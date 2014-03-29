@@ -13,27 +13,28 @@ atom
 
 list
   : { console.log("list: "); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
-  | sexpr list { $$ = cons( $1, $2 ); }
-  | sexpr '.' sexpr { $$ = cons( $1, $3 ); }
+  | sexpr list { $$ = cons( $sexpr, $list ); }
+  | sexpr '.' sexpr { $$ = cons( $sexpr1, $sexpr2 ); }
   ;
 
 sexpr
-  : atom { console.log("sexpr: atom"); $$ = yy.Node('ExpressionStatement', $1, yy.loc(@$)); }
-  | '(' list ')' { console.log("sexpr: (list)"); $$ = $2; }
+  : atom { console.log("sexpr: atom"); $$ = yy.Node('ExpressionStatement', $atom, yy.loc(@$)); }
+  | '(' list ')' { console.log("sexpr: (list)"); $$ = $list; }
   ;
 
 sexprs
-  : sexpr { console.log("sexprs: sexpr"); $$ = [$1]; }
+  : sexpr { console.log("sexprs: sexpr"); $$ = [$sexpr]; }
   | sexprs sexpr {
         console.log("sexprs: sexpr");
-        yy.locComb(@$, @2);
-        $$ = $1; $1.push($2);
+        yy.locComb(@$, @sexpr);
+        $$ = $sexprs;
+        $sexprs.push($sexpr);
     }
   ;
 
 Program
   : sexprs {
-        var prog = yy.Node('Program', $1, yy.loc(@1));
+        var prog = yy.Node('Program', $sexprs, yy.loc(@sexprs));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
         if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($1);

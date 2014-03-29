@@ -4,8 +4,6 @@ STRING          \"([^\"\\]|\\[\'\"\\bfnrt])+\"
 IDENTIFIER      [a-zA-Z]+
 
 
-%options flex
-
 %%
 
 {WHITESPACE}  /* whitespace */;
