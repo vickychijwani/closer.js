@@ -1,0 +1,41 @@
+{
+  "name": "closer",
+  "description": "Closer.js - Clojure parser in JavaScript, compatible with the Mozilla Parser API (https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API)",
+  "homepage": "http://github.com/vickychijwani/closer.js",
+  "main": "closer.js",
+  "version": "0.0.1",
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.10.24"
+  },
+  "author": {
+    "name": "Vicky Chijwani",
+    "email": "vickychijwani@gmail.com",
+    "url": "http://vickychijwani.github.io/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/vickychijwani/closer.js"
+  },
+  "scripts": {
+    "pretest": "jison src/grammar.y src/lexer.l -o src/parser.js",
+    "test": "jasmine-node spec --noStack --noColor --verbose --autotest --watch src --watch spec"
+  },
+  "keywords": [
+    "parser",
+    "parse",
+    "clojure",
+    "ast",
+    "syntax",
+    "spidermonkey",
+    "acorn",
+    "esprima"
+  ],
+  "devDependencies": {
+    "jasmine-node": "^1.14.2",
+    "json-diff": "^0.3.1"
+  },
+  "dependencies": {
+    "jison": "^0.4.13"
+  }
+}
