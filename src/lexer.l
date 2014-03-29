@@ -17,14 +17,13 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
     return 'STRING';
 %}
 
-{IDENTIFIER} %{
-    return 'IDENTIFIER';
-%}
-
 '(' return '(';
 ')' return ')';
 
-//<<EOF>> %{
-//    return 'EOF';
-//%}
-//
+'true'  return 'true';
+'false' return 'false';
+'nil'   return 'nil';
+
+{IDENTIFIER} %{
+    return 'IDENTIFIER';
+%}

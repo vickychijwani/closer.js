@@ -45,8 +45,8 @@ describe("Closer.js", function () {
         });
     });
 
-    it("correctly parses an integer literal", function () {
-        expect(closer.parse("24\n")).toDeepEqual({
+    it("correctly parses integer, string, boolean, and nil literals", function () {
+        expect(closer.parse("24\n\"string\"\ntrue\nfalse\nnil\n")).toDeepEqual({
             type: 'Program',
             body: [{
                 type: "ExpressionStatement",
@@ -54,18 +54,29 @@ describe("Closer.js", function () {
                     type: "Literal",
                     value: 24
                 }
-            }]
-        });
-    });
-
-    it("correctly parses a string literal", function () {
-        expect(closer.parse("\"string\"\n")).toDeepEqual({
-            type: 'Program',
-            body: [{
+            }, {
                 type: "ExpressionStatement",
                 expression: {
                     type: "Literal",
                     value: "string"
+                }
+            }, {
+                type: "ExpressionStatement",
+                expression: {
+                    type: "Literal",
+                    value: true
+                }
+            }, {
+                type: "ExpressionStatement",
+                expression: {
+                    type: "Literal",
+                    value: false
+                }
+            }, {
+                type: "ExpressionStatement",
+                expression: {
+                    type: "Literal",
+                    value: null
                 }
             }]
         });
