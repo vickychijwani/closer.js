@@ -19,7 +19,11 @@
   },
   "scripts": {
     "pretest": "jison src/grammar.y src/lexer.l -o src/parser.js",
-    "test": "jasmine-node spec --noStack --noColor --verbose --autotest --watch src --watch spec"
+    "test": "jasmine-node spec --noStack --noColor --verbose",
+    "watch": "npm-watch"
+  },
+  "watch": {
+    "test": ["src/lexer.l", "src/grammar.y", "src/nodes.js", "src/closer.js", "spec/*"]
   },
   "keywords": [
     "parser",
@@ -33,7 +37,8 @@
   ],
   "devDependencies": {
     "jasmine-node": "^1.14.2",
-    "json-diff": "^0.3.1"
+    "json-diff": "^0.3.1",
+    "npm-watch": "0.0.0"
   },
   "dependencies": {
     "jison": "^0.4.13"
