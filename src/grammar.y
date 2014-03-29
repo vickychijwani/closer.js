@@ -5,7 +5,7 @@
 atom
   : NUMBER { $$ = yy.Node('Literal', parseNum($1), yy.loc(@1), yytext); }
   | STRING { $$ = yy.Node('Literal', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
-  | IDENTIFIER { console.log("atom: identifier"); $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  | IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
   | 'true' { $$ = yy.Node('Literal', true, yy.loc(@1), yytext); }
   | 'false' { $$ = yy.Node('Literal', false, yy.loc(@1), yytext); }
   | 'nil' { $$ = yy.Node('Literal', null, yy.loc(@1), yytext); }

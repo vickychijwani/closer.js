@@ -60,7 +60,7 @@ exports.defineNodes = function (builder) {
 // Literal expression node
     def('Literal', function (val, loc, raw) {
         this.value = val;
-        if (raw) this.raw = raw;
+//        if (raw) this.raw = raw;
         this.loc = loc;
     });
 

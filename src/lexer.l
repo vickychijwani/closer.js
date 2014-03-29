@@ -13,6 +13,7 @@ IDENTIFIER      [a-zA-Z]+
 %}
 
 {STRING} %{
+    yytext = yytext.substr(1, yyleng-2);
     return 'STRING';
 %}
 

@@ -45,6 +45,32 @@ describe("Closer.js", function () {
         });
     });
 
+    it("correctly parses an integer literal", function () {
+        expect(closer.parse("24\n")).toDeepEqual({
+            type: 'Program',
+            body: [{
+                type: "ExpressionStatement",
+                expression: {
+                    type: "Literal",
+                    value: 24
+                }
+            }]
+        });
+    });
+
+    it("correctly parses a string literal", function () {
+        expect(closer.parse("\"string\"\n")).toDeepEqual({
+            type: 'Program',
+            body: [{
+                type: "ExpressionStatement",
+                expression: {
+                    type: "Literal",
+                    value: "string"
+                }
+            }]
+        });
+    });
+
 //    it("correctly parses a function call with arguments", function () {
 //        expect(closer.parse("(fn-name arg1 arg2)\n")).toDeepEqual({
 //            type: "Program",
