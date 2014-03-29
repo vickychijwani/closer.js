@@ -1,4 +1,4 @@
-%start Program
+%start program
 
 %%
 
@@ -32,7 +32,7 @@ sexprs
     }
   ;
 
-Program
+program
   : sexprs {
         var prog = yy.Node('Program', $sexprs, yy.loc(@sexprs));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
