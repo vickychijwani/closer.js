@@ -34,16 +34,25 @@ Fn
   | '(' List ')' { console.log('Fn: (List)'); $$ = $List; }
   ;
 
-List
-  : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
-  | FN '[' IdentifierList RestArgs ']' BlockStatement {
-        console.log('List: fn [IdentifierList] DoForm');
+FnParamsAndBody
+  : '[' IdentifierList RestArgs ']' BlockStatement {
         $$ = yy.Node('FunctionExpression', null, $IdentifierList, $RestArgs, $BlockStatement, false, false, yy.loc(@BlockStatement));
     }
-  | DEFN Identifier '[' IdentifierList RestArgs ']' BlockStatement {
-        console.log('List: defn Identifier [IdentifierList] DoForm');
-        $$ = yy.Node('FunctionDeclaration', $Identifier, $IdentifierList, $RestArgs, $BlockStatement, false, false, yy.loc(@BlockStatement));
+  ;
+
+FnDefinition
+  : FN FnParamsAndBody { $$ = $FnParamsAndBody; }
+  | DEFN Identifier FnParamsAndBody {
+        console.log('FnDefinition: DEFN Identifier FnParamsAndBody');
+        $FnParamsAndBody.type = 'FunctionDeclaration';
+        $FnParamsAndBody.id = $Identifier;
+        $$ = $FnParamsAndBody;
     }
+  ;
+
+List
+  : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
+  | FnDefinition
   | Fn SExprs { console.log('List: Fn SExprs'); $$ = yy.Node('CallExpression', $Fn, $SExprs, yy.loc(@Fn)); }
   ;
 
