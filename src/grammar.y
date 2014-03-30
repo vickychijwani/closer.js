@@ -62,7 +62,11 @@ List
   : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
   | ConditionalExpr
-  | Fn SExprs { console.log('List: Fn SExprs'); $$ = yy.Node('CallExpression', $Fn, $SExprs, yy.loc(@Fn)); }
+  | Fn SExprs? {
+        console.log('List: Fn SExprs?');
+        $2 = ($2 === undefined) ? [] : $2;
+        $$ = yy.Node('CallExpression', $Fn, $2, yy.loc(@Fn));
+    }
   ;
 
 SExpr

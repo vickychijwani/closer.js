@@ -84,7 +84,24 @@ describe("Closer.js", function () {
     });
 
     // functions
-    it("correctly parses a function call with arguments", function () {
+    it("correctly parses a function call with 0 arguments", function () {
+        expect(closer.parse("(fn-name)\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "ExpressionStatement",
+                expression: {
+                    type: "CallExpression",
+                    arguments: [],
+                    callee: {
+                        type: "Identifier",
+                        name: "fn-name"
+                    }
+                }
+            }]
+        });
+    });
+
+    it("correctly parses a function call with > 0 arguments", function () {
         expect(closer.parse("(fn-name arg1 arg2)\n")).toDeepEqual({
             type: "Program",
             body: [{
