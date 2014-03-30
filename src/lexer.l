@@ -27,6 +27,7 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_=<>?/.:]+
 'fn'    return 'FN';
 'defn'  return 'DEFN';
 'if'    return 'IF';
+'when'  return 'WHEN';
 
 'true'  return 'true';
 'false' return 'false';

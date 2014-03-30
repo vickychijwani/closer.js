@@ -36,8 +36,9 @@ Fn
   ;
 
 FnParamsAndBody
-  : '[' IdentifierList RestArgs ']' BlockStatement {
-        $$ = yy.Node('FunctionExpression', null, $IdentifierList, $RestArgs, $BlockStatement, false, false, yy.loc(@BlockStatement));
+  : '[' IdentifierList RestArgs ']' BlockStatementWithReturn {
+        $$ = yy.Node('FunctionExpression', null, $IdentifierList, $RestArgs,
+            $BlockStatementWithReturn, false, false, yy.loc(@BlockStatementWithReturn));
     }
   ;
 
@@ -55,6 +56,9 @@ ConditionalExpr
   : IF SExpr[test] SExprStmt[consequent] SExprStmt?[alternate] {
         $alternate = ($alternate === undefined) ? null : $alternate;
         $$ = yy.Node('IfStatement', $test, $consequent, $alternate);
+    }
+  | WHEN SExpr[test] BlockStatement[consequent] {
+        $$ = yy.Node('IfStatement', $test, $consequent, null);
     }
   ;
 
@@ -107,11 +111,17 @@ DoForm
 
 BlockStatement
   : DoForm {
-        var lastSExpr = $DoForm[$DoForm.length-1];
+        $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@DoForm));
+    }
+  ;
+
+BlockStatementWithReturn
+  : BlockStatement {
+        var lastSExpr = $BlockStatement.body[$BlockStatement.body.length-1];
         lastSExpr.type = 'ReturnStatement';
         lastSExpr.argument = lastSExpr.expression;
         delete lastSExpr.expression;
-        $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@DoForm));
+        $$ = $BlockStatement;
     }
   ;
 

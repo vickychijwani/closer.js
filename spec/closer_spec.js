@@ -328,6 +328,47 @@ describe("Closer.js", function () {
         });
     });
 
+    it("correctly parses a when form", function () {
+        expect(closer.parse("(when (condition) (println \"hello\") true)\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "IfStatement",
+                test: {
+                    type: "CallExpression",
+                    arguments: [],
+                    callee: {
+                        type: "Identifier",
+                        name: "condition"
+                    }
+                },
+                consequent: {
+                    type: "BlockStatement",
+                    body: [{
+                        type: "ExpressionStatement",
+                        expression: {
+                            type: "CallExpression",
+                            arguments: [{
+                                type: "Literal",
+                                value: "hello"
+                            }],
+                            callee: {
+                                type: "Identifier",
+                                name: "println"
+                            }
+                        }
+                    }, {
+                        type: "ExpressionStatement",
+                        expression: {
+                            type: "Literal",
+                            value: true
+                        }
+                    }]
+                },
+                alternate: null
+            }]
+        });
+    });
+
     // pending
     xit("correctly parses source locations");
 
