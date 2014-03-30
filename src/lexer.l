@@ -3,6 +3,7 @@ NUMBER          [0-9]+
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])+\"
 IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
 
+%options flex
 
 %%
 
@@ -19,6 +20,10 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
 
 '(' return '(';
 ')' return ')';
+'[' return '[';
+']' return ']';
+
+'fn'    return 'FUNCTION';
 
 'true'  return 'true';
 'false' return 'false';

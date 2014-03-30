@@ -1,16 +1,27 @@
 %start Program
 
-%option flex
-
 %%
+
+Identifier
+  : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  ;
 
 Atom
   : NUMBER { $$ = yy.Node('Literal', parseNum($1), yy.loc(@1), yytext); }
   | STRING { $$ = yy.Node('Literal', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
-  | IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  | Identifier
   | 'true' { $$ = yy.Node('Literal', true, yy.loc(@1), yytext); }
   | 'false' { $$ = yy.Node('Literal', false, yy.loc(@1), yytext); }
   | 'nil' { $$ = yy.Node('Literal', null, yy.loc(@1), yytext); }
+  ;
+
+IdentifierList
+  : Identifier { $$ = [$1]; }
+  | IdentifierList Identifier {
+        yy.locComb(@$, @Identifier);
+        $$ = $IdentifierList;
+        $IdentifierList.push($Identifier);
+    }
   ;
 
 Fn
@@ -20,6 +31,10 @@ Fn
 
 List
   : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
+  | FUNCTION '[' IdentifierList ']' BlockStatement {
+        console.log('List: fn [IdentifierList] DoForm');
+        $$ = yy.Node('FunctionExpression', null, $IdentifierList, $BlockStatement, false, false, yy.loc(@BlockStatement));
+    }
   | Fn SExprs { console.log('List: Fn SExprs'); $$ = yy.Node('CallExpression', $Fn, $SExprs, yy.loc(@Fn)); }
   ;
 
@@ -42,10 +57,20 @@ DoForm
   : SExprs {
         for (var i = 0; i < $SExprs.length; ++i) {
             var SExpr = $SExprs[i];
-            if (SExpr.type === 'Literal' || SExpr.type === 'Identifier' || SExpr.type === 'CallExpression') {
+            if (ExpressionTypes.indexOf(SExpr.type) !== -1) {
                 $SExprs[i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
             }
         }
+    }
+  ;
+
+BlockStatement
+  : DoForm {
+        var lastSExpr = $DoForm[$DoForm.length-1];
+        lastSExpr.type = 'ReturnStatement';
+        lastSExpr.argument = lastSExpr.expression;
+        delete lastSExpr.expression;
+        $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@DoForm));
     }
   ;
 
@@ -69,6 +94,8 @@ Program
   ;
 
 %%
+
+var ExpressionTypes = ['Literal', 'Identifier', 'CallExpression', 'FunctionExpression'];
 
 function parseNum(num) {
     if (num[0] === '0') {

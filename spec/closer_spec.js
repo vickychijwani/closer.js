@@ -106,74 +106,74 @@ describe("Closer.js", function () {
         });
     });
 
-//    it("correctly parses an anonymous function definition", function () {
-//        expect(closer.parse("(fn [x] x)\n")).toDeepEqual({
-//            type: "Program",
-//            body: [{
-//                type: "ExpressionStatement",
-//                expression: {
-//                    type: "FunctionExpression",
-//                    id: null,
-//                    params: [{
-//                        type: "Identifier",
-//                        name: "x"
-//                    }],
-//                    defaults: [],
-//                    rest: null,
-//                    body: {
-//                        type: "BlockStatement",
-//                        body: [{
-//                            type: "ReturnStatement",
-//                            argument: {
-//                                type: "Identifier",
-//                                name: "x"
-//                            }
-//                        }]
-//                    },
-//                    generator: false,
-//                    expression: false
-//                }
-//            }]
-//        });
-//    });
-//
-//    it("correctly parses an anonymous function call", function () {
-//        expect(closer.parse("((fn [x] x) 2)\n")).toDeepEqual({
-//            type: "Program",
-//            body: [{
-//                type: "ExpressionStatement",
-//                expression: {
-//                    type: "CallExpression",
-//                    arguments: [{
-//                        type: "Literal",
-//                        value: "2"
-//                    }],
-//                    callee: {
-//                        type: "FunctionExpression",
-//                        id: null,
-//                        params: [{
-//                            type: "Identifier",
-//                            name: "x"
-//                        }],
-//                        defaults: [],
-//                        rest: null,
-//                        body: {
-//                            type: "BlockStatement",
-//                            body: [{
-//                                type: "ReturnStatement",
-//                                argument: {
-//                                    type: "Identifier",
-//                                    name: "x"
-//                                }
-//                            }]
-//                        },
-//                        generator: false,
-//                        expression: false
-//                    }
-//                }
-//            }]
-//        });
-//    });
+    it("correctly parses an anonymous function definition", function () {
+        expect(closer.parse("(fn [x] x)\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "ExpressionStatement",
+                expression: {
+                    type: "FunctionExpression",
+                    id: null,
+                    params: [{
+                        type: "Identifier",
+                        name: "x"
+                    }],
+                    defaults: [],
+                    rest: null,
+                    body: {
+                        type: "BlockStatement",
+                        body: [{
+                            type: "ReturnStatement",
+                            argument: {
+                                type: "Identifier",
+                                name: "x"
+                            }
+                        }]
+                    },
+                    generator: false,
+                    expression: false
+                }
+            }]
+        });
+    });
+
+    it("correctly parses an anonymous function call", function () {
+        expect(closer.parse("((fn [x] x) 2)\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "ExpressionStatement",
+                expression: {
+                    type: "CallExpression",
+                    arguments: [{
+                        type: "Literal",
+                        value: 2
+                    }],
+                    callee: {
+                        type: "FunctionExpression",
+                        id: null,
+                        params: [{
+                            type: "Identifier",
+                            name: "x"
+                        }],
+                        defaults: [],
+                        rest: null,
+                        body: {
+                            type: "BlockStatement",
+                            body: [{
+                                type: "ReturnStatement",
+                                argument: {
+                                    type: "Identifier",
+                                    name: "x"
+                                }
+                            }]
+                        },
+                        generator: false,
+                        expression: false
+                    }
+                }
+            }]
+        });
+    });
 
     // pending
     xit("correctly parses source locations");

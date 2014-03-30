@@ -103,13 +103,17 @@ exports.defineNodes = function (builder) {
         this.params = params;
         this.body = body;
         this.loc = loc;
-        if (!this.expression) {
-            this.body.body.forEach(function (el) {
-                if (el.type === "VariableDeclaration" && el.kind === "let") {
-                    el.kind = "var";
-                }
-            });
-        }
+        this.generator = isGen;
+        this.expression = isExp;
+        this.defaults = [];
+        this.rest = null;
+//        if (!this.expression) {
+//            this.body.body.forEach(function (el) {
+//                if (el.type === "VariableDeclaration" && el.kind === "let") {
+//                    el.kind = "var";
+//                }
+//            });
+//        }
     };
 
     def('FunctionDeclaration', funIni);
