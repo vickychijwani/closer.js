@@ -4,11 +4,12 @@ Closer.js
 Closer.js - Clojure parser in JavaScript, compatible with the Mozilla Parser API
 (https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API).
 
+**NOTE**: This is pre-alpha quality software, still taking its first baby
+steps. You have been warned!
+
 
 Usage
 -----
-
-**NOTE**: this example does _not_ currently work, I am still working towards it.
 
 ```js
 var closer = require("closer");
