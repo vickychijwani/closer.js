@@ -18,6 +18,7 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
     return 'STRING';
 %}
 
+'&' return '&';
 '(' return '(';
 ')' return ')';
 '[' return '[';

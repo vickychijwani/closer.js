@@ -206,6 +206,64 @@ describe("Closer.js", function () {
         });
     });
 
+    it("correctly parses rest arguments", function () {
+        expect(closer.parse("(defn avg [& rest] (/ (apply + rest) (count rest)))\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "FunctionDeclaration",
+                id: {
+                    type: "Identifier",
+                    name: "avg"
+                },
+                params: [],
+                defaults: [],
+                rest: {
+                    type: "Identifier",
+                    name: "rest"
+                },
+                body: {
+                    type: "BlockStatement",
+                    body: [{
+                        type: "ReturnStatement",
+                        argument: {
+                            type: "CallExpression",
+                            arguments: [{
+                                type: "CallExpression",
+                                arguments: [{
+                                    type: "Identifier",
+                                    name: "+"
+                                }, {
+                                    type: "Identifier",
+                                    name: "rest"
+                                }],
+                                callee: {
+                                    type: "Identifier",
+                                    name: "apply"
+                                }
+                            }, {
+                                type: "CallExpression",
+                                arguments: [{
+                                    type: "Identifier",
+                                    name: "rest"
+                                }],
+                                callee: {
+                                    type: "Identifier",
+                                    name: "count"
+                                }
+                            }],
+                            callee: {
+                                type: "Identifier",
+                                name: "/"
+                            }
+                        }
+                    }]
+                },
+                generator: false,
+                expression: false
+            }]
+        });
+    });
+
     // pending
     xit("correctly parses source locations");
 

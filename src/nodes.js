@@ -98,15 +98,15 @@ exports.defineNodes = function (builder) {
     });
 
 // Function declaration node
-    var funIni = function (ident, params, body, isGen, isExp, loc) {
+    var funIni = function (ident, params, rest, body, isGen, isExp, loc) {
         this.id = ident;
         this.params = params;
+        this.defaults = [];
+        this.rest = rest;
         this.body = body;
         this.loc = loc;
         this.generator = isGen;
         this.expression = isExp;
-        this.defaults = [];
-        this.rest = null;
 //        if (!this.expression) {
 //            this.body.body.forEach(function (el) {
 //                if (el.type === "VariableDeclaration" && el.kind === "let") {
