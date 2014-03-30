@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="en" style="height:100%;">
+    <head>
+        <title>Closer.js - Demo</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="bower/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="bower/bootstrap/dist/css/bootstrap-theme.min.css" />
+    </head>
+
+    <body style="height:100%;">
+        <div class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Closer.js</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="https://github.com/vickychijwani/closer.js">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid" style="height:100%;">
+            <div class="row" style="height:100%;">
+                <div class="col-md-5" style="height:100%;">
+                    <h4>Clojure code:</h4>
+                    <textarea name="editor" data-editor="clojure"></textarea>
+                </div>
+                <div class="col-md-7" style="height:100%;">
+                    <h4>Abstract Syntax Tree:</h4>
+                    <textarea name="output" data-editor="javascript"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="js/closer.js"></script>
+        <script type="text/javascript" src="bower/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="bower/ace-builds/src-min/ace.js" charset="utf-8"></script>
+        <script type="text/javascript" src="bower/ace-builds/src-min/theme-tomorrow.js" charset="utf-8"></script>
+        <script type="text/javascript" src="bower/ace-builds/src-min/mode-clojure.js" charset="utf-8"></script>
+        <script type="text/javascript" src="bower/ace-builds/src-min/mode-json.js" charset="utf-8"></script>
+        <script type="text/javascript">
+            // Hook up ACE editor to all textareas with data-editor attribute
+            $(function () {
+                var inputTabSize = 2, outputTabSize = 4;
+                var $inputTextArea = $('textarea[name="editor"]');
+                var $outputTextArea = $('textarea[name="output"]');
+                var inputEditor = setupAceEditor($inputTextArea);
+                var outputEditor = setupAceEditor($outputTextArea);
+
+                inputEditor.getSession().setTabSize(inputTabSize);
+                outputEditor.setReadOnly(true);
+                outputEditor.getSession().setTabSize(outputTabSize);
+
+                var timeout = null;
+                inputEditor.getSession().on('change', function (e) {
+                    console.log(e);
+                    clearTimeout(timeout);
+                    timeout = setTimeout(parseInput, 200);
+                });
+
+                var initialInput =
+                        "(defn average\n" +
+                        "  [numbers]\n" +
+                        "  (/ (apply + numbers) (count numbers)))\n" +
+                        "\n" +
+                        "(= (average (range 1 10)) 5)\n";
+                inputEditor.getSession().setValue(initialInput);
+                parseInput();
+
+                function parseInput () {
+                    var input = inputEditor.getSession().getValue();
+                    var output = closer.parse(input);
+                    var formattedOutput = JSON.stringify(output, null, outputTabSize);
+                    outputEditor.getSession().setValue(formattedOutput);
+                }
+
+                function setupAceEditor($textarea) {
+                    var mode = $textarea.data('editor');
+
+                    var editDiv = $('<div>', {
+                        position: 'absolute',
+                        width: '100%',
+                        height: '80%',
+                        'class': $textarea.attr('class')
+                    }).insertBefore($textarea);
+
+                    $textarea.hide();
+
+                    var editor = ace.edit(editDiv[0]);
+                    editor.getSession().setMode("ace/mode/" + mode);
+                    editor.setTheme("ace/theme/tomorrow");
+                    editor.setFontSize(16);
+                    editor.setDisplayIndentGuides(true);
+
+                    return editor;
+                }
+            });
+        </script>
+    </body>
+</html>
