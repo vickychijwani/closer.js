@@ -31,9 +31,13 @@ Fn
 
 List
   : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
-  | FUNCTION '[' IdentifierList ']' BlockStatement {
+  | FN '[' IdentifierList ']' BlockStatement {
         console.log('List: fn [IdentifierList] DoForm');
         $$ = yy.Node('FunctionExpression', null, $IdentifierList, $BlockStatement, false, false, yy.loc(@BlockStatement));
+    }
+  | DEFN Identifier '[' IdentifierList ']' BlockStatement {
+        console.log('List: defn Identifier [IdentifierList] DoForm');
+        $$ = yy.Node('FunctionDeclaration', $Identifier, $IdentifierList, $BlockStatement, false, false, yy.loc(@BlockStatement));
     }
   | Fn SExprs { console.log('List: Fn SExprs'); $$ = yy.Node('CallExpression', $Fn, $SExprs, yy.loc(@Fn)); }
   ;

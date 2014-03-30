@@ -175,6 +175,37 @@ describe("Closer.js", function () {
         });
     });
 
+    it("correctly parses a named function definition", function () {
+        expect(closer.parse("(defn fn-name [x] x)\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "FunctionDeclaration",
+                id: {
+                    type: "Identifier",
+                    name: "fn-name"
+                },
+                params: [{
+                    type: "Identifier",
+                    name: "x"
+                }],
+                defaults: [],
+                rest: null,
+                body: {
+                    type: "BlockStatement",
+                    body: [{
+                        type: "ReturnStatement",
+                        argument: {
+                            type: "Identifier",
+                            name: "x"
+                        }
+                    }]
+                },
+                generator: false,
+                expression: false
+            }]
+        });
+    });
+
     // pending
     xit("correctly parses source locations");
 

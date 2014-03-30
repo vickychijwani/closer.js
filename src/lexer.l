@@ -23,7 +23,8 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
 '[' return '[';
 ']' return ']';
 
-'fn'    return 'FUNCTION';
+'fn'    return 'FN';
+'defn'  return 'DEFN';
 
 'true'  return 'true';
 'false' return 'false';
