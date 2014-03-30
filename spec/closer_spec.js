@@ -82,30 +82,30 @@ describe("Closer.js", function () {
         });
     });
 
-//    it("correctly parses a function call with arguments", function () {
-//        expect(closer.parse("(fn-name arg1 arg2)\n")).toDeepEqual({
-//            type: "Program",
-//            body: [{
-//                type: "ExpressionStatement",
-//                expression: {
-//                    type: "CallExpression",
-//                    arguments: [{
-//                        type: "Identifier",
-//                        name: "arg1"
-//                    },
-//                        {
-//                            type: "Identifier",
-//                            name: "arg2"
-//                        }],
-//                    callee: {
-//                        type: "Identifier",
-//                        name: "fn-name"
-//                    }
-//                }
-//            }]
-//        });
-//    });
-//
+    it("correctly parses a function call with arguments", function () {
+        expect(closer.parse("(fn-name arg1 arg2)\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "ExpressionStatement",
+                expression: {
+                    type: "CallExpression",
+                    arguments: [{
+                        type: "Identifier",
+                        name: "arg1"
+                    },
+                        {
+                            type: "Identifier",
+                            name: "arg2"
+                        }],
+                    callee: {
+                        type: "Identifier",
+                        name: "fn-name"
+                    }
+                }
+            }]
+        });
+    });
+
 //    it("correctly parses an anonymous function definition", function () {
 //        expect(closer.parse("(fn [x] x)\n")).toDeepEqual({
 //            type: "Program",

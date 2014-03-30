@@ -1,8 +1,10 @@
-%start program
+%start Program
+
+%option flex
 
 %%
 
-atom
+Atom
   : NUMBER { $$ = yy.Node('Literal', parseNum($1), yy.loc(@1), yytext); }
   | STRING { $$ = yy.Node('Literal', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
   | IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
@@ -11,30 +13,45 @@ atom
   | 'nil' { $$ = yy.Node('Literal', null, yy.loc(@1), yytext); }
   ;
 
-list
-  : { console.log("list: "); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
-  | sexpr list { $$ = cons( $sexpr, $list ); }
-  | sexpr '.' sexpr { $$ = cons( $sexpr1, $sexpr2 ); }
+Fn
+  : IDENTIFIER { console.log('Fn: IDENTIFIER'); $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  | '(' List ')' { console.log('Fn: (List)'); $$ = $List; }
   ;
 
-sexpr
-  : atom { console.log("sexpr: atom"); $$ = yy.Node('ExpressionStatement', $atom, yy.loc(@$)); }
-  | '(' list ')' { console.log("sexpr: (list)"); $$ = $list; }
+List
+  : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
+  | Fn SExprs { console.log('List: Fn SExprs'); $$ = yy.Node('CallExpression', $Fn, $SExprs, yy.loc(@Fn)); }
   ;
 
-sexprs
-  : sexpr { console.log("sexprs: sexpr"); $$ = [$sexpr]; }
-  | sexprs sexpr {
-        console.log("sexprs: sexpr");
-        yy.locComb(@$, @sexpr);
-        $$ = $sexprs;
-        $sexprs.push($sexpr);
+SExpr
+  : Atom { console.log('SExpr: Atom'); $$ = $Atom; }
+  | '(' List ')' { console.log('SExpr: (List)'); $$ = $List; }
+  ;
+
+SExprs
+  : SExpr { console.log('SExprs: SExpr'); $$ = [$SExpr]; }
+  | SExprs SExpr {
+        console.log('SExprs: SExprs SExpr');
+        yy.locComb(@$, @SExpr);
+        $$ = $SExprs;
+        $SExprs.push($SExpr);
     }
   ;
 
-program
-  : sexprs {
-        var prog = yy.Node('Program', $sexprs, yy.loc(@sexprs));
+DoForm
+  : SExprs {
+        for (var i = 0; i < $SExprs.length; ++i) {
+            var SExpr = $SExprs[i];
+            if (SExpr.type === 'Literal' || SExpr.type === 'Identifier' || SExpr.type === 'CallExpression') {
+                $SExprs[i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
+            }
+        }
+    }
+  ;
+
+Program
+  : DoForm {
+        var prog = yy.Node('Program', $DoForm, yy.loc(@DoForm));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
         if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($1);
@@ -80,5 +97,5 @@ function parseString(str) {
         .replace(/\\v/g,'\v')
         .replace(/\\f/g,'\f')
         .replace(/\\b/g,'\b')
-        .replace(/\\(.)/g, "$1");
+        .replace(/\\(.)/g, '$1');
 }
