@@ -1,4 +1,5 @@
 %start Program
+%ebnf
 
 %%
 
@@ -50,15 +51,33 @@ FnDefinition
     }
   ;
 
+ConditionalExpr
+  : IF SExpr[test] SExprStmt[consequent] SExprStmt?[alternate] {
+        $alternate = ($alternate === undefined) ? null : $alternate;
+        $$ = yy.Node('IfStatement', $test, $consequent, $alternate);
+    }
+  ;
+
 List
   : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
+  | ConditionalExpr
   | Fn SExprs { console.log('List: Fn SExprs'); $$ = yy.Node('CallExpression', $Fn, $SExprs, yy.loc(@Fn)); }
   ;
 
 SExpr
   : Atom { console.log('SExpr: Atom'); $$ = $Atom; }
   | '(' List ')' { console.log('SExpr: (List)'); $$ = $List; }
+  ;
+
+SExprStmt
+  : SExpr {
+        if (ExpressionTypes.indexOf($SExpr.type) !== -1) {
+            $$ = yy.Node('ExpressionStatement', $SExpr, $SExpr.loc);
+        } else {
+            $$ = $SExpr;
+        }
+    }
   ;
 
 SExprs

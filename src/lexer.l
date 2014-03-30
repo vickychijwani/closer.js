@@ -1,7 +1,7 @@
 WHITESPACE      [\s]+
 NUMBER          [0-9]+
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])+\"
-IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
+IDENTIFIER      [0-9a-zA-Z*+!\-_=<>?/.:]+
 
 %options flex
 
@@ -26,6 +26,7 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_?/.:]+
 
 'fn'    return 'FN';
 'defn'  return 'DEFN';
+'if'    return 'IF';
 
 'true'  return 'true';
 'false' return 'false';

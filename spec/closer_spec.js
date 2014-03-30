@@ -16,6 +16,7 @@ beforeEach(function () {
 
 describe("Closer.js", function () {
 
+    // atoms
     it("correctly parses an empty program", function () {
         expect(closer.parse("\n")).toDeepEqual({
             type: 'Program',
@@ -82,6 +83,7 @@ describe("Closer.js", function () {
         });
     });
 
+    // functions
     it("correctly parses a function call with arguments", function () {
         expect(closer.parse("(fn-name arg1 arg2)\n")).toDeepEqual({
             type: "Program",
@@ -260,6 +262,51 @@ describe("Closer.js", function () {
                 },
                 generator: false,
                 expression: false
+            }]
+        });
+    });
+
+    // conditional statements
+    it("correctly parses an if-else statement", function () {
+        expect(closer.parse("(if (>= x 0) x (- x))\n")).toDeepEqual({
+            type: "Program",
+            body: [{
+                type: "IfStatement",
+                test: {
+                    type: "CallExpression",
+                    arguments: [{
+                        type: "Identifier",
+                        name: "x"
+                    }, {
+                        type: "Literal",
+                        value: 0
+                    }],
+                    callee: {
+                        type: "Identifier",
+                        name: ">="
+                    }
+                },
+                consequent: {
+                    type: "ExpressionStatement",
+                    expression: {
+                        type: "Identifier",
+                        name: "x"
+                    }
+                },
+                alternate: {
+                    type: "ExpressionStatement",
+                    expression: {
+                        type: "CallExpression",
+                        arguments: [{
+                            type: "Identifier",
+                            name: "x"
+                        }],
+                        callee: {
+                            type: "Identifier",
+                            name: "-"
+                        }
+                    }
+                }
             }]
         });
     });
