@@ -2,6 +2,7 @@ WHITESPACE      [\s]+
 NUMBER          [0-9]+
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])+\"
 IDENTIFIER      [0-9a-zA-Z*+!\-_=<>?/.:]+
+COMMENT         \;[^\r\n]*
 
 %options flex
 
@@ -18,6 +19,7 @@ IDENTIFIER      [0-9a-zA-Z*+!\-_=<>?/.:]+
     return 'STRING';
 %}
 
+{COMMENT} %{ /* ignore */ %};
 '&' return '&';
 '(' return '(';
 ')' return ')';

@@ -40,6 +40,12 @@ describe("Closer.js", function () {
         ));
     });
 
+    it("correctly parses comments", function () {
+        expect(closer.parse("; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r")).toDeepEqual(Program(
+            EmptyStatement()
+        ));
+    });
+
     it("correctly parses an identifier", function () {
         expect(closer.parse("x\n")).toDeepEqual(Program(
             ExpressionStatement(Identifier("x"))
