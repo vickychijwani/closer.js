@@ -18,10 +18,10 @@
     "url": "http://github.com/vickychijwani/closer.js"
   },
   "scripts": {
-    "pretest": "browserify -s closer src/closer.js > demo/js/closer.js; jison src/grammar.y src/lexer.l -o src/parser.js",
+    "pretest": "jison src/grammar.y src/lexer.l -o src/parser.js",
     "test": "jasmine-node spec --noStack --noColor --verbose",
     "watch": "npm-watch",
-    "browserify": "browserify -s closer src/closer.js > demo/js/closer.js",
+    "browserify": "jison src/grammar.y src/lexer.l -o src/parser.js; browserify -s closer src/closer.js > demo/js/closer.js",
     "publish-demo": "git subtree push --prefix demo origin gh-pages"
   },
   "watch": {
@@ -31,6 +31,12 @@
       "src/nodes.js",
       "src/closer.js",
       "spec/*"
+    ],
+    "browserify": [
+        "src/lexer.l",
+        "src/grammar.y",
+        "src/nodes.js",
+        "src/closer.js"
     ]
   },
   "keywords": [
