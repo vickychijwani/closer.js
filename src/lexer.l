@@ -26,6 +26,7 @@ COMMENT         \;[^\r\n]*
 '[' return '[';
 ']' return ']';
 
+'def'   return 'DEF';
 'fn'    return 'FN';
 'defn'  return 'DEFN';
 'if'    return 'IF';

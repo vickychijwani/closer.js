@@ -62,6 +62,23 @@ exports.ReturnStatement = function (argument) {
     };
 };
 
+exports.VariableDeclaration = function () {
+    var array = Array.prototype.slice.call(arguments);
+    return {
+        type: "VariableDeclaration",
+        kind: array[0],
+        declarations: array.slice(1)
+    };
+};
+
+exports.VariableDeclarator = function (id, init) {
+    return {
+        type: "VariableDeclarator",
+        id: id,
+        init: init
+    };
+};
+
 exports.FunctionDeclaration = function (id, params, rest, body) {
     var node = exports.FunctionExpression(id, params, rest, body);
     node.type = "FunctionDeclaration";

@@ -62,10 +62,19 @@ ConditionalExpr
     }
   ;
 
+VarDeclaration
+  : DEF Identifier SExpr?[init] {
+        $init = ($init === undefined) ? null : $init;
+        var decl = yy.Node('VariableDeclarator', $Identifier, $init, yy.loc(@DEF));
+        $$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(@DEF));
+    }
+  ;
+
 List
   : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
   | ConditionalExpr
+  | VarDeclaration
   | Fn SExprs? {
         console.log('List: Fn SExprs?');
         $2 = ($2 === undefined) ? [] : $2;

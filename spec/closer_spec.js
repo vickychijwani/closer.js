@@ -10,6 +10,8 @@ var EmptyStatement = helpers.EmptyStatement;
 var ExpressionStatement = helpers.ExpressionStatement;
 var IfStatement = helpers.IfStatement;
 var ReturnStatement = helpers.ReturnStatement;
+var VariableDeclaration = helpers.VariableDeclaration;
+var VariableDeclarator = helpers.VariableDeclarator;
 var FunctionDeclaration = helpers.FunctionDeclaration;
 var BlockStatement = helpers.BlockStatement;
 var Program = helpers.Program;
@@ -180,6 +182,67 @@ describe("Closer.js", function () {
                         [Literal("hello")]
                     )),
                     ExpressionStatement(Literal(true))
+                )
+            )
+        ));
+    });
+
+    it("correctly parses an unbound var definition", function () {
+        expect(closer.parse("(def var-name)")).toDeepEqual(Program(
+            VariableDeclaration(
+                'var',
+                VariableDeclarator(
+                    Identifier('var-name'),
+                    null
+                )
+            )
+        ));
+    });
+
+    it("correctly parses a var bound to a literal", function () {
+        expect(closer.parse("(def greeting \"Hello\")")).toDeepEqual(Program(
+            VariableDeclaration(
+                'var',
+                VariableDeclarator(
+                    Identifier('greeting'),
+                    Literal('Hello')
+                )
+            )
+        ));
+    });
+
+    it("correctly parses a var bound to the result of an expression", function () {
+        expect(closer.parse("(def sum (+ 3 5))")).toDeepEqual(Program(
+            VariableDeclaration(
+                'var',
+                VariableDeclarator(
+                    Identifier('sum'),
+                    CallExpression(
+                        Identifier('+'),
+                        [Literal(3), Literal(5)]
+                    )
+                )
+            )
+        ));
+    });
+
+    it("correctly parses a var bound to an fn form", function () {
+        expect(closer.parse("(def add (fn [& numbers] (apply + numbers)))")).toDeepEqual(Program(
+            VariableDeclaration(
+                'var',
+                VariableDeclarator(
+                    Identifier('add'),
+                    FunctionExpression(
+                        null,
+                        [],
+                        Identifier('numbers'),
+                        BlockStatement(
+                            ReturnStatement(CallExpression(
+                                Identifier('apply'),
+                                [Identifier('+'), Identifier('numbers')]
+                            ))
+                        )
+                    )
                 )
             )
         ));
