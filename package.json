@@ -21,7 +21,7 @@
     "pretest": "jison src/grammar.y src/lexer.l -o src/parser.js",
     "test": "jasmine-node spec --noStack --noColor --verbose",
     "watch": "npm-watch",
-    "browserify": "jison src/grammar.y src/lexer.l -o src/parser.js; browserify -s closer src/closer.js > demo/js/closer.js",
+    "browserify": "jison src/grammar.y src/lexer.l -o src/parser.js; browserify -s closer src/closer.js > demo/js/closer.js; browserify -s closer_spec spec/closer_spec.js > demo/js/closer_spec.js",
     "publish-demo": "git subtree push --prefix demo origin gh-pages"
   },
   "watch": {
@@ -30,13 +30,14 @@
       "src/grammar.y",
       "src/nodes.js",
       "src/closer.js",
-      "spec/*"
+      "spec/*.js"
     ],
     "browserify": [
         "src/lexer.l",
         "src/grammar.y",
         "src/nodes.js",
-        "src/closer.js"
+        "src/closer.js",
+        "spec/*.js"
     ]
   },
   "keywords": [
