@@ -53,8 +53,7 @@ FnDefinition
 
 ConditionalExpr
   : IF SExpr[test] SExprStmt[consequent] SExprStmt?[alternate] {
-        $alternate = ($alternate === undefined) ? null : $alternate;
-        $$ = yy.Node('IfStatement', $test, $consequent, $alternate);
+        $$ = yy.Node('IfStatement', $test, $consequent, getValueIfUndefined($alternate, null));
     }
   | WHEN SExpr[test] BlockStatement[consequent] {
         $$ = yy.Node('IfStatement', $test, $consequent, null);
@@ -63,8 +62,7 @@ ConditionalExpr
 
 VarDeclaration
   : DEF Identifier SExpr?[init] {
-        $init = ($init === undefined) ? null : $init;
-        var decl = yy.Node('VariableDeclarator', $Identifier, $init, yy.loc(@DEF));
+        var decl = yy.Node('VariableDeclarator', $Identifier, getValueIfUndefined($init, null), yy.loc(@DEF));
         $$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(@DEF));
     }
   ;
@@ -74,9 +72,8 @@ List
   | FnDefinition
   | ConditionalExpr
   | VarDeclaration
-  | Fn SExprs? {
-        $2 = ($2 === undefined) ? [] : $2;
-        $$ = yy.Node('CallExpression', $Fn, $2, yy.loc(@Fn));
+  | Fn SExprs?[args] {
+        $$ = yy.Node('CallExpression', $Fn, getValueIfUndefined($args, []), yy.loc(@Fn));
     }
   | DO DoForm {
         $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@1));
@@ -194,4 +191,8 @@ function parseString(str) {
         .replace(/\\f/g,'\f')
         .replace(/\\b/g,'\b')
         .replace(/\\(.)/g, '$1');
+}
+
+function getValueIfUndefined(variable, valueIfUndefined) {
+    return (typeof variable === 'undefined') ? valueIfUndefined : variable;
 }
