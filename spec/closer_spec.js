@@ -177,6 +177,19 @@ describe("Closer.js", function () {
     });
 
     // conditional statements
+    it("correctly parses an if statement without else", function () {
+        expect(closer.parse("(if (>= x 0) x)\n")).toDeepEqual(Program(
+            IfStatement(
+                CallExpression(
+                    Identifier(">="),
+                    [Identifier("x"), Literal(0)]
+                ),
+                ExpressionStatement(Identifier("x")),
+                null
+            )
+        ));
+    });
+
     it("correctly parses an if-else statement", function () {
         expect(closer.parse("(if (>= x 0) x (- x))\n")).toDeepEqual(Program(
             IfStatement(
