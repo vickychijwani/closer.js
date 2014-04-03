@@ -458,7 +458,6 @@ parser.parse = function (source, options) {
 
 var closer = {
     parse: function (src, options) {
-        console.log("\n\n\n\n" + "input: " + src);
         return new Closer(options).parse(src, options);
     }
 };
@@ -887,9 +886,9 @@ case 10: this.$ = $$[$0];
 break;
 case 11: this.$ = null; 
 break;
-case 12: console.log('Fn: IDENTIFIER'); this.$ = yy.Node('Identifier', String($$[$0]), yy.loc(_$[$0])); 
+case 12: this.$ = yy.Node('Identifier', String($$[$0]), yy.loc(_$[$0])); 
 break;
-case 13: console.log('Fn: (List)'); this.$ = $$[$0-1]; 
+case 13: this.$ = $$[$0-1]; 
 break;
 case 14:
         this.$ = yy.Node('FunctionExpression', null, $$[$0-3], $$[$0-2],
@@ -899,7 +898,6 @@ break;
 case 15: this.$ = $$[$0]; 
 break;
 case 16:
-        console.log('FnDefinition: DEFN Identifier FnParamsAndBody');
         $$[$0].type = 'FunctionDeclaration';
         $$[$0].id = $$[$0-1];
         this.$ = $$[$0];
@@ -920,10 +918,9 @@ case 19:
         this.$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(_$[$0-2]));
     
 break;
-case 20: console.log('List: '); this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0])); 
+case 20: this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0])); 
 break;
 case 24:
-        console.log('List: Fn SExprs?');
         $$[$0] = ($$[$0] === undefined) ? [] : $$[$0];
         this.$ = yy.Node('CallExpression', $$[$0-1], $$[$0], yy.loc(_$[$0-1]));
     
@@ -932,9 +929,9 @@ case 25:
         this.$ = yy.Node('BlockStatement', $$[$0], yy.loc(_$[$0-1]));
     
 break;
-case 26: console.log('SExpr: Atom'); this.$ = $$[$0]; 
+case 26: this.$ = $$[$0]; 
 break;
-case 27: console.log('SExpr: (List)'); this.$ = $$[$0-1]; 
+case 27: this.$ = $$[$0-1]; 
 break;
 case 28:
         if (ExpressionTypes.indexOf($$[$0].type) !== -1) {
@@ -944,10 +941,9 @@ case 28:
         }
     
 break;
-case 29: console.log('SExprs: SExpr'); this.$ = [$$[$0]]; 
+case 29: this.$ = [$$[$0]]; 
 break;
 case 30:
-        console.log('SExprs: SExprs SExpr');
         yy.locComb(this._$, _$[$0]);
         this.$ = $$[$0-1];
         $$[$0-1].push($$[$0]);

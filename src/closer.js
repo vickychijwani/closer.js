@@ -165,7 +165,6 @@ parser.parse = function (source, options) {
 
 var closer = {
     parse: function (src, options) {
-        console.log("\n\n\n\n" + "input: " + src);
         return new Closer(options).parse(src, options);
     }
 };

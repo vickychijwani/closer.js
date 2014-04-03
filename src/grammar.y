@@ -31,8 +31,8 @@ RestArgs
   ;
 
 Fn
-  : IDENTIFIER { console.log('Fn: IDENTIFIER'); $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
-  | '(' List ')' { console.log('Fn: (List)'); $$ = $List; }
+  : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  | '(' List ')' { $$ = $List; }
   ;
 
 FnParamsAndBody
@@ -45,7 +45,6 @@ FnParamsAndBody
 FnDefinition
   : FN FnParamsAndBody { $$ = $FnParamsAndBody; }
   | DEFN Identifier FnParamsAndBody {
-        console.log('FnDefinition: DEFN Identifier FnParamsAndBody');
         $FnParamsAndBody.type = 'FunctionDeclaration';
         $FnParamsAndBody.id = $Identifier;
         $$ = $FnParamsAndBody;
@@ -71,12 +70,11 @@ VarDeclaration
   ;
 
 List
-  : { console.log('List: '); $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
+  : { $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
   | ConditionalExpr
   | VarDeclaration
   | Fn SExprs? {
-        console.log('List: Fn SExprs?');
         $2 = ($2 === undefined) ? [] : $2;
         $$ = yy.Node('CallExpression', $Fn, $2, yy.loc(@Fn));
     }
@@ -86,8 +84,8 @@ List
   ;
 
 SExpr
-  : Atom { console.log('SExpr: Atom'); $$ = $Atom; }
-  | '(' List ')' { console.log('SExpr: (List)'); $$ = $List; }
+  : Atom { $$ = $Atom; }
+  | '(' List ')' { $$ = $List; }
   ;
 
 SExprStmt
@@ -101,9 +99,8 @@ SExprStmt
   ;
 
 SExprs
-  : SExpr { console.log('SExprs: SExpr'); $$ = [$SExpr]; }
+  : SExpr { $$ = [$SExpr]; }
   | SExprs SExpr {
-        console.log('SExprs: SExprs SExpr');
         yy.locComb(@$, @SExpr);
         $$ = $SExprs;
         $SExprs.push($SExpr);
