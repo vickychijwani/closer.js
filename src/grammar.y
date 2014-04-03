@@ -67,11 +67,34 @@ VarDeclaration
     }
   ;
 
+LetBinding
+  : Identifier SExpr {
+        $$ = yy.Node('VariableDeclarator', $Identifier, getValueIfUndefined($SExpr, null), yy.loc(@Identifier));
+    }
+  ;
+
+LetBindings
+  : LetBindings LetBinding {
+        $$ = $LetBindings;
+        var binding = yy.Node('VariableDeclaration', 'let', [$LetBinding], yy.loc(@LetBinding));
+        $LetBindings.push(binding);
+    }
+  | { $$ = []; }
+  ;
+
+LetForm
+  : LET '[' LetBindings ']' DoForm {
+        var body = [].concat($LetBindings).concat($DoForm);
+        $$ = yy.Node('BlockStatement', body, yy.loc(@1));
+    }
+  ;
+
 List
   : { $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
   | ConditionalExpr
   | VarDeclaration
+  | LetForm
   | Fn SExprs?[args] {
         $$ = yy.Node('CallExpression', $Fn, getValueIfUndefined($args, []), yy.loc(@Fn));
     }

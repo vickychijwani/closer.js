@@ -155,27 +155,6 @@ describe("Closer.js", function () {
         ));
     });
 
-    it("correctly parses an empty do form", function () {
-        expect(closer.parse("(do)")).toDeepEqual(Program(
-            BlockStatement(ExpressionStatement(Literal(null)))
-        ));
-    });
-
-    it("correctly parses a non-empty do form", function () {
-        expect(closer.parse("(do (+ 1 2) (+ 3 4))")).toDeepEqual(Program(
-            BlockStatement(
-                ExpressionStatement(CallExpression(
-                    Identifier('+'),
-                    [Literal(1), Literal(2)]
-                )),
-                ExpressionStatement(CallExpression(
-                    Identifier('+'),
-                    [Literal(3), Literal(4)]
-                ))
-            )
-        ));
-    });
-
     // conditional statements
     it("correctly parses an if statement without else", function () {
         expect(closer.parse("(if (>= x 0) x)\n")).toDeepEqual(Program(
@@ -279,6 +258,60 @@ describe("Closer.js", function () {
                         )
                     )
                 )
+            )
+        ));
+    });
+
+    it("correctly parses a let form with no bindings and no body", function () {
+        expect(closer.parse("(let [])")).toDeepEqual(Program(
+            BlockStatement(ExpressionStatement(Literal(null)))
+        ));
+    });
+
+    it("correctly parses a let form with non-empty bindings and a non-empty body", function () {
+        expect(closer.parse("(let [x 3 y (- x)] (+ x y))")).toDeepEqual(Program(
+            BlockStatement(
+                VariableDeclaration('let',
+                    VariableDeclarator(
+                        Identifier('x'),
+                        Literal(3)
+                    )
+                ),
+                VariableDeclaration('let',
+                    VariableDeclarator(
+                        Identifier('y'),
+                        CallExpression(
+                            Identifier('-'),
+                            [Identifier('x')]
+                        )
+                    )
+                ),
+                ExpressionStatement(CallExpression(
+                    Identifier('+'),
+                    [Identifier('x'), Identifier('y')]
+                ))
+            )
+        ));
+    });
+
+    // other special forms
+    it("correctly parses an empty do form", function () {
+        expect(closer.parse("(do)")).toDeepEqual(Program(
+            BlockStatement(ExpressionStatement(Literal(null)))
+        ));
+    });
+
+    it("correctly parses a non-empty do form", function () {
+        expect(closer.parse("(do (+ 1 2) (+ 3 4))")).toDeepEqual(Program(
+            BlockStatement(
+                ExpressionStatement(CallExpression(
+                    Identifier('+'),
+                    [Literal(1), Literal(2)]
+                )),
+                ExpressionStatement(CallExpression(
+                    Identifier('+'),
+                    [Literal(3), Literal(4)]
+                ))
             )
         ));
     });

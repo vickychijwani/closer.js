@@ -32,6 +32,7 @@ COMMENT         \;[^\r\n]*
 'if'    return 'IF';
 'when'  return 'WHEN';
 'do'    return 'DO';
+'let'   return 'LET';
 
 'true'  return 'true';
 'false' return 'false';
