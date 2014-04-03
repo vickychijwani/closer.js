@@ -80,6 +80,9 @@ List
         $2 = ($2 === undefined) ? [] : $2;
         $$ = yy.Node('CallExpression', $Fn, $2, yy.loc(@Fn));
     }
+  | DO DoForm {
+        $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@1));
+    }
   ;
 
 SExpr
@@ -107,14 +110,23 @@ SExprs
     }
   ;
 
-DoForm
-  : SExprs {
+NonEmptyDoForm
+    : SExprs {
         for (var i = 0; i < $SExprs.length; ++i) {
             var SExpr = $SExprs[i];
             if (ExpressionTypes.indexOf(SExpr.type) !== -1) {
                 $SExprs[i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
             }
         }
+    }
+  ;
+
+DoForm
+  : NonEmptyDoForm
+  | {
+        // do forms evaluate to nil if the body is empty
+        nilNode = yy.Node('Literal', null, yy.loc(@1), yytext);
+        $$ = [yy.Node('ExpressionStatement', nilNode, nilNode.loc)];
     }
   ;
 
@@ -135,8 +147,8 @@ BlockStatementWithReturn
   ;
 
 Program
-  : DoForm {
-        var prog = yy.Node('Program', $DoForm, yy.loc(@DoForm));
+  : NonEmptyDoForm {
+        var prog = yy.Node('Program', $NonEmptyDoForm, yy.loc(@NonEmptyDoForm));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
         if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($1);

@@ -31,6 +31,7 @@ COMMENT         \;[^\r\n]*
 'defn'  return 'DEFN';
 'if'    return 'IF';
 'when'  return 'WHEN';
+'do'    return 'DO';
 
 'true'  return 'true';
 'false' return 'false';

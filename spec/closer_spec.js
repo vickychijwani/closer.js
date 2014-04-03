@@ -155,6 +155,27 @@ describe("Closer.js", function () {
         ));
     });
 
+    it("correctly parses an empty do form", function () {
+        expect(closer.parse("(do)")).toDeepEqual(Program(
+            BlockStatement(ExpressionStatement(Literal(null)))
+        ));
+    });
+
+    it("correctly parses a non-empty do form", function () {
+        expect(closer.parse("(do (+ 1 2) (+ 3 4))")).toDeepEqual(Program(
+            BlockStatement(
+                ExpressionStatement(CallExpression(
+                    Identifier('+'),
+                    [Literal(1), Literal(2)]
+                )),
+                ExpressionStatement(CallExpression(
+                    Identifier('+'),
+                    [Literal(3), Literal(4)]
+                ))
+            )
+        ));
+    });
+
     // conditional statements
     it("correctly parses an if-else statement", function () {
         expect(closer.parse("(if (>= x 0) x (- x))\n")).toDeepEqual(Program(
@@ -187,6 +208,7 @@ describe("Closer.js", function () {
         ));
     });
 
+    // variables
     it("correctly parses an unbound var definition", function () {
         expect(closer.parse("(def var-name)")).toDeepEqual(Program(
             VariableDeclaration(
