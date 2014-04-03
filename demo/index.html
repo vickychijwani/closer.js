@@ -69,11 +69,9 @@
                         "  [numbers]\n" +
                         "  (/ (apply + numbers) (count numbers)))\n" +
                         "\n" +
-                        "; stupid and contrived, and not Clojure-y at all\n" +
-                        "(def min 1)\n" +
-                        "(def max (+ min 9))\n" +
-                        "\n" +
-                        "(average (range min max))   ; => 5\n";
+                        "(let [min 1\n" +
+                        "      max (+ min 9)]\n" +
+                        "  (average (range min max)))   ; => 5\n";
                 inputEditor.getSession().setValue(initialInput);
                 parseInput();
 
