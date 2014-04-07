@@ -2,7 +2,7 @@
   "name": "closer",
   "description": "Closer.js - Clojure parser in JavaScript, compatible with the Mozilla Parser API (https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API)",
   "homepage": "http://github.com/vickychijwani/closer.js",
-  "main": "closer.js",
+  "main": "src/closer.js",
   "version": "0.0.1",
   "license": "MIT",
   "engines": {
@@ -19,26 +19,7 @@
   },
   "scripts": {
     "pretest": "jison src/grammar.y src/lexer.l -o src/parser.js",
-    "test": "jasmine-node spec --noStack --noColor --verbose",
-    "watch": "npm-watch",
-    "browserify": "jison src/grammar.y src/lexer.l -o src/parser.js; browserify -s closer src/closer.js > demo/js/closer.js; browserify -s closer_spec spec/closer_spec.js > demo/js/closer_spec.js",
-    "publish-demo": "git subtree push --prefix demo origin gh-pages"
-  },
-  "watch": {
-    "test": [
-      "src/lexer.l",
-      "src/grammar.y",
-      "src/nodes.js",
-      "src/closer.js",
-      "spec/*.js"
-    ],
-    "browserify": [
-        "src/lexer.l",
-        "src/grammar.y",
-        "src/nodes.js",
-        "src/closer.js",
-        "spec/*.js"
-    ]
+    "test": "jasmine-node spec --noStack --noColor --verbose"
   },
   "keywords": [
     "parser",
@@ -51,10 +32,13 @@
     "esprima"
   ],
   "devDependencies": {
-    "jison": "^0.4.13",
     "browserify": "^3.38.0",
+    "grunt": "^0.4.4",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-jasmine-node": "^0.2.1",
+    "grunt-shell": "^0.6.4",
     "jasmine-node": "^1.14.2",
-    "json-diff": "^0.3.1",
-    "npm-watch": "0.0.0"
+    "jison": "^0.4.13",
+    "json-diff": "^0.3.1"
   }
 }
