@@ -1,32 +1,28 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.closer=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var Closer, Parser, closer, con, defaultBuilder, nodes, oldParse, parser;
+  var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
 
   parser = _dereq_('./parser').parser;
 
   nodes = _dereq_('./nodes');
 
-  defaultBuilder = {};
+  builder = {};
 
-  nodes.defineNodes(defaultBuilder);
+  nodes.defineNodes(builder);
 
-  for (con in defaultBuilder) {
-    if (defaultBuilder.hasOwnProperty(con)) {
-      parser.yy[con] = (function(name) {
-        var context;
-        context = this;
-        return function(a, b, c, d, e, f, g, h) {
-          return context.builder[name](a, b, c, d, e, f, g, h);
-        };
-      })(con);
-    }
+  for (con in builder) {
+    parser.yy[con] = (function(name) {
+      return function(a, b, c, d, e, f, g, h) {
+        return builder[name](a, b, c, d, e, f, g, h);
+      };
+    })(con);
   }
 
   parser.yy.Node = function(type, a, b, c, d, e, f, g, h) {
     var buildName;
     buildName = type[0].toLowerCase() + type.slice(1);
-    if (this.builder && this.builder[buildName]) {
-      return this.builder[buildName](a, b, c, d, e, f, g, h);
+    if (builder && buildName in builder) {
+      return builder[buildName](a, b, c, d, e, f, g, h);
     } else {
       throw new ReferenceError("no such node type: " + type);
     }
@@ -56,9 +52,6 @@
         column: loc.last_column
       }
     };
-    if (this.source || this.builder !== defaultBuilder) {
-      newLoc.source = this.source;
-    }
     return newLoc;
   };
 
@@ -81,7 +74,6 @@
       this.yy.source = options.source || null;
       this.yy.startLine = options.line || 1;
       this.yy.locations = options.locations;
-      this.yy.builder = options.builder || defaultBuilder;
     }
 
     return Parser;
@@ -106,7 +98,8 @@
   closer = {
     parse: function(src, options) {
       return new Closer(options).parse(src, options);
-    }
+    },
+    node: parser.yy.Node
   };
 
   module.exports = closer;
