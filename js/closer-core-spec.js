@@ -7,44 +7,54 @@
 
   core = {
     '+': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return _.reduce(args, (function(sum, num) {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.reduce(nums, (function(sum, num) {
         return sum + num;
       }), 0);
     },
     '-': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (args.length === 1) {
-        args.unshift(0);
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (nums.length === 1) {
+        nums.unshift(0);
       }
-      return _.reduce(args.slice(1), (function(diff, num) {
+      return _.reduce(nums.slice(1), (function(diff, num) {
         return diff - num;
-      }), args[0]);
+      }), nums[0]);
     },
     '*': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return _.reduce(args, (function(prod, num) {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.reduce(nums, (function(prod, num) {
         return prod * num;
       }), 1);
     },
     '/': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (args.length === 1) {
-        args.unshift(1);
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (nums.length === 1) {
+        nums.unshift(1);
       }
-      return _.reduce(args.slice(1), (function(quo, num) {
+      return _.reduce(nums.slice(1), (function(quo, num) {
         return quo / num;
-      }), args[0]);
+      }), nums[0]);
     },
     'inc': function(num) {
       return ++num;
     },
     'dec': function(num) {
       return --num;
+    },
+    'max': function() {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.max(nums);
+    },
+    'min': function() {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.min(nums);
     }
   };
 
@@ -1319,9 +1329,19 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return assertAlmostEqual('(inc -2e-3)', 0.998);
       });
     });
-    return describe('dec', function() {
+    describe('dec', function() {
       return it('decrements a number', function() {
         return assertAlmostEqual('(dec -2e-3)', -1.002);
+      });
+    });
+    describe('max', function() {
+      return it('finds the maximum of the given numbers', function() {
+        return assertAlmostEqual('(max -1e10 653.32 1.345e4)', 1.345e4);
+      });
+    });
+    return describe('min', function() {
+      return it('finds the minimum of the given numbers', function() {
+        return assertAlmostEqual('(min -1e10 653.32 1.345e4)', -1e10);
       });
     });
   });
