@@ -33,6 +33,8 @@
   ],
   "devDependencies": {
     "browserify": "^3.38.0",
+    "escodegen": "^1.3.1",
+    "estraverse": "^1.5.0",
     "grunt": "^0.4.4",
     "grunt-coffeelint": "0.0.8",
     "grunt-contrib-coffee": "^0.10.1",
@@ -42,5 +44,8 @@
     "jasmine-node": "^1.14.2",
     "jison": "^0.4.13",
     "json-diff": "^0.3.1"
+  },
+  "dependencies": {
+    "lodash-node": "^2.4.1"
   }
 }

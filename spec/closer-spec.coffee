@@ -24,25 +24,25 @@ beforeEach ->
     typeof json_diff.diff(@actual, expected) is 'undefined'
 
 
-describe 'Closer.js', ->
+describe 'Closer parser', ->
 
   # atoms
-  it 'correctly parses an empty program', ->
+  it 'parses an empty program', ->
     expect(closer.parse('\n')).toDeepEqual Program()
 
-  it 'correctly parses an empty s-expression', ->
+  it 'parses an empty s-expression', ->
     expect(closer.parse('()\n')).toDeepEqual Program(
       EmptyStatement())
 
-  it 'correctly parses comments', ->
+  it 'parses comments', ->
     expect(closer.parse('; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r')).toDeepEqual Program(
       EmptyStatement())
 
-  it 'correctly parses an identifier', ->
+  it 'parses an identifier', ->
     expect(closer.parse('x\n')).toDeepEqual Program(
       ExpressionStatement(Identifier('x')))
 
-  it 'correctly parses integer, string, boolean, and nil literals', ->
+  it 'parses integer, float, string, boolean, and nil literals', ->
     expect(closer.parse('-24\n-23.67\n-22.45E-5\n\"string\"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
       ExpressionStatement(UnaryExpression('-', Literal(24))),
       ExpressionStatement(UnaryExpression('-', Literal(23.67))),
@@ -54,19 +54,19 @@ describe 'Closer.js', ->
 
 
   # functions
-  it 'correctly parses a function call with 0 arguments', ->
+  it 'parses a function call with 0 arguments', ->
     expect(closer.parse('(fn-name)\n')).toDeepEqual Program(
       ExpressionStatement(
         CallExpression(Identifier('fn-name'))))
 
-  it 'correctly parses a function call with > 0 arguments', ->
+  it 'parses a function call with > 0 arguments', ->
     expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual Program(
       ExpressionStatement(
         CallExpression(
           Identifier('fn-name'),
           [Identifier('arg1'), Identifier('arg2')])))
 
-  it 'correctly parses an anonymous function definition', ->
+  it 'parses an anonymous function definition', ->
     expect(closer.parse('(fn [x] x)\n')).toDeepEqual Program(
       ExpressionStatement(
         FunctionExpression(
@@ -76,7 +76,7 @@ describe 'Closer.js', ->
           BlockStatement(
             ReturnStatement(Identifier('x'))))))
 
-  it 'correctly parses an anonymous function call', ->
+  it 'parses an anonymous function call', ->
     expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual Program(
       ExpressionStatement(
         CallExpression(
@@ -88,7 +88,7 @@ describe 'Closer.js', ->
               ReturnStatement(Identifier('x')))),
           [Literal(2)])))
 
-  it 'correctly parses a named function definition', ->
+  it 'parses a named function definition', ->
     expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
       FunctionDeclaration(
         Identifier('fn-name'),
@@ -97,7 +97,7 @@ describe 'Closer.js', ->
         BlockStatement(
           ReturnStatement(Identifier('x')))))
 
-  it 'correctly parses rest arguments', ->
+  it 'parses rest arguments', ->
     expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual Program(
       FunctionDeclaration(
         Identifier('avg'),
@@ -114,7 +114,7 @@ describe 'Closer.js', ->
 
 
   # conditional statements
-  it 'correctly parses an if statement without else', ->
+  it 'parses an if statement without else', ->
     expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
@@ -123,7 +123,7 @@ describe 'Closer.js', ->
         ExpressionStatement(Identifier('x')),
         null))
 
-  it 'correctly parses an if-else statement', ->
+  it 'parses an if-else statement', ->
     expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
@@ -135,7 +135,7 @@ describe 'Closer.js', ->
             Identifier('-'),
             [Identifier('x')]))))
 
-  it 'correctly parses a when form', ->
+  it 'parses a when form', ->
     expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(Identifier('condition?')),
@@ -147,7 +147,7 @@ describe 'Closer.js', ->
 
 
   # variables
-  it 'correctly parses an unbound var definition', ->
+  it 'parses an unbound var definition', ->
     expect(closer.parse('(def var-name)')).toDeepEqual Program(
       VariableDeclaration(
         'var',
@@ -155,7 +155,7 @@ describe 'Closer.js', ->
           Identifier('var-name'),
           null)))
 
-  it 'correctly parses a var bound to a literal', ->
+  it 'parses a var bound to a literal', ->
     expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual Program(
       VariableDeclaration(
         'var',
@@ -163,7 +163,7 @@ describe 'Closer.js', ->
           Identifier('greeting'),
           Literal('Hello'))))
 
-  it 'correctly parses a var bound to the result of an expression', ->
+  it 'parses a var bound to the result of an expression', ->
     expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual Program(
       VariableDeclaration(
         'var',
@@ -173,7 +173,7 @@ describe 'Closer.js', ->
             Identifier('+'),
             [Literal(3), Literal(5)]))))
 
-  it 'correctly parses a var bound to an fn form', ->
+  it 'parses a var bound to an fn form', ->
     expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual Program(
       VariableDeclaration(
         'var',
@@ -188,11 +188,11 @@ describe 'Closer.js', ->
                 Identifier('apply'),
                 [Identifier('+'), Identifier('numbers')])))))))
 
-  it 'correctly parses a let form with no bindings and no body', ->
+  it 'parses a let form with no bindings and no body', ->
     expect(closer.parse('(let [])')).toDeepEqual Program(
       BlockStatement(ExpressionStatement(Literal(null))))
 
-  it 'correctly parses a let form with non-empty bindings and a non-empty body', ->
+  it 'parses a let form with non-empty bindings and a non-empty body', ->
     expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual Program(
       BlockStatement(
         VariableDeclaration(
@@ -213,11 +213,11 @@ describe 'Closer.js', ->
 
 
   # other special forms
-  it 'correctly parses an empty do form', ->
+  it 'parses an empty do form', ->
     expect(closer.parse('(do)')).toDeepEqual Program(
       BlockStatement(ExpressionStatement(Literal(null))))
 
-  it 'correctly parses a non-empty do form', ->
+  it 'parses a non-empty do form', ->
     expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual Program(
       BlockStatement(
         ExpressionStatement(CallExpression(
@@ -229,4 +229,4 @@ describe 'Closer.js', ->
 
 
   # pending
-  xit 'correctly parses source locations'
+  xit 'parses source locations'
