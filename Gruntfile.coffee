@@ -68,4 +68,5 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
 
   grunt.registerTask 'default', ['coffeelint', 'coffee', 'shell:jison', 'jasmine_node', 'shell:browserify']
+  grunt.registerTask 'test', ['coffeelint', 'coffee', 'shell:jison', 'jasmine_node']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']
