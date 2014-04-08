@@ -2,23 +2,19 @@ parser = require('./parser').parser
 nodes = require './nodes'
 
 # Define AST nodes
-defaultBuilder = {}
-nodes.defineNodes defaultBuilder
+builder = {}
+nodes.defineNodes builder
 
 # allow yy.NodeType calls in parser
-for con of defaultBuilder
-  if defaultBuilder.hasOwnProperty(con)
-    parser.yy[con] = ((name) ->
-      context = this
-      (a, b, c, d, e, f, g, h) ->
-        context.builder[name] a, b, c, d, e, f, g, h
-    )(con)
+for con of builder
+  parser.yy[con] = (a, b, c, d, e, f, g, h) ->
+    builder[con] a, b, c, d, e, f, g, h
 
 # used named arguments to avoid arguments array
 parser.yy.Node = (type, a, b, c, d, e, f, g, h) ->
   buildName = type[0].toLowerCase() + type.slice(1)
-  if @builder and @builder[buildName]
-    @builder[buildName] a, b, c, d, e, f, g, h
+  if builder and buildName of builder
+    builder[buildName] a, b, c, d, e, f, g, h
   else
     throw new ReferenceError "no such node type: " + type
 
@@ -40,7 +36,6 @@ parser.yy.loc = (loc) ->
       column: loc.last_column
     # range: loc.range
 
-  newLoc.source = @source  if @source or @builder isnt defaultBuilder
   newLoc
 
 parser.yy.escapeString = (s) ->
@@ -59,7 +54,6 @@ class Parser
     @yy.source = options.source or null
     @yy.startLine = options.line or 1
     @yy.locations = options.locations
-    @yy.builder = options.builder or defaultBuilder
 
 Parser:: = parser
 
@@ -74,5 +68,7 @@ class Closer
 closer =
   parse: (src, options) ->
     new Closer(options).parse src, options
+
+  node: parser.yy.Node
 
 module.exports = closer
