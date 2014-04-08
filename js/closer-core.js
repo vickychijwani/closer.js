@@ -39,6 +39,12 @@
       return _.reduce(args.slice(1), (function(quo, num) {
         return quo / num;
       }), args[0]);
+    },
+    'inc': function(num) {
+      return ++num;
+    },
+    'dec': function(num) {
+      return --num;
     }
   };
 
