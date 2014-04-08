@@ -1293,7 +1293,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
   describe('Closer core library', function() {
     describe('+', function() {
-      it('handles 0 arguments', function() {
+      it('returns 0 when given no arguments', function() {
         return assertEqual('(+)', 0);
       });
       return it('adds numbers', function() {
@@ -1309,7 +1309,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       });
     });
     describe('*', function() {
-      it('handles 0 arguments', function() {
+      it('returns 1 when given no arguments', function() {
         return assertEqual('(*)', 1);
       });
       return it('multiplies numbers', function() {
