@@ -23,7 +23,7 @@ module.exports = (grunt) ->
     jasmine_node:
       all: ['lib/spec/']
       options:
-        showColors: false
+        showColors: true
         includeStackTrace: false
         forceExit: true
 
