@@ -1,488 +1,357 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.closer=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-var parser = _dereq_("./parser").parser,
-    nodes = _dereq_("./nodes");
+(function() {
+  var Closer, Parser, closer, con, defaultBuilder, nodes, oldParse, parser;
 
-function Closer(options) {
-    // Create a parser constructor and an instance
-    this.parser = new Parser(options || {});
-}
+  parser = _dereq_('./parser').parser;
 
-Closer.prototype = {
-    parse: function (source, options) {
-        return this.parser.parse(source, options);
-    }
-};
+  nodes = _dereq_('./nodes');
 
-var defaultBuilder = {};
+  defaultBuilder = {};
 
-// Define AST nodes
-nodes.defineNodes(defaultBuilder);
+  nodes.defineNodes(defaultBuilder);
 
-function Parser(options) {
-    this.yy.source = options.source || null;
-    this.yy.startLine = options.line || 1;
-    this.yy.locations = options.locations;
-    this.yy.builder = options.builder || defaultBuilder;
-}
-
-Parser.prototype = parser;
-
-// allow yy.NodeType calls in parser
-for (var con in defaultBuilder) {
+  for (con in defaultBuilder) {
     if (defaultBuilder.hasOwnProperty(con)) {
-        parser.yy[con] = (function (name) {
-            var context = this;
-            return function (a, b, c, d, e, f, g, h) {
-                return context.builder[name](a, b, c, d, e, f, g, h);
-            };
-        })(con);
+      parser.yy[con] = (function(name) {
+        var context;
+        context = this;
+        return function(a, b, c, d, e, f, g, h) {
+          return context.builder[name](a, b, c, d, e, f, g, h);
+        };
+      })(con);
     }
-}
+  }
 
-// used named arguments to avoid arguments array
-parser.yy.Node = function Node(type, a, b, c, d, e, f, g, h) {
-    var buildName = type[0].toLowerCase() + type.slice(1);
+  parser.yy.Node = function(type, a, b, c, d, e, f, g, h) {
+    var buildName;
+    buildName = type[0].toLowerCase() + type.slice(1);
     if (this.builder && this.builder[buildName]) {
-        return this.builder[buildName](a, b, c, d, e, f, g, h);
+      return this.builder[buildName](a, b, c, d, e, f, g, h);
     } else {
-        throw 'no such node type: ' + type;
+      throw new ReferenceError("no such node type: " + type);
     }
-};
+  };
 
-parser.yy.locComb = function (start, end) {
+  parser.yy.locComb = function(start, end) {
     start.last_line = end.last_line;
     start.last_column = end.last_column;
-//    start.range = [start.range[0], end.range[1]];
     return start;
-};
+  };
 
-parser.yy.loc = function (loc) {
-    if (! this.locations) return null;
-    if ("length" in loc) loc = this.locComb(loc[0], loc[1]);
-
-    var newLoc = { start: { line: this.startLine + loc.first_line - 1,
-        column: loc.first_column },
-        end: { line: this.startLine + loc.last_line - 1,
-            column: loc.last_column }
-//        range: loc.range
-    };
-
-    if (this.source || this.builder !== defaultBuilder)
-        newLoc.source = this.source;
-    return newLoc;
-};
-
-// Handle parse errors and recover from ASI
-parser.yy.parseError = function (err, hash) {
-    // don't print error for missing semicolon
-    if (!((!hash.expected || hash.expected.indexOf("';'") >= 0) && (hash.token === 'CLOSEBRACE' || /* parser.yy.lineBreak || parser.yy.lastLineBreak || */ hash.token === 1))) {
-        throw new SyntaxError(err);
+  parser.yy.loc = function(loc) {
+    var newLoc;
+    if (!this.locations) {
+      return null;
     }
-};
+    if ("length" in loc) {
+      loc = this.locComb(loc[0], loc[1]);
+    }
+    newLoc = {
+      start: {
+        line: this.startLine + loc.first_line - 1,
+        column: loc.first_column
+      },
+      end: {
+        line: this.startLine + loc.last_line - 1,
+        column: loc.last_column
+      }
+    };
+    if (this.source || this.builder !== defaultBuilder) {
+      newLoc.source = this.source;
+    }
+    return newLoc;
+  };
 
-//parser.lexer.options.ranges = true;
-
-// used to check if last match was a line break (for ; insertion)
-//var realLex = parser.lexer.lex;
-//parser.lexer.lex = function () {
-//    parser.yy.lastLineBreak = parser.yy.lineBreak;
-//    parser.yy.lineBreak = false;
-//    return realLex.call(this);
-//};
-
-//var realNext = parser.lexer.next;
-//parser.lexer.next = function () {
-//    var ret = realNext.call(this);
-//    if (ret === 'COMMENT' || ret === 'COMMENT_BLOCK') {
-//        if (this.yy.options.comment) {
-//            this.yy.comments.push({range: this.yylloc.range, type: types[ret], value: this.yytext});
-//        }
-//        return;
-//    }
-//    if (ret && ret !== 1 && ret !== 199) {
-//        if (this.yy.options.tokens) {
-//            var tokens = this.yy.tokens;
-//            var last = tokens[tokens.length - 1];
-//            if (tokens.length && (last.value == '/' || last.value == '/=')) {
-//                tokens[tokens.length - 1] = tokenObject(this, ret);
-//                var t = tokens[tokens.length - 1];
-//                t.range[0] = last.range[0];
-//                t.value = last.value + t.value;
-//            } else {
-//                this.yy.tokens.push(tokenObject(this, ret));
-//            }
-//        }
-//    }
-//    return ret;
-//};
-
-var types = {
-    "NULLTOKEN": "Null",
-    "THISTOKEN": "Keyword",
-    "VAR": "Keyword",
-    "IDENT": "Identifier",
-    "NUMBER": "Numeric",
-    "STRING": "String",
-    "REGEXP_BODY": "RegularExpression",
-    "COMMENT": "Line",
-    "COMMENT_BLOCK": "Block",
-    "TRUETOKEN": "Boolean",
-    "FALSETOKEN": "Boolean"
-};
-
-// Punctuator tokens
-'OPENBRACE CLOSEBRACE [ ] ( ) { } . ; : , PLUSEQUAL MINUSEQUAL MULTEQUAL MODEQUAL ANDEQUAL OREQUAL XOREQUAL LSHIFTEQUAL RSHIFTEQUAL URSHIFTEQUAL DIVEQUAL LE GE STREQ STRNEQ EQEQ NE AND OR PLUSPLUS MINUSMINUS URSHIFT LSHIFT + - * % < > & | ^ ! ~ ? / ='.split(' ').forEach(function (token) {
-    types[token] = 'Punctuator';
-});
-
-// Keyword tokens
-'BREAK CASE CONTINUE DEBUGGER DEFAULT DELETETOKEN DO ELSE FINALLY FOR FUNCTION IF INTOKEN INSTANCEOF NEW RETURN SWITCH TRY CATCH THROW TYPEOF VAR VOIDTOKEN WHILE WITH CLASS CONSTTOKEN LET ENUM EXPORT EXTENDS IMPORT SUPERTOKEN IMPLEMENTS INTERFACE PACKAGE PRIVATE PROTECTED PUBLIC STATIC YIELD THISTOKEN EVAL ARGUMENTS'.split(' ').forEach(function (token) {
-    types[token] = 'Keyword';
-});
-
-//function tokenObject(lexer, token) {
-//    var symbols = lexer.yy.parser.terminals_;
-//    return {
-//        "type": types[symbols[token] || token],
-//        "value": lexer.match,
-//        "range": lexer.yylloc.range
-//    };
-//}
-
-parser.yy.escapeString = function (s) {
+  parser.yy.escapeString = function(s) {
     return s.replace(/\\\n/, '').replace(/\\([^xubfnvrt0\\])/g, '$1');
-};
+  };
 
-var oldParse = parser.parse;
-parser.parse = function (source, options) {
-//    this.yy.lineBreak = false;
+  oldParse = parser.parse;
+
+  parser.parse = function(source, options) {
     this.yy.inRegex = false;
-//    this.yy.tokens = [];
     this.yy.raw = [];
     this.yy.comments = [];
     this.yy.options = options || {};
     return oldParse.call(this, source);
-};
+  };
 
-var closer = {
-    parse: function (src, options) {
-        return new Closer(options).parse(src, options);
+  Parser = (function() {
+    function Parser(options) {
+      this.yy.source = options.source || null;
+      this.yy.startLine = options.line || 1;
+      this.yy.locations = options.locations;
+      this.yy.builder = options.builder || defaultBuilder;
     }
-};
 
-module.exports = closer;
+    return Parser;
+
+  })();
+
+  Parser.prototype = parser;
+
+  Closer = (function() {
+    function Closer(options) {
+      this.parser = new Parser(options || {});
+    }
+
+    Closer.prototype.parse = function(source, options) {
+      return this.parser.parse(source, options);
+    };
+
+    return Closer;
+
+  })();
+
+  closer = {
+    parse: function(src, options) {
+      return new Closer(options).parse(src, options);
+    }
+  };
+
+  module.exports = closer;
+
+}).call(this);
 
 },{"./nodes":2,"./parser":3}],2:[function(_dereq_,module,exports){
-exports.defineNodes = function (builder) {
-
-    var defaultIni = function (loc) {
-        this.loc = loc;
-        return this;
+(function() {
+  exports.defineNodes = function(builder) {
+    var convertExprToPattern, def, defaultIni, funIni;
+    defaultIni = function(loc) {
+      this.loc = loc;
+      return this;
     };
-
-    var def = function def(name, ini) {
-        builder[name[0].toLowerCase() + name.slice(1)] = function (a, b, c, d, e, f, g, h) {
-            var obj = {};
-            obj.type = name;
-            ini.call(obj, a, b, c, d, e, f, g, h);
-//            if (obj.loc) {
-//                obj.range = obj.loc.range || [0, 0];
-                delete obj.loc;
-//                obj.loc = arguments[ini.length - (name === 'Literal' ? 2 : 1)];
-//                delete obj.loc.range;
-//            }
-            return obj;
-        };
+    def = function(name, ini) {
+      return builder[name[0].toLowerCase() + name.slice(1)] = function(a, b, c, d, e, f, g, h) {
+        var obj;
+        obj = {};
+        obj.type = name;
+        ini.call(obj, a, b, c, d, e, f, g, h);
+        delete obj.loc;
+        return obj;
+      };
     };
-
-    /* Nodes
-     */
-
-// used in cases where object and array literals are valid expressions
-    function convertExprToPattern(expr) {
-        if (expr.type === 'ObjectExpression') {
-            expr.type = 'ObjectPattern';
-        } else if (expr.type === 'ArrayExpression') {
-            expr.type = 'ArrayPattern';
-        }
-    }
-
-// Program node
-    def('Program', function (elements, loc) {
-        this.body = elements;
-        this.loc = loc;
+    convertExprToPattern = function(expr) {
+      if (expr.type === 'ObjectExpression') {
+        expr.type = 'ObjectPattern';
+      }
+      if (expr.type === 'ArrayExpression') {
+        return expr.type = 'ArrayPattern';
+      }
+    };
+    def('Program', function(elements, loc) {
+      this.body = elements;
+      return this.loc = loc;
     });
-
-    def('ExpressionStatement', function (expression, loc) {
-        this.expression = expression;
-        this.loc = loc;
+    def('ExpressionStatement', function(expression, loc) {
+      this.expression = expression;
+      return this.loc = loc;
     });
-
-    def('BlockStatement', function (body, loc) {
-        this.body = body;
-        this.loc = loc;
+    def('BlockStatement', function(body, loc) {
+      this.body = body;
+      return this.loc = loc;
     });
-
     def('EmptyStatement', defaultIni);
-
-
-// Identifier node
-    def('Identifier', function (name, loc) {
-        this.name = name;
-        this.loc = loc;
+    def('Identifier', function(name, loc) {
+      this.name = name;
+      return this.loc = loc;
     });
-
-// Literal expression node
-    def('Literal', function (val, loc, raw) {
-        this.value = val;
-//        if (raw) this.raw = raw;
-        this.loc = loc;
+    def('Literal', function(val, loc, raw) {
+      this.value = val;
+      return this.loc = loc;
     });
-
-// "this" expression node
     def('ThisExpression', defaultIni);
-
-// Var statement node
-    def('VariableDeclaration', function (kind, declarations, loc) {
-        this.declarations = declarations;
-        this.kind = kind;
-        this.loc = loc;
+    def('VariableDeclaration', function(kind, declarations, loc) {
+      this.declarations = declarations;
+      this.kind = kind;
+      return this.loc = loc;
     });
-
-    def('VariableDeclarator', function (id, init, loc) {
-        this.id = id;
-        this.init = init;
-        this.loc = loc;
+    def('VariableDeclarator', function(id, init, loc) {
+      this.id = id;
+      this.init = init;
+      return this.loc = loc;
     });
-
-    def('ArrayExpression', function (elements, loc) {
-        this.elements = elements;
-        this.loc = loc;
+    def('ArrayExpression', function(elements, loc) {
+      this.elements = elements;
+      return this.loc = loc;
     });
-
-    def('ObjectExpression', function (properties, loc) {
-        this.properties = properties;
-        this.loc = loc;
+    def('ObjectExpression', function(properties, loc) {
+      this.properties = properties;
+      return this.loc = loc;
     });
-
-    def('Property', function (key, value, kind, loc) {
-        this.key = key;
-        this.value = value;
-        this.kind = kind;
-        this.loc = loc;
+    def('Property', function(key, value, kind, loc) {
+      this.key = key;
+      this.value = value;
+      this.kind = kind;
+      return this.loc = loc;
     });
-
-// Function declaration node
-    var funIni = function (ident, params, rest, body, isGen, isExp, loc) {
-        this.id = ident;
-        this.params = params;
-        this.defaults = [];
-        this.rest = rest;
-        this.body = body;
-        this.loc = loc;
-        this.generator = isGen;
-        this.expression = isExp;
-//        if (!this.expression) {
-//            this.body.body.forEach(function (el) {
-//                if (el.type === "VariableDeclaration" && el.kind === "let") {
-//                    el.kind = "var";
-//                }
-//            });
-//        }
+    funIni = function(ident, params, rest, body, isGen, isExp, loc) {
+      this.id = ident;
+      this.params = params;
+      this.defaults = [];
+      this.rest = rest;
+      this.body = body;
+      this.loc = loc;
+      this.generator = isGen;
+      return this.expression = isExp;
     };
-
     def('FunctionDeclaration', funIni);
-
     def('FunctionExpression', funIni);
-
-// return statement node
-    def('ReturnStatement', function (argument, loc) {
-        this.argument = argument;
-        this.loc = loc;
+    def('ReturnStatement', function(argument, loc) {
+      this.argument = argument;
+      return this.loc = loc;
     });
-
-    def('TryStatement', function (block, handlers, finalizer, loc) {
-        this.block = block;
-        this.handlers = handlers || [];
-        this.finalizer = finalizer;
-        this.loc = loc;
+    def('TryStatement', function(block, handlers, finalizer, loc) {
+      this.block = block;
+      this.handlers = handlers || [];
+      this.finalizer = finalizer;
+      return this.loc = loc;
     });
-
-    def('CatchClause', function (param, guard, body, loc) {
-        this.param = param;
-        this.guard = guard;
-        this.body = body;
-        this.loc = loc;
+    def('CatchClause', function(param, guard, body, loc) {
+      this.param = param;
+      this.guard = guard;
+      this.body = body;
+      return this.loc = loc;
     });
-
-    def('ThrowStatement', function (argument, loc) {
-        this.argument = argument;
-        this.loc = loc;
+    def('ThrowStatement', function(argument, loc) {
+      this.argument = argument;
+      return this.loc = loc;
     });
-
-    def('LabeledStatement', function (label, body, loc) {
-        this.label = label;
-        this.body = body;
-        this.loc = loc;
+    def('LabeledStatement', function(label, body, loc) {
+      this.label = label;
+      this.body = body;
+      return this.loc = loc;
     });
-
-    def('BreakStatement', function (label, loc) {
-        this.label = label;
-        this.loc = loc;
+    def('BreakStatement', function(label, loc) {
+      this.label = label;
+      return this.loc = loc;
     });
-
-    def('ContinueStatement', function (label, loc) {
-        this.label = label;
-        this.loc = loc;
+    def('ContinueStatement', function(label, loc) {
+      this.label = label;
+      return this.loc = loc;
     });
-
-    def('SwitchStatement', function (discriminant, cases, lexical, loc) {
-        this.discriminant = discriminant;
-        if (cases.length) this.cases = cases;
-        this.loc = loc;
+    def('SwitchStatement', function(discriminant, cases, lexical, loc) {
+      this.discriminant = discriminant;
+      if (cases.length) {
+        this.cases = cases;
+      }
+      return this.loc = loc;
     });
-
-    def('SwitchCase', function (test, consequent, loc) {
-        this.test = test;
-        this.consequent = consequent;
-        this.loc = loc;
+    def('SwitchCase', function(test, consequent, loc) {
+      this.test = test;
+      this.consequent = consequent;
+      return this.loc = loc;
     });
-
-    def('WithStatement', function (object, body, loc) {
-        this.object = object;
-        this.body = body;
-        this.loc = loc;
+    def('WithStatement', function(object, body, loc) {
+      this.object = object;
+      this.body = body;
+      return this.loc = loc;
     });
-
-
-// operators
-    def('ConditionalExpression', function (test, consequent, alternate, loc) {
-        this.test = test;
-        this.consequent = consequent;
-        this.alternate = alternate;
-        this.loc = loc;
+    def('ConditionalExpression', function(test, consequent, alternate, loc) {
+      this.test = test;
+      this.consequent = consequent;
+      this.alternate = alternate;
+      return this.loc = loc;
     });
-
-    def('SequenceExpression', function (expressions, loc) {
-        this.expressions = expressions;
-        this.loc = loc;
+    def('SequenceExpression', function(expressions, loc) {
+      this.expressions = expressions;
+      return this.loc = loc;
     });
-
-    def('BinaryExpression', function (op, left, right, loc) {
-        this.operator = op;
-        this.left = left;
-        this.right = right;
-        this.loc = loc;
+    def('BinaryExpression', function(op, left, right, loc) {
+      this.operator = op;
+      this.left = left;
+      this.right = right;
+      return this.loc = loc;
     });
-
-    def('AssignmentExpression', function (op, left, right, loc) {
-        this.operator = op;
-        this.left = left;
-        this.right = right;
-        this.loc = loc;
-        convertExprToPattern(left);
+    def('AssignmentExpression', function(op, left, right, loc) {
+      this.operator = op;
+      this.left = left;
+      this.right = right;
+      this.loc = loc;
+      return convertExprToPattern(left);
     });
-
-    def('LogicalExpression', function (op, left, right, loc) {
-        this.operator = op;
-        this.left = left;
-        this.right = right;
-        this.loc = loc;
+    def('LogicalExpression', function(op, left, right, loc) {
+      this.operator = op;
+      this.left = left;
+      this.right = right;
+      return this.loc = loc;
     });
-
-    def('UnaryExpression', function (operator, argument, prefix, loc) {
-        this.operator = operator;
-        this.argument = argument;
-        this.prefix = prefix;
-        this.loc = loc;
+    def('UnaryExpression', function(operator, argument, prefix, loc) {
+      this.operator = operator;
+      this.argument = argument;
+      this.prefix = prefix;
+      return this.loc = loc;
     });
-
-
-    def('UpdateExpression', function (operator, argument, prefix, loc) {
-        this.operator = operator;
-        this.argument = argument;
-        this.prefix = prefix;
-        this.loc = loc;
+    def('UpdateExpression', function(operator, argument, prefix, loc) {
+      this.operator = operator;
+      this.argument = argument;
+      this.prefix = prefix;
+      return this.loc = loc;
     });
-
-    def('CallExpression', function (callee, args, loc) {
-        this.callee = callee;
-        this["arguments"] = args;
-        this.loc = loc;
+    def('CallExpression', function(callee, args, loc) {
+      this.callee = callee;
+      this["arguments"] = args;
+      return this.loc = loc;
     });
-
-
-    def('NewExpression', function (callee, args, loc) {
-        this.callee = callee;
-        this["arguments"] = args;
-        this.loc = loc;
+    def('NewExpression', function(callee, args, loc) {
+      this.callee = callee;
+      this["arguments"] = args;
+      return this.loc = loc;
     });
-
-
-    def('MemberExpression', function (object, property, computed, loc) {
-        this.object = object;
-        this.property = property;
-        this.computed = computed;
-        this.loc = loc;
+    def('MemberExpression', function(object, property, computed, loc) {
+      this.object = object;
+      this.property = property;
+      this.computed = computed;
+      return this.loc = loc;
     });
-
-// debugger node
     def('DebuggerStatement', defaultIni);
-
-// empty node
     def('Empty', defaultIni);
-
-// control structs
-
-    def('WhileStatement', function (test, body, loc) {
-        this.test = test;
-        this.body = body;
-        this.loc = loc;
+    def('WhileStatement', function(test, body, loc) {
+      this.test = test;
+      this.body = body;
+      return this.loc = loc;
     });
-
-    def('DoWhileStatement', function (body, test, loc) {
-        this.body = body;
-        this.test = test;
-        this.loc = loc;
+    def('DoWhileStatement', function(body, test, loc) {
+      this.body = body;
+      this.test = test;
+      return this.loc = loc;
     });
-
-    def('ForStatement', function (init, test, update, body, loc) {
-        this.init = init;
-        this.test = test;
-        this.update = update;
-        this.body = body;
-        this.loc = loc;
-        if (init) convertExprToPattern(init);
+    def('ForStatement', function(init, test, update, body, loc) {
+      this.init = init;
+      this.test = test;
+      this.update = update;
+      this.body = body;
+      this.loc = loc;
+      if (init) {
+        return convertExprToPattern(init);
+      }
     });
-
-    def('ForInStatement', function (left, right, body, each, loc) {
-        this.left = left;
-        this.right = right;
-        this.body = body;
-        this.each = !!each;
-        this.loc = loc;
-        convertExprToPattern(left);
+    def('ForInStatement', function(left, right, body, each, loc) {
+      this.left = left;
+      this.right = right;
+      this.body = body;
+      this.each = !!each;
+      this.loc = loc;
+      return convertExprToPattern(left);
     });
-
-    def('IfStatement', function (test, consequent, alternate, loc) {
-        this.test = test;
-        this.consequent = consequent;
-        this.alternate = alternate;
-        this.loc = loc;
+    def('IfStatement', function(test, consequent, alternate, loc) {
+      this.test = test;
+      this.consequent = consequent;
+      this.alternate = alternate;
+      return this.loc = loc;
     });
-
-    def('ObjectPattern', function (properties, loc) {
-        this.properties = properties;
-        this.loc = loc;
+    def('ObjectPattern', function(properties, loc) {
+      this.properties = properties;
+      return this.loc = loc;
     });
-
-    def('ArrayPattern', function (elements, loc) {
-        this.elements = elements;
-        this.loc = loc;
+    def('ArrayPattern', function(elements, loc) {
+      this.elements = elements;
+      return this.loc = loc;
     });
-
     return def;
-};
+  };
+
+}).call(this);
 
 },{}],3:[function(_dereq_,module,exports){
 (function (process){
