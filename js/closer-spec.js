@@ -1,32 +1,26 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.closerSpec=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var Closer, Parser, closer, con, defaultBuilder, nodes, oldParse, parser;
+  var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
 
   parser = _dereq_('./parser').parser;
 
   nodes = _dereq_('./nodes');
 
-  defaultBuilder = {};
+  builder = {};
 
-  nodes.defineNodes(defaultBuilder);
+  nodes.defineNodes(builder);
 
-  for (con in defaultBuilder) {
-    if (defaultBuilder.hasOwnProperty(con)) {
-      parser.yy[con] = (function(name) {
-        var context;
-        context = this;
-        return function(a, b, c, d, e, f, g, h) {
-          return context.builder[name](a, b, c, d, e, f, g, h);
-        };
-      })(con);
-    }
+  for (con in builder) {
+    parser.yy[con] = function(a, b, c, d, e, f, g, h) {
+      return builder[con](a, b, c, d, e, f, g, h);
+    };
   }
 
   parser.yy.Node = function(type, a, b, c, d, e, f, g, h) {
     var buildName;
     buildName = type[0].toLowerCase() + type.slice(1);
-    if (this.builder && this.builder[buildName]) {
-      return this.builder[buildName](a, b, c, d, e, f, g, h);
+    if (builder && buildName in builder) {
+      return builder[buildName](a, b, c, d, e, f, g, h);
     } else {
       throw new ReferenceError("no such node type: " + type);
     }
@@ -56,9 +50,6 @@
         column: loc.last_column
       }
     };
-    if (this.source || this.builder !== defaultBuilder) {
-      newLoc.source = this.source;
-    }
     return newLoc;
   };
 
@@ -81,7 +72,6 @@
       this.yy.source = options.source || null;
       this.yy.startLine = options.line || 1;
       this.yy.locations = options.locations;
-      this.yy.builder = options.builder || defaultBuilder;
     }
 
     return Parser;
@@ -106,7 +96,8 @@
   closer = {
     parse: function(src, options) {
       return new Closer(options).parse(src, options);
-    }
+    },
+    node: parser.yy.Node
   };
 
   module.exports = closer;
@@ -441,7 +432,13 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1: this.$ = yy.Node('Identifier', String($$[$0]), yy.loc(_$[$0])); 
 break;
-case 2: this.$ = yy.Node('Literal', parseNum($$[$0]), yy.loc(_$[$0]), yytext); 
+case 2:
+        this.$ = yy.Node('Literal', parseNum($$[$0]), yy.loc(_$[$0]), yytext);
+        if ($$[$0][0] === '-') {
+            this.$.value = -this.$.value;
+            this.$ = yy.Node('UnaryExpression', '-', this.$, true, yy.loc(_$[$0]))
+        }
+    
 break;
 case 3: this.$ = yy.Node('Literal', parseString($$[$0]), yy.loc(_$[$0]), yy.raw[yy.raw.length-1]); 
 break;
@@ -728,7 +725,7 @@ parse: function parse(input) {
 }};
 
 
-var ExpressionTypes = ['Literal', 'Identifier', 'CallExpression', 'FunctionExpression'];
+var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression'];
 
 function parseNum(num) {
     if (num[0] === '0') {
@@ -1098,52 +1095,56 @@ case 1:
 
 break;
 case 2:
+    return 6;
+
+break;
+case 3:
     yy_.yytext = yy_.yytext.substr(1, yy_.yyleng-2);
     return 7;
 
 break;
-case 3: /* ignore */ 
+case 4: /* ignore */ 
 break;
-case 4:return 13;
+case 5:return 13;
 break;
-case 5:return 15;
+case 6:return 15;
 break;
-case 6:return 17;
+case 7:return 17;
 break;
-case 7:return 19;
+case 8:return 19;
 break;
-case 8:return 20;
+case 9:return 20;
 break;
-case 9:return 33;
+case 10:return 33;
 break;
-case 10:return 23;
+case 11:return 23;
 break;
-case 11:return 24;
+case 12:return 24;
 break;
-case 12:return 26;
+case 13:return 26;
 break;
-case 13:return 30;
+case 14:return 30;
 break;
-case 14:return 42;
+case 15:return 42;
 break;
-case 15:return 39;
+case 16:return 39;
 break;
-case 16:return 8;
+case 17:return 8;
 break;
-case 17:return 9;
+case 18:return 9;
 break;
-case 18:return 10;
+case 19:return 10;
 break;
-case 19:
+case 20:
     return 4;
 
 break;
-case 20:console.log(yy_.yytext);
+case 21:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:([\s]+))/,/^(?:([0-9]+))/,/^(?:("([^\"\\]|\\[\'\"\\bfnrt])+"))/,/^(?:(;[^\r\n]*))/,/^(?:&)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:def)/,/^(?:fn)/,/^(?:defn)/,/^(?:if)/,/^(?:when)/,/^(?:do)/,/^(?:let)/,/^(?:true)/,/^(?:false)/,/^(?:nil)/,/^(?:([0-9a-zA-Z*+!\-_=<>?/.:]+))/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"inclusive":true}}
+rules: [/^(?:([\s]+))/,/^(?:([-+]?[0-9]|[1-9][0-9]+))/,/^(?:([-+]?[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?))/,/^(?:("([^\"\\]|\\[\'\"\\bfnrt])+"))/,/^(?:(;[^\r\n]*))/,/^(?:&)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:def)/,/^(?:fn)/,/^(?:defn)/,/^(?:if)/,/^(?:when)/,/^(?:do)/,/^(?:let)/,/^(?:true)/,/^(?:false)/,/^(?:nil)/,/^(?:([a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.:]*))/,/^(?:.)/],
+conditions: {"regex":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],"inclusive":true},"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],"inclusive":true}}
 };
 return lexer;
 })();
@@ -1188,6 +1189,15 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     return {
       type: 'Identifier',
       name: name
+    };
+  };
+
+  exports.UnaryExpression = function(operator, argument) {
+    return {
+      type: 'UnaryExpression',
+      operator: operator,
+      argument: argument,
+      prefix: true
     };
   };
 
@@ -1288,7 +1298,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{}],5:[function(_dereq_,module,exports){
 (function() {
-  var BlockStatement, CallExpression, EmptyStatement, ExpressionStatement, FunctionDeclaration, FunctionExpression, Identifier, IfStatement, Literal, Program, ReturnStatement, VariableDeclaration, VariableDeclarator, closer, helpers, json_diff;
+  var BlockStatement, CallExpression, EmptyStatement, ExpressionStatement, FunctionDeclaration, FunctionExpression, Identifier, IfStatement, Literal, Program, ReturnStatement, UnaryExpression, VariableDeclaration, VariableDeclarator, closer, helpers, json_diff;
 
   closer = _dereq_('../closer');
 
@@ -1299,6 +1309,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
   Literal = helpers.Literal;
 
   Identifier = helpers.Identifier;
+
+  UnaryExpression = helpers.UnaryExpression;
 
   CallExpression = helpers.CallExpression;
 
@@ -1333,74 +1345,74 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
   });
 
-  describe('Closer.js', function() {
-    it('correctly parses an empty program', function() {
+  describe('Closer parser', function() {
+    it('parses an empty program', function() {
       return expect(closer.parse('\n')).toDeepEqual(Program());
     });
-    it('correctly parses an empty s-expression', function() {
+    it('parses an empty s-expression', function() {
       return expect(closer.parse('()\n')).toDeepEqual(Program(EmptyStatement()));
     });
-    it('correctly parses comments', function() {
+    it('parses comments', function() {
       return expect(closer.parse('; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r')).toDeepEqual(Program(EmptyStatement()));
     });
-    it('correctly parses an identifier', function() {
+    it('parses an identifier', function() {
       return expect(closer.parse('x\n')).toDeepEqual(Program(ExpressionStatement(Identifier('x'))));
     });
-    it('correctly parses integer, string, boolean, and nil literals', function() {
-      return expect(closer.parse('24\n\"string\"\ntrue\nfalse\nnil\n')).toDeepEqual(Program(ExpressionStatement(Literal(24)), ExpressionStatement(Literal('string')), ExpressionStatement(Literal(true)), ExpressionStatement(Literal(false)), ExpressionStatement(Literal(null))));
+    it('parses integer, float, string, boolean, and nil literals', function() {
+      return expect(closer.parse('-24\n-23.67\n-22.45E-5\n\"string\"\ntrue\nfalse\nnil\n')).toDeepEqual(Program(ExpressionStatement(UnaryExpression('-', Literal(24))), ExpressionStatement(UnaryExpression('-', Literal(23.67))), ExpressionStatement(UnaryExpression('-', Literal(22.45e-5))), ExpressionStatement(Literal('string')), ExpressionStatement(Literal(true)), ExpressionStatement(Literal(false)), ExpressionStatement(Literal(null))));
     });
-    it('correctly parses a function call with 0 arguments', function() {
+    it('parses a function call with 0 arguments', function() {
       return expect(closer.parse('(fn-name)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('fn-name')))));
     });
-    it('correctly parses a function call with > 0 arguments', function() {
+    it('parses a function call with > 0 arguments', function() {
       return expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('fn-name'), [Identifier('arg1'), Identifier('arg2')]))));
     });
-    it('correctly parses an anonymous function definition', function() {
+    it('parses an anonymous function definition', function() {
       return expect(closer.parse('(fn [x] x)\n')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))))));
     });
-    it('correctly parses an anonymous function call', function() {
+    it('parses an anonymous function call', function() {
       return expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))), [Literal(2)]))));
     });
-    it('correctly parses a named function definition', function() {
+    it('parses a named function definition', function() {
       return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('fn-name'), [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))));
     });
-    it('correctly parses rest arguments', function() {
+    it('parses rest arguments', function() {
       return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('avg'), [], Identifier('rest'), BlockStatement(ReturnStatement(CallExpression(Identifier('/'), [CallExpression(Identifier('apply'), [Identifier('+'), Identifier('rest')]), CallExpression(Identifier('count'), [Identifier('rest')])]))))));
     });
-    it('correctly parses an if statement without else', function() {
+    it('parses an if statement without else', function() {
       return expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('>='), [Identifier('x'), Literal(0)]), ExpressionStatement(Identifier('x')), null)));
     });
-    it('correctly parses an if-else statement', function() {
+    it('parses an if-else statement', function() {
       return expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('>='), [Identifier('x'), Literal(0)]), ExpressionStatement(Identifier('x')), ExpressionStatement(CallExpression(Identifier('-'), [Identifier('x')])))));
     });
-    it('correctly parses a when form', function() {
+    it('parses a when form', function() {
       return expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('condition?')), BlockStatement(ExpressionStatement(CallExpression(Identifier('println'), [Literal('hello')])), ExpressionStatement(Literal(true))))));
     });
-    it('correctly parses an unbound var definition', function() {
+    it('parses an unbound var definition', function() {
       return expect(closer.parse('(def var-name)')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('var-name'), null))));
     });
-    it('correctly parses a var bound to a literal', function() {
+    it('parses a var bound to a literal', function() {
       return expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('greeting'), Literal('Hello')))));
     });
-    it('correctly parses a var bound to the result of an expression', function() {
+    it('parses a var bound to the result of an expression', function() {
       return expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('sum'), CallExpression(Identifier('+'), [Literal(3), Literal(5)])))));
     });
-    it('correctly parses a var bound to an fn form', function() {
+    it('parses a var bound to an fn form', function() {
       return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('add'), FunctionExpression(null, [], Identifier('numbers'), BlockStatement(ReturnStatement(CallExpression(Identifier('apply'), [Identifier('+'), Identifier('numbers')]))))))));
     });
-    it('correctly parses a let form with no bindings and no body', function() {
+    it('parses a let form with no bindings and no body', function() {
       return expect(closer.parse('(let [])')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Literal(null)))));
     });
-    it('correctly parses a let form with non-empty bindings and a non-empty body', function() {
+    it('parses a let form with non-empty bindings and a non-empty body', function() {
       return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(BlockStatement(VariableDeclaration('let', VariableDeclarator(Identifier('x'), Literal(3))), VariableDeclaration('let', VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ExpressionStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))));
     });
-    it('correctly parses an empty do form', function() {
+    it('parses an empty do form', function() {
       return expect(closer.parse('(do)')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Literal(null)))));
     });
-    it('correctly parses a non-empty do form', function() {
+    it('parses a non-empty do form', function() {
       return expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual(Program(BlockStatement(ExpressionStatement(CallExpression(Identifier('+'), [Literal(1), Literal(2)])), ExpressionStatement(CallExpression(Identifier('+'), [Literal(3), Literal(4)])))));
     });
-    return xit('correctly parses source locations');
+    return xit('parses source locations');
   });
 
 }).call(this);
