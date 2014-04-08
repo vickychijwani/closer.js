@@ -39,6 +39,12 @@
       return _.reduce(args.slice(1), (function(quo, num) {
         return quo / num;
       }), args[0]);
+    },
+    'inc': function(num) {
+      return ++num;
+    },
+    'dec': function(num) {
+      return --num;
     }
   };
 
@@ -1306,6 +1312,16 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       });
       return it('divides numbers', function() {
         return assertAlmostEqual('(/ 14 -2 -3)', 14 / 6);
+      });
+    });
+    describe('inc', function() {
+      return it('increments a number', function() {
+        return assertAlmostEqual('(inc -2e-3)', 0.998);
+      });
+    });
+    return describe('dec', function() {
+      return it('decrements a number', function() {
+        return assertAlmostEqual('(dec -2e-3)', -1.002);
       });
     });
   });

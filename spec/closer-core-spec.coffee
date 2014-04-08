@@ -33,3 +33,11 @@ describe 'Closer core library', ->
       assertAlmostEqual '(/ -3.34)', -1/3.34
     it 'divides numbers', ->
       assertAlmostEqual '(/ 14 -2 -3)', 14/6
+
+  describe 'inc', ->
+    it 'increments a number', ->
+      assertAlmostEqual '(inc -2e-3)', 0.998
+
+  describe 'dec', ->
+    it 'decrements a number', ->
+      assertAlmostEqual '(dec -2e-3)', -1.002

@@ -17,4 +17,11 @@ core =
     args.unshift(1) if args.length is 1
     _.reduce args.slice(1), ((quo, num) -> quo / num), args[0]
 
+  'inc': (num) ->
+    ++num
+
+  'dec': (num) ->
+    --num
+
+
 module.exports = core
