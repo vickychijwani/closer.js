@@ -8,7 +8,13 @@ Identifier
   ;
 
 Atom
-  : NUMBER { $$ = yy.Node('Literal', parseNum($1), yy.loc(@1), yytext); }
+  : NUMBER {
+        $$ = yy.Node('Literal', parseNum($1), yy.loc(@1), yytext);
+        if ($1[0] === '-') {
+            $$.value = -$$.value;
+            $$ = yy.Node('UnaryExpression', '-', $$, true, yy.loc(@1))
+        }
+    }
   | STRING { $$ = yy.Node('Literal', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
   | Identifier
   | 'true' { $$ = yy.Node('Literal', true, yy.loc(@1), yytext); }
@@ -184,7 +190,7 @@ Program
 
 %%
 
-var ExpressionTypes = ['Literal', 'Identifier', 'CallExpression', 'FunctionExpression'];
+var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression'];
 
 function parseNum(num) {
     if (num[0] === '0') {

@@ -4,6 +4,7 @@ json_diff = require 'json-diff'
 helpers = require './closer-helpers'
 Literal = helpers.Literal
 Identifier = helpers.Identifier
+UnaryExpression = helpers.UnaryExpression
 CallExpression = helpers.CallExpression
 FunctionExpression = helpers.FunctionExpression
 EmptyStatement = helpers.EmptyStatement
@@ -42,8 +43,10 @@ describe 'Closer.js', ->
       ExpressionStatement(Identifier('x')))
 
   it 'correctly parses integer, string, boolean, and nil literals', ->
-    expect(closer.parse('24\n\"string\"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
-      ExpressionStatement(Literal(24)),
+    expect(closer.parse('-24\n-23.67\n-22.45E-5\n\"string\"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
+      ExpressionStatement(UnaryExpression('-', Literal(24))),
+      ExpressionStatement(UnaryExpression('-', Literal(23.67))),
+      ExpressionStatement(UnaryExpression('-', Literal(22.45e-5))),
       ExpressionStatement(Literal('string')),
       ExpressionStatement(Literal(true)),
       ExpressionStatement(Literal(false)),

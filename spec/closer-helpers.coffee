@@ -6,6 +6,12 @@ exports.Identifier = (name) ->
   type: 'Identifier'
   name: name
 
+exports.UnaryExpression = (operator, argument) ->
+  type: 'UnaryExpression'
+  operator: operator
+  argument: argument
+  prefix: true
+
 exports.CallExpression = (callee, args) ->
   type: 'CallExpression'
   callee: callee

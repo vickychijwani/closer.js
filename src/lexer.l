@@ -1,8 +1,11 @@
 WHITESPACE      [\s]+
-NUMBER          [0-9]+
+INTEGER         [-+]?[0-9]|[1-9][0-9]+
+FLOAT           [-+]?[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])+\"
-IDENTIFIER      [0-9a-zA-Z*+!\-_=<>?/.:]+
+IDENTIFIER      [a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.:]*
 COMMENT         \;[^\r\n]*
+
+%s regex
 
 %options flex
 
@@ -10,7 +13,11 @@ COMMENT         \;[^\r\n]*
 
 {WHITESPACE}  /* whitespace */;
 
-{NUMBER} %{
+{INTEGER} %{
+    return 'NUMBER';
+%}
+
+{FLOAT} %{
     return 'NUMBER';
 %}
 
