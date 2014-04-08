@@ -41,3 +41,11 @@ describe 'Closer core library', ->
   describe 'dec', ->
     it 'decrements a number', ->
       assertAlmostEqual '(dec -2e-3)', -1.002
+
+  describe 'max', ->
+    it 'finds the maximum of the given numbers', ->
+      assertAlmostEqual '(max -1e10 653.32 1.345e4)', 1.345e4
+
+  describe 'min', ->
+    it 'finds the minimum of the given numbers', ->
+      assertAlmostEqual '(min -1e10 653.32 1.345e4)', -1e10

@@ -7,44 +7,54 @@
 
   core = {
     '+': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return _.reduce(args, (function(sum, num) {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.reduce(nums, (function(sum, num) {
         return sum + num;
       }), 0);
     },
     '-': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (args.length === 1) {
-        args.unshift(0);
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (nums.length === 1) {
+        nums.unshift(0);
       }
-      return _.reduce(args.slice(1), (function(diff, num) {
+      return _.reduce(nums.slice(1), (function(diff, num) {
         return diff - num;
-      }), args[0]);
+      }), nums[0]);
     },
     '*': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return _.reduce(args, (function(prod, num) {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.reduce(nums, (function(prod, num) {
         return prod * num;
       }), 1);
     },
     '/': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (args.length === 1) {
-        args.unshift(1);
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (nums.length === 1) {
+        nums.unshift(1);
       }
-      return _.reduce(args.slice(1), (function(quo, num) {
+      return _.reduce(nums.slice(1), (function(quo, num) {
         return quo / num;
-      }), args[0]);
+      }), nums[0]);
     },
     'inc': function(num) {
       return ++num;
     },
     'dec': function(num) {
       return --num;
+    },
+    'max': function() {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.max(nums);
+    },
+    'min': function() {
+      var nums;
+      nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _.min(nums);
     }
   };
 
