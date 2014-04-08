@@ -11,7 +11,7 @@ describe 'Closer core library', ->
 
   # arithmetic
   describe '+', ->
-    it 'handles 0 arguments', ->
+    it 'returns 0 when given no arguments', ->
       assertEqual '(+)', 0
     it 'adds numbers', ->
       assertAlmostEqual '(+ 3.3 0 -6e2 2)', -594.7
@@ -23,7 +23,7 @@ describe 'Closer core library', ->
       assertAlmostEqual '(- 10 3.5 -4)', 10.5
 
   describe '*', ->
-    it 'handles 0 arguments', ->
+    it 'returns 1 when given no arguments', ->
       assertEqual '(*)', 1
     it 'multiplies numbers', ->
       assertAlmostEqual '(* 3 -6.1)', -18.3
