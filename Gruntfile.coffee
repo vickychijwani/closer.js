@@ -10,7 +10,8 @@ module.exports = (grunt) ->
 
       browserify:
         command: 'browserify -s <%= pkg.name %> lib/<%= pkg.name %>.js > demo/js/<%= pkg.name %>.js;
-          browserify -s <%= pkg.name %>-spec lib/spec/<%= pkg.name %>-spec.js > demo/js/<%= pkg.name %>-spec.js;'
+          browserify -s <%= pkg.name %>-spec lib/spec/<%= pkg.name %>-spec.js > demo/js/<%= pkg.name %>-spec.js;
+          cp demo/js/<%= pkg.name %>.js dist/<%= pkg.name %>.js'
         options:
           failOnError: true
 
