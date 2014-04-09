@@ -49,3 +49,24 @@ describe 'Closer core library', ->
   describe 'min', ->
     it 'finds the minimum of the given numbers', ->
       assertAlmostEqual '(min -1e10 653.32 1.345e4)', -1e10
+
+  describe 'quot', ->
+    it 'computes the quotient of a division', ->
+      assertEqual '(quot 10 3)', 3
+      assertEqual '(quot -5.9 3)', -1.0
+      assertEqual '(quot -10 -3)', 3
+      assertEqual '(quot 10 -3)', -3
+
+  describe 'rem', ->
+    it 'computes the remainder of a division (same as % in other languages)', ->
+      assertEqual '(rem 10 3)', 1
+      assertEqual '(rem -10 3)', -1
+      assertEqual '(rem -10 -3)', -1
+      assertEqual '(rem 10 -3)', 1
+
+  describe 'mod', ->
+    it 'computes the modulus of a division (NOT the same as % in other languages)', ->
+      assertEqual '(mod 10 3)', 1
+      assertEqual '(mod -10 3)', 2
+      assertEqual '(mod -10 -3)', -1
+      assertEqual '(mod 10 -3)', -2
