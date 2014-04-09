@@ -11,27 +11,23 @@ describe 'Closer core library', ->
 
   # arithmetic
   describe '+', ->
-    it 'returns 0 when given no arguments', ->
-      assertEqual '(+)', 0
     it 'adds numbers', ->
+      assertEqual '(+)', 0
       assertAlmostEqual '(+ 3.3 0 -6e2 2)', -594.7
 
   describe '-', ->
-    it 'negates a single number', ->
-      assertAlmostEqual '(- -3.54)', 3.54
     it 'subtracts numbers', ->
+      assertAlmostEqual '(- -3.54)', 3.54
       assertAlmostEqual '(- 10 3.5 -4)', 10.5
 
   describe '*', ->
-    it 'returns 1 when given no arguments', ->
-      assertEqual '(*)', 1
     it 'multiplies numbers', ->
+      assertEqual '(*)', 1
       assertAlmostEqual '(* 3 -6.1)', -18.3
 
   describe '/', ->
-    it 'inverts a single number', ->
-      assertAlmostEqual '(/ -3.34)', -1/3.34
     it 'divides numbers', ->
+      assertAlmostEqual '(/ -3.34)', -1/3.34
       assertAlmostEqual '(/ 14 -2 -3)', 14/6
 
   describe 'inc', ->
