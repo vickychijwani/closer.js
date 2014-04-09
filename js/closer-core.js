@@ -1,9 +1,13 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.closerCore=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var core, _,
+  var core, sameSign, _,
     __slice = [].slice;
 
   _ = _dereq_('lodash-node');
+
+  sameSign = function(num1, num2) {
+    return num1 > 0 && num2 > 0 || num1 < 0 && num2 < 0;
+  };
 
   core = {
     '+': function() {
@@ -55,6 +59,23 @@
       var nums;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return _.min(nums);
+    },
+    'quot': function(num, div) {
+      var sign;
+      sign = sameSign(num, div) ? 1 : -1;
+      return sign * Math.floor(Math.abs(num / div));
+    },
+    'rem': function(num, div) {
+      return num % div;
+    },
+    'mod': function(num, div) {
+      var rem;
+      rem = core.rem(num, div);
+      if (rem === 0 || sameSign(num, div)) {
+        return rem;
+      } else {
+        return rem + div;
+      }
     }
   };
 
