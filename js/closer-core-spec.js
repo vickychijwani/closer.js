@@ -1314,34 +1314,26 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
   describe('Closer core library', function() {
     describe('+', function() {
-      it('returns 0 when given no arguments', function() {
-        return assertEqual('(+)', 0);
-      });
       return it('adds numbers', function() {
+        assertEqual('(+)', 0);
         return assertAlmostEqual('(+ 3.3 0 -6e2 2)', -594.7);
       });
     });
     describe('-', function() {
-      it('negates a single number', function() {
-        return assertAlmostEqual('(- -3.54)', 3.54);
-      });
       return it('subtracts numbers', function() {
+        assertAlmostEqual('(- -3.54)', 3.54);
         return assertAlmostEqual('(- 10 3.5 -4)', 10.5);
       });
     });
     describe('*', function() {
-      it('returns 1 when given no arguments', function() {
-        return assertEqual('(*)', 1);
-      });
       return it('multiplies numbers', function() {
+        assertEqual('(*)', 1);
         return assertAlmostEqual('(* 3 -6.1)', -18.3);
       });
     });
     describe('/', function() {
-      it('inverts a single number', function() {
-        return assertAlmostEqual('(/ -3.34)', -1 / 3.34);
-      });
       return it('divides numbers', function() {
+        assertAlmostEqual('(/ -3.34)', -1 / 3.34);
         return assertAlmostEqual('(/ 14 -2 -3)', 14 / 6);
       });
     });
