@@ -17,10 +17,6 @@
     "type": "git",
     "url": "http://github.com/vickychijwani/closer.js"
   },
-  "scripts": {
-    "pretest": "jison src/grammar.y src/lexer.l -o src/parser.js",
-    "test": "jasmine-node spec --noStack --noColor --verbose"
-  },
   "keywords": [
     "parser",
     "parse",
