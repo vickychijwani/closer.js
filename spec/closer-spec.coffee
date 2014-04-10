@@ -2,7 +2,11 @@ closer = require '../closer'
 json_diff = require 'json-diff'
 
 helpers = require './closer-helpers'
-Literal = helpers.Literal
+Integer = helpers['Integer']
+Float = helpers['Float']
+String = helpers['String']
+Boolean = helpers['Boolean']
+Nil = helpers['Nil']
 Identifier = helpers.Identifier
 UnaryExpression = helpers.UnaryExpression
 CallExpression = helpers.CallExpression
@@ -18,10 +22,7 @@ BlockStatement = helpers.BlockStatement
 Program = helpers.Program
 
 beforeEach ->
-  @addMatchers toDeepEqual: (expected) ->
-    @message = ->
-      'actual != expected, diff is:\n' + json_diff.diffString(@actual, expected)
-    typeof json_diff.diff(@actual, expected) is 'undefined'
+  @addMatchers toDeepEqual: helpers.toDeepEqual
 
 
 describe 'Closer parser', ->
@@ -44,13 +45,13 @@ describe 'Closer parser', ->
 
   it 'parses integer, float, string, boolean, and nil literals', ->
     expect(closer.parse('-24\n-23.67\n-22.45E-5\n\"string\"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
-      ExpressionStatement(UnaryExpression('-', Literal(24))),
-      ExpressionStatement(UnaryExpression('-', Literal(23.67))),
-      ExpressionStatement(UnaryExpression('-', Literal(22.45e-5))),
-      ExpressionStatement(Literal('string')),
-      ExpressionStatement(Literal(true)),
-      ExpressionStatement(Literal(false)),
-      ExpressionStatement(Literal(null)))
+      ExpressionStatement(Integer(UnaryExpression('-', 24))),
+      ExpressionStatement(Float(UnaryExpression('-', 23.67))),
+      ExpressionStatement(Float(UnaryExpression('-', 22.45e-5))),
+      ExpressionStatement(String('string')),
+      ExpressionStatement(Boolean(true)),
+      ExpressionStatement(Boolean(false)),
+      ExpressionStatement(Nil()))
 
 
   # functions
@@ -86,7 +87,7 @@ describe 'Closer parser', ->
             null,
             BlockStatement(
               ReturnStatement(Identifier('x')))),
-          [Literal(2)])))
+          [Integer(2)])))
 
   it 'parses a named function definition', ->
     expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
@@ -119,7 +120,7 @@ describe 'Closer parser', ->
       IfStatement(
         CallExpression(
           Identifier('>='),
-          [Identifier('x'), Literal(0)]),
+          [Identifier('x'), Integer(0)]),
         ExpressionStatement(Identifier('x')),
         null))
 
@@ -128,7 +129,7 @@ describe 'Closer parser', ->
       IfStatement(
         CallExpression(
           Identifier('>='),
-          [Identifier('x'), Literal(0)]),
+          [Identifier('x'), Integer(0)]),
         ExpressionStatement(Identifier('x')),
         ExpressionStatement(
           CallExpression(
@@ -142,8 +143,8 @@ describe 'Closer parser', ->
         BlockStatement(
           ExpressionStatement(CallExpression(
             Identifier('println'),
-            [Literal('hello')])),
-          ExpressionStatement(Literal(true)))))
+            [String('hello')])),
+          ExpressionStatement(Boolean(true)))))
 
 
   # variables
@@ -161,7 +162,7 @@ describe 'Closer parser', ->
         'var',
         VariableDeclarator(
           Identifier('greeting'),
-          Literal('Hello'))))
+          String('Hello'))))
 
   it 'parses a var bound to the result of an expression', ->
     expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual Program(
@@ -171,7 +172,7 @@ describe 'Closer parser', ->
           Identifier('sum'),
           CallExpression(
             Identifier('+'),
-            [Literal(3), Literal(5)]))))
+            [Integer(3), Integer(5)]))))
 
   it 'parses a var bound to an fn form', ->
     expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual Program(
@@ -190,7 +191,7 @@ describe 'Closer parser', ->
 
   it 'parses a let form with no bindings and no body', ->
     expect(closer.parse('(let [])')).toDeepEqual Program(
-      BlockStatement(ExpressionStatement(Literal(null))))
+      BlockStatement(ExpressionStatement(Nil())))
 
   it 'parses a let form with non-empty bindings and a non-empty body', ->
     expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual Program(
@@ -199,7 +200,7 @@ describe 'Closer parser', ->
           'let',
           VariableDeclarator(
             Identifier('x'),
-            Literal(3))),
+            Integer(3))),
         VariableDeclaration(
           'let',
           VariableDeclarator(
@@ -215,17 +216,17 @@ describe 'Closer parser', ->
   # other special forms
   it 'parses an empty do form', ->
     expect(closer.parse('(do)')).toDeepEqual Program(
-      BlockStatement(ExpressionStatement(Literal(null))))
+      BlockStatement(ExpressionStatement(Nil())))
 
   it 'parses a non-empty do form', ->
     expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual Program(
       BlockStatement(
         ExpressionStatement(CallExpression(
           Identifier('+'),
-          [Literal(1), Literal(2)])),
+          [Integer(1), Integer(2)])),
         ExpressionStatement(CallExpression(
           Identifier('+'),
-          [Literal(3), Literal(4)]))))
+          [Integer(3), Integer(4)]))))
 
 
   # pending

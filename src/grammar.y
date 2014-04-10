@@ -8,18 +8,30 @@ Identifier
   ;
 
 Atom
-  : NUMBER {
-        $$ = yy.Node('Literal', parseNum($1), yy.loc(@1), yytext);
+  : INTEGER {
+        // TODO refactor common code for integer and float handling
         if ($1[0] === '-') {
-            $$.value = -$$.value;
-            $$ = yy.Node('UnaryExpression', '-', $$, true, yy.loc(@1))
+            $$ = yy.Node('Literal', 'Integer', -parseNum($1), yy.loc(@1), yytext);
+            var literal = $$.properties[1].value
+            $$.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(@1));
+        } else {
+            $$ = yy.Node('Literal', 'Integer', parseNum($1), yy.loc(@1), yytext);
         }
     }
-  | STRING { $$ = yy.Node('Literal', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
+  | FLOAT {
+        if ($1[0] === '-') {
+            $$ = yy.Node('Literal', 'Float', -parseNum($1), yy.loc(@1), yytext);
+            var literal = $$.properties[1].value
+            $$.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(@1));
+        } else {
+            $$ = yy.Node('Literal', 'Float', parseNum($1), yy.loc(@1), yytext);
+        }
+  }
+  | STRING { $$ = yy.Node('Literal', 'String', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
   | Identifier
-  | 'true' { $$ = yy.Node('Literal', true, yy.loc(@1), yytext); }
-  | 'false' { $$ = yy.Node('Literal', false, yy.loc(@1), yytext); }
-  | 'nil' { $$ = yy.Node('Literal', null, yy.loc(@1), yytext); }
+  | 'true' { $$ = yy.Node('Literal', 'Boolean', true, yy.loc(@1), yytext); }
+  | 'false' { $$ = yy.Node('Literal', 'Boolean', false, yy.loc(@1), yytext); }
+  | 'nil' { $$ = yy.Node('Literal', 'Nil', null, yy.loc(@1), yytext); }
   ;
 
 IdentifierList
@@ -148,7 +160,7 @@ DoForm
   : NonEmptyDoForm
   | {
         // do forms evaluate to nil if the body is empty
-        nilNode = yy.Node('Literal', null, yy.loc(@1), yytext);
+        nilNode = yy.Node('Literal', 'Nil', null, yy.loc(@1), yytext);
         $$ = [yy.Node('ExpressionStatement', nilNode, nilNode.loc)];
     }
   ;
@@ -190,7 +202,8 @@ Program
 
 %%
 
-var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression'];
+var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
+    'ObjectExpression'];
 
 function parseNum(num) {
     if (num[0] === '0') {

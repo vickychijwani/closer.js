@@ -31,7 +31,7 @@ module.exports = (grunt) ->
         forceExit: true
 
     watch:
-      files: ['src/lexer.l', 'src/grammar.y', 'src/nodes.coffee', 'src/<%= pkg.name %>.coffee', 'src/<%= pkg.name %>-core.coffee', 'spec/**/*.coffee']
+      files: ['src/lexer.l', 'src/grammar.y', 'src/**/*.coffee', 'spec/**/*.coffee']
       tasks: ['coffeelint', 'coffee', 'shell:jison', 'jasmine_node', 'shell:browserify']
       options:
         spawn: true

@@ -1,6 +1,6 @@
 WHITESPACE      [\s]+
-INTEGER         [-+]?[0-9]|[1-9][0-9]+
-FLOAT           [-+]?[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?
+INTEGER         [-+]?([1-9][0-9]+|[0-9])
+FLOAT           [-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])+\"
 IDENTIFIER      [a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.:]*
 COMMENT         \;[^\r\n]*
@@ -11,14 +11,16 @@ COMMENT         \;[^\r\n]*
 
 %%
 
+/* %options flex = match *longest* token instead of using the first matching rule */
+
 {WHITESPACE}  /* whitespace */;
 
 {INTEGER} %{
-    return 'NUMBER';
+    return 'INTEGER';
 %}
 
 {FLOAT} %{
-    return 'NUMBER';
+    return 'FLOAT';
 %}
 
 {STRING} %{

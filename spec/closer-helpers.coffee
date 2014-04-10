@@ -1,6 +1,45 @@
-exports.Literal = (value) ->
-  type: 'Literal'
-  value: value
+json_diff = require 'json-diff'
+
+# custom matcher to deep-compare objects
+exports.toDeepEqual = (expected) ->
+  @message = ->
+    'actual != expected, diff is:\n' + json_diff.diffString(@actual, expected)
+  typeof json_diff.diff(@actual, expected) is 'undefined'
+
+types = require('../closer-types').typeNames
+
+for type in types
+  exports[type] = ((type2) ->
+    (value) ->
+      value = if type2 is 'Nil' then null else value
+      if value?.type is 'UnaryExpression'
+        value.argument =
+          type: 'Literal'
+          value: value.argument
+        valueProp = value
+      else
+        valueProp =
+          type: 'Literal'
+          value: value
+      type: 'ObjectExpression'
+      properties: [{
+        type: 'Property'
+        kind: 'init'
+        key:
+          type: 'Identifier'
+          name: 'type'
+        value:
+          type: 'Literal'
+          value: type2
+      }, {
+        type: 'Property'
+        kind: 'init'
+        key:
+          type: 'Literal'
+          value: 'value'
+        value: valueProp
+      }]
+  )(type)
 
 exports.Identifier = (name) ->
   type: 'Identifier'
