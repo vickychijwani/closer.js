@@ -10,10 +10,10 @@ Identifier
 Atom
   : INTEGER { $$ = parseNumLiteral('Integer', $1, @1, yy, yytext); }
   | FLOAT { $$ = parseNumLiteral('Float', $1, @1, yy, yytext); }
-  | STRING { $$ = yy.Node('Literal', 'String', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
-  | 'true' { $$ = yy.Node('Literal', 'Boolean', true, yy.loc(@1), yytext); }
-  | 'false' { $$ = yy.Node('Literal', 'Boolean', false, yy.loc(@1), yytext); }
-  | 'nil' { $$ = yy.Node('Literal', 'Nil', null, yy.loc(@1), yytext); }
+  | STRING { $$ = parseLiteral('String', parseString($1), @1, yy.raw[yy.raw.length-1], yy); }
+  | 'true' { $$ = parseLiteral('Boolean', true, @1, yytext, yy); }
+  | 'false' { $$ = parseLiteral('Boolean', false, @1, yytext, yy); }
+  | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
   | Identifier
   ;
 
@@ -139,7 +139,7 @@ DoForm
   : NonEmptyDoForm
   | {
         // do forms evaluate to nil if the body is empty
-        nilNode = yy.Node('Literal', 'Nil', null, yy.loc(@1), yytext);
+        nilNode = parseLiteral('Nil', null, @1, yytext, yy);
         $$ = [yy.Node('ExpressionStatement', nilNode, nilNode.loc)];
     }
   ;
@@ -187,13 +187,31 @@ var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpressi
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;
     if (token[0] === '-') {
-        node = yy.Node('Literal', type, -parseNum(token), yy.loc(loc), yytext);
+        node = parseLiteral(type, -parseNum(token), loc, yytext, yy);
         var literal = node.properties[1].value
         node.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(loc));
     } else {
-        node = yy.Node('Literal', type, parseNum(token), yy.loc(loc), yytext);
+        node = parseLiteral(type, parseNum(token), loc, yytext, yy);
     }
     return node;
+}
+
+function parseLiteral(type, value, loc, raw, yy) {
+    loc = yy.loc(loc);
+    return yy.Node('ObjectExpression', [
+        yy.Node(
+            'Property',
+            yy.Node('Identifier', 'type', loc),
+            yy.Node('Literal', type, loc, "\"" + type + "\""),
+            'init', loc
+        ),
+        yy.Node(
+            'Property',
+            yy.Node('Identifier', 'value', loc),
+            yy.Node('Literal', value, loc, raw),
+            'init', loc
+        )
+    ], loc);
 }
 
 function parseNum(num) {

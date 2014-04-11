@@ -41,21 +41,9 @@ exports.defineNodes = (builder) ->
     @name = name
     @loc = loc
 
-  def 'Literal', (type, val, loc, raw) ->
-    # TODO refactor this ugliness! Move it to the grammar file!
-    @type = 'ObjectExpression'
-    @properties = [
-      builder['property'](
-        { type: 'Identifier', name: 'type' },
-        { type: 'Literal', value: type },
-        'init', loc
-      ),
-      builder['property'](
-        { type: 'Literal', value: 'value' },
-        { type: 'Literal', value: val },
-        'init', loc
-      )
-    ]
+  def 'Literal', (value, loc, raw) ->
+    @value = value
+    # @raw = raw if raw
     @loc = loc
 
   def 'ThisExpression', defaultIni

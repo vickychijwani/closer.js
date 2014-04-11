@@ -35,8 +35,8 @@ for type in types
         type: 'Property'
         kind: 'init'
         key:
-          type: 'Literal'
-          value: 'value'
+          type: 'Identifier'
+          name: 'value'
         value: valueProp
       }]
   )(type)
