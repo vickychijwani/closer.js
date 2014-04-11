@@ -229,23 +229,8 @@
       this.name = name;
       return this.loc = loc;
     });
-    def('Literal', function(type, val, loc, raw) {
-      this.type = 'ObjectExpression';
-      this.properties = [
-        builder['property']({
-          type: 'Identifier',
-          name: 'type'
-        }, {
-          type: 'Literal',
-          value: type
-        }, 'init', loc), builder['property']({
-          type: 'Literal',
-          value: 'value'
-        }, {
-          type: 'Literal',
-          value: val
-        }, 'init', loc)
-      ];
+    def('Literal', function(value, loc, raw) {
+      this.value = value;
       return this.loc = loc;
     });
     def('ThisExpression', defaultIni);
@@ -533,13 +518,13 @@ case 2: this.$ = parseNumLiteral('Integer', $$[$0], _$[$0], yy, yytext);
 break;
 case 3: this.$ = parseNumLiteral('Float', $$[$0], _$[$0], yy, yytext); 
 break;
-case 4: this.$ = yy.Node('Literal', 'String', parseString($$[$0]), yy.loc(_$[$0]), yy.raw[yy.raw.length-1]); 
+case 4: this.$ = parseLiteral('String', parseString($$[$0]), _$[$0], yy.raw[yy.raw.length-1], yy); 
 break;
-case 5: this.$ = yy.Node('Literal', 'Boolean', true, yy.loc(_$[$0]), yytext); 
+case 5: this.$ = parseLiteral('Boolean', true, _$[$0], yytext, yy); 
 break;
-case 6: this.$ = yy.Node('Literal', 'Boolean', false, yy.loc(_$[$0]), yytext); 
+case 6: this.$ = parseLiteral('Boolean', false, _$[$0], yytext, yy); 
 break;
-case 7: this.$ = yy.Node('Literal', 'Nil', null, yy.loc(_$[$0]), yytext); 
+case 7: this.$ = parseLiteral('Nil', null, _$[$0], yytext, yy); 
 break;
 case 9: this.$ = []; 
 break;
@@ -637,7 +622,7 @@ case 37:
 break;
 case 39:
         // do forms evaluate to nil if the body is empty
-        nilNode = yy.Node('Literal', 'Nil', null, yy.loc(_$[$0]), yytext);
+        nilNode = parseLiteral('Nil', null, _$[$0], yytext, yy);
         this.$ = [yy.Node('ExpressionStatement', nilNode, nilNode.loc)];
     
 break;
@@ -820,13 +805,31 @@ var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpressi
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;
     if (token[0] === '-') {
-        node = yy.Node('Literal', type, -parseNum(token), yy.loc(loc), yytext);
+        node = parseLiteral(type, -parseNum(token), loc, yytext, yy);
         var literal = node.properties[1].value
         node.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(loc));
     } else {
-        node = yy.Node('Literal', type, parseNum(token), yy.loc(loc), yytext);
+        node = parseLiteral(type, parseNum(token), loc, yytext, yy);
     }
     return node;
+}
+
+function parseLiteral(type, value, loc, raw, yy) {
+    loc = yy.loc(loc);
+    return yy.Node('ObjectExpression', [
+        yy.Node(
+            'Property',
+            yy.Node('Identifier', 'type', loc),
+            yy.Node('Literal', type, loc, "\"" + type + "\""),
+            'init', loc
+        ),
+        yy.Node(
+            'Property',
+            yy.Node('Identifier', 'value', loc),
+            yy.Node('Literal', value, loc, raw),
+            'init', loc
+        )
+    ], loc);
 }
 
 function parseNum(num) {
@@ -1328,8 +1331,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
               type: 'Property',
               kind: 'init',
               key: {
-                type: 'Literal',
-                value: 'value'
+                type: 'Identifier',
+                name: 'value'
               },
               value: valueProp
             }
