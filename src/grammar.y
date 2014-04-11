@@ -96,12 +96,8 @@ List
   | ConditionalExpr
   | VarDeclaration
   | LetForm
-  | Fn SExprs?[args] {
-        $$ = yy.Node('CallExpression', $Fn, getValueIfUndefined($args, []), yy.loc(@Fn));
-    }
-  | DO DoForm {
-        $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@1));
-    }
+  | Fn SExprs?[args] { $$ = yy.Node('CallExpression', $Fn, getValueIfUndefined($args, []), yy.loc(@Fn)); }
+  | DO DoForm { $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@1)); }
   ;
 
 SExpr
