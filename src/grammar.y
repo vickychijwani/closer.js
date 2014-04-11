@@ -8,30 +8,13 @@ Identifier
   ;
 
 Atom
-  : INTEGER {
-        // TODO refactor common code for integer and float handling
-        if ($1[0] === '-') {
-            $$ = yy.Node('Literal', 'Integer', -parseNum($1), yy.loc(@1), yytext);
-            var literal = $$.properties[1].value
-            $$.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(@1));
-        } else {
-            $$ = yy.Node('Literal', 'Integer', parseNum($1), yy.loc(@1), yytext);
-        }
-    }
-  | FLOAT {
-        if ($1[0] === '-') {
-            $$ = yy.Node('Literal', 'Float', -parseNum($1), yy.loc(@1), yytext);
-            var literal = $$.properties[1].value
-            $$.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(@1));
-        } else {
-            $$ = yy.Node('Literal', 'Float', parseNum($1), yy.loc(@1), yytext);
-        }
-  }
+  : INTEGER { $$ = parseNumLiteral('Integer', $1, @1, yy, yytext); }
+  | FLOAT { $$ = parseNumLiteral('Float', $1, @1, yy, yytext); }
   | STRING { $$ = yy.Node('Literal', 'String', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1]); }
-  | Identifier
   | 'true' { $$ = yy.Node('Literal', 'Boolean', true, yy.loc(@1), yytext); }
   | 'false' { $$ = yy.Node('Literal', 'Boolean', false, yy.loc(@1), yytext); }
   | 'nil' { $$ = yy.Node('Literal', 'Nil', null, yy.loc(@1), yytext); }
+  | Identifier
   ;
 
 IdentifierList
@@ -204,6 +187,18 @@ Program
 
 var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
     'ObjectExpression'];
+
+function parseNumLiteral(type, token, loc, yy, yytext) {
+    var node;
+    if (token[0] === '-') {
+        node = yy.Node('Literal', type, -parseNum(token), yy.loc(loc), yytext);
+        var literal = node.properties[1].value
+        node.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(loc));
+    } else {
+        node = yy.Node('Literal', type, parseNum(token), yy.loc(loc), yytext);
+    }
+    return node;
+}
 
 function parseNum(num) {
     if (num[0] === '0') {
