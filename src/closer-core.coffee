@@ -4,6 +4,18 @@ types = require './closer-types'
 sameSign = (num1, num2) ->
   num1.value > 0 and num2.value > 0 or num1.value < 0 and num2.value < 0
 
+values = (args) ->
+  _.map args, 'value'
+
+uniqueValues = (args) ->
+  _.uniq args, false, 'value'
+
+allEqual = (args) ->
+  uniqueValues(args).length is 1
+
+allOfSameType = (args) ->
+  _.uniq(args, false, 'type').length is 1
+
 core =
 
   # arithmetic
@@ -69,10 +81,8 @@ core =
 
   # comparison
   '=': (args...) ->
-    values = _.map args, 'value'
-
     if _.every(args, (arg) -> arg.type in types.collectionTypes)
-      return new types.Boolean _.reduce _.zip(values), ((result, items) ->
+      return new types.Boolean _.reduce _.zip(values(args)), ((result, items) ->
         # if values contains arrays of unequal length, items can contain undefined
         return false if 'undefined' in _.map items, (item) -> typeof item
         result and core['='].apply(@, items).isTrue()
@@ -82,11 +92,16 @@ core =
     if _.some(args, (arg) -> arg.type in types.collectionTypes)
       return types.Boolean.false
 
-    # for primitives to be equal, they all must be of the same type
-    if _.uniq(args, false, 'type').length isnt 1
+    unless allOfSameType args
       return types.Boolean.false
 
     # at this point all the arguments are: 1) primitives, and 2) of the same type
-    return new types.Boolean(_.uniq(values).length is 1)
+    new types.Boolean allEqual args
+
+  '==': (args...) ->
+    return types.Boolean.true if args.length is 1
+    types.assertAllNumbers args
+    new types.Boolean allEqual args
+
 
 module.exports = core

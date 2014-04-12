@@ -88,3 +88,9 @@ describe 'Closer core library', ->
       eq '(= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean.true
       eq '(= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean.false
       eq '(= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean.false
+
+  describe '==', ->
+    it 'returns true if all its arguments are numeric and equal, or if given only 1 argument', ->
+      eq '(== 1)', types.Boolean.true
+      eq '(== [1 2 3])', types.Boolean.true  # == returns true for 1 arg irrespective of type
+      eq '(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean.true
