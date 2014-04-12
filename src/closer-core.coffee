@@ -81,7 +81,7 @@ core =
 
   # comparison
   '=': (args...) ->
-    if _.every(args, (arg) -> arg.type in types.collectionTypes)
+    if _.every(args, (arg) -> arg.isCollection())
       return new types.Boolean _.reduce _.zip(values(args)), ((result, items) ->
         # if values contains arrays of unequal length, items can contain undefined
         return false if 'undefined' in _.map items, (item) -> typeof item
@@ -89,7 +89,7 @@ core =
       ), true
 
     # a primitive can never equal a collection
-    if _.some(args, (arg) -> arg.type in types.collectionTypes)
+    if _.some(args, (arg) -> arg.isCollection())
       return types.Boolean.false
 
     unless allOfSameType args

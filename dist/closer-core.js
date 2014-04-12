@@ -121,8 +121,7 @@
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (_.every(args, function(arg) {
-        var _ref;
-        return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
+        return arg.isCollection();
       })) {
         return new types.Boolean(_.reduce(_.zip(values(args)), (function(result, items) {
           if (__indexOf.call(_.map(items, function(item) {
@@ -134,8 +133,7 @@
         }), true));
       }
       if (_.some(args, function(arg) {
-        var _ref;
-        return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
+        return arg.isCollection();
       })) {
         return types.Boolean["false"];
       }
@@ -161,30 +159,61 @@
 
 },{"./closer-types":2,"lodash-node":76}],2:[function(_dereq_,module,exports){
 (function() {
-  var makeCollectionType, makePrimitiveType, makeType, _;
+  var Type, makeCollectionType, makePrimitiveType, makeType, _,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = _dereq_('lodash-node');
 
-  makeType = function(typeName) {
-    var type;
-    type = function(value) {
+  Type = (function() {
+    function Type(typeName, value) {
       this.type = typeName;
-      return this.value = value;
-    };
-    type.typeName = typeName;
-    type.isTypeOf = function(literal) {
-      return literal instanceof type || literal.type === type.typeName;
-    };
-    type.prototype.isTrue = function() {
+      this.value = value;
+    }
+
+    Type.prototype.isTrue = function() {
       return this.type === 'Boolean' && this.value === true;
     };
-    type.prototype.isFalse = function() {
+
+    Type.prototype.isFalse = function() {
       return this.type === 'Boolean' && this.value === false;
     };
-    type.prototype.isNil = function() {
+
+    Type.prototype.isNil = function() {
       return this.type === 'Nil';
     };
-    return type;
+
+    Type.prototype.isPrimitive = function() {
+      var _ref;
+      return _ref = this.type, __indexOf.call(exports.primitiveTypes, _ref) >= 0;
+    };
+
+    Type.prototype.isCollection = function() {
+      var _ref;
+      return _ref = this.type, __indexOf.call(exports.collectionTypes, _ref) >= 0;
+    };
+
+    return Type;
+
+  })();
+
+  exports.allTypes = [];
+
+  makeType = function(typeName) {
+    exports.allTypes.push(typeName);
+    return (function(_super) {
+      __extends(_Class, _super);
+
+      function _Class(value) {
+        _Class.__super__.constructor.call(this, typeName, value);
+      }
+
+      _Class.typeName = typeName;
+
+      return _Class;
+
+    })(Type);
   };
 
   exports.primitiveTypes = [];
@@ -220,32 +249,16 @@
   exports.Vector = makeCollectionType('Vector');
 
   exports.assertAll = function(literals, types) {
-    var lit, type, typeNames, values, _i, _len, _results;
+    var actual, expected, lit, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = literals.length; _i < _len; _i++) {
       lit = literals[_i];
       if (!_.some(types, function(type) {
-        return type.isTypeOf(lit);
+        return lit instanceof type;
       })) {
-        values = (function() {
-          var _j, _len1, _results1;
-          _results1 = [];
-          for (_j = 0, _len1 = literals.length; _j < _len1; _j++) {
-            lit = literals[_j];
-            _results1.push(lit.value);
-          }
-          return _results1;
-        })();
-        typeNames = (function() {
-          var _j, _len1, _results1;
-          _results1 = [];
-          for (_j = 0, _len1 = types.length; _j < _len1; _j++) {
-            type = types[_j];
-            _results1.push(type.typeName);
-          }
-          return _results1;
-        })();
-        throw new TypeError("Expected " + values + " to be of type " + (typeNames.join(" or ")));
+        actual = _.pluck(literals, 'type');
+        expected = _.pluck(types, 'typeName');
+        throw new TypeError("Expected " + (expected.join(' or ')) + ", got [" + (actual.join(', ')) + "]");
       } else {
         _results.push(void 0);
       }
@@ -259,7 +272,7 @@
 
   exports.getResultType = function(numbers) {
     if (_.some(numbers, function(num) {
-      return exports.Float.isTypeOf(num);
+      return num instanceof exports.Float;
     })) {
       return exports.Float;
     } else {

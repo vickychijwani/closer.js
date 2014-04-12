@@ -112,7 +112,7 @@ SExpr
 
 SExprStmt
   : SExpr {
-        if (ExpressionTypes.indexOf($SExpr.type) !== -1) {
+        if (expressionTypes.indexOf($SExpr.type) !== -1) {
             $$ = yy.Node('ExpressionStatement', $SExpr, $SExpr.loc);
         } else {
             $$ = $SExpr;
@@ -133,7 +133,7 @@ NonEmptyDoForm
     : SExprs {
         for (var i = 0; i < $SExprs.length; ++i) {
             var SExpr = $SExprs[i];
-            if (ExpressionTypes.indexOf(SExpr.type) !== -1) {
+            if (expressionTypes.indexOf(SExpr.type) !== -1) {
                 $SExprs[i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
             }
         }
@@ -186,15 +186,14 @@ Program
 
 %%
 
-var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
-    'ObjectExpression'];
+var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
+    'ObjectExpression', 'NewExpression'];
 
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;
     if (token[0] === '-') {
         node = parseLiteral(type, -parseNum(token), loc, yytext, yy);
-        var literal = node.properties[1].value
-        node.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(loc));
+        node.arguments[0] = yy.Node('UnaryExpression', '-', node.arguments[0], true, yy.loc(loc));
     } else {
         node = parseLiteral(type, parseNum(token), loc, yytext, yy);
     }
@@ -211,19 +210,7 @@ function parseCollectionLiteral(type, items, loc, yy) {
 
 function parseLiteralCommon(type, value, loc, yy) {
     loc = yy.loc(loc);
-    return yy.Node('ObjectExpression', [
-        yy.Node(
-            'Property',
-            yy.Node('Identifier', 'type', loc),
-            yy.Node('Literal', type, loc, "\"" + type + "\""),
-            'init', loc
-        ),
-        yy.Node(
-            'Property',
-            yy.Node('Identifier', 'value', loc),
-            value, 'init', loc
-        )
-    ], loc);
+    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [value], loc);
 }
 
 function parseNum(num) {
