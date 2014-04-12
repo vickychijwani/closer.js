@@ -5,8 +5,12 @@ makeType = (typeName) ->
     @type = typeName
     @value = value
   type.typeName = typeName
+  # utilities
   type.isTypeOf = (literal) ->
     literal instanceof type or literal.type is type.typeName
+  type::isTrue = -> @type is 'Boolean' and @value is true
+  type::isFalse = -> @type is 'Boolean' and @value is false
+  type::isNil = -> @type is 'Nil'
   type
 
 # primitive types
@@ -20,6 +24,13 @@ exports.Float = makePrimitiveType 'Float'
 exports.String = makePrimitiveType 'String'
 exports.Boolean = makePrimitiveType 'Boolean'
 exports.Nil = makePrimitiveType 'Nil'
+
+# boolean constants
+exports.Boolean.true = new exports.Boolean true
+exports.Boolean.false = new exports.Boolean false
+
+# nil constant
+exports.Nil.nil = new exports.Nil()
 
 # collection types
 exports.collectionTypes = []

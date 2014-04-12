@@ -70,3 +70,21 @@ describe 'Closer core library', ->
       eq '(mod -10.1 3)', new types.Float 3 - 10.1 % 3
       eq '(mod -10.1 -3)', new types.Float -10.1 % 3
       eq '(mod 10.1 -3)', new types.Float 10.1 % 3 - 3
+
+
+  # comparison
+  describe '=', ->
+    it 'returns true if all its arguments are equal (by value, not identity)', ->
+      eq '(= nil nil)', types.Boolean.true
+      eq '(= 1)', types.Boolean.true
+      eq '(= 1 (/ 4 (+ 2 2)) (mod 5 4))', types.Boolean.true
+      eq '(= 1 (/ 4 (+ 2 2)) (mod 5 3))', types.Boolean.false
+      eq '(= 1 1.0)', types.Boolean.false
+      eq '(= 1.0 (/ 2.0 2))', types.Boolean.true
+      eq '(= "hello" "hello")', types.Boolean.true
+      eq '(= true (= 4 (* 2 2)))', types.Boolean.true
+      eq '(= true (= 4 (* 2 3)))', types.Boolean.false
+      eq '(= [3 4] [3 4])', types.Boolean.true
+      eq '(= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean.true
+      eq '(= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean.false
+      eq '(= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean.false

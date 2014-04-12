@@ -1,7 +1,8 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.closerCore=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
   var core, sameSign, types, _,
-    __slice = [].slice;
+    __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   _ = _dereq_('lodash-node');
 
@@ -99,6 +100,34 @@
       type = types.getResultType(arguments);
       rem = num.value % div.value;
       return new type(rem === 0 || sameSign(num, div) ? rem : rem + div.value);
+    },
+    '=': function() {
+      var args, values;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      values = _.map(args, 'value');
+      if (_.every(args, function(arg) {
+        var _ref;
+        return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
+      })) {
+        return new types.Boolean(_.reduce(_.zip(values), (function(result, items) {
+          if (__indexOf.call(_.map(items, function(item) {
+            return typeof item;
+          }), 'undefined') >= 0) {
+            return false;
+          }
+          return result && core['='].apply(this, items).isTrue();
+        }), true));
+      }
+      if (_.some(args, function(arg) {
+        var _ref;
+        return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
+      })) {
+        return types.Boolean["false"];
+      }
+      if (_.uniq(args, false, 'type').length !== 1) {
+        return types.Boolean["false"];
+      }
+      return new types.Boolean(_.uniq(values).length === 1);
     }
   };
 
@@ -122,6 +151,15 @@
     type.isTypeOf = function(literal) {
       return literal instanceof type || literal.type === type.typeName;
     };
+    type.prototype.isTrue = function() {
+      return this.type === 'Boolean' && this.value === true;
+    };
+    type.prototype.isFalse = function() {
+      return this.type === 'Boolean' && this.value === false;
+    };
+    type.prototype.isNil = function() {
+      return this.type === 'Nil';
+    };
     return type;
   };
 
@@ -141,6 +179,12 @@
   exports.Boolean = makePrimitiveType('Boolean');
 
   exports.Nil = makePrimitiveType('Nil');
+
+  exports.Boolean["true"] = new exports.Boolean(true);
+
+  exports.Boolean["false"] = new exports.Boolean(false);
+
+  exports.Nil.nil = new exports.Nil();
 
   exports.collectionTypes = [];
 

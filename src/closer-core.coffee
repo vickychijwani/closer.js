@@ -67,5 +67,26 @@ core =
     rem = num.value % div.value
     new type if rem is 0 or sameSign num, div then rem else rem + div.value
 
+  # comparison
+  '=': (args...) ->
+    values = _.map args, 'value'
+
+    if _.every(args, (arg) -> arg.type in types.collectionTypes)
+      return new types.Boolean _.reduce _.zip(values), ((result, items) ->
+        # if values contains arrays of unequal length, items can contain undefined
+        return false if 'undefined' in _.map items, (item) -> typeof item
+        result and core['='].apply(@, items).isTrue()
+      ), true
+
+    # a primitive can never equal a collection
+    if _.some(args, (arg) -> arg.type in types.collectionTypes)
+      return types.Boolean.false
+
+    # for primitives to be equal, they all must be of the same type
+    if _.uniq(args, false, 'type').length isnt 1
+      return types.Boolean.false
+
+    # at this point all the arguments are: 1) primitives, and 2) of the same type
+    return new types.Boolean(_.uniq(values).length is 1)
 
 module.exports = core
