@@ -121,8 +121,7 @@
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (_.every(args, function(arg) {
-        var _ref;
-        return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
+        return arg.isCollection();
       })) {
         return new types.Boolean(_.reduce(_.zip(values(args)), (function(result, items) {
           if (__indexOf.call(_.map(items, function(item) {
@@ -134,8 +133,7 @@
         }), true));
       }
       if (_.some(args, function(arg) {
-        var _ref;
-        return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
+        return arg.isCollection();
       })) {
         return types.Boolean["false"];
       }
@@ -161,30 +159,61 @@
 
 },{"./closer-types":2,"lodash-node":113}],2:[function(_dereq_,module,exports){
 (function() {
-  var makeCollectionType, makePrimitiveType, makeType, _;
+  var Type, makeCollectionType, makePrimitiveType, makeType, _,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = _dereq_('lodash-node');
 
-  makeType = function(typeName) {
-    var type;
-    type = function(value) {
+  Type = (function() {
+    function Type(typeName, value) {
       this.type = typeName;
-      return this.value = value;
-    };
-    type.typeName = typeName;
-    type.isTypeOf = function(literal) {
-      return literal instanceof type || literal.type === type.typeName;
-    };
-    type.prototype.isTrue = function() {
+      this.value = value;
+    }
+
+    Type.prototype.isTrue = function() {
       return this.type === 'Boolean' && this.value === true;
     };
-    type.prototype.isFalse = function() {
+
+    Type.prototype.isFalse = function() {
       return this.type === 'Boolean' && this.value === false;
     };
-    type.prototype.isNil = function() {
+
+    Type.prototype.isNil = function() {
       return this.type === 'Nil';
     };
-    return type;
+
+    Type.prototype.isPrimitive = function() {
+      var _ref;
+      return _ref = this.type, __indexOf.call(exports.primitiveTypes, _ref) >= 0;
+    };
+
+    Type.prototype.isCollection = function() {
+      var _ref;
+      return _ref = this.type, __indexOf.call(exports.collectionTypes, _ref) >= 0;
+    };
+
+    return Type;
+
+  })();
+
+  exports.allTypes = [];
+
+  makeType = function(typeName) {
+    exports.allTypes.push(typeName);
+    return (function(_super) {
+      __extends(_Class, _super);
+
+      function _Class(value) {
+        _Class.__super__.constructor.call(this, typeName, value);
+      }
+
+      _Class.typeName = typeName;
+
+      return _Class;
+
+    })(Type);
   };
 
   exports.primitiveTypes = [];
@@ -220,32 +249,16 @@
   exports.Vector = makeCollectionType('Vector');
 
   exports.assertAll = function(literals, types) {
-    var lit, type, typeNames, values, _i, _len, _results;
+    var actual, expected, lit, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = literals.length; _i < _len; _i++) {
       lit = literals[_i];
       if (!_.some(types, function(type) {
-        return type.isTypeOf(lit);
+        return lit instanceof type;
       })) {
-        values = (function() {
-          var _j, _len1, _results1;
-          _results1 = [];
-          for (_j = 0, _len1 = literals.length; _j < _len1; _j++) {
-            lit = literals[_j];
-            _results1.push(lit.value);
-          }
-          return _results1;
-        })();
-        typeNames = (function() {
-          var _j, _len1, _results1;
-          _results1 = [];
-          for (_j = 0, _len1 = types.length; _j < _len1; _j++) {
-            type = types[_j];
-            _results1.push(type.typeName);
-          }
-          return _results1;
-        })();
-        throw new TypeError("Expected " + values + " to be of type " + (typeNames.join(" or ")));
+        actual = _.pluck(literals, 'type');
+        expected = _.pluck(types, 'typeName');
+        throw new TypeError("Expected " + (expected.join(' or ')) + ", got [" + (actual.join(', ')) + "]");
       } else {
         _results.push(void 0);
       }
@@ -259,7 +272,7 @@
 
   exports.getResultType = function(numbers) {
     if (_.some(numbers, function(num) {
-      return exports.Float.isTypeOf(num);
+      return num instanceof exports.Float;
     })) {
       return exports.Float;
     } else {
@@ -789,7 +802,7 @@ break;
 case 35: this.$ = $$[$0-1]; 
 break;
 case 36:
-        if (ExpressionTypes.indexOf($$[$0].type) !== -1) {
+        if (expressionTypes.indexOf($$[$0].type) !== -1) {
             this.$ = yy.Node('ExpressionStatement', $$[$0], $$[$0].loc);
         } else {
             this.$ = $$[$0];
@@ -807,7 +820,7 @@ break;
 case 39:
         for (var i = 0; i < $$[$0].length; ++i) {
             var SExpr = $$[$0][i];
-            if (ExpressionTypes.indexOf(SExpr.type) !== -1) {
+            if (expressionTypes.indexOf(SExpr.type) !== -1) {
                 $$[$0][i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
             }
         }
@@ -992,15 +1005,14 @@ parse: function parse(input) {
 }};
 
 
-var ExpressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
-    'ObjectExpression'];
+var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
+    'ObjectExpression', 'NewExpression'];
 
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;
     if (token[0] === '-') {
         node = parseLiteral(type, -parseNum(token), loc, yytext, yy);
-        var literal = node.properties[1].value
-        node.properties[1].value = yy.Node('UnaryExpression', '-', literal, true, yy.loc(loc));
+        node.arguments[0] = yy.Node('UnaryExpression', '-', node.arguments[0], true, yy.loc(loc));
     } else {
         node = parseLiteral(type, parseNum(token), loc, yytext, yy);
     }
@@ -1017,19 +1029,7 @@ function parseCollectionLiteral(type, items, loc, yy) {
 
 function parseLiteralCommon(type, value, loc, yy) {
     loc = yy.loc(loc);
-    return yy.Node('ObjectExpression', [
-        yy.Node(
-            'Property',
-            yy.Node('Identifier', 'type', loc),
-            yy.Node('Literal', type, loc, "\"" + type + "\""),
-            'init', loc
-        ),
-        yy.Node(
-            'Property',
-            yy.Node('Identifier', 'value', loc),
-            value, 'init', loc
-        )
-    ], loc);
+    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [value], loc);
 }
 
 function parseNum(num) {
@@ -1481,11 +1481,14 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
 },{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":220,"fs":215,"path":221}],6:[function(_dereq_,module,exports){
 (function() {
-  var closer, core, escodegen, estraverse, parse, wireCallsToCore;
+  var closer, core, escodegen, estraverse, parse, types, wireCallsToCore,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   closer = _dereq_('../closer');
 
   core = _dereq_('../closer-core');
+
+  types = _dereq_('../closer-types');
 
   escodegen = _dereq_('escodegen');
 
@@ -1494,11 +1497,15 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
   wireCallsToCore = function(ast) {
     estraverse.replace(ast, {
       enter: function(node) {
-        var calleeObj, calleeProp;
+        var calleeObj, calleeProp, _ref;
         if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name in core) {
           calleeObj = closer.node('Identifier', 'core', node.loc);
           calleeProp = closer.node('Literal', node.callee.name, node.loc);
           node.callee = closer.node('MemberExpression', calleeObj, calleeProp, true, node.loc);
+        } else if (node.type === 'NewExpression' && node.callee.type === 'Identifier' && (_ref = node.callee.name, __indexOf.call(types.allTypes, _ref) >= 0)) {
+          calleeObj = closer.node('Identifier', 'types', node.loc);
+          calleeProp = closer.node('Identifier', node.callee.name, node.loc);
+          node.callee = closer.node('MemberExpression', calleeObj, calleeProp, false, node.loc);
         }
         return node;
       }
@@ -1516,7 +1523,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{"../closer":3,"../closer-core":1,"escodegen":9,"estraverse":25}],7:[function(_dereq_,module,exports){
+},{"../closer":3,"../closer-core":1,"../closer-types":2,"escodegen":9,"estraverse":25}],7:[function(_dereq_,module,exports){
 (function() {
   var eq, evaluate, global_helpers, helpers, types;
 
@@ -1639,7 +1646,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer-types":2,"./closer-core-helpers":6,"./closer-helpers":8}],8:[function(_dereq_,module,exports){
 (function() {
-  var closer, collectionTypes, json_diff, primitiveTypes, type, types, _i, _len, _ref,
+  var closer, json_diff, type, types, _i, _len, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __slice = [].slice;
 
@@ -1656,19 +1663,15 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
   types = _dereq_('../closer-types');
 
-  primitiveTypes = types.primitiveTypes;
-
-  collectionTypes = types.collectionTypes;
-
-  _ref = primitiveTypes.concat(collectionTypes);
+  _ref = types.allTypes;
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     type = _ref[_i];
     exports[type] = (function(type2) {
       return function(value) {
         var valueProp;
         value = type2 === 'Nil' ? null : value;
-        valueProp = (value != null ? value.type : void 0) === 'UnaryExpression' ? (value.argument = closer.node('Literal', value.argument), value) : __indexOf.call(collectionTypes, type2) >= 0 ? closer.node('ArrayExpression', value) : closer.node('Literal', value);
-        return closer.node('ObjectExpression', [closer.node('Property', closer.node('Identifier', 'type'), closer.node('Literal', type2), 'init'), closer.node('Property', closer.node('Identifier', 'value'), valueProp, 'init')]);
+        valueProp = (value != null ? value.type : void 0) === 'UnaryExpression' ? (value.argument = closer.node('Literal', value.argument), value) : __indexOf.call(types.collectionTypes, type2) >= 0 ? closer.node('ArrayExpression', value) : closer.node('Literal', value);
+        return closer.node('NewExpression', closer.node('Identifier', type2), [valueProp]);
       };
     })(type);
   }
