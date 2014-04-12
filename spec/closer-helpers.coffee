@@ -6,39 +6,27 @@ exports.toDeepEqual = (expected) ->
     'actual != expected, diff is:\n' + json_diff.diffString(@actual, expected)
   typeof json_diff.diff(@actual, expected) is 'undefined'
 
-types = require('../closer-types').typeNames
+closer = require '../closer'
+types = require '../closer-types'
+primitiveTypes = types.primitiveTypes
+collectionTypes = types.collectionTypes
 
-for type in types
+for type in primitiveTypes.concat(collectionTypes)
   exports[type] = ((type2) ->
     (value) ->
       value = if type2 is 'Nil' then null else value
-      if value?.type is 'UnaryExpression'
-        value.argument =
-          type: 'Literal'
-          value: value.argument
-        valueProp = value
+      valueProp = if value?.type is 'UnaryExpression'
+        value.argument = closer.node 'Literal', value.argument
+        value
+      else if type2 in collectionTypes
+        closer.node 'ArrayExpression', value
       else
-        valueProp =
-          type: 'Literal'
-          value: value
-      type: 'ObjectExpression'
-      properties: [{
-        type: 'Property'
-        kind: 'init'
-        key:
-          type: 'Identifier'
-          name: 'type'
-        value:
-          type: 'Literal'
-          value: type2
-      }, {
-        type: 'Property'
-        kind: 'init'
-        key:
-          type: 'Identifier'
-          name: 'value'
-        value: valueProp
-      }]
+        closer.node 'Literal', value
+      closer.node('ObjectExpression',
+        [closer.node('Property', closer.node('Identifier', 'type'),
+          closer.node('Literal', type2), 'init'),
+         closer.node('Property', closer.node('Identifier', 'value'),
+           valueProp, 'init')])
   )(type)
 
 exports.Identifier = (name) ->

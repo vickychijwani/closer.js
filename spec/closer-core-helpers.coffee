@@ -10,9 +10,7 @@ wireCallsToCore = (ast) ->
         # FIXME embedding a variable name here to be eval'ed later is practically
         # FIXME a crime, but I couldn't think of a better solution
         calleeObj = closer.node 'Identifier', 'core', node.loc
-        calleeProp =
-          type: 'Literal'
-          value: node.callee.name
+        calleeProp = closer.node 'Literal', node.callee.name, node.loc
         node.callee = closer.node 'MemberExpression',
           calleeObj, calleeProp, true, node.loc
       node

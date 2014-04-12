@@ -7,6 +7,15 @@ Identifier
   : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
   ;
 
+IdentifierList
+  : { $$ = []; }
+  | IdentifierList Identifier {
+        yy.locComb(@$, @Identifier);
+        $$ = $IdentifierList;
+        $IdentifierList.push($Identifier);
+  }
+;
+
 Atom
   : INTEGER { $$ = parseNumLiteral('Integer', $1, @1, yy, yytext); }
   | FLOAT { $$ = parseNumLiteral('Float', $1, @1, yy, yytext); }
@@ -17,13 +26,8 @@ Atom
   | Identifier
   ;
 
-IdentifierList
-  : { $$ = []; }
-  | IdentifierList Identifier {
-        yy.locComb(@$, @Identifier);
-        $$ = $IdentifierList;
-        $IdentifierList.push($Identifier);
-    }
+CollectionLiteral
+  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('Vector', getValueIfUndefined($items, []), @items, yy); }
   ;
 
 RestArgs
@@ -102,6 +106,7 @@ List
 
 SExpr
   : Atom { $$ = $Atom; }
+  | CollectionLiteral { $$ = $CollectionLiteral; }
   | '(' List ')' { $$ = $List; }
   ;
 
@@ -197,6 +202,14 @@ function parseNumLiteral(type, token, loc, yy, yytext) {
 }
 
 function parseLiteral(type, value, loc, raw, yy) {
+    return parseLiteralCommon(type, yy.Node('Literal', value, loc, raw), loc, yy);
+}
+
+function parseCollectionLiteral(type, items, loc, yy) {
+    return parseLiteralCommon(type, yy.Node('ArrayExpression', items, loc), loc, yy);
+}
+
+function parseLiteralCommon(type, value, loc, yy) {
     loc = yy.loc(loc);
     return yy.Node('ObjectExpression', [
         yy.Node(
@@ -208,8 +221,7 @@ function parseLiteral(type, value, loc, raw, yy) {
         yy.Node(
             'Property',
             yy.Node('Identifier', 'value', loc),
-            yy.Node('Literal', value, loc, raw),
-            'init', loc
+            value, 'init', loc
         )
     ], loc);
 }
