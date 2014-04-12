@@ -14,6 +14,15 @@
     type.isTypeOf = function(literal) {
       return literal instanceof type || literal.type === type.typeName;
     };
+    type.prototype.isTrue = function() {
+      return this.type === 'Boolean' && this.value === true;
+    };
+    type.prototype.isFalse = function() {
+      return this.type === 'Boolean' && this.value === false;
+    };
+    type.prototype.isNil = function() {
+      return this.type === 'Nil';
+    };
     return type;
   };
 
@@ -33,6 +42,12 @@
   exports.Boolean = makePrimitiveType('Boolean');
 
   exports.Nil = makePrimitiveType('Nil');
+
+  exports.Boolean["true"] = new exports.Boolean(true);
+
+  exports.Boolean["false"] = new exports.Boolean(false);
+
+  exports.Nil.nil = new exports.Nil();
 
   exports.collectionTypes = [];
 
