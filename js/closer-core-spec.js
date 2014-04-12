@@ -1,6 +1,6 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.closerCoreSpec=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var core, sameSign, types, _,
+  var allEqual, allOfSameType, core, sameSign, types, uniqueValues, values, _,
     __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -10,6 +10,22 @@
 
   sameSign = function(num1, num2) {
     return num1.value > 0 && num2.value > 0 || num1.value < 0 && num2.value < 0;
+  };
+
+  values = function(args) {
+    return _.map(args, 'value');
+  };
+
+  uniqueValues = function(args) {
+    return _.uniq(args, false, 'value');
+  };
+
+  allEqual = function(args) {
+    return uniqueValues(args).length === 1;
+  };
+
+  allOfSameType = function(args) {
+    return _.uniq(args, false, 'type').length === 1;
   };
 
   core = {
@@ -102,14 +118,13 @@
       return new type(rem === 0 || sameSign(num, div) ? rem : rem + div.value);
     },
     '=': function() {
-      var args, values;
+      var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      values = _.map(args, 'value');
       if (_.every(args, function(arg) {
         var _ref;
         return _ref = arg.type, __indexOf.call(types.collectionTypes, _ref) >= 0;
       })) {
-        return new types.Boolean(_.reduce(_.zip(values), (function(result, items) {
+        return new types.Boolean(_.reduce(_.zip(values(args)), (function(result, items) {
           if (__indexOf.call(_.map(items, function(item) {
             return typeof item;
           }), 'undefined') >= 0) {
@@ -124,10 +139,19 @@
       })) {
         return types.Boolean["false"];
       }
-      if (_.uniq(args, false, 'type').length !== 1) {
+      if (!allOfSameType(args)) {
         return types.Boolean["false"];
       }
-      return new types.Boolean(_.uniq(values).length === 1);
+      return new types.Boolean(allEqual(args));
+    },
+    '==': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      types.assertAllNumbers(args);
+      return new types.Boolean(allEqual(args));
     }
   };
 
@@ -1585,7 +1609,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(mod 10.1 -3)', new types.Float(10.1 % 3 - 3));
       });
     });
-    return describe('=', function() {
+    describe('=', function() {
       return it('returns true if all its arguments are equal (by value, not identity)', function() {
         eq('(= nil nil)', types.Boolean["true"]);
         eq('(= 1)', types.Boolean["true"]);
@@ -1600,6 +1624,13 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean["true"]);
         eq('(= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean["false"]);
         return eq('(= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean["false"]);
+      });
+    });
+    return describe('==', function() {
+      return it('returns true if all its arguments are numeric and equal, or if given only 1 argument', function() {
+        eq('(== 1)', types.Boolean["true"]);
+        eq('(== [1 2 3])', types.Boolean["true"]);
+        return eq('(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean["true"]);
       });
     });
   });
