@@ -108,15 +108,12 @@
 
 },{"./closer-types":2,"lodash-node":76}],2:[function(_dereq_,module,exports){
 (function() {
-  var makeType, _;
+  var makeCollectionType, makePrimitiveType, makeType, _;
 
   _ = _dereq_('lodash-node');
 
-  exports.typeNames = [];
-
   makeType = function(typeName) {
     var type;
-    exports.typeNames.push(typeName);
     type = function(value) {
       this.type = typeName;
       return this.value = value;
@@ -128,15 +125,31 @@
     return type;
   };
 
-  exports.Integer = makeType('Integer');
+  exports.primitiveTypes = [];
 
-  exports.Float = makeType('Float');
+  makePrimitiveType = function(typeName) {
+    exports.primitiveTypes.push(typeName);
+    return makeType(typeName);
+  };
 
-  exports.String = makeType('String');
+  exports.Integer = makePrimitiveType('Integer');
 
-  exports.Boolean = makeType('Boolean');
+  exports.Float = makePrimitiveType('Float');
 
-  exports.Nil = makeType('Nil');
+  exports.String = makePrimitiveType('String');
+
+  exports.Boolean = makePrimitiveType('Boolean');
+
+  exports.Nil = makePrimitiveType('Nil');
+
+  exports.collectionTypes = [];
+
+  makeCollectionType = function(typeName) {
+    exports.collectionTypes.push(typeName);
+    return makeType(typeName);
+  };
+
+  exports.Vector = makeCollectionType('Vector');
 
   exports.assertAll = function(literals, types) {
     var lit, type, typeNames, values, _i, _len, _results;
