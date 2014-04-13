@@ -89,6 +89,9 @@ describe 'Closer core library', ->
       eq '(= [3 4] \'((+ 2 1) (/ 16 4)))', types.Boolean.true
       eq '(= [3 4] \'((+ 2 1) (/ 16 8)))', types.Boolean.false
       eq '(= [3 4] \'((+ 2 1) (/ 16 4) 5))', types.Boolean.false
+      eq '(= #{1 2} #{2 1})', types.Boolean.true
+      eq '(= #{1 2} #{2 1 3})', types.Boolean.false
+      eq '(= #{1 2} [2 1])', types.Boolean.false
 
   describe 'not=', ->
     it 'returns true if some of its arguments are unequal (by value, not identity)', ->
@@ -106,12 +109,16 @@ describe 'Closer core library', ->
       eq '(not= [3 4] \'((+ 2 1) (/ 16 4)))', types.Boolean.false
       eq '(not= [3 4] \'((+ 2 1) (/ 16 8)))', types.Boolean.true
       eq '(not= [3 4] \'((+ 2 1) (/ 16 4) 5))', types.Boolean.true
+      eq '(not= #{1 2} #{2 1})', types.Boolean.false
+      eq '(not= #{1 2} #{2 1 3})', types.Boolean.true
+      eq '(not= #{1 2} [2 1])', types.Boolean.true
 
   describe '==', ->
     it 'returns true if all its arguments are numeric and equal, or if given only 1 argument', ->
       eq '(== 1)', types.Boolean.true
       eq '(== [1 2 3])', types.Boolean.true  # == returns true for 1 arg irrespective of type
       eq '(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean.true
+
 
   # logic
   describe 'boolean', ->
@@ -133,6 +140,7 @@ describe 'Closer core library', ->
       eq '(not "hello")', types.Boolean.false
       eq '(not [1 2])', types.Boolean.false
       eq '(not (fn [x y] (+ x y)))', types.Boolean.false
+
 
   # test
   describe 'true?', ->
@@ -158,3 +166,11 @@ describe 'Closer core library', ->
       eq '(some? nil)', types.Boolean.false
       eq '(some? "hello")', types.Boolean.true
       eq '(some? (fn []))', types.Boolean.true
+
+  describe 'contains?', ->
+    it 'returns true if the collection contains the given key', ->
+      eq '(contains? #{nil 2} nil)', types.Boolean.true
+      eq '(contains? #{1 2} 3)', types.Boolean.false
+      eq '(contains? #{#{1 2}} #{2 1})', types.Boolean.true
+      eq '(contains? #{[1 2]} \'(1 2))', types.Boolean.true
+      eq '(contains? #{[1 2]} \'(2 1))', types.Boolean.false

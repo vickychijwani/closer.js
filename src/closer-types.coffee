@@ -1,4 +1,5 @@
 _ = require 'lodash-node'
+core = require './closer-core'
 
 exports.BaseType = class Type
   constructor: (typeName, value) ->
@@ -9,6 +10,7 @@ exports.BaseType = class Type
   isNil: -> @type is 'Nil'
   isPrimitive: -> @type in exports.primitiveTypes
   isCollection: -> @type in exports.collectionTypes
+  isSequentialCollection: -> @type in exports.sequentialCollectionTypes
 
 exports.allTypes = []
 makeType = (typeName) ->
@@ -47,8 +49,21 @@ makeCollectionType = (typeName) ->
   exports.collectionTypes.push typeName
   makeType typeName
 
-exports.Vector = makeCollectionType 'Vector'
-exports.List = makeCollectionType 'List'
+exports.sequentialCollectionTypes = []
+makeSequentialCollectionType = (typeName) ->
+  exports.sequentialCollectionTypes.push typeName
+  makeCollectionType typeName
+
+exports.Vector = makeSequentialCollectionType 'Vector'
+exports.List = makeSequentialCollectionType 'List'
+exports.HashSet = class extends makeCollectionType('HashSet')
+  constructor: (values) ->
+    uniques = []
+    _.each values, (val) ->
+      isNew = _.every uniques, (uniq) ->
+        core['not='](val, uniq).value
+      uniques.push(val) if isNew
+    super uniques
 
 
 # utilities

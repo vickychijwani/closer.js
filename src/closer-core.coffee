@@ -1,17 +1,14 @@
-_ = require 'lodash-node'
-types = require './closer-types'
-
 sameSign = (num1, num2) ->
   num1.value > 0 and num2.value > 0 or num1.value < 0 and num2.value < 0
 
-values = (args) ->
+getValues = (args) ->
   _.map args, 'value'
 
-uniqueValues = (args) ->
+getUniqueValues = (args) ->
   _.uniq args, false, 'value'
 
 allEqual = (args) ->
-  uniqueValues(args).length is 1
+  getUniqueValues(args).length is 1
 
 allOfSameType = (args) ->
   _.uniq(args, false, 'type').length is 1
@@ -84,11 +81,23 @@ core =
   '=': (args...) ->
     return types.Boolean.true if args.length is 1
 
-    if _.every(args, (arg) -> arg.isCollection())
-      return new types.Boolean _.reduce _.zip(values(args)), ((result, items) ->
+    values = getValues(args)
+
+    if _.every(args, (arg) -> arg.isSequentialCollection())
+      return new types.Boolean _.reduce _.zip(values), ((result, items) ->
         # if values contains arrays of unequal length, items can contain undefined
         return false if 'undefined' in _.map items, (item) -> typeof item
         result and core['='].apply(@, items).isTrue()
+      ), true
+
+    if _.every(args, (arg) -> arg instanceof types.HashSet)
+      # sets can't be equal unless they are of equal cardinality
+      return types.Boolean.false unless _.uniq(_.map values, 'length').length is 1
+      return new types.Boolean _.reduce _.rest(args), ((result, set1) ->
+        set2 = _.first(args)
+        result and
+        _.every set1.value, (item1) -> core['contains?'](set2, item1).isTrue() and
+        _.every set2.value, (item2) -> core['contains?'](set1, item2).isTrue()
       ), true
 
     # a primitive can never equal a collection
@@ -116,6 +125,7 @@ core =
   'not': (arg) ->
     core.boolean(arg).complement()
 
+
   # test
   'true?': (arg) ->
     new types.Boolean arg instanceof types.BaseType and arg.isTrue()
@@ -129,5 +139,15 @@ core =
   'some?': (arg) ->
     core['nil?'](arg).complement()
 
+  'contains?': (coll, key) ->
+    # TODO wrong result for Lists and Vectors!
+    new types.Boolean _.any coll.value, (item) ->
+      core['='](key, item).isTrue()
+
 
 module.exports = core
+
+# requires go here, because of circular dependency
+# see https://coderwall.com/p/myzvmg for more
+_ = require 'lodash-node'
+types = require './closer-types'

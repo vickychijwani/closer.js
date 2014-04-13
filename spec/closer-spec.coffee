@@ -9,6 +9,7 @@ Boolean = helpers['Boolean']
 Nil = helpers['Nil']
 Vector = helpers['Vector']
 List = helpers['List']
+HashSet = helpers['HashSet']
 Identifier = helpers.Identifier
 UnaryExpression = helpers.UnaryExpression
 CallExpression = helpers.CallExpression
@@ -63,6 +64,13 @@ describe 'Closer parser', ->
         Boolean(true)])),
       ExpressionStatement(List([])),
       ExpressionStatement(List([
+        String('string'),
+        Boolean(true)])))
+
+  it 'parses set literals', ->
+    expect(closer.parse('#{} #{"string" true}')).toDeepEqual Program(
+      ExpressionStatement(HashSet([])),
+      ExpressionStatement(HashSet([
         String('string'),
         Boolean(true)])))
 

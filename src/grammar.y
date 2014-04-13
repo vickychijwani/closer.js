@@ -29,6 +29,7 @@ Atom
 CollectionLiteral
   : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('Vector', getValueIfUndefined($items, []), @items, yy); }
   | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('List', getValueIfUndefined($items, []), @items, yy); }
+  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('HashSet', getValueIfUndefined($items, []), @items, yy); }
   ;
 
 RestArgs

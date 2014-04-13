@@ -34,6 +34,9 @@ COMMENT         \;[^\r\n]*
 ')' return ')';
 '[' return '[';
 ']' return ']';
+'{' return '{';
+'}' return '}';
+'#' return 'SHARP';
 '\'' return 'QUOTE';
 
 'def'   return 'DEF';

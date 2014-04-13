@@ -1,27 +1,23 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.closerCore=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var allEqual, allOfSameType, core, sameSign, types, uniqueValues, values, _,
+  var allEqual, allOfSameType, core, getUniqueValues, getValues, sameSign, types, _,
     __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  _ = _dereq_('lodash-node');
-
-  types = _dereq_('./closer-types');
 
   sameSign = function(num1, num2) {
     return num1.value > 0 && num2.value > 0 || num1.value < 0 && num2.value < 0;
   };
 
-  values = function(args) {
+  getValues = function(args) {
     return _.map(args, 'value');
   };
 
-  uniqueValues = function(args) {
+  getUniqueValues = function(args) {
     return _.uniq(args, false, 'value');
   };
 
   allEqual = function(args) {
-    return uniqueValues(args).length === 1;
+    return getUniqueValues(args).length === 1;
   };
 
   allOfSameType = function(args) {
@@ -118,21 +114,38 @@
       return new type(rem === 0 || sameSign(num, div) ? rem : rem + div.value);
     },
     '=': function() {
-      var args;
+      var args, values;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (args.length === 1) {
         return types.Boolean["true"];
       }
+      values = getValues(args);
       if (_.every(args, function(arg) {
-        return arg.isCollection();
+        return arg.isSequentialCollection();
       })) {
-        return new types.Boolean(_.reduce(_.zip(values(args)), (function(result, items) {
+        return new types.Boolean(_.reduce(_.zip(values), (function(result, items) {
           if (__indexOf.call(_.map(items, function(item) {
             return typeof item;
           }), 'undefined') >= 0) {
             return false;
           }
           return result && core['='].apply(this, items).isTrue();
+        }), true));
+      }
+      if (_.every(args, function(arg) {
+        return arg instanceof types.HashSet;
+      })) {
+        if (_.uniq(_.map(values, 'length')).length !== 1) {
+          return types.Boolean["false"];
+        }
+        return new types.Boolean(_.reduce(_.rest(args), (function(result, set1) {
+          var set2;
+          set2 = _.first(args);
+          return result && _.every(set1.value, function(item1) {
+            return core['contains?'](set2, item1).isTrue() && _.every(set2.value, function(item2) {
+              return core['contains?'](set1, item2).isTrue();
+            });
+          });
         }), true));
       }
       if (_.some(args, function(arg) {
@@ -179,21 +192,32 @@
     },
     'some?': function(arg) {
       return core['nil?'](arg).complement();
+    },
+    'contains?': function(coll, key) {
+      return new types.Boolean(_.any(coll.value, function(item) {
+        return core['='](key, item).isTrue();
+      }));
     }
   };
 
   module.exports = core;
 
+  _ = _dereq_('lodash-node');
+
+  types = _dereq_('./closer-types');
+
 }).call(this);
 
 },{"./closer-types":2,"lodash-node":76}],2:[function(_dereq_,module,exports){
 (function() {
-  var Type, makeCollectionType, makePrimitiveType, makeType, _,
+  var Type, core, makeCollectionType, makePrimitiveType, makeSequentialCollectionType, makeType, _,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   _ = _dereq_('lodash-node');
+
+  core = _dereq_('./closer-core');
 
   exports.BaseType = Type = (function() {
     function Type(typeName, value) {
@@ -221,6 +245,11 @@
     Type.prototype.isCollection = function() {
       var _ref;
       return _ref = this.type, __indexOf.call(exports.collectionTypes, _ref) >= 0;
+    };
+
+    Type.prototype.isSequentialCollection = function() {
+      var _ref;
+      return _ref = this.type, __indexOf.call(exports.sequentialCollectionTypes, _ref) >= 0;
     };
 
     return Type;
@@ -283,9 +312,38 @@
     return makeType(typeName);
   };
 
-  exports.Vector = makeCollectionType('Vector');
+  exports.sequentialCollectionTypes = [];
 
-  exports.List = makeCollectionType('List');
+  makeSequentialCollectionType = function(typeName) {
+    exports.sequentialCollectionTypes.push(typeName);
+    return makeCollectionType(typeName);
+  };
+
+  exports.Vector = makeSequentialCollectionType('Vector');
+
+  exports.List = makeSequentialCollectionType('List');
+
+  exports.HashSet = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class(values) {
+      var uniques;
+      uniques = [];
+      _.each(values, function(val) {
+        var isNew;
+        isNew = _.every(uniques, function(uniq) {
+          return core['not='](val, uniq).value;
+        });
+        if (isNew) {
+          return uniques.push(val);
+        }
+      });
+      _Class.__super__.constructor.call(this, uniques);
+    }
+
+    return _Class;
+
+  })(makeCollectionType('HashSet'));
 
   exports.assertAll = function(literals, types) {
     var actual, expected, lit, _i, _len, _results;
@@ -321,7 +379,7 @@
 
 }).call(this);
 
-},{"lodash-node":76}],3:[function(_dereq_,module,exports){
+},{"./closer-core":1,"lodash-node":76}],3:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
