@@ -48,6 +48,8 @@ makeCollectionType = (typeName) ->
   makeType typeName
 
 exports.Vector = makeCollectionType 'Vector'
+exports.List = makeCollectionType 'List'
+
 
 # utilities
 # throws TypeError if any of the given literals is not of one of the given types

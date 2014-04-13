@@ -285,6 +285,8 @@
 
   exports.Vector = makeCollectionType('Vector');
 
+  exports.List = makeCollectionType('List');
+
   exports.assertAll = function(literals, types) {
     var actual, expected, lit, _i, _len, _results;
     _results = [];

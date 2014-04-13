@@ -85,10 +85,10 @@ describe 'Closer core library', ->
       eq '(= "hello" "hello")', types.Boolean.true
       eq '(= true (= 4 (* 2 2)))', types.Boolean.true
       eq '(= true (= 4 (* 2 3)))', types.Boolean.false
-      eq '(= [3 4] [3 4])', types.Boolean.true
-      eq '(= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean.true
-      eq '(= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean.false
-      eq '(= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean.false
+      eq '(= [3 4] \'(3 4))', types.Boolean.true
+      eq '(= [3 4] \'((+ 2 1) (/ 16 4)))', types.Boolean.true
+      eq '(= [3 4] \'((+ 2 1) (/ 16 8)))', types.Boolean.false
+      eq '(= [3 4] \'((+ 2 1) (/ 16 4) 5))', types.Boolean.false
 
   describe 'not=', ->
     it 'returns true if some of its arguments are unequal (by value, not identity)', ->
@@ -102,10 +102,10 @@ describe 'Closer core library', ->
       eq '(not= "hello" "hello")', types.Boolean.false
       eq '(not= true (= 4 (* 2 2)))', types.Boolean.false
       eq '(not= true (= 4 (* 2 3)))', types.Boolean.true
-      eq '(not= [3 4] [3 4])', types.Boolean.false
-      eq '(not= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean.false
-      eq '(not= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean.true
-      eq '(not= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean.true
+      eq '(not= [3 4] \'(3 4))', types.Boolean.false
+      eq '(not= [3 4] \'((+ 2 1) (/ 16 4)))', types.Boolean.false
+      eq '(not= [3 4] \'((+ 2 1) (/ 16 8)))', types.Boolean.true
+      eq '(not= [3 4] \'((+ 2 1) (/ 16 4) 5))', types.Boolean.true
 
   describe '==', ->
     it 'returns true if all its arguments are numeric and equal, or if given only 1 argument', ->

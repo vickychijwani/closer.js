@@ -34,6 +34,7 @@ COMMENT         \;[^\r\n]*
 ')' return ')';
 '[' return '[';
 ']' return ']';
+'\'' return 'QUOTE';
 
 'def'   return 'DEF';
 'fn'    return 'FN';

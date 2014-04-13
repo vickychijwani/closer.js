@@ -8,6 +8,7 @@ String = helpers['String']
 Boolean = helpers['Boolean']
 Nil = helpers['Nil']
 Vector = helpers['Vector']
+List = helpers['List']
 Identifier = helpers.Identifier
 UnaryExpression = helpers.UnaryExpression
 CallExpression = helpers.CallExpression
@@ -54,14 +55,16 @@ describe 'Closer parser', ->
       ExpressionStatement(Boolean(false)),
       ExpressionStatement(Nil()))
 
-  it 'parses vector literals', ->
-    expect(closer.parse('[] [-23.67 "string" true nil]')).toDeepEqual Program(
+  it 'parses vector and list literals', ->
+    expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual Program(
       ExpressionStatement(Vector([])),
       ExpressionStatement(Vector([
-        Float(UnaryExpression('-', 23.67)),
         String('string'),
-        Boolean(true),
-        Nil()])))
+        Boolean(true)])),
+      ExpressionStatement(List([])),
+      ExpressionStatement(List([
+        String('string'),
+        Boolean(true)])))
 
 
   # functions
