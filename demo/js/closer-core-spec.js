@@ -120,6 +120,9 @@
     '=': function() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
       if (_.every(args, function(arg) {
         return arg.isCollection();
       })) {
@@ -141,6 +144,11 @@
         return types.Boolean["false"];
       }
       return new types.Boolean(allEqual(args));
+    },
+    'not=': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return core.not(core['='].apply(this, args));
     },
     '==': function() {
       var args;
@@ -1637,6 +1645,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       return it('returns true if all its arguments are equal (by value, not identity)', function() {
         eq('(= nil nil)', types.Boolean["true"]);
         eq('(= 1)', types.Boolean["true"]);
+        eq('(= (fn [x y] (+ x y)))', types.Boolean["true"]);
         eq('(= 1 (/ 4 (+ 2 2)) (mod 5 4))', types.Boolean["true"]);
         eq('(= 1 (/ 4 (+ 2 2)) (mod 5 3))', types.Boolean["false"]);
         eq('(= 1 1.0)', types.Boolean["false"]);
@@ -1648,6 +1657,24 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean["true"]);
         eq('(= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean["false"]);
         return eq('(= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean["false"]);
+      });
+    });
+    describe('not=', function() {
+      return it('returns true if some of its arguments are unequal (by value, not identity)', function() {
+        eq('(not= nil nil)', types.Boolean["false"]);
+        eq('(not= 1)', types.Boolean["false"]);
+        eq('(not= (fn [x y] (+ x y)))', types.Boolean["false"]);
+        eq('(not= 1 (/ 4 (+ 2 2)) (mod 5 4))', types.Boolean["false"]);
+        eq('(not= 1 (/ 4 (+ 2 2)) (mod 5 3))', types.Boolean["true"]);
+        eq('(not= 1 1.0)', types.Boolean["true"]);
+        eq('(not= 1.0 (/ 2.0 2))', types.Boolean["false"]);
+        eq('(not= "hello" "hello")', types.Boolean["false"]);
+        eq('(not= true (= 4 (* 2 2)))', types.Boolean["false"]);
+        eq('(not= true (= 4 (* 2 3)))', types.Boolean["true"]);
+        eq('(not= [3 4] [3 4])', types.Boolean["false"]);
+        eq('(not= [3 4] [(+ 2 1) (/ 16 4)])', types.Boolean["false"]);
+        eq('(not= [3 4] [(+ 2 1) (/ 16 8)])', types.Boolean["true"]);
+        return eq('(not= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean["true"]);
       });
     });
     describe('==', function() {

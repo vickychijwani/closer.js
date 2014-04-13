@@ -82,6 +82,8 @@ core =
 
   # comparison
   '=': (args...) ->
+    return types.Boolean.true if args.length is 1
+
     if _.every(args, (arg) -> arg.isCollection())
       return new types.Boolean _.reduce _.zip(values(args)), ((result, items) ->
         # if values contains arrays of unequal length, items can contain undefined
@@ -90,14 +92,15 @@ core =
       ), true
 
     # a primitive can never equal a collection
-    if _.some(args, (arg) -> arg.isCollection())
-      return types.Boolean.false
+    return types.Boolean.false if _.some(args, (arg) -> arg.isCollection())
 
-    unless allOfSameType args
-      return types.Boolean.false
+    return types.Boolean.false unless allOfSameType args
 
     # at this point all the arguments are: 1) primitives, and 2) of the same type
     new types.Boolean allEqual args
+
+  'not=': (args...) ->
+    core.not core['='].apply @, args
 
   '==': (args...) ->
     return types.Boolean.true if args.length is 1

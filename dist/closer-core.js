@@ -120,6 +120,9 @@
     '=': function() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
       if (_.every(args, function(arg) {
         return arg.isCollection();
       })) {
@@ -141,6 +144,11 @@
         return types.Boolean["false"];
       }
       return new types.Boolean(allEqual(args));
+    },
+    'not=': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return core.not(core['='].apply(this, args));
     },
     '==': function() {
       var args;
