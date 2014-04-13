@@ -133,3 +133,28 @@ describe 'Closer core library', ->
       eq '(not "hello")', types.Boolean.false
       eq '(not [1 2])', types.Boolean.false
       eq '(not (fn [x y] (+ x y)))', types.Boolean.false
+
+  # test
+  describe 'true?', ->
+    it 'returns true if and only if its argument is the value true', ->
+      eq '(true? true)', types.Boolean.true
+      eq '(true? "hello")', types.Boolean.false
+      eq '(true? (fn []))', types.Boolean.false
+
+  describe 'false?', ->
+    it 'returns true if and only if its argument is the value false', ->
+      eq '(false? false)', types.Boolean.true
+      eq '(false? "hello")', types.Boolean.false
+      eq '(false? (fn []))', types.Boolean.false
+
+  describe 'nil?', ->
+    it 'returns true if and only if its argument is the value nil', ->
+      eq '(nil? nil)', types.Boolean.true
+      eq '(nil? "hello")', types.Boolean.false
+      eq '(nil? (fn []))', types.Boolean.false
+
+  describe 'some?', ->
+    it 'returns true if and only if its argument is NOT the value nil', ->
+      eq '(some? nil)', types.Boolean.false
+      eq '(some? "hello")', types.Boolean.true
+      eq '(some? (fn []))', types.Boolean.true

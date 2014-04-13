@@ -167,6 +167,18 @@
     },
     'not': function(arg) {
       return core.boolean(arg).complement();
+    },
+    'true?': function(arg) {
+      return new types.Boolean(arg instanceof types.BaseType && arg.isTrue());
+    },
+    'false?': function(arg) {
+      return new types.Boolean(arg instanceof types.BaseType && arg.isFalse());
+    },
+    'nil?': function(arg) {
+      return new types.Boolean(arg instanceof types.BaseType && arg.isNil());
+    },
+    'some?': function(arg) {
+      return core['nil?'](arg).complement();
     }
   };
 
@@ -1695,7 +1707,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(boolean (fn [x y] (+ x y)))', types.Boolean["true"]);
       });
     });
-    return describe('not', function() {
+    describe('not', function() {
       return it('returns the complement of calling boolean on its argument (true for nil and false, else false)', function() {
         eq('(not nil)', types.Boolean["true"]);
         eq('(not false)', types.Boolean["true"]);
@@ -1704,6 +1716,34 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(not "hello")', types.Boolean["false"]);
         eq('(not [1 2])', types.Boolean["false"]);
         return eq('(not (fn [x y] (+ x y)))', types.Boolean["false"]);
+      });
+    });
+    describe('true?', function() {
+      return it('returns true if and only if its argument is the value true', function() {
+        eq('(true? true)', types.Boolean["true"]);
+        eq('(true? "hello")', types.Boolean["false"]);
+        return eq('(true? (fn []))', types.Boolean["false"]);
+      });
+    });
+    describe('false?', function() {
+      return it('returns true if and only if its argument is the value false', function() {
+        eq('(false? false)', types.Boolean["true"]);
+        eq('(false? "hello")', types.Boolean["false"]);
+        return eq('(false? (fn []))', types.Boolean["false"]);
+      });
+    });
+    describe('nil?', function() {
+      return it('returns true if and only if its argument is the value nil', function() {
+        eq('(nil? nil)', types.Boolean["true"]);
+        eq('(nil? "hello")', types.Boolean["false"]);
+        return eq('(nil? (fn []))', types.Boolean["false"]);
+      });
+    });
+    return describe('some?', function() {
+      return it('returns true if and only if its argument is NOT the value nil', function() {
+        eq('(some? nil)', types.Boolean["false"]);
+        eq('(some? "hello")', types.Boolean["true"]);
+        return eq('(some? (fn []))', types.Boolean["true"]);
       });
     });
   });

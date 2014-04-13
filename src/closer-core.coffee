@@ -116,5 +116,18 @@ core =
   'not': (arg) ->
     core.boolean(arg).complement()
 
+  # test
+  'true?': (arg) ->
+    new types.Boolean arg instanceof types.BaseType and arg.isTrue()
+
+  'false?': (arg) ->
+    new types.Boolean arg instanceof types.BaseType and arg.isFalse()
+
+  'nil?': (arg) ->
+    new types.Boolean arg instanceof types.BaseType and arg.isNil()
+
+  'some?': (arg) ->
+    core['nil?'](arg).complement()
+
 
 module.exports = core

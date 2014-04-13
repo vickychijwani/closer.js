@@ -167,6 +167,18 @@
     },
     'not': function(arg) {
       return core.boolean(arg).complement();
+    },
+    'true?': function(arg) {
+      return new types.Boolean(arg instanceof types.BaseType && arg.isTrue());
+    },
+    'false?': function(arg) {
+      return new types.Boolean(arg instanceof types.BaseType && arg.isFalse());
+    },
+    'nil?': function(arg) {
+      return new types.Boolean(arg instanceof types.BaseType && arg.isNil());
+    },
+    'some?': function(arg) {
+      return core['nil?'](arg).complement();
     }
   };
 
