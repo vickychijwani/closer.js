@@ -1,6 +1,6 @@
 _ = require 'lodash-node'
 
-class Type
+exports.BaseType = class Type
   constructor: (typeName, value) ->
     @type = typeName
     @value = value
@@ -34,6 +34,8 @@ exports.Nil = makePrimitiveType 'Nil'
 # boolean constants
 exports.Boolean.true = new exports.Boolean true
 exports.Boolean.false = new exports.Boolean false
+exports.Boolean::complement = () ->
+  if @isTrue() then exports.Boolean.false else exports.Boolean.true
 
 # nil constant
 exports.Nil.nil = new exports.Nil()

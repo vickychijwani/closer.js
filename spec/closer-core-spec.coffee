@@ -94,3 +94,24 @@ describe 'Closer core library', ->
       eq '(== 1)', types.Boolean.true
       eq '(== [1 2 3])', types.Boolean.true  # == returns true for 1 arg irrespective of type
       eq '(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean.true
+
+  # logic
+  describe 'boolean', ->
+    it 'coerces its argument into a boolean value (false for nil and false, else true)', ->
+      eq '(boolean nil)', types.Boolean.false
+      eq '(boolean false)', types.Boolean.false
+      eq '(boolean true)', types.Boolean.true
+      eq '(boolean 34.75)', types.Boolean.true
+      eq '(boolean "hello")', types.Boolean.true
+      eq '(boolean [1 2])', types.Boolean.true
+      eq '(boolean (fn [x y] (+ x y)))', types.Boolean.true
+
+  describe 'not', ->
+    it 'returns the complement of calling boolean on its argument (true for nil and false, else false)', ->
+      eq '(not nil)', types.Boolean.true
+      eq '(not false)', types.Boolean.true
+      eq '(not true)', types.Boolean.false
+      eq '(not 34.75)', types.Boolean.false
+      eq '(not "hello")', types.Boolean.false
+      eq '(not [1 2])', types.Boolean.false
+      eq '(not (fn [x y] (+ x y)))', types.Boolean.false

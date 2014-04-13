@@ -150,6 +150,15 @@
       }
       types.assertAllNumbers(args);
       return new types.Boolean(allEqual(args));
+    },
+    'boolean': function(arg) {
+      if (!(arg instanceof types.BaseType)) {
+        return types.Boolean["true"];
+      }
+      return new types.Boolean(!arg.isFalse() && !arg.isNil());
+    },
+    'not': function(arg) {
+      return core.boolean(arg).complement();
     }
   };
 
@@ -166,7 +175,7 @@
 
   _ = _dereq_('lodash-node');
 
-  Type = (function() {
+  exports.BaseType = Type = (function() {
     function Type(typeName, value) {
       this.type = typeName;
       this.value = value;
@@ -236,6 +245,14 @@
   exports.Boolean["true"] = new exports.Boolean(true);
 
   exports.Boolean["false"] = new exports.Boolean(false);
+
+  exports.Boolean.prototype.complement = function() {
+    if (this.isTrue()) {
+      return exports.Boolean["false"];
+    } else {
+      return exports.Boolean["true"];
+    }
+  };
 
   exports.Nil.nil = new exports.Nil();
 
@@ -1633,11 +1650,33 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(= [3 4] [(+ 2 1) (/ 16 4) 5])', types.Boolean["false"]);
       });
     });
-    return describe('==', function() {
+    describe('==', function() {
       return it('returns true if all its arguments are numeric and equal, or if given only 1 argument', function() {
         eq('(== 1)', types.Boolean["true"]);
         eq('(== [1 2 3])', types.Boolean["true"]);
         return eq('(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean["true"]);
+      });
+    });
+    describe('boolean', function() {
+      return it('coerces its argument into a boolean value (false for nil and false, else true)', function() {
+        eq('(boolean nil)', types.Boolean["false"]);
+        eq('(boolean false)', types.Boolean["false"]);
+        eq('(boolean true)', types.Boolean["true"]);
+        eq('(boolean 34.75)', types.Boolean["true"]);
+        eq('(boolean "hello")', types.Boolean["true"]);
+        eq('(boolean [1 2])', types.Boolean["true"]);
+        return eq('(boolean (fn [x y] (+ x y)))', types.Boolean["true"]);
+      });
+    });
+    return describe('not', function() {
+      return it('returns the complement of calling boolean on its argument (true for nil and false, else false)', function() {
+        eq('(not nil)', types.Boolean["true"]);
+        eq('(not false)', types.Boolean["true"]);
+        eq('(not true)', types.Boolean["false"]);
+        eq('(not 34.75)', types.Boolean["false"]);
+        eq('(not "hello")', types.Boolean["false"]);
+        eq('(not [1 2])', types.Boolean["false"]);
+        return eq('(not (fn [x y] (+ x y)))', types.Boolean["false"]);
       });
     });
   });

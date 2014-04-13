@@ -7,7 +7,7 @@
 
   _ = _dereq_('lodash-node');
 
-  Type = (function() {
+  exports.BaseType = Type = (function() {
     function Type(typeName, value) {
       this.type = typeName;
       this.value = value;
@@ -77,6 +77,14 @@
   exports.Boolean["true"] = new exports.Boolean(true);
 
   exports.Boolean["false"] = new exports.Boolean(false);
+
+  exports.Boolean.prototype.complement = function() {
+    if (this.isTrue()) {
+      return exports.Boolean["false"];
+    } else {
+      return exports.Boolean["true"];
+    }
+  };
 
   exports.Nil.nil = new exports.Nil();
 

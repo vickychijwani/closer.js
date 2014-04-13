@@ -79,6 +79,7 @@ core =
     rem = num.value % div.value
     new type if rem is 0 or sameSign num, div then rem else rem + div.value
 
+
   # comparison
   '=': (args...) ->
     if _.every(args, (arg) -> arg.isCollection())
@@ -102,6 +103,15 @@ core =
     return types.Boolean.true if args.length is 1
     types.assertAllNumbers args
     new types.Boolean allEqual args
+
+
+  # logic
+  'boolean': (arg) ->
+    return types.Boolean.true unless arg instanceof types.BaseType
+    new types.Boolean(not arg.isFalse() and not arg.isNil())
+
+  'not': (arg) ->
+    core.boolean(arg).complement()
 
 
 module.exports = core
