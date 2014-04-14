@@ -194,6 +194,10 @@
       return core['nil?'](arg).complement();
     },
     'contains?': function(coll, key) {
+      var _ref;
+      if (coll instanceof types.Vector) {
+        return new types.Boolean((0 <= (_ref = key.value) && _ref < coll.value.length));
+      }
       return new types.Boolean(_.any(coll.value, function(item) {
         return core['='](key, item).isTrue();
       }));

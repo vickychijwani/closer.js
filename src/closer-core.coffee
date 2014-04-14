@@ -140,7 +140,9 @@ core =
     core['nil?'](arg).complement()
 
   'contains?': (coll, key) ->
-    # TODO wrong result for Lists and Vectors!
+    # TODO wrong result for Lists!
+    if coll instanceof types.Vector
+      return new types.Boolean(0 <= key.value < coll.value.length)
     new types.Boolean _.any coll.value, (item) ->
       core['='](key, item).isTrue()
 

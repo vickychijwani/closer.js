@@ -174,3 +174,8 @@ describe 'Closer core library', ->
       eq '(contains? #{#{1 2}} #{2 1})', types.Boolean.true
       eq '(contains? #{[1 2]} \'(1 2))', types.Boolean.true
       eq '(contains? #{[1 2]} \'(2 1))', types.Boolean.false
+      # when coll is a vector, contains? checks if key is a valid index into it
+      eq '(contains? [98 54] 0)', types.Boolean.true
+      eq '(contains? [98 54] 1)', types.Boolean.true
+      eq '(contains? [98 54] 2)', types.Boolean.false
+      eq '(contains? [98 54] 98)', types.Boolean.false
