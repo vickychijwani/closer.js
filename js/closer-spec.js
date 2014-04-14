@@ -1065,7 +1065,8 @@ case 24:
 break;
 case 25:
         this.$ = $$[$0-1];
-        var binding = yy.Node('VariableDeclaration', 'let', [$$[$0]], yy.loc(_$[$0]));
+        // TODO let bindings are supposed to be local!
+        var binding = yy.Node('VariableDeclaration', 'var', [$$[$0]], yy.loc(_$[$0]));
         $$[$0-1].push(binding);
     
 break;
@@ -1874,8 +1875,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return {
       type: 'VariableDeclaration',
-      kind: args[0],
-      declarations: args.slice(1)
+      kind: 'var',
+      declarations: args
     };
   };
 
@@ -2022,22 +2023,22 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       return expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('condition?')), BlockStatement(ExpressionStatement(CallExpression(Identifier('println'), [String('hello')])), ExpressionStatement(Boolean(true))))));
     });
     it('parses an unbound var definition', function() {
-      return expect(closer.parse('(def var-name)')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('var-name'), null))));
+      return expect(closer.parse('(def var-name)')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('var-name'), null))));
     });
     it('parses a var bound to a literal', function() {
-      return expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('greeting'), String('Hello')))));
+      return expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('greeting'), String('Hello')))));
     });
     it('parses a var bound to the result of an expression', function() {
-      return expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('sum'), CallExpression(Identifier('+'), [Integer(3), Integer(5)])))));
+      return expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('sum'), CallExpression(Identifier('+'), [Integer(3), Integer(5)])))));
     });
     it('parses a var bound to an fn form', function() {
-      return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration('var', VariableDeclarator(Identifier('add'), FunctionExpression(null, [], Identifier('numbers'), BlockStatement(ReturnStatement(CallExpression(Identifier('apply'), [Identifier('+'), Identifier('numbers')]))))))));
+      return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], Identifier('numbers'), BlockStatement(ReturnStatement(CallExpression(Identifier('apply'), [Identifier('+'), Identifier('numbers')]))))))));
     });
     it('parses a let form with no bindings and no body', function() {
       return expect(closer.parse('(let [])')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
     });
     it('parses a let form with non-empty bindings and a non-empty body', function() {
-      return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(BlockStatement(VariableDeclaration('let', VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration('let', VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ExpressionStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))));
+      return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ExpressionStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))));
     });
     it('parses an empty do form', function() {
       return expect(closer.parse('(do)')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));

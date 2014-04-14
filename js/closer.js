@@ -498,7 +498,8 @@ case 24:
 break;
 case 25:
         this.$ = $$[$0-1];
-        var binding = yy.Node('VariableDeclaration', 'let', [$$[$0]], yy.loc(_$[$0]));
+        // TODO let bindings are supposed to be local!
+        var binding = yy.Node('VariableDeclaration', 'var', [$$[$0]], yy.loc(_$[$0]));
         $$[$0-1].push(binding);
     
 break;
