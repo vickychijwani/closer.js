@@ -269,17 +269,6 @@
       assert.numbers(args);
       return new types.Boolean(allEqual(args));
     },
-    'boolean': function(arg) {
-      assert.arity(1, 1, arguments);
-      if (!(arg instanceof types.BaseType)) {
-        return types.Boolean["true"];
-      }
-      return new types.Boolean(!arg.isFalse() && !arg.isNil());
-    },
-    'not': function(arg) {
-      assert.arity(1, 1, arguments);
-      return core.boolean(arg).complement();
-    },
     'true?': function(arg) {
       assert.arity(1, 1, arguments);
       return new types.Boolean(arg instanceof types.BaseType && arg.isTrue());
@@ -307,6 +296,17 @@
       return new types.Boolean(_.any(coll.value, function(item) {
         return core['='](key, item).isTrue();
       }));
+    },
+    'boolean': function(arg) {
+      assert.arity(1, 1, arguments);
+      if (!(arg instanceof types.BaseType)) {
+        return types.Boolean["true"];
+      }
+      return new types.Boolean(!arg.isFalse() && !arg.isNil());
+    },
+    'not': function(arg) {
+      assert.arity(1, 1, arguments);
+      return core.boolean(arg).complement();
     }
   };
 
