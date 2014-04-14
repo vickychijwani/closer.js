@@ -3,20 +3,11 @@ global_helpers = require './closer-helpers'
 helpers = require './closer-core-helpers'
 evaluate = helpers.evaluate
 
-beforeEach ->
-  @addMatchers toDeepEqual: global_helpers.toDeepEqual
-
-eq = (src, expected) ->
-  expect(evaluate src).toDeepEqual expected
-
-throws = (src) ->
-  expect(-> evaluate src).toThrow()
-
-truthy = (src) ->
-  eq src, types.Boolean.true
-
-falsy = (src) ->
-  eq src, types.Boolean.false
+beforeEach -> @addMatchers toDeepEqual: global_helpers.toDeepEqual
+eq = (src, expected) -> expect(evaluate src).toDeepEqual expected
+throws = (src) -> expect(-> evaluate src).toThrow()
+truthy = (src) -> eq src, types.Boolean.true
+falsy = (src) -> eq src, types.Boolean.false
 
 describe 'Closer core library', ->
 
