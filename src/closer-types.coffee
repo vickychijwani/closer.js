@@ -57,6 +57,7 @@ makeSequentialCollectionType = (typeName) ->
 exports.Vector = makeSequentialCollectionType 'Vector'
 exports.List = makeSequentialCollectionType 'List'
 exports.HashSet = class extends makeCollectionType('HashSet')
+  # TODO HashSet isn't really a HashSet yet
   constructor: (values) ->
     uniques = []
     _.each values, (val) ->
@@ -68,15 +69,15 @@ exports.HashSet = class extends makeCollectionType('HashSet')
 
 # utilities
 # throws TypeError if any of the given literals is not of one of the given types
-exports.assertAll = (literals, types) ->
+exports.assertTypes = (literals, types) ->
   for lit in literals
     unless _.some(types, (type) -> lit instanceof type)
       actual = _.pluck literals, 'type'
       expected = _.pluck types, 'typeName'
       throw new TypeError "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
 
-exports.assertAllNumbers = (literals) ->
-  exports.assertAll literals, [exports.Integer, exports.Float]
+exports.assertNumbers = (literals) ->
+  exports.assertTypes literals, [exports.Integer, exports.Float]
 
 exports.getResultType = (numbers) ->
   if _.some(numbers, (num) -> num instanceof exports.Float)

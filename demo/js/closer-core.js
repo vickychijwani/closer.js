@@ -28,7 +28,7 @@
     '+': function() {
       var nums, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      types.assertAllNumbers(nums);
+      types.assertNumbers(nums);
       type = types.getResultType(nums);
       return new type(_.reduce(nums, (function(sum, num) {
         return sum + num.value;
@@ -37,7 +37,7 @@
     '-': function() {
       var nums, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      types.assertAllNumbers(nums);
+      types.assertNumbers(nums);
       if (nums.length === 1) {
         nums.unshift(new types.Integer(0));
       }
@@ -49,7 +49,7 @@
     '*': function() {
       var nums, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      types.assertAllNumbers(nums);
+      types.assertNumbers(nums);
       type = types.getResultType(nums);
       return new type(_.reduce(nums, (function(prod, num) {
         return prod * num.value;
@@ -58,7 +58,7 @@
     '/': function() {
       var nums, result, resultIsFloat, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      types.assertAllNumbers(nums);
+      types.assertNumbers(nums);
       if (nums.length === 1) {
         nums.unshift(new types.Integer(1));
       }
@@ -71,44 +71,44 @@
     },
     'inc': function(num) {
       var type;
-      types.assertAllNumbers(arguments);
+      types.assertNumbers(arguments);
       type = types.getResultType(arguments);
       return new type(++num.value);
     },
     'dec': function(num) {
       var type;
-      types.assertAllNumbers(arguments);
+      types.assertNumbers(arguments);
       type = types.getResultType(arguments);
       return new type(--num.value);
     },
     'max': function() {
       var nums;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      types.assertAllNumbers(nums);
+      types.assertNumbers(nums);
       return _.max(nums, 'value');
     },
     'min': function() {
       var nums;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      types.assertAllNumbers(nums);
+      types.assertNumbers(nums);
       return _.min(nums, 'value');
     },
     'quot': function(num, div) {
       var sign, type;
-      types.assertAllNumbers(arguments);
+      types.assertNumbers(arguments);
       type = types.getResultType(arguments);
       sign = sameSign(num, div) ? 1 : -1;
       return new type(sign * Math.floor(Math.abs(num.value / div.value)));
     },
     'rem': function(num, div) {
       var type;
-      types.assertAllNumbers(arguments);
+      types.assertNumbers(arguments);
       type = types.getResultType(arguments);
       return new type(num.value % div.value);
     },
     'mod': function(num, div) {
       var rem, type;
-      types.assertAllNumbers(arguments);
+      types.assertNumbers(arguments);
       type = types.getResultType(arguments);
       rem = num.value % div.value;
       return new type(rem === 0 || sameSign(num, div) ? rem : rem + div.value);
@@ -169,7 +169,7 @@
       if (args.length === 1) {
         return types.Boolean["true"];
       }
-      types.assertAllNumbers(args);
+      types.assertNumbers(args);
       return new types.Boolean(allEqual(args));
     },
     'boolean': function(arg) {
@@ -345,7 +345,7 @@
 
   })(makeCollectionType('HashSet'));
 
-  exports.assertAll = function(literals, types) {
+  exports.assertTypes = function(literals, types) {
     var actual, expected, lit, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = literals.length; _i < _len; _i++) {
@@ -363,8 +363,8 @@
     return _results;
   };
 
-  exports.assertAllNumbers = function(literals) {
-    return exports.assertAll(literals, [exports.Integer, exports.Float]);
+  exports.assertNumbers = function(literals) {
+    return exports.assertTypes(literals, [exports.Integer, exports.Float]);
   };
 
   exports.getResultType = function(numbers) {
