@@ -146,6 +146,18 @@ describe 'Closer core library', ->
       eq '(== [1 2 3])', types.Boolean.true  # == returns true for 1 arg irrespective of type
       eq '(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean.true
 
+  describe '(identical? x y)', ->
+    it 'returns true if x and y are the same object', ->
+      thr '(identical? 1 1 1)'
+      eq '(identical? 1 1)', types.Boolean.true
+      eq '(identical? 1.56 1.56)', types.Boolean.false
+      eq '(identical? true true)', types.Boolean.true
+      eq '(identical? nil nil)', types.Boolean.true
+      eq '(identical? #{1 2} #{1 2})', types.Boolean.false
+      eq '(def a #{1 2}) (identical? a a)', types.Boolean.true
+      # different from standard Clojure behaviour; string interning cannot be emulated
+      eq '(identical? "string" "string")', types.Boolean.false
+
   describe '(true? x)', ->
     it 'returns true if and only if x is the value true', ->
       thr '(true? nil false)'

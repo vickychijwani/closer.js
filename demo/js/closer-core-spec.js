@@ -270,6 +270,16 @@
       assert.numbers(args);
       return new types.Boolean(allEqual(args));
     },
+    'identical?': function(x, y) {
+      assert.arity(2, 2, arguments);
+      if (_.every([x, y], function(arg) {
+        var _ref;
+        return (_ref = arg.type) === 'Integer' || _ref === 'Boolean' || _ref === 'Nil';
+      })) {
+        return core['='](x, y);
+      }
+      return new types.Boolean(x === y);
+    },
     'true?': function(arg) {
       assert.arity(1, 1, arguments);
       return new types.Boolean(arg instanceof types.BaseType && arg.isTrue());
@@ -1977,6 +1987,18 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(== 1)', types.Boolean["true"]);
         eq('(== [1 2 3])', types.Boolean["true"]);
         return eq('(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean["true"]);
+      });
+    });
+    describe('(identical? x y)', function() {
+      return it('returns true if x and y are the same object', function() {
+        thr('(identical? 1 1 1)');
+        eq('(identical? 1 1)', types.Boolean["true"]);
+        eq('(identical? 1.56 1.56)', types.Boolean["false"]);
+        eq('(identical? true true)', types.Boolean["true"]);
+        eq('(identical? nil nil)', types.Boolean["true"]);
+        eq('(identical? #{1 2} #{1 2})', types.Boolean["false"]);
+        eq('(def a #{1 2}) (identical? a a)', types.Boolean["true"]);
+        return eq('(identical? "string" "string")', types.Boolean["false"]);
       });
     });
     describe('(true? x)', function() {

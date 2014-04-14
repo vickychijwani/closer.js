@@ -270,6 +270,16 @@
       assert.numbers(args);
       return new types.Boolean(allEqual(args));
     },
+    'identical?': function(x, y) {
+      assert.arity(2, 2, arguments);
+      if (_.every([x, y], function(arg) {
+        var _ref;
+        return (_ref = arg.type) === 'Integer' || _ref === 'Boolean' || _ref === 'Nil';
+      })) {
+        return core['='](x, y);
+      }
+      return new types.Boolean(x === y);
+    },
     'true?': function(arg) {
       assert.arity(1, 1, arguments);
       return new types.Boolean(arg instanceof types.BaseType && arg.isTrue());

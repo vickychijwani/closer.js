@@ -131,6 +131,11 @@ core =
     assert.numbers args
     new types.Boolean allEqual args
 
+  'identical?': (x, y) ->
+    assert.arity 2, 2, arguments
+    return core['='](x, y) if _.every [x, y], (arg) -> arg.type in ['Integer', 'Boolean', 'Nil']
+    new types.Boolean(x is y)
+
   'true?': (arg) ->
     assert.arity 1, 1, arguments
     new types.Boolean arg instanceof types.BaseType and arg.isTrue()
