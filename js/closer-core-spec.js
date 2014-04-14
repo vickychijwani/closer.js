@@ -1655,77 +1655,77 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
   };
 
   describe('Closer core library', function() {
-    describe('+', function() {
-      return it('adds numbers', function() {
+    describe('(+ x y & more)', function() {
+      return it('adds the given numbers', function() {
         eq('(+)', new types.Integer(0));
         return eq('(+ 3.3 0 -6e2 2)', new types.Float(-594.7));
       });
     });
-    describe('-', function() {
-      return it('subtracts numbers', function() {
+    describe('(- x y & more)', function() {
+      return it('subtracts all but the first number from the first one', function() {
         eq('(- -3.54)', new types.Float(3.54));
         return eq('(- 10 3.5 -4)', new types.Float(10.5));
       });
     });
-    describe('*', function() {
-      return it('multiplies numbers', function() {
+    describe('(* x y & more)', function() {
+      return it('multiplies the given numbers', function() {
         eq('(*)', new types.Integer(1));
         return eq('(* 3 -6)', new types.Integer(-18));
       });
     });
-    describe('/', function() {
-      return it('divides numbers', function() {
+    describe('(/ x y & more)', function() {
+      return it('divides the first number by the rest', function() {
         eq('(/ -4)', new types.Float(-0.25));
         eq('(/ 14 -2)', new types.Integer(-7));
         eq('(/ 14 -2.0)', new types.Float(-7));
         return eq('(/ 14 -2 -2)', new types.Float(3.5));
       });
     });
-    describe('inc', function() {
-      return it('increments a number', function() {
+    describe('(inc x)', function() {
+      return it('increments x by 1', function() {
         return eq('(inc -2e-3)', new types.Float(0.998));
       });
     });
-    describe('dec', function() {
-      return it('decrements a number', function() {
+    describe('(dec x)', function() {
+      return it('decrements x by 1', function() {
         return eq('(dec -2e-3)', new types.Float(-1.002));
       });
     });
-    describe('max', function() {
+    describe('(max x y & more)', function() {
       return it('finds the maximum of the given numbers', function() {
         return eq('(max -1e10 653.32 1.345e4)', new types.Float(1.345e4));
       });
     });
-    describe('min', function() {
+    describe('(min x y & more)', function() {
       return it('finds the minimum of the given numbers', function() {
         return eq('(min -1e10 653.32 1.345e4)', new types.Float(-1e10));
       });
     });
-    describe('quot', function() {
-      return it('computes the quotient of a division', function() {
+    describe('(quot num div)', function() {
+      return it('computes the quotient of dividing num by div', function() {
         eq('(quot 10 3)', new types.Integer(3));
         eq('(quot -5.9 3)', new types.Float(-1.0));
         eq('(quot -10 -3)', new types.Integer(3));
         return eq('(quot 10 -3)', new types.Integer(-3));
       });
     });
-    describe('rem', function() {
-      return it('computes the remainder of a division (same as % in other languages)', function() {
+    describe('(rem num div)', function() {
+      return it('computes the remainder of dividing num by div (same as % in other languages)', function() {
         eq('(rem 10.1 3)', new types.Float(10.1 % 3));
         eq('(rem -10.1 3)', new types.Float(-10.1 % 3));
         eq('(rem -10.1 -3)', new types.Float(-10.1 % -3));
         return eq('(rem 10.1 -3)', new types.Float(10.1 % -3));
       });
     });
-    describe('mod', function() {
-      return it('computes the modulus of a division (NOT the same as % in other languages)', function() {
+    describe('(mod num div)', function() {
+      return it('computes the modulus of num and div (NOT the same as % in other languages)', function() {
         eq('(mod 10.1 3)', new types.Float(10.1 % 3));
         eq('(mod -10.1 3)', new types.Float(3 - 10.1 % 3));
         eq('(mod -10.1 -3)', new types.Float(-10.1 % 3));
         return eq('(mod 10.1 -3)', new types.Float(10.1 % 3 - 3));
       });
     });
-    describe('=', function() {
+    describe('(= x y & more)', function() {
       return it('returns true if all its arguments are equal (by value, not identity)', function() {
         eq('(= nil nil)', types.Boolean["true"]);
         eq('(= 1)', types.Boolean["true"]);
@@ -1746,7 +1746,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(= #{1 2} [2 1])', types.Boolean["false"]);
       });
     });
-    describe('not=', function() {
+    describe('(not= x y & more)', function() {
       return it('returns true if some of its arguments are unequal (by value, not identity)', function() {
         eq('(not= nil nil)', types.Boolean["false"]);
         eq('(not= 1)', types.Boolean["false"]);
@@ -1767,15 +1767,15 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(not= #{1 2} [2 1])', types.Boolean["true"]);
       });
     });
-    describe('==', function() {
+    describe('(== x y & more)', function() {
       return it('returns true if all its arguments are numeric and equal, or if given only 1 argument', function() {
         eq('(== 1)', types.Boolean["true"]);
         eq('(== [1 2 3])', types.Boolean["true"]);
         return eq('(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean["true"]);
       });
     });
-    describe('boolean', function() {
-      return it('coerces its argument into a boolean value (false for nil and false, else true)', function() {
+    describe('(boolean x)', function() {
+      return it('coerces x into a boolean value (false for nil and false, else true)', function() {
         eq('(boolean nil)', types.Boolean["false"]);
         eq('(boolean false)', types.Boolean["false"]);
         eq('(boolean true)', types.Boolean["true"]);
@@ -1785,8 +1785,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(boolean (fn [x y] (+ x y)))', types.Boolean["true"]);
       });
     });
-    describe('not', function() {
-      return it('returns the complement of calling boolean on its argument (true for nil and false, else false)', function() {
+    describe('(not x)', function() {
+      return it('returns the complement of (boolean x) (true for nil and false, else false)', function() {
         eq('(not nil)', types.Boolean["true"]);
         eq('(not false)', types.Boolean["true"]);
         eq('(not true)', types.Boolean["false"]);
@@ -1796,35 +1796,35 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(not (fn [x y] (+ x y)))', types.Boolean["false"]);
       });
     });
-    describe('true?', function() {
-      return it('returns true if and only if its argument is the value true', function() {
+    describe('(true? x)', function() {
+      return it('returns true if and only if x is the value true', function() {
         eq('(true? true)', types.Boolean["true"]);
         eq('(true? "hello")', types.Boolean["false"]);
         return eq('(true? (fn []))', types.Boolean["false"]);
       });
     });
-    describe('false?', function() {
-      return it('returns true if and only if its argument is the value false', function() {
+    describe('(false? x)', function() {
+      return it('returns true if and only if x is the value false', function() {
         eq('(false? false)', types.Boolean["true"]);
         eq('(false? "hello")', types.Boolean["false"]);
         return eq('(false? (fn []))', types.Boolean["false"]);
       });
     });
-    describe('nil?', function() {
-      return it('returns true if and only if its argument is the value nil', function() {
+    describe('(nil? x)', function() {
+      return it('returns true if and only if x is the value nil', function() {
         eq('(nil? nil)', types.Boolean["true"]);
         eq('(nil? "hello")', types.Boolean["false"]);
         return eq('(nil? (fn []))', types.Boolean["false"]);
       });
     });
-    describe('some?', function() {
-      return it('returns true if and only if its argument is NOT the value nil', function() {
+    describe('(some? x)', function() {
+      return it('returns true if and only if x is NOT the value nil', function() {
         eq('(some? nil)', types.Boolean["false"]);
         eq('(some? "hello")', types.Boolean["true"]);
         return eq('(some? (fn []))', types.Boolean["true"]);
       });
     });
-    return describe('contains?', function() {
+    return describe('(contains? coll key)', function() {
       return it('returns true if the collection contains the given key', function() {
         eq('(contains? #{nil 2} nil)', types.Boolean["true"]);
         eq('(contains? #{1 2} 3)', types.Boolean["false"]);
