@@ -296,6 +296,18 @@
       assert.arity(1, 1, arguments);
       return core['nil?'](arg).complement();
     },
+    'number?': function(x) {
+      assert.arity(1, 1, arguments);
+      return new types.Boolean(x instanceof types.Number);
+    },
+    'integer?': function(x) {
+      assert.arity(1, 1, arguments);
+      return new types.Boolean(x instanceof types.Integer);
+    },
+    'float?': function(x) {
+      assert.arity(1, 1, arguments);
+      return new types.Boolean(x instanceof types.Float);
+    },
     'contains?': function(coll, key) {
       var _ref;
       assert.arity(2, 2, arguments);
@@ -2032,6 +2044,36 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(some? nil)', types.Boolean["false"]);
         eq('(some? "hello")', types.Boolean["true"]);
         return eq('(some? (fn []))', types.Boolean["true"]);
+      });
+    });
+    describe('(number? x)', function() {
+      return it('returns true if and only if x is a number', function() {
+        eq('(number? 0)', types.Boolean["true"]);
+        eq('(number? 0.0)', types.Boolean["true"]);
+        eq('(number? ((fn [] 0)))', types.Boolean["true"]);
+        eq('(number? "0")', types.Boolean["false"]);
+        eq('(number? [])', types.Boolean["false"]);
+        return eq('(number? nil)', types.Boolean["false"]);
+      });
+    });
+    describe('(integer? x)', function() {
+      return it('returns true if and only if x is an integer', function() {
+        eq('(integer? 0)', types.Boolean["true"]);
+        eq('(integer? 0.0)', types.Boolean["false"]);
+        eq('(integer? ((fn [] 0)))', types.Boolean["true"]);
+        eq('(integer? "0")', types.Boolean["false"]);
+        eq('(integer? [])', types.Boolean["false"]);
+        return eq('(integer? nil)', types.Boolean["false"]);
+      });
+    });
+    describe('(float? x)', function() {
+      return it('returns true if and only if x is a floating-point number', function() {
+        eq('(float? 0)', types.Boolean["false"]);
+        eq('(float? 0.0)', types.Boolean["true"]);
+        eq('(float? ((fn [] 0.0)))', types.Boolean["true"]);
+        eq('(float? "0.0")', types.Boolean["false"]);
+        eq('(float? [])', types.Boolean["false"]);
+        return eq('(float? nil)', types.Boolean["false"]);
       });
     });
     describe('(contains? coll key)', function() {

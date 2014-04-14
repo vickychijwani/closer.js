@@ -186,6 +186,33 @@ describe 'Closer core library', ->
       eq '(some? "hello")', types.Boolean.true
       eq '(some? (fn []))', types.Boolean.true
 
+  describe '(number? x)', ->
+    it 'returns true if and only if x is a number', ->
+      eq '(number? 0)', types.Boolean.true
+      eq '(number? 0.0)', types.Boolean.true
+      eq '(number? ((fn [] 0)))', types.Boolean.true
+      eq '(number? "0")', types.Boolean.false
+      eq '(number? [])', types.Boolean.false
+      eq '(number? nil)', types.Boolean.false
+
+  describe '(integer? x)', ->
+    it 'returns true if and only if x is an integer', ->
+      eq '(integer? 0)', types.Boolean.true
+      eq '(integer? 0.0)', types.Boolean.false
+      eq '(integer? ((fn [] 0)))', types.Boolean.true
+      eq '(integer? "0")', types.Boolean.false
+      eq '(integer? [])', types.Boolean.false
+      eq '(integer? nil)', types.Boolean.false
+
+  describe '(float? x)', ->
+    it 'returns true if and only if x is a floating-point number', ->
+      eq '(float? 0)', types.Boolean.false
+      eq '(float? 0.0)', types.Boolean.true
+      eq '(float? ((fn [] 0.0)))', types.Boolean.true
+      eq '(float? "0.0")', types.Boolean.false
+      eq '(float? [])', types.Boolean.false
+      eq '(float? nil)', types.Boolean.false
+
   describe '(contains? coll key)', ->
     it 'returns true if the collection contains the given key', ->
       thr '(contains? #{nil 2} nil 2)'

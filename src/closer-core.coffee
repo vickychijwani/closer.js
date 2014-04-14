@@ -152,6 +152,18 @@ core =
     assert.arity 1, 1, arguments
     core['nil?'](arg).complement()
 
+  'number?': (x) ->
+    assert.arity 1, 1, arguments
+    new types.Boolean x instanceof types.Number
+
+  'integer?': (x) ->
+    assert.arity 1, 1, arguments
+    new types.Boolean x instanceof types.Integer
+
+  'float?': (x) ->
+    assert.arity 1, 1, arguments
+    new types.Boolean x instanceof types.Float
+
   'contains?': (coll, key) ->
     assert.arity 2, 2, arguments
     assert.collections coll

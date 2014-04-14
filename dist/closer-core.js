@@ -296,6 +296,18 @@
       assert.arity(1, 1, arguments);
       return core['nil?'](arg).complement();
     },
+    'number?': function(x) {
+      assert.arity(1, 1, arguments);
+      return new types.Boolean(x instanceof types.Number);
+    },
+    'integer?': function(x) {
+      assert.arity(1, 1, arguments);
+      return new types.Boolean(x instanceof types.Integer);
+    },
+    'float?': function(x) {
+      assert.arity(1, 1, arguments);
+      return new types.Boolean(x instanceof types.Float);
+    },
     'contains?': function(coll, key) {
       var _ref;
       assert.arity(2, 2, arguments);
