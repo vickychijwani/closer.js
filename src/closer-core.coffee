@@ -17,23 +17,23 @@ core =
 
   # arithmetic
   '+': (nums...) ->
-    types.assertNumbers nums
+    assert.numbers nums
     type = types.getResultType nums
     new type _.reduce nums, ((sum, num) -> sum + num.value), 0
 
   '-': (nums...) ->
-    types.assertNumbers nums
+    assert.numbers nums
     nums.unshift(new types.Integer 0) if nums.length is 1
     type = types.getResultType nums
     new type _.reduce nums.slice(1), ((diff, num) -> diff - num.value), nums[0].value
 
   '*': (nums...) ->
-    types.assertNumbers nums
+    assert.numbers nums
     type = types.getResultType nums
     new type _.reduce nums, ((prod, num) -> prod * num.value), 1
 
   '/': (nums...) ->
-    types.assertNumbers nums
+    assert.numbers nums
     nums.unshift(new types.Integer 1) if nums.length is 1
     result = _.reduce nums.slice(1), ((quo, num) -> quo / num.value), nums[0].value
     # result % 1 is 0 when result is an integer
@@ -42,36 +42,36 @@ core =
     new type result
 
   'inc': (num) ->
-    types.assertNumbers arguments
+    assert.numbers num
     type = types.getResultType arguments
     new type ++num.value
 
   'dec': (num) ->
-    types.assertNumbers arguments
+    assert.numbers num
     type = types.getResultType arguments
     new type --num.value
 
   'max': (nums...) ->
-    types.assertNumbers nums
+    assert.numbers nums
     _.max nums, 'value'
 
   'min': (nums...) ->
-    types.assertNumbers nums
+    assert.numbers nums
     _.min nums, 'value'
 
   'quot': (num, div) ->
-    types.assertNumbers arguments
+    assert.numbers arguments
     type = types.getResultType arguments
     sign = if sameSign num, div then 1 else -1
     new type sign * Math.floor Math.abs num.value / div.value
 
   'rem': (num, div) ->
-    types.assertNumbers arguments
+    assert.numbers arguments
     type = types.getResultType arguments
     new type num.value % div.value
 
   'mod': (num, div) ->
-    types.assertNumbers arguments
+    assert.numbers arguments
     type = types.getResultType arguments
     rem = num.value % div.value
     new type if rem is 0 or sameSign num, div then rem else rem + div.value
@@ -113,7 +113,7 @@ core =
 
   '==': (args...) ->
     return types.Boolean.true if args.length is 1
-    types.assertNumbers args
+    assert.numbers args
     new types.Boolean allEqual args
 
 
@@ -141,6 +141,7 @@ core =
 
   'contains?': (coll, key) ->
     # TODO wrong result for Lists!
+    assert.collections coll
     if coll instanceof types.Vector
       return new types.Boolean(0 <= key.value < coll.value.length)
     new types.Boolean _.any coll.value, (item) ->
@@ -153,3 +154,4 @@ module.exports = core
 # see https://coderwall.com/p/myzvmg for more
 _ = require 'lodash-node'
 types = require './closer-types'
+assert = require './assert'

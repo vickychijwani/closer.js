@@ -7,10 +7,14 @@ types.BaseType = class
   isTrue: -> @ instanceof types.Boolean and @value is true
   isFalse: -> @ instanceof types.Boolean and @value is false
   isNil: -> @ instanceof types.Nil
+  @typeName: 'BaseType'
 
 # primitive types
 types.Primitive = class extends types.BaseType
+  @typeName: 'Primitive'
+
 types.Number = class extends types.Primitive
+  @typeName: 'Number'
 
 types.Integer = class extends types.Number
   @typeName: 'Integer'
@@ -34,7 +38,10 @@ types.Nil = class extends types.Primitive
 
 # collection types
 types.Collection = class extends types.BaseType
+  @typeName: 'Collection'
+
 types.Sequential = class extends types.Collection
+  @typeName: 'Sequential'
 
 types.Vector = class extends types.Sequential
   @typeName: 'Vector'
@@ -55,17 +62,6 @@ types.HashSet = class extends types.Collection
 
 
 # utilities
-# throws TypeError if any of the given literals is not of one of the given types
-types.assertTypes = (literals, expectedTypes) ->
-  for lit in literals
-    unless _.some(expectedTypes, (type) -> lit instanceof type)
-      actual = _.pluck literals, 'type'
-      expected = _.pluck expectedTypes, 'typeName'
-      throw new TypeError "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
-
-types.assertNumbers = (literals) ->
-  types.assertTypes literals, [types.Number]
-
 types.getResultType = (nums) ->
   if _.some(nums, (n) -> n instanceof types.Float) then types.Float else types.Integer
 
