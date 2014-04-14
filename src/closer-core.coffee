@@ -88,7 +88,7 @@ core =
     new type if rem is 0 or sameSign num, div then rem else rem + div.value
 
 
-  # comparison
+  # comparison / test
   '=': (args...) ->
     assert.arity 1, Infinity, arguments
     return types.Boolean.true if args.length is 1
@@ -129,19 +129,6 @@ core =
     assert.numbers args
     new types.Boolean allEqual args
 
-
-  # logic
-  'boolean': (arg) ->
-    assert.arity 1, 1, arguments
-    return types.Boolean.true unless arg instanceof types.BaseType
-    new types.Boolean(not arg.isFalse() and not arg.isNil())
-
-  'not': (arg) ->
-    assert.arity 1, 1, arguments
-    core.boolean(arg).complement()
-
-
-  # test
   'true?': (arg) ->
     assert.arity 1, 1, arguments
     new types.Boolean arg instanceof types.BaseType and arg.isTrue()
@@ -166,6 +153,17 @@ core =
       return new types.Boolean(0 <= key.value < coll.value.length)
     new types.Boolean _.any coll.value, (item) ->
       core['='](key, item).isTrue()
+
+
+  # logic
+  'boolean': (arg) ->
+    assert.arity 1, 1, arguments
+    return types.Boolean.true unless arg instanceof types.BaseType
+    new types.Boolean(not arg.isFalse() and not arg.isNil())
+
+  'not': (arg) ->
+    assert.arity 1, 1, arguments
+    core.boolean(arg).complement()
 
 
 module.exports = core

@@ -146,32 +146,6 @@ describe 'Closer core library', ->
       eq '(== [1 2 3])', types.Boolean.true  # == returns true for 1 arg irrespective of type
       eq '(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean.true
 
-
-  # logic
-  describe '(boolean x)', ->
-    it 'coerces x into a boolean value (false for nil and false, else true)', ->
-      thr '(boolean nil false)'
-      eq '(boolean nil)', types.Boolean.false
-      eq '(boolean false)', types.Boolean.false
-      eq '(boolean true)', types.Boolean.true
-      eq '(boolean 34.75)', types.Boolean.true
-      eq '(boolean "hello")', types.Boolean.true
-      eq '(boolean [1 2])', types.Boolean.true
-      eq '(boolean (fn [x y] (+ x y)))', types.Boolean.true
-
-  describe '(not x)', ->
-    it 'returns the complement of (boolean x) (true for nil and false, else false)', ->
-      thr '(not nil false)'
-      eq '(not nil)', types.Boolean.true
-      eq '(not false)', types.Boolean.true
-      eq '(not true)', types.Boolean.false
-      eq '(not 34.75)', types.Boolean.false
-      eq '(not "hello")', types.Boolean.false
-      eq '(not [1 2])', types.Boolean.false
-      eq '(not (fn [x y] (+ x y)))', types.Boolean.false
-
-
-  # test
   describe '(true? x)', ->
     it 'returns true if and only if x is the value true', ->
       thr '(true? nil false)'
@@ -215,3 +189,27 @@ describe 'Closer core library', ->
       eq '(contains? [98 54] 1)', types.Boolean.true
       eq '(contains? [98 54] 2)', types.Boolean.false
       eq '(contains? [98 54] 98)', types.Boolean.false
+
+
+  # logic
+  describe '(boolean x)', ->
+    it 'coerces x into a boolean value (false for nil and false, else true)', ->
+      thr '(boolean nil false)'
+      eq '(boolean nil)', types.Boolean.false
+      eq '(boolean false)', types.Boolean.false
+      eq '(boolean true)', types.Boolean.true
+      eq '(boolean 34.75)', types.Boolean.true
+      eq '(boolean "hello")', types.Boolean.true
+      eq '(boolean [1 2])', types.Boolean.true
+      eq '(boolean (fn [x y] (+ x y)))', types.Boolean.true
+
+  describe '(not x)', ->
+    it 'returns the complement of (boolean x) (true for nil and false, else false)', ->
+      thr '(not nil false)'
+      eq '(not nil)', types.Boolean.true
+      eq '(not false)', types.Boolean.true
+      eq '(not true)', types.Boolean.false
+      eq '(not 34.75)', types.Boolean.false
+      eq '(not "hello")', types.Boolean.false
+      eq '(not [1 2])', types.Boolean.false
+      eq '(not (fn [x y] (+ x y)))', types.Boolean.false
