@@ -308,6 +308,18 @@
       assert.arity(1, 1, arguments);
       return new types.Boolean(x instanceof types.Float);
     },
+    'zero?': function(x) {
+      assert.arity(1, 1, arguments);
+      return core['=='](x, new types.Integer(0));
+    },
+    'even?': function(x) {
+      assert.arity(1, 1, arguments);
+      assert.types([x], [types.Integer]);
+      return core['zero?'](core['mod'](x, new types.Integer(2)));
+    },
+    'odd?': function(x) {
+      return core['not'](core['even?'](x));
+    },
     'contains?': function(coll, key) {
       var _ref;
       assert.arity(2, 2, arguments);
@@ -2082,6 +2094,39 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         falsy('(float? "0.0")');
         falsy('(float? [])');
         return falsy('(float? nil)');
+      });
+    });
+    describe('(zero? x)', function() {
+      return it('returns true if and only if x is numerically 0', function() {
+        truthy('(zero? 0)');
+        truthy('(zero? 0.0)');
+        truthy('(zero? ((fn [] 0.0)))');
+        throws('(zero? "0.0")');
+        throws('(zero? [])');
+        return throws('(zero? nil)');
+      });
+    });
+    describe('(even? x)', function() {
+      return it('returns true if and only if x is an even integer', function() {
+        truthy('(even? 0)');
+        truthy('(even? 68)');
+        falsy('(even? 69)');
+        truthy('(even? ((fn [] -56)))');
+        falsy('(even? ((fn [] -57)))');
+        throws('(even? 0.0)');
+        throws('(even? 2.0)');
+        return throws('(even? "0.0")');
+      });
+    });
+    describe('(odd? x)', function() {
+      return it('returns true if and only if x is an odd integer', function() {
+        falsy('(odd? 0)');
+        falsy('(odd? 68)');
+        truthy('(odd? 69)');
+        falsy('(odd? ((fn [] -56)))');
+        truthy('(odd? ((fn [] -57)))');
+        throws('(odd? 1.0)');
+        return throws('(odd? "1.0")');
       });
     });
     describe('(contains? coll key)', function() {
