@@ -129,7 +129,7 @@ core =
     assert.arity 1, Infinity, arguments
     return types.Boolean.true if args.length is 1
     assert.numbers args
-    new types.Boolean allEqual args
+    new types.Boolean allEqual _.uniq args
 
   'identical?': (x, y) ->
     assert.arity 2, 2, arguments

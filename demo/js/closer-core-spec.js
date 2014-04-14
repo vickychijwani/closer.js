@@ -268,7 +268,7 @@
         return types.Boolean["true"];
       }
       assert.numbers(args);
-      return new types.Boolean(allEqual(args));
+      return new types.Boolean(allEqual(_.uniq(args)));
     },
     'identical?': function(x, y) {
       assert.arity(2, 2, arguments);
@@ -1975,8 +1975,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         truthy('(= nil nil)');
         truthy('(= 1)');
         truthy('(= (fn [x y] (+ x y)))');
-        truthy('(= 1 (/ 4 (+ 2 2)) (mod 5 4))');
-        falsy('(= 1 (/ 4 (+ 2 2)) (mod 5 3))');
+        truthy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))');
+        falsy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))');
         falsy('(= 1 1.0)');
         truthy('(= 1.0 (/ 2.0 2))');
         truthy('(= "hello" "hello")');
@@ -1997,8 +1997,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         falsy('(not= nil nil)');
         falsy('(not= 1)');
         falsy('(not= (fn [x y] (+ x y)))');
-        falsy('(not= 1 (/ 4 (+ 2 2)) (mod 5 4))');
-        truthy('(not= 1 (/ 4 (+ 2 2)) (mod 5 3))');
+        falsy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))');
+        truthy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))');
         truthy('(not= 1 1.0)');
         falsy('(not= 1.0 (/ 2.0 2))');
         falsy('(not= "hello" "hello")');
@@ -2019,7 +2019,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         throws('(== "hello" "hello")');
         truthy('(== 1)');
         truthy('(== [1 2 3])');
-        return truthy('(== 2 2.0 (/ 8 (+ 2 2.0)))');
+        return truthy('(let [a 2] (== a a 2.0 (/ 8 (+ 2 2.0))))');
       });
     });
     describe('(identical? x y)', function() {

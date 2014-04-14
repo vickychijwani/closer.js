@@ -108,8 +108,8 @@ describe 'Closer core library', ->
       truthy '(= nil nil)'
       truthy '(= 1)'
       truthy '(= (fn [x y] (+ x y)))'   # always returns true for 1 arg
-      truthy '(= 1 (/ 4 (+ 2 2)) (mod 5 4))'
-      falsy '(= 1 (/ 4 (+ 2 2)) (mod 5 3))'
+      truthy '(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))'
+      falsy '(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))'
       falsy '(= 1 1.0)'
       truthy '(= 1.0 (/ 2.0 2))'
       truthy '(= "hello" "hello")'
@@ -129,8 +129,8 @@ describe 'Closer core library', ->
       falsy '(not= nil nil)'
       falsy '(not= 1)'
       falsy '(not= (fn [x y] (+ x y)))'   # always falsy for 1 arg
-      falsy '(not= 1 (/ 4 (+ 2 2)) (mod 5 4))'
-      truthy '(not= 1 (/ 4 (+ 2 2)) (mod 5 3))'
+      falsy '(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))'
+      truthy '(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))'
       truthy '(not= 1 1.0)'
       falsy '(not= 1.0 (/ 2.0 2))'
       falsy '(not= "hello" "hello")'
@@ -150,7 +150,7 @@ describe 'Closer core library', ->
       throws '(== "hello" "hello")'
       truthy '(== 1)'
       truthy '(== [1 2 3])'  # always truthy for 1 arg irrespective of type
-      truthy '(== 2 2.0 (/ 8 (+ 2 2.0)))'
+      truthy '(let [a 2] (== a a 2.0 (/ 8 (+ 2 2.0))))'
 
   describe '(identical? x y)', ->
     it 'returns true if x and y are the same object', ->
