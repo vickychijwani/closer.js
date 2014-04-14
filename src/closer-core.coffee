@@ -91,6 +91,8 @@ core =
   # comparison / test
   '=': (args...) ->
     assert.arity 1, Infinity, arguments
+
+    args = _.uniq args   # remove duplicates
     return types.Boolean.true if args.length is 1
     values = getValues(args)
 
