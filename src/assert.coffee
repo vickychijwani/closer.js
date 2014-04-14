@@ -1,19 +1,42 @@
+class ArityError extends Error
+  constructor: (expected_min, expected_max, actual) ->
+    Error.captureStackTrace @, @.constructor
+    @name = 'ArityError'
+    @message = "Expected #{expected_min}..#{expected_max} args, got #{actual}"
+
+class ArgTypeError extends Error
+  constructor: (args, expectedTypes) ->
+    Error.captureStackTrace @, @.constructor
+    actual = _.pluck args, 'type'
+    expected = _.pluck expectedTypes, 'typeName'
+    @name = 'ArgTypeError'
+    @message = "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
+
+checkTypes = (args, expectedTypes) ->
+  _.every args, (arg) -> _.some(expectedTypes, (type) -> arg instanceof type)
+
 assert =
+
   # throws TypeError if any of the given literals is not of one of the given types
-  types: (literals, expectedTypes) ->
-    for lit in literals
-      unless _.some(expectedTypes, (type) -> lit instanceof type)
-        actual = _.pluck literals, 'type'
-        expected = _.pluck expectedTypes, 'typeName'
-        throw new TypeError "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
+  types: (args, expectedTypes) ->
+    unless checkTypes args, expectedTypes
+      throw new ArgTypeError args, expectedTypes
 
-  numbers: (literals...) ->
-    literals = _.flatten literals, true
-    assert.types literals, [types.Number]
+  notTypes: (args, expectedTypes) ->
+    if checkTypes args, expectedTypes
+      throw new ArgTypeError args, expectedTypes
 
-  collections: (literals...) ->
-    literals = _.flatten literals, true
-    assert.types literals, [types.Collection]
+  numbers: (args...) ->
+    assert.types _.flatten(args, true), [types.Number]
+
+  collections: (args...) ->
+    assert.types _.flatten(args, true), [types.Collection]
+
+  arity: (expected_min, expected_max, args...) ->
+    args = _.flatten args, true
+    unless expected_min <= args.length <= expected_max
+      throw new ArityError expected_min, expected_max, args.length
+
 
 module.exports = assert
 

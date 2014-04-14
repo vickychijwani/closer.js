@@ -1,37 +1,75 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.closerCoreSpec=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var assert, types, _,
+  var ArgTypeError, ArityError, assert, checkTypes, types, _,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
 
+  ArityError = (function(_super) {
+    __extends(ArityError, _super);
+
+    function ArityError(expected_min, expected_max, actual) {
+      Error.captureStackTrace(this, this.constructor);
+      this.name = 'ArityError';
+      this.message = "Expected " + expected_min + ".." + expected_max + " args, got " + actual;
+    }
+
+    return ArityError;
+
+  })(Error);
+
+  ArgTypeError = (function(_super) {
+    __extends(ArgTypeError, _super);
+
+    function ArgTypeError(args, expectedTypes) {
+      var actual, expected;
+      Error.captureStackTrace(this, this.constructor);
+      actual = _.pluck(args, 'type');
+      expected = _.pluck(expectedTypes, 'typeName');
+      this.name = 'ArgTypeError';
+      this.message = "Expected " + (expected.join(' or ')) + ", got [" + (actual.join(', ')) + "]";
+    }
+
+    return ArgTypeError;
+
+  })(Error);
+
+  checkTypes = function(args, expectedTypes) {
+    return _.every(args, function(arg) {
+      return _.some(expectedTypes, function(type) {
+        return arg instanceof type;
+      });
+    });
+  };
+
   assert = {
-    types: function(literals, expectedTypes) {
-      var actual, expected, lit, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = literals.length; _i < _len; _i++) {
-        lit = literals[_i];
-        if (!_.some(expectedTypes, function(type) {
-          return lit instanceof type;
-        })) {
-          actual = _.pluck(literals, 'type');
-          expected = _.pluck(expectedTypes, 'typeName');
-          throw new TypeError("Expected " + (expected.join(' or ')) + ", got [" + (actual.join(', ')) + "]");
-        } else {
-          _results.push(void 0);
-        }
+    types: function(args, expectedTypes) {
+      if (!checkTypes(args, expectedTypes)) {
+        throw new ArgTypeError(args, expectedTypes);
       }
-      return _results;
+    },
+    notTypes: function(args, expectedTypes) {
+      if (checkTypes(args, expectedTypes)) {
+        throw new ArgTypeError(args, expectedTypes);
+      }
     },
     numbers: function() {
-      var literals;
-      literals = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      literals = _.flatten(literals, true);
-      return assert.types(literals, [types.Number]);
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return assert.types(_.flatten(args, true), [types.Number]);
     },
     collections: function() {
-      var literals;
-      literals = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      literals = _.flatten(literals, true);
-      return assert.types(literals, [types.Collection]);
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return assert.types(_.flatten(args, true), [types.Collection]);
+    },
+    arity: function() {
+      var args, expected_max, expected_min, _ref;
+      expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+      args = _.flatten(args, true);
+      if (!((expected_min <= (_ref = args.length) && _ref <= expected_max))) {
+        throw new ArityError(expected_min, expected_max, args.length);
+      }
     }
   };
 
@@ -73,6 +111,7 @@
     '+': function() {
       var nums, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(0, Infinity, arguments);
       assert.numbers(nums);
       type = types.getResultType(nums);
       return new type(_.reduce(nums, (function(sum, num) {
@@ -82,6 +121,7 @@
     '-': function() {
       var nums, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       assert.numbers(nums);
       if (nums.length === 1) {
         nums.unshift(new types.Integer(0));
@@ -94,6 +134,7 @@
     '*': function() {
       var nums, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(0, Infinity, arguments);
       assert.numbers(nums);
       type = types.getResultType(nums);
       return new type(_.reduce(nums, (function(prod, num) {
@@ -103,6 +144,7 @@
     '/': function() {
       var nums, result, resultIsFloat, type;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       assert.numbers(nums);
       if (nums.length === 1) {
         nums.unshift(new types.Integer(1));
@@ -116,12 +158,14 @@
     },
     'inc': function(num) {
       var type;
+      assert.arity(1, 1, arguments);
       assert.numbers(num);
       type = types.getResultType(arguments);
       return new type(++num.value);
     },
     'dec': function(num) {
       var type;
+      assert.arity(1, 1, arguments);
       assert.numbers(num);
       type = types.getResultType(arguments);
       return new type(--num.value);
@@ -129,17 +173,20 @@
     'max': function() {
       var nums;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       assert.numbers(nums);
       return _.max(nums, 'value');
     },
     'min': function() {
       var nums;
       nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       assert.numbers(nums);
       return _.min(nums, 'value');
     },
     'quot': function(num, div) {
       var sign, type;
+      assert.arity(2, 2, arguments);
       assert.numbers(arguments);
       type = types.getResultType(arguments);
       sign = sameSign(num, div) ? 1 : -1;
@@ -147,12 +194,14 @@
     },
     'rem': function(num, div) {
       var type;
+      assert.arity(2, 2, arguments);
       assert.numbers(arguments);
       type = types.getResultType(arguments);
       return new type(num.value % div.value);
     },
     'mod': function(num, div) {
       var rem, type;
+      assert.arity(2, 2, arguments);
       assert.numbers(arguments);
       type = types.getResultType(arguments);
       rem = num.value % div.value;
@@ -161,6 +210,7 @@
     '=': function() {
       var args, values;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       if (args.length === 1) {
         return types.Boolean["true"];
       }
@@ -206,11 +256,13 @@
     'not=': function() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       return core.not(core['='].apply(this, args));
     },
     '==': function() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
       if (args.length === 1) {
         return types.Boolean["true"];
       }
@@ -218,29 +270,37 @@
       return new types.Boolean(allEqual(args));
     },
     'boolean': function(arg) {
+      assert.arity(1, 1, arguments);
       if (!(arg instanceof types.BaseType)) {
         return types.Boolean["true"];
       }
       return new types.Boolean(!arg.isFalse() && !arg.isNil());
     },
     'not': function(arg) {
+      assert.arity(1, 1, arguments);
       return core.boolean(arg).complement();
     },
     'true?': function(arg) {
+      assert.arity(1, 1, arguments);
       return new types.Boolean(arg instanceof types.BaseType && arg.isTrue());
     },
     'false?': function(arg) {
+      assert.arity(1, 1, arguments);
       return new types.Boolean(arg instanceof types.BaseType && arg.isFalse());
     },
     'nil?': function(arg) {
+      assert.arity(1, 1, arguments);
       return new types.Boolean(arg instanceof types.BaseType && arg.isNil());
     },
     'some?': function(arg) {
+      assert.arity(1, 1, arguments);
       return core['nil?'](arg).complement();
     },
     'contains?': function(coll, key) {
       var _ref;
+      assert.arity(2, 2, arguments);
       assert.collections(coll);
+      assert.notTypes([coll], [types.List]);
       if (coll instanceof types.Vector) {
         return new types.Boolean((0 <= (_ref = key.value) && _ref < coll.value.length));
       }
@@ -1748,7 +1808,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer":4,"../closer-core":2,"../closer-types":3,"escodegen":10,"estraverse":26}],8:[function(_dereq_,module,exports){
 (function() {
-  var eq, evaluate, global_helpers, helpers, types;
+  var eq, evaluate, global_helpers, helpers, thr, types;
 
   types = _dereq_('../closer-types');
 
@@ -1768,27 +1828,39 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     return expect(evaluate(src)).toDeepEqual(expected);
   };
 
+  thr = function(src) {
+    return expect(function() {
+      return evaluate(src);
+    }).toThrow();
+  };
+
   describe('Closer core library', function() {
     describe('(+ x y & more)', function() {
       return it('adds the given numbers', function() {
+        thr('(+ "string")');
         eq('(+)', new types.Integer(0));
         return eq('(+ 3.3 0 -6e2 2)', new types.Float(-594.7));
       });
     });
     describe('(- x y & more)', function() {
       return it('subtracts all but the first number from the first one', function() {
+        thr('(-)');
+        thr('(- "string")');
         eq('(- -3.54)', new types.Float(3.54));
         return eq('(- 10 3.5 -4)', new types.Float(10.5));
       });
     });
     describe('(* x y & more)', function() {
       return it('multiplies the given numbers', function() {
+        thr('(* "string")');
         eq('(*)', new types.Integer(1));
         return eq('(* 3 -6)', new types.Integer(-18));
       });
     });
     describe('(/ x y & more)', function() {
       return it('divides the first number by the rest', function() {
+        thr('(/)');
+        thr('(/ "string")');
         eq('(/ -4)', new types.Float(-0.25));
         eq('(/ 14 -2)', new types.Integer(-7));
         eq('(/ 14 -2.0)', new types.Float(-7));
@@ -1797,26 +1869,36 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(inc x)', function() {
       return it('increments x by 1', function() {
+        thr('(inc 2 3 4)');
+        thr('(inc "string")');
         return eq('(inc -2e-3)', new types.Float(0.998));
       });
     });
     describe('(dec x)', function() {
       return it('decrements x by 1', function() {
+        thr('(dec 2 3 4)');
+        thr('(dec "string")');
         return eq('(dec -2e-3)', new types.Float(-1.002));
       });
     });
     describe('(max x y & more)', function() {
       return it('finds the maximum of the given numbers', function() {
+        thr('(max)');
+        thr('(max "string" [1 2])');
         return eq('(max -1e10 653.32 1.345e4)', new types.Float(1.345e4));
       });
     });
     describe('(min x y & more)', function() {
       return it('finds the minimum of the given numbers', function() {
+        thr('(min)');
+        thr('(min "string" [1 2])');
         return eq('(min -1e10 653.32 1.345e4)', new types.Float(-1e10));
       });
     });
     describe('(quot num div)', function() {
       return it('computes the quotient of dividing num by div', function() {
+        thr('(quot 10)');
+        thr('(quot [1 2] 3)');
         eq('(quot 10 3)', new types.Integer(3));
         eq('(quot -5.9 3)', new types.Float(-1.0));
         eq('(quot -10 -3)', new types.Integer(3));
@@ -1825,6 +1907,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(rem num div)', function() {
       return it('computes the remainder of dividing num by div (same as % in other languages)', function() {
+        thr('(rem 10)');
+        thr('(rem [1 2] 3)');
         eq('(rem 10.1 3)', new types.Float(10.1 % 3));
         eq('(rem -10.1 3)', new types.Float(-10.1 % 3));
         eq('(rem -10.1 -3)', new types.Float(-10.1 % -3));
@@ -1833,6 +1917,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(mod num div)', function() {
       return it('computes the modulus of num and div (NOT the same as % in other languages)', function() {
+        thr('(mod 10)');
+        thr('(mod [1 2] 3)');
         eq('(mod 10.1 3)', new types.Float(10.1 % 3));
         eq('(mod -10.1 3)', new types.Float(3 - 10.1 % 3));
         eq('(mod -10.1 -3)', new types.Float(-10.1 % 3));
@@ -1841,6 +1927,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(= x y & more)', function() {
       return it('returns true if all its arguments are equal (by value, not identity)', function() {
+        thr('(=)');
         eq('(= nil nil)', types.Boolean["true"]);
         eq('(= 1)', types.Boolean["true"]);
         eq('(= (fn [x y] (+ x y)))', types.Boolean["true"]);
@@ -1862,6 +1949,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(not= x y & more)', function() {
       return it('returns true if some of its arguments are unequal (by value, not identity)', function() {
+        thr('(not=)');
         eq('(not= nil nil)', types.Boolean["false"]);
         eq('(not= 1)', types.Boolean["false"]);
         eq('(not= (fn [x y] (+ x y)))', types.Boolean["false"]);
@@ -1883,6 +1971,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(== x y & more)', function() {
       return it('returns true if all its arguments are numeric and equal, or if given only 1 argument', function() {
+        thr('(==)');
+        thr('(== "hello" "hello")');
         eq('(== 1)', types.Boolean["true"]);
         eq('(== [1 2 3])', types.Boolean["true"]);
         return eq('(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean["true"]);
@@ -1890,6 +1980,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(boolean x)', function() {
       return it('coerces x into a boolean value (false for nil and false, else true)', function() {
+        thr('(boolean nil false)');
         eq('(boolean nil)', types.Boolean["false"]);
         eq('(boolean false)', types.Boolean["false"]);
         eq('(boolean true)', types.Boolean["true"]);
@@ -1901,6 +1992,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(not x)', function() {
       return it('returns the complement of (boolean x) (true for nil and false, else false)', function() {
+        thr('(not nil false)');
         eq('(not nil)', types.Boolean["true"]);
         eq('(not false)', types.Boolean["true"]);
         eq('(not true)', types.Boolean["false"]);
@@ -1912,6 +2004,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(true? x)', function() {
       return it('returns true if and only if x is the value true', function() {
+        thr('(true? nil false)');
         eq('(true? true)', types.Boolean["true"]);
         eq('(true? "hello")', types.Boolean["false"]);
         return eq('(true? (fn []))', types.Boolean["false"]);
@@ -1919,6 +2012,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(false? x)', function() {
       return it('returns true if and only if x is the value false', function() {
+        thr('(false? nil false)');
         eq('(false? false)', types.Boolean["true"]);
         eq('(false? "hello")', types.Boolean["false"]);
         return eq('(false? (fn []))', types.Boolean["false"]);
@@ -1926,6 +2020,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(nil? x)', function() {
       return it('returns true if and only if x is the value nil', function() {
+        thr('(nil? nil false)');
         eq('(nil? nil)', types.Boolean["true"]);
         eq('(nil? "hello")', types.Boolean["false"]);
         return eq('(nil? (fn []))', types.Boolean["false"]);
@@ -1933,6 +2028,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(some? x)', function() {
       return it('returns true if and only if x is NOT the value nil', function() {
+        thr('(some? nil false)');
         eq('(some? nil)', types.Boolean["false"]);
         eq('(some? "hello")', types.Boolean["true"]);
         return eq('(some? (fn []))', types.Boolean["true"]);
@@ -1940,6 +2036,9 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     return describe('(contains? coll key)', function() {
       return it('returns true if the collection contains the given key', function() {
+        thr('(contains? #{nil 2} nil 2)');
+        thr('(contains? "string" "str")');
+        thr('(contains? \'(1 2) 2)');
         eq('(contains? #{nil 2} nil)', types.Boolean["true"]);
         eq('(contains? #{1 2} 3)', types.Boolean["false"]);
         eq('(contains? #{#{1 2}} #{2 1})', types.Boolean["true"]);

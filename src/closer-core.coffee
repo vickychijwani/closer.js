@@ -17,22 +17,26 @@ core =
 
   # arithmetic
   '+': (nums...) ->
+    assert.arity 0, Infinity, arguments
     assert.numbers nums
     type = types.getResultType nums
     new type _.reduce nums, ((sum, num) -> sum + num.value), 0
 
   '-': (nums...) ->
+    assert.arity 1, Infinity, arguments
     assert.numbers nums
     nums.unshift(new types.Integer 0) if nums.length is 1
     type = types.getResultType nums
     new type _.reduce nums.slice(1), ((diff, num) -> diff - num.value), nums[0].value
 
   '*': (nums...) ->
+    assert.arity 0, Infinity, arguments
     assert.numbers nums
     type = types.getResultType nums
     new type _.reduce nums, ((prod, num) -> prod * num.value), 1
 
   '/': (nums...) ->
+    assert.arity 1, Infinity, arguments
     assert.numbers nums
     nums.unshift(new types.Integer 1) if nums.length is 1
     result = _.reduce nums.slice(1), ((quo, num) -> quo / num.value), nums[0].value
@@ -42,35 +46,42 @@ core =
     new type result
 
   'inc': (num) ->
+    assert.arity 1, 1, arguments
     assert.numbers num
     type = types.getResultType arguments
     new type ++num.value
 
   'dec': (num) ->
+    assert.arity 1, 1, arguments
     assert.numbers num
     type = types.getResultType arguments
     new type --num.value
 
   'max': (nums...) ->
+    assert.arity 1, Infinity, arguments
     assert.numbers nums
     _.max nums, 'value'
 
   'min': (nums...) ->
+    assert.arity 1, Infinity, arguments
     assert.numbers nums
     _.min nums, 'value'
 
   'quot': (num, div) ->
+    assert.arity 2, 2, arguments
     assert.numbers arguments
     type = types.getResultType arguments
     sign = if sameSign num, div then 1 else -1
     new type sign * Math.floor Math.abs num.value / div.value
 
   'rem': (num, div) ->
+    assert.arity 2, 2, arguments
     assert.numbers arguments
     type = types.getResultType arguments
     new type num.value % div.value
 
   'mod': (num, div) ->
+    assert.arity 2, 2, arguments
     assert.numbers arguments
     type = types.getResultType arguments
     rem = num.value % div.value
@@ -79,8 +90,8 @@ core =
 
   # comparison
   '=': (args...) ->
+    assert.arity 1, Infinity, arguments
     return types.Boolean.true if args.length is 1
-
     values = getValues(args)
 
     if _.every(args, (arg) -> arg instanceof types.Sequential)
@@ -109,9 +120,11 @@ core =
     new types.Boolean allEqual args
 
   'not=': (args...) ->
+    assert.arity 1, Infinity, arguments
     core.not core['='].apply @, args
 
   '==': (args...) ->
+    assert.arity 1, Infinity, arguments
     return types.Boolean.true if args.length is 1
     assert.numbers args
     new types.Boolean allEqual args
@@ -119,29 +132,36 @@ core =
 
   # logic
   'boolean': (arg) ->
+    assert.arity 1, 1, arguments
     return types.Boolean.true unless arg instanceof types.BaseType
     new types.Boolean(not arg.isFalse() and not arg.isNil())
 
   'not': (arg) ->
+    assert.arity 1, 1, arguments
     core.boolean(arg).complement()
 
 
   # test
   'true?': (arg) ->
+    assert.arity 1, 1, arguments
     new types.Boolean arg instanceof types.BaseType and arg.isTrue()
 
   'false?': (arg) ->
+    assert.arity 1, 1, arguments
     new types.Boolean arg instanceof types.BaseType and arg.isFalse()
 
   'nil?': (arg) ->
+    assert.arity 1, 1, arguments
     new types.Boolean arg instanceof types.BaseType and arg.isNil()
 
   'some?': (arg) ->
+    assert.arity 1, 1, arguments
     core['nil?'](arg).complement()
 
   'contains?': (coll, key) ->
-    # TODO wrong result for Lists!
+    assert.arity 2, 2, arguments
     assert.collections coll
+    assert.notTypes [coll], [types.List]
     if coll instanceof types.Vector
       return new types.Boolean(0 <= key.value < coll.value.length)
     new types.Boolean _.any coll.value, (item) ->
