@@ -9,14 +9,14 @@ exports.toDeepEqual = (expected) ->
 closer = require '../closer'
 types = require '../closer-types'
 
-for type in types.allTypes
+for type of types
   exports[type] = ((type2) ->
     (value) ->
       value = if type2 is 'Nil' then null else value
       valueProp = if value?.type is 'UnaryExpression'
         value.argument = closer.node 'Literal', value.argument
         value
-      else if type2 in types.collectionTypes
+      else if types[type2].prototype instanceof types.Collection
         closer.node 'ArrayExpression', value
       else
         closer.node 'Literal', value

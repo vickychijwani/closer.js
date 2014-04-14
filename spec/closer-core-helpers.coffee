@@ -14,7 +14,7 @@ wireCallsToCore = (ast) ->
         calleeProp = closer.node 'Literal', node.callee.name, node.loc
         node.callee = closer.node 'MemberExpression',
           calleeObj, calleeProp, true, node.loc
-      else if node.type is 'NewExpression' and node.callee.type is 'Identifier' and node.callee.name in types.allTypes
+      else if node.type is 'NewExpression' and node.callee.type is 'Identifier' and node.callee.name of types
         # FIXME same evil here with types
         calleeObj = closer.node 'Identifier', 'types', node.loc
         calleeProp = closer.node 'Identifier', node.callee.name, node.loc

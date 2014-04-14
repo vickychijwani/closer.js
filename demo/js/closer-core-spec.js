@@ -121,7 +121,7 @@
       }
       values = getValues(args);
       if (_.every(args, function(arg) {
-        return arg.isSequentialCollection();
+        return arg instanceof types.Sequential;
       })) {
         return new types.Boolean(_.reduce(_.zip(values), (function(result, items) {
           if (__indexOf.call(_.map(items, function(item) {
@@ -149,7 +149,7 @@
         }), true));
       }
       if (_.some(args, function(arg) {
-        return arg.isCollection();
+        return arg instanceof types.Collection;
       })) {
         return types.Boolean["false"];
       }
@@ -210,120 +210,187 @@
 
 },{"./closer-types":2,"lodash-node":113}],2:[function(_dereq_,module,exports){
 (function() {
-  var Type, core, makeCollectionType, makePrimitiveType, makeSequentialCollectionType, makeType, _,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+  var core, types, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  _ = _dereq_('lodash-node');
+  types = {};
 
-  core = _dereq_('./closer-core');
-
-  exports.BaseType = Type = (function() {
-    function Type(typeName, value) {
-      this.type = typeName;
+  types.BaseType = (function() {
+    function _Class(value, type) {
+      if (type == null) {
+        type = this.constructor.typeName;
+      }
+      this.type = type;
       this.value = value;
     }
 
-    Type.prototype.isTrue = function() {
-      return this.type === 'Boolean' && this.value === true;
+    _Class.prototype.isTrue = function() {
+      return this instanceof types.Boolean && this.value === true;
     };
 
-    Type.prototype.isFalse = function() {
-      return this.type === 'Boolean' && this.value === false;
+    _Class.prototype.isFalse = function() {
+      return this instanceof types.Boolean && this.value === false;
     };
 
-    Type.prototype.isNil = function() {
-      return this.type === 'Nil';
+    _Class.prototype.isNil = function() {
+      return this instanceof types.Nil;
     };
 
-    Type.prototype.isPrimitive = function() {
-      var _ref;
-      return _ref = this.type, __indexOf.call(exports.primitiveTypes, _ref) >= 0;
-    };
-
-    Type.prototype.isCollection = function() {
-      var _ref;
-      return _ref = this.type, __indexOf.call(exports.collectionTypes, _ref) >= 0;
-    };
-
-    Type.prototype.isSequentialCollection = function() {
-      var _ref;
-      return _ref = this.type, __indexOf.call(exports.sequentialCollectionTypes, _ref) >= 0;
-    };
-
-    return Type;
+    return _Class;
 
   })();
 
-  exports.allTypes = [];
+  types.Primitive = (function(_super) {
+    __extends(_Class, _super);
 
-  makeType = function(typeName) {
-    exports.allTypes.push(typeName);
-    return (function(_super) {
-      __extends(_Class, _super);
-
-      function _Class(value) {
-        _Class.__super__.constructor.call(this, typeName, value);
-      }
-
-      _Class.typeName = typeName;
-
-      return _Class;
-
-    })(Type);
-  };
-
-  exports.primitiveTypes = [];
-
-  makePrimitiveType = function(typeName) {
-    exports.primitiveTypes.push(typeName);
-    return makeType(typeName);
-  };
-
-  exports.Integer = makePrimitiveType('Integer');
-
-  exports.Float = makePrimitiveType('Float');
-
-  exports.String = makePrimitiveType('String');
-
-  exports.Boolean = makePrimitiveType('Boolean');
-
-  exports.Nil = makePrimitiveType('Nil');
-
-  exports.Boolean["true"] = new exports.Boolean(true);
-
-  exports.Boolean["false"] = new exports.Boolean(false);
-
-  exports.Boolean.prototype.complement = function() {
-    if (this.isTrue()) {
-      return exports.Boolean["false"];
-    } else {
-      return exports.Boolean["true"];
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
     }
-  };
 
-  exports.Nil.nil = new exports.Nil();
+    return _Class;
 
-  exports.collectionTypes = [];
+  })(types.BaseType);
 
-  makeCollectionType = function(typeName) {
-    exports.collectionTypes.push(typeName);
-    return makeType(typeName);
-  };
+  types.Number = (function(_super) {
+    __extends(_Class, _super);
 
-  exports.sequentialCollectionTypes = [];
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
 
-  makeSequentialCollectionType = function(typeName) {
-    exports.sequentialCollectionTypes.push(typeName);
-    return makeCollectionType(typeName);
-  };
+    return _Class;
 
-  exports.Vector = makeSequentialCollectionType('Vector');
+  })(types.Primitive);
 
-  exports.List = makeSequentialCollectionType('List');
+  types.Integer = (function(_super) {
+    __extends(_Class, _super);
 
-  exports.HashSet = (function(_super) {
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'Integer';
+
+    return _Class;
+
+  })(types.Number);
+
+  types.Float = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'Float';
+
+    return _Class;
+
+  })(types.Number);
+
+  types.String = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'String';
+
+    return _Class;
+
+  })(types.Primitive);
+
+  types.Boolean = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.prototype.complement = function() {
+      if (this.isTrue()) {
+        return this.constructor["false"];
+      } else {
+        return this.constructor["true"];
+      }
+    };
+
+    _Class.typeName = 'Boolean';
+
+    _Class["true"] = new _Class(true, 'Boolean');
+
+    _Class["false"] = new _Class(false, 'Boolean');
+
+    return _Class;
+
+  })(types.Primitive);
+
+  types.Nil = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'Nil';
+
+    _Class.nil = new _Class(null, 'Nil');
+
+    return _Class;
+
+  })(types.Primitive);
+
+  types.Collection = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    return _Class;
+
+  })(types.BaseType);
+
+  types.Sequential = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    return _Class;
+
+  })(types.Collection);
+
+  types.Vector = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'Vector';
+
+    return _Class;
+
+  })(types.Sequential);
+
+  types.List = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'List';
+
+    return _Class;
+
+  })(types.Sequential);
+
+  types.HashSet = (function(_super) {
     __extends(_Class, _super);
 
     function _Class(values) {
@@ -341,20 +408,22 @@
       _Class.__super__.constructor.call(this, uniques);
     }
 
+    _Class.typeName = 'HashSet';
+
     return _Class;
 
-  })(makeCollectionType('HashSet'));
+  })(types.Collection);
 
-  exports.assertTypes = function(literals, types) {
+  types.assertTypes = function(literals, expectedTypes) {
     var actual, expected, lit, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = literals.length; _i < _len; _i++) {
       lit = literals[_i];
-      if (!_.some(types, function(type) {
+      if (!_.some(expectedTypes, function(type) {
         return lit instanceof type;
       })) {
         actual = _.pluck(literals, 'type');
-        expected = _.pluck(types, 'typeName');
+        expected = _.pluck(expectedTypes, 'typeName');
         throw new TypeError("Expected " + (expected.join(' or ')) + ", got [" + (actual.join(', ')) + "]");
       } else {
         _results.push(void 0);
@@ -363,19 +432,25 @@
     return _results;
   };
 
-  exports.assertNumbers = function(literals) {
-    return exports.assertTypes(literals, [exports.Integer, exports.Float]);
+  types.assertNumbers = function(literals) {
+    return types.assertTypes(literals, [types.Number]);
   };
 
-  exports.getResultType = function(numbers) {
-    if (_.some(numbers, function(num) {
-      return num instanceof exports.Float;
+  types.getResultType = function(nums) {
+    if (_.some(nums, function(n) {
+      return n instanceof types.Float;
     })) {
-      return exports.Float;
+      return types.Float;
     } else {
-      return exports.Integer;
+      return types.Integer;
     }
   };
+
+  module.exports = types;
+
+  _ = _dereq_('lodash-node');
+
+  core = _dereq_('./closer-core');
 
 }).call(this);
 
@@ -1590,8 +1665,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
 },{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":220,"fs":215,"path":221}],6:[function(_dereq_,module,exports){
 (function() {
-  var closer, core, escodegen, estraverse, parse, types, wireCallsToCore,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var closer, core, escodegen, estraverse, parse, types, wireCallsToCore;
 
   closer = _dereq_('../closer');
 
@@ -1606,12 +1680,12 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
   wireCallsToCore = function(ast) {
     estraverse.replace(ast, {
       enter: function(node) {
-        var calleeObj, calleeProp, _ref;
+        var calleeObj, calleeProp;
         if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name in core) {
           calleeObj = closer.node('Identifier', 'core', node.loc);
           calleeProp = closer.node('Literal', node.callee.name, node.loc);
           node.callee = closer.node('MemberExpression', calleeObj, calleeProp, true, node.loc);
-        } else if (node.type === 'NewExpression' && node.callee.type === 'Identifier' && (_ref = node.callee.name, __indexOf.call(types.allTypes, _ref) >= 0)) {
+        } else if (node.type === 'NewExpression' && node.callee.type === 'Identifier' && node.callee.name in types) {
           calleeObj = closer.node('Identifier', 'types', node.loc);
           calleeProp = closer.node('Identifier', node.callee.name, node.loc);
           node.callee = closer.node('MemberExpression', calleeObj, calleeProp, false, node.loc);
@@ -1839,8 +1913,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer-types":2,"./closer-core-helpers":6,"./closer-helpers":8}],8:[function(_dereq_,module,exports){
 (function() {
-  var closer, json_diff, type, types, _i, _len, _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+  var closer, json_diff, type, types,
     __slice = [].slice;
 
   json_diff = _dereq_('json-diff');
@@ -1856,14 +1929,12 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
   types = _dereq_('../closer-types');
 
-  _ref = types.allTypes;
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    type = _ref[_i];
+  for (type in types) {
     exports[type] = (function(type2) {
       return function(value) {
         var valueProp;
         value = type2 === 'Nil' ? null : value;
-        valueProp = (value != null ? value.type : void 0) === 'UnaryExpression' ? (value.argument = closer.node('Literal', value.argument), value) : __indexOf.call(types.collectionTypes, type2) >= 0 ? closer.node('ArrayExpression', value) : closer.node('Literal', value);
+        valueProp = (value != null ? value.type : void 0) === 'UnaryExpression' ? (value.argument = closer.node('Literal', value.argument), value) : types[type2].prototype instanceof types.Collection ? closer.node('ArrayExpression', value) : closer.node('Literal', value);
         return closer.node('NewExpression', closer.node('Identifier', type2), [valueProp]);
       };
     })(type);

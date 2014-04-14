@@ -1,85 +1,78 @@
-_ = require 'lodash-node'
-core = require './closer-core'
+types = {}
 
-exports.BaseType = class Type
-  constructor: (typeName, value) ->
-    @type = typeName
+types.BaseType = class
+  constructor: (value, type = @constructor.typeName) ->
+    @type = type
     @value = value
-  isTrue: -> @type is 'Boolean' and @value is true
-  isFalse: -> @type is 'Boolean' and @value is false
-  isNil: -> @type is 'Nil'
-  isPrimitive: -> @type in exports.primitiveTypes
-  isCollection: -> @type in exports.collectionTypes
-  isSequentialCollection: -> @type in exports.sequentialCollectionTypes
-
-exports.allTypes = []
-makeType = (typeName) ->
-  exports.allTypes.push typeName
-  class extends Type
-    constructor: (value) ->
-      super typeName, value
-    @typeName: typeName
-
+  isTrue: -> @ instanceof types.Boolean and @value is true
+  isFalse: -> @ instanceof types.Boolean and @value is false
+  isNil: -> @ instanceof types.Nil
 
 # primitive types
-exports.primitiveTypes = []
-makePrimitiveType = (typeName) ->
-  exports.primitiveTypes.push typeName
-  makeType typeName
+types.Primitive = class extends types.BaseType
+types.Number = class extends types.Primitive
 
-exports.Integer = makePrimitiveType 'Integer'
-exports.Float = makePrimitiveType 'Float'
-exports.String = makePrimitiveType 'String'
-exports.Boolean = makePrimitiveType 'Boolean'
-exports.Nil = makePrimitiveType 'Nil'
+types.Integer = class extends types.Number
+  @typeName: 'Integer'
 
-# boolean constants
-exports.Boolean.true = new exports.Boolean true
-exports.Boolean.false = new exports.Boolean false
-exports.Boolean::complement = () ->
-  if @isTrue() then exports.Boolean.false else exports.Boolean.true
+types.Float = class extends types.Number
+  @typeName: 'Float'
 
-# nil constant
-exports.Nil.nil = new exports.Nil()
+types.String = class extends types.Primitive
+  @typeName: 'String'
+
+types.Boolean = class extends types.Primitive
+  complement: -> if @isTrue() then @constructor.false else @constructor.true
+  @typeName: 'Boolean'
+  @true: new @ true, 'Boolean'
+  @false: new @ false, 'Boolean'
+
+types.Nil = class extends types.Primitive
+  @typeName: 'Nil'
+  @nil: new @ null, 'Nil'
 
 
 # collection types
-exports.collectionTypes = []
-makeCollectionType = (typeName) ->
-  exports.collectionTypes.push typeName
-  makeType typeName
+types.Collection = class extends types.BaseType
+types.Sequential = class extends types.Collection
 
-exports.sequentialCollectionTypes = []
-makeSequentialCollectionType = (typeName) ->
-  exports.sequentialCollectionTypes.push typeName
-  makeCollectionType typeName
+types.Vector = class extends types.Sequential
+  @typeName: 'Vector'
 
-exports.Vector = makeSequentialCollectionType 'Vector'
-exports.List = makeSequentialCollectionType 'List'
-exports.HashSet = class extends makeCollectionType('HashSet')
-  # TODO HashSet isn't really a HashSet yet
+types.List = class extends types.Sequential
+  @typeName: 'List'
+
+types.HashSet = class extends types.Collection
   constructor: (values) ->
+    # TODO HashSet isn't really a HashSet
     uniques = []
     _.each values, (val) ->
       isNew = _.every uniques, (uniq) ->
         core['not='](val, uniq).value
       uniques.push(val) if isNew
     super uniques
+  @typeName: 'HashSet'
 
 
 # utilities
 # throws TypeError if any of the given literals is not of one of the given types
-exports.assertTypes = (literals, types) ->
+types.assertTypes = (literals, expectedTypes) ->
   for lit in literals
-    unless _.some(types, (type) -> lit instanceof type)
+    unless _.some(expectedTypes, (type) -> lit instanceof type)
       actual = _.pluck literals, 'type'
-      expected = _.pluck types, 'typeName'
+      expected = _.pluck expectedTypes, 'typeName'
       throw new TypeError "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
 
-exports.assertNumbers = (literals) ->
-  exports.assertTypes literals, [exports.Integer, exports.Float]
+types.assertNumbers = (literals) ->
+  types.assertTypes literals, [types.Number]
 
-exports.getResultType = (numbers) ->
-  if _.some(numbers, (num) -> num instanceof exports.Float)
-  then exports.Float
-  else exports.Integer
+types.getResultType = (nums) ->
+  if _.some(nums, (n) -> n instanceof types.Float) then types.Float else types.Integer
+
+
+module.exports = types
+
+# requires go here, because of circular dependency
+# see https://coderwall.com/p/myzvmg for more
+_ = require 'lodash-node'
+core = require './closer-core'

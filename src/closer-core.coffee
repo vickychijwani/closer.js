@@ -83,7 +83,7 @@ core =
 
     values = getValues(args)
 
-    if _.every(args, (arg) -> arg.isSequentialCollection())
+    if _.every(args, (arg) -> arg instanceof types.Sequential)
       return new types.Boolean _.reduce _.zip(values), ((result, items) ->
         # if values contains arrays of unequal length, items can contain undefined
         return false if 'undefined' in _.map items, (item) -> typeof item
@@ -101,7 +101,7 @@ core =
       ), true
 
     # a primitive can never equal a collection
-    return types.Boolean.false if _.some(args, (arg) -> arg.isCollection())
+    return types.Boolean.false if _.some(args, (arg) -> arg instanceof types.Collection)
 
     return types.Boolean.false unless allOfSameType args
 
