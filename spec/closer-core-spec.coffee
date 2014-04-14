@@ -267,6 +267,26 @@ describe 'Closer core library', ->
       throws '(zero? [])'
       throws '(zero? nil)'
 
+  describe '(pos? x)', ->
+    it 'returns true if and only if x is a number > 0', ->
+      truthy '(pos? 3)'
+      truthy '(pos? 3.54)'
+      falsy '(pos? 0)'
+      falsy '(pos? -4.5)'
+      throws '(pos? "0.0")'
+      throws '(pos? [])'
+      throws '(pos? nil)'
+
+  describe '(neg? x)', ->
+    it 'returns true if and only if x is a number < 0', ->
+      truthy '(neg? -3)'
+      truthy '(neg? -3.54)'
+      falsy '(neg? 0)'
+      falsy '(neg? 4.5)'
+      throws '(neg? "0.0")'
+      throws '(neg? [])'
+      throws '(neg? nil)'
+
   describe '(even? x)', ->
     it 'returns true if and only if x is an even integer', ->
       truthy '(even? 0)'

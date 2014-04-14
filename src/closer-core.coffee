@@ -200,6 +200,14 @@ core =
     assert.arity 1, 1, arguments
     core['=='](x, new types.Integer(0))
 
+  'pos?': (x) ->
+    assert.arity 1, 1, arguments
+    core['>'] x, new types.Integer(0)
+
+  'neg?': (x) ->
+    assert.arity 1, 1, arguments
+    core['<'] x, new types.Integer(0)
+
   'even?': (x) ->
     assert.arity 1, 1, arguments
     assert.types [x], [types.Integer]

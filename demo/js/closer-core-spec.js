@@ -360,6 +360,14 @@
       assert.arity(1, 1, arguments);
       return core['=='](x, new types.Integer(0));
     },
+    'pos?': function(x) {
+      assert.arity(1, 1, arguments);
+      return core['>'](x, new types.Integer(0));
+    },
+    'neg?': function(x) {
+      assert.arity(1, 1, arguments);
+      return core['<'](x, new types.Integer(0));
+    },
     'even?': function(x) {
       assert.arity(1, 1, arguments);
       assert.types([x], [types.Integer]);
@@ -2195,6 +2203,28 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         throws('(zero? "0.0")');
         throws('(zero? [])');
         return throws('(zero? nil)');
+      });
+    });
+    describe('(pos? x)', function() {
+      return it('returns true if and only if x is a number > 0', function() {
+        truthy('(pos? 3)');
+        truthy('(pos? 3.54)');
+        falsy('(pos? 0)');
+        falsy('(pos? -4.5)');
+        throws('(pos? "0.0")');
+        throws('(pos? [])');
+        return throws('(pos? nil)');
+      });
+    });
+    describe('(neg? x)', function() {
+      return it('returns true if and only if x is a number < 0', function() {
+        truthy('(neg? -3)');
+        truthy('(neg? -3.54)');
+        falsy('(neg? 0)');
+        falsy('(neg? 4.5)');
+        throws('(neg? "0.0")');
+        throws('(neg? [])');
+        return throws('(neg? nil)');
       });
     });
     describe('(even? x)', function() {
