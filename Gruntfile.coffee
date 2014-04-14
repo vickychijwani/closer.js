@@ -72,4 +72,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', ['coffeelint', 'coffee', 'shell:jison', 'jasmine_node', 'shell:browserify']
   grunt.registerTask 'test', ['coffeelint', 'coffee', 'shell:jison', 'jasmine_node']
+  grunt.registerTask 'build', ['coffeelint', 'coffee', 'shell:jison']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']
