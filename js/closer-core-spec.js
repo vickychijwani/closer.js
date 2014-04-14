@@ -194,6 +194,10 @@
       return core['nil?'](arg).complement();
     },
     'contains?': function(coll, key) {
+      var _ref;
+      if (coll instanceof types.Vector) {
+        return new types.Boolean((0 <= (_ref = key.value) && _ref < coll.value.length));
+      }
       return new types.Boolean(_.any(coll.value, function(item) {
         return core['='](key, item).isTrue();
       }));
@@ -1904,7 +1908,11 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(contains? #{1 2} 3)', types.Boolean["false"]);
         eq('(contains? #{#{1 2}} #{2 1})', types.Boolean["true"]);
         eq('(contains? #{[1 2]} \'(1 2))', types.Boolean["true"]);
-        return eq('(contains? #{[1 2]} \'(2 1))', types.Boolean["false"]);
+        eq('(contains? #{[1 2]} \'(2 1))', types.Boolean["false"]);
+        eq('(contains? [98 54] 0)', types.Boolean["true"]);
+        eq('(contains? [98 54] 1)', types.Boolean["true"]);
+        eq('(contains? [98 54] 2)', types.Boolean["false"]);
+        return eq('(contains? [98 54] 98)', types.Boolean["false"]);
       });
     });
   });
