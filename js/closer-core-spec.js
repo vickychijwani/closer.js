@@ -211,6 +211,7 @@
       var args, values;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       assert.arity(1, Infinity, arguments);
+      args = _.uniq(args);
       if (args.length === 1) {
         return types.Boolean["true"];
       }
