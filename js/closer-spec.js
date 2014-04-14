@@ -360,6 +360,14 @@
       assert.arity(1, 1, arguments);
       return core['=='](x, new types.Integer(0));
     },
+    'pos?': function(x) {
+      assert.arity(1, 1, arguments);
+      return core['>'](x, new types.Integer(0));
+    },
+    'neg?': function(x) {
+      assert.arity(1, 1, arguments);
+      return core['<'](x, new types.Integer(0));
+    },
     'even?': function(x) {
       assert.arity(1, 1, arguments);
       assert.types([x], [types.Integer]);
