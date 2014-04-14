@@ -9,35 +9,41 @@ beforeEach ->
 eq = (src, expected) ->
   expect(evaluate src).toDeepEqual expected
 
-thr = (src) ->
+throws = (src) ->
   expect(-> evaluate src).toThrow()
+
+truthy = (src) ->
+  eq src, types.Boolean.true
+
+falsy = (src) ->
+  eq src, types.Boolean.false
 
 describe 'Closer core library', ->
 
   # arithmetic
   describe '(+ x y & more)', ->
     it 'adds the given numbers', ->
-      thr '(+ "string")'
+      throws '(+ "string")'
       eq '(+)', new types.Integer 0
       eq '(+ 3.3 0 -6e2 2)', new types.Float -594.7
 
   describe '(- x y & more)', ->
     it 'subtracts all but the first number from the first one', ->
-      thr '(-)'
-      thr '(- "string")'
+      throws '(-)'
+      throws '(- "string")'
       eq '(- -3.54)', new types.Float 3.54
       eq '(- 10 3.5 -4)', new types.Float 10.5
 
   describe '(* x y & more)', ->
     it 'multiplies the given numbers', ->
-      thr '(* "string")'
+      throws '(* "string")'
       eq '(*)', new types.Integer 1
       eq '(* 3 -6)', new types.Integer -18
 
   describe '(/ x y & more)', ->
     it 'divides the first number by the rest', ->
-      thr '(/)'
-      thr '(/ "string")'
+      throws '(/)'
+      throws '(/ "string")'
       eq '(/ -4)', new types.Float -0.25
       eq '(/ 14 -2)', new types.Integer -7
       eq '(/ 14 -2.0)', new types.Float -7
@@ -45,32 +51,32 @@ describe 'Closer core library', ->
 
   describe '(inc x)', ->
     it 'increments x by 1', ->
-      thr '(inc 2 3 4)'
-      thr '(inc "string")'
+      throws '(inc 2 3 4)'
+      throws '(inc "string")'
       eq '(inc -2e-3)', new types.Float 0.998
 
   describe '(dec x)', ->
     it 'decrements x by 1', ->
-      thr '(dec 2 3 4)'
-      thr '(dec "string")'
+      throws '(dec 2 3 4)'
+      throws '(dec "string")'
       eq '(dec -2e-3)', new types.Float -1.002
 
   describe '(max x y & more)', ->
     it 'finds the maximum of the given numbers', ->
-      thr '(max)'
-      thr '(max "string" [1 2])'
+      throws '(max)'
+      throws '(max "string" [1 2])'
       eq '(max -1e10 653.32 1.345e4)', new types.Float 1.345e4
 
   describe '(min x y & more)', ->
     it 'finds the minimum of the given numbers', ->
-      thr '(min)'
-      thr '(min "string" [1 2])'
+      throws '(min)'
+      throws '(min "string" [1 2])'
       eq '(min -1e10 653.32 1.345e4)', new types.Float -1e10
 
   describe '(quot num div)', ->
     it 'computes the quotient of dividing num by div', ->
-      thr '(quot 10)'
-      thr '(quot [1 2] 3)'
+      throws '(quot 10)'
+      throws '(quot [1 2] 3)'
       eq '(quot 10 3)', new types.Integer 3
       eq '(quot -5.9 3)', new types.Float -1.0
       eq '(quot -10 -3)', new types.Integer 3
@@ -78,8 +84,8 @@ describe 'Closer core library', ->
 
   describe '(rem num div)', ->
     it 'computes the remainder of dividing num by div (same as % in other languages)', ->
-      thr '(rem 10)'
-      thr '(rem [1 2] 3)'
+      throws '(rem 10)'
+      throws '(rem [1 2] 3)'
       eq '(rem 10.1 3)', new types.Float 10.1 % 3
       eq '(rem -10.1 3)', new types.Float -10.1 % 3
       eq '(rem -10.1 -3)', new types.Float -10.1 % -3
@@ -87,8 +93,8 @@ describe 'Closer core library', ->
 
   describe '(mod num div)', ->
     it 'computes the modulus of num and div (NOT the same as % in other languages)', ->
-      thr '(mod 10)'
-      thr '(mod [1 2] 3)'
+      throws '(mod 10)'
+      throws '(mod [1 2] 3)'
       eq '(mod 10.1 3)', new types.Float 10.1 % 3
       eq '(mod -10.1 3)', new types.Float 3 - 10.1 % 3
       eq '(mod -10.1 -3)', new types.Float -10.1 % 3
@@ -98,157 +104,157 @@ describe 'Closer core library', ->
   # comparison
   describe '(= x y & more)', ->
     it 'returns true if all its arguments are equal (by value, not identity)', ->
-      thr '(=)'
-      eq '(= nil nil)', types.Boolean.true
-      eq '(= 1)', types.Boolean.true
-      eq '(= (fn [x y] (+ x y)))', types.Boolean.true   # always returns true for 1 arg
-      eq '(= 1 (/ 4 (+ 2 2)) (mod 5 4))', types.Boolean.true
-      eq '(= 1 (/ 4 (+ 2 2)) (mod 5 3))', types.Boolean.false
-      eq '(= 1 1.0)', types.Boolean.false
-      eq '(= 1.0 (/ 2.0 2))', types.Boolean.true
-      eq '(= "hello" "hello")', types.Boolean.true
-      eq '(= true (= 4 (* 2 2)))', types.Boolean.true
-      eq '(= true (= 4 (* 2 3)))', types.Boolean.false
-      eq '(= [3 4] \'(3 4))', types.Boolean.true
-      eq '(= [3 4] \'((+ 2 1) (/ 16 4)))', types.Boolean.true
-      eq '(= [3 4] \'((+ 2 1) (/ 16 8)))', types.Boolean.false
-      eq '(= [3 4] \'((+ 2 1) (/ 16 4) 5))', types.Boolean.false
-      eq '(= #{1 2} #{2 1})', types.Boolean.true
-      eq '(= #{1 2} #{2 1 3})', types.Boolean.false
-      eq '(= #{1 2} [2 1])', types.Boolean.false
+      throws '(=)'
+      truthy '(= nil nil)'
+      truthy '(= 1)'
+      truthy '(= (fn [x y] (+ x y)))'   # always returns true for 1 arg
+      truthy '(= 1 (/ 4 (+ 2 2)) (mod 5 4))'
+      falsy '(= 1 (/ 4 (+ 2 2)) (mod 5 3))'
+      falsy '(= 1 1.0)'
+      truthy '(= 1.0 (/ 2.0 2))'
+      truthy '(= "hello" "hello")'
+      truthy '(= true (= 4 (* 2 2)))'
+      falsy '(= true (= 4 (* 2 3)))'
+      truthy '(= [3 4] \'(3 4))'
+      truthy '(= [3 4] \'((+ 2 1) (/ 16 4)))'
+      falsy '(= [3 4] \'((+ 2 1) (/ 16 8)))'
+      falsy '(= [3 4] \'((+ 2 1) (/ 16 4) 5))'
+      truthy '(= #{1 2} #{2 1})'
+      falsy '(= #{1 2} #{2 1 3})'
+      falsy '(= #{1 2} [2 1])'
 
   describe '(not= x y & more)', ->
     it 'returns true if some of its arguments are unequal (by value, not identity)', ->
-      thr '(not=)'
-      eq '(not= nil nil)', types.Boolean.false
-      eq '(not= 1)', types.Boolean.false
-      eq '(not= (fn [x y] (+ x y)))', types.Boolean.false   # always returns false for 1 arg
-      eq '(not= 1 (/ 4 (+ 2 2)) (mod 5 4))', types.Boolean.false
-      eq '(not= 1 (/ 4 (+ 2 2)) (mod 5 3))', types.Boolean.true
-      eq '(not= 1 1.0)', types.Boolean.true
-      eq '(not= 1.0 (/ 2.0 2))', types.Boolean.false
-      eq '(not= "hello" "hello")', types.Boolean.false
-      eq '(not= true (= 4 (* 2 2)))', types.Boolean.false
-      eq '(not= true (= 4 (* 2 3)))', types.Boolean.true
-      eq '(not= [3 4] \'(3 4))', types.Boolean.false
-      eq '(not= [3 4] \'((+ 2 1) (/ 16 4)))', types.Boolean.false
-      eq '(not= [3 4] \'((+ 2 1) (/ 16 8)))', types.Boolean.true
-      eq '(not= [3 4] \'((+ 2 1) (/ 16 4) 5))', types.Boolean.true
-      eq '(not= #{1 2} #{2 1})', types.Boolean.false
-      eq '(not= #{1 2} #{2 1 3})', types.Boolean.true
-      eq '(not= #{1 2} [2 1])', types.Boolean.true
+      throws '(not=)'
+      falsy '(not= nil nil)'
+      falsy '(not= 1)'
+      falsy '(not= (fn [x y] (+ x y)))'   # always falsy for 1 arg
+      falsy '(not= 1 (/ 4 (+ 2 2)) (mod 5 4))'
+      truthy '(not= 1 (/ 4 (+ 2 2)) (mod 5 3))'
+      truthy '(not= 1 1.0)'
+      falsy '(not= 1.0 (/ 2.0 2))'
+      falsy '(not= "hello" "hello")'
+      falsy '(not= true (= 4 (* 2 2)))'
+      truthy '(not= true (= 4 (* 2 3)))'
+      falsy '(not= [3 4] \'(3 4))'
+      falsy '(not= [3 4] \'((+ 2 1) (/ 16 4)))'
+      truthy '(not= [3 4] \'((+ 2 1) (/ 16 8)))'
+      truthy '(not= [3 4] \'((+ 2 1) (/ 16 4) 5))'
+      falsy '(not= #{1 2} #{2 1})'
+      truthy '(not= #{1 2} #{2 1 3})'
+      truthy '(not= #{1 2} [2 1])'
 
   describe '(== x y & more)', ->
     it 'returns true if all its arguments are numeric and equal, or if given only 1 argument', ->
-      thr '(==)'
-      thr '(== "hello" "hello")'
-      eq '(== 1)', types.Boolean.true
-      eq '(== [1 2 3])', types.Boolean.true  # == returns true for 1 arg irrespective of type
-      eq '(== 2 2.0 (/ 8 (+ 2 2.0)))', types.Boolean.true
+      throws '(==)'
+      throws '(== "hello" "hello")'
+      truthy '(== 1)'
+      truthy '(== [1 2 3])'  # always truthy for 1 arg irrespective of type
+      truthy '(== 2 2.0 (/ 8 (+ 2 2.0)))'
 
   describe '(identical? x y)', ->
     it 'returns true if x and y are the same object', ->
-      thr '(identical? 1 1 1)'
-      eq '(identical? 1 1)', types.Boolean.true
-      eq '(identical? 1.56 1.56)', types.Boolean.false
-      eq '(identical? true true)', types.Boolean.true
-      eq '(identical? nil nil)', types.Boolean.true
-      eq '(identical? #{1 2} #{1 2})', types.Boolean.false
-      eq '(let [a #{1 2}] (identical? a a))', types.Boolean.true
+      throws '(identical? 1 1 1)'
+      truthy '(identical? 1 1)'
+      falsy '(identical? 1.56 1.56)'
+      truthy '(identical? true true)'
+      truthy '(identical? nil nil)'
+      falsy '(identical? #{1 2} #{1 2})'
+      truthy '(let [a #{1 2}] (identical? a a))'
       # different from standard Clojure behaviour; string interning cannot be emulated
-      eq '(identical? "string" "string")', types.Boolean.false
+      falsy '(identical? "string" "string")'
 
   describe '(true? x)', ->
     it 'returns true if and only if x is the value true', ->
-      thr '(true? nil false)'
-      eq '(true? true)', types.Boolean.true
-      eq '(true? "hello")', types.Boolean.false
-      eq '(true? (fn []))', types.Boolean.false
+      throws '(true? nil false)'
+      truthy '(true? true)'
+      falsy '(true? "hello")'
+      falsy '(true? (fn []))'
 
   describe '(false? x)', ->
     it 'returns true if and only if x is the value false', ->
-      thr '(false? nil false)'
-      eq '(false? false)', types.Boolean.true
-      eq '(false? "hello")', types.Boolean.false
-      eq '(false? (fn []))', types.Boolean.false
+      throws '(false? nil false)'
+      truthy '(false? false)'
+      falsy '(false? "hello")'
+      falsy '(false? (fn []))'
 
   describe '(nil? x)', ->
     it 'returns true if and only if x is the value nil', ->
-      thr '(nil? nil false)'
-      eq '(nil? nil)', types.Boolean.true
-      eq '(nil? "hello")', types.Boolean.false
-      eq '(nil? (fn []))', types.Boolean.false
+      throws '(nil? nil false)'
+      truthy '(nil? nil)'
+      falsy '(nil? "hello")'
+      falsy '(nil? (fn []))'
 
   describe '(some? x)', ->
     it 'returns true if and only if x is NOT the value nil', ->
-      thr '(some? nil false)'
-      eq '(some? nil)', types.Boolean.false
-      eq '(some? "hello")', types.Boolean.true
-      eq '(some? (fn []))', types.Boolean.true
+      throws '(some? nil false)'
+      falsy '(some? nil)'
+      truthy '(some? "hello")'
+      truthy '(some? (fn []))'
 
   describe '(number? x)', ->
     it 'returns true if and only if x is a number', ->
-      eq '(number? 0)', types.Boolean.true
-      eq '(number? 0.0)', types.Boolean.true
-      eq '(number? ((fn [] 0)))', types.Boolean.true
-      eq '(number? "0")', types.Boolean.false
-      eq '(number? [])', types.Boolean.false
-      eq '(number? nil)', types.Boolean.false
+      truthy '(number? 0)'
+      truthy '(number? 0.0)'
+      truthy '(number? ((fn [] 0)))'
+      falsy '(number? "0")'
+      falsy '(number? [])'
+      falsy '(number? nil)'
 
   describe '(integer? x)', ->
     it 'returns true if and only if x is an integer', ->
-      eq '(integer? 0)', types.Boolean.true
-      eq '(integer? 0.0)', types.Boolean.false
-      eq '(integer? ((fn [] 0)))', types.Boolean.true
-      eq '(integer? "0")', types.Boolean.false
-      eq '(integer? [])', types.Boolean.false
-      eq '(integer? nil)', types.Boolean.false
+      truthy '(integer? 0)'
+      falsy '(integer? 0.0)'
+      truthy '(integer? ((fn [] 0)))'
+      falsy '(integer? "0")'
+      falsy '(integer? [])'
+      falsy '(integer? nil)'
 
   describe '(float? x)', ->
     it 'returns true if and only if x is a floating-point number', ->
-      eq '(float? 0)', types.Boolean.false
-      eq '(float? 0.0)', types.Boolean.true
-      eq '(float? ((fn [] 0.0)))', types.Boolean.true
-      eq '(float? "0.0")', types.Boolean.false
-      eq '(float? [])', types.Boolean.false
-      eq '(float? nil)', types.Boolean.false
+      falsy '(float? 0)'
+      truthy '(float? 0.0)'
+      truthy '(float? ((fn [] 0.0)))'
+      falsy '(float? "0.0")'
+      falsy '(float? [])'
+      falsy '(float? nil)'
 
   describe '(contains? coll key)', ->
     it 'returns true if the collection contains the given key', ->
-      thr '(contains? #{nil 2} nil 2)'
-      thr '(contains? "string" "str")'
-      thr '(contains? \'(1 2) 2)'  # not supported for lists
-      eq '(contains? #{nil 2} nil)', types.Boolean.true
-      eq '(contains? #{1 2} 3)', types.Boolean.false
-      eq '(contains? #{#{1 2}} #{2 1})', types.Boolean.true
-      eq '(contains? #{[1 2]} \'(1 2))', types.Boolean.true
-      eq '(contains? #{[1 2]} \'(2 1))', types.Boolean.false
+      throws '(contains? #{nil 2} nil 2)'
+      throws '(contains? "string" "str")'
+      throws '(contains? \'(1 2) 2)'  # not supported for lists
+      truthy '(contains? #{nil 2} nil)'
+      falsy '(contains? #{1 2} 3)'
+      truthy '(contains? #{#{1 2}} #{2 1})'
+      truthy '(contains? #{[1 2]} \'(1 2))'
+      falsy '(contains? #{[1 2]} \'(2 1))'
       # when coll is a vector, contains? checks if key is a valid index into it
-      eq '(contains? [98 54] 0)', types.Boolean.true
-      eq '(contains? [98 54] 1)', types.Boolean.true
-      eq '(contains? [98 54] 2)', types.Boolean.false
-      eq '(contains? [98 54] 98)', types.Boolean.false
+      truthy '(contains? [98 54] 0)'
+      truthy '(contains? [98 54] 1)'
+      falsy '(contains? [98 54] 2)'
+      falsy '(contains? [98 54] 98)'
 
 
   # logic
   describe '(boolean x)', ->
     it 'coerces x into a boolean value (false for nil and false, else true)', ->
-      thr '(boolean nil false)'
-      eq '(boolean nil)', types.Boolean.false
-      eq '(boolean false)', types.Boolean.false
-      eq '(boolean true)', types.Boolean.true
-      eq '(boolean 34.75)', types.Boolean.true
-      eq '(boolean "hello")', types.Boolean.true
-      eq '(boolean [1 2])', types.Boolean.true
-      eq '(boolean (fn [x y] (+ x y)))', types.Boolean.true
+      throws '(boolean nil false)'
+      falsy '(boolean nil)'
+      falsy '(boolean false)'
+      truthy '(boolean true)'
+      truthy '(boolean 34.75)'
+      truthy '(boolean "hello")'
+      truthy '(boolean [1 2])'
+      truthy '(boolean (fn [x y] (+ x y)))'
 
   describe '(not x)', ->
     it 'returns the complement of (boolean x) (true for nil and false, else false)', ->
-      thr '(not nil false)'
-      eq '(not nil)', types.Boolean.true
-      eq '(not false)', types.Boolean.true
-      eq '(not true)', types.Boolean.false
-      eq '(not 34.75)', types.Boolean.false
-      eq '(not "hello")', types.Boolean.false
-      eq '(not [1 2])', types.Boolean.false
-      eq '(not (fn [x y] (+ x y)))', types.Boolean.false
+      throws '(not nil false)'
+      truthy '(not nil)'
+      truthy '(not false)'
+      falsy '(not true)'
+      falsy '(not 34.75)'
+      falsy '(not "hello")'
+      falsy '(not [1 2])'
+      falsy '(not (fn [x y] (+ x y)))'
