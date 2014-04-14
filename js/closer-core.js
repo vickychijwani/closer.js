@@ -268,7 +268,7 @@
         return types.Boolean["true"];
       }
       assert.numbers(args);
-      return new types.Boolean(allEqual(args));
+      return new types.Boolean(allEqual(_.uniq(args)));
     },
     'identical?': function(x, y) {
       assert.arity(2, 2, arguments);
