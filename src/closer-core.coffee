@@ -164,6 +164,18 @@ core =
     assert.arity 1, 1, arguments
     new types.Boolean x instanceof types.Float
 
+  'zero?': (x) ->
+    assert.arity 1, 1, arguments
+    core['=='](x, new types.Integer(0))
+
+  'even?': (x) ->
+    assert.arity 1, 1, arguments
+    assert.types [x], [types.Integer]
+    core['zero?'] core['mod'] x, new types.Integer(2)
+
+  'odd?': (x) ->
+    core['not'] core['even?'] x
+
   'contains?': (coll, key) ->
     assert.arity 2, 2, arguments
     assert.collections coll

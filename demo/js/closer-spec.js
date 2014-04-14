@@ -308,6 +308,18 @@
       assert.arity(1, 1, arguments);
       return new types.Boolean(x instanceof types.Float);
     },
+    'zero?': function(x) {
+      assert.arity(1, 1, arguments);
+      return core['=='](x, new types.Integer(0));
+    },
+    'even?': function(x) {
+      assert.arity(1, 1, arguments);
+      assert.types([x], [types.Integer]);
+      return core['zero?'](core['mod'](x, new types.Integer(2)));
+    },
+    'odd?': function(x) {
+      return core['not'](core['even?'](x));
+    },
     'contains?': function(coll, key) {
       var _ref;
       assert.arity(2, 2, arguments);

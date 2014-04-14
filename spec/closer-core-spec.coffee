@@ -219,6 +219,36 @@ describe 'Closer core library', ->
       falsy '(float? [])'
       falsy '(float? nil)'
 
+  describe '(zero? x)', ->
+    it 'returns true if and only if x is numerically 0', ->
+      truthy '(zero? 0)'
+      truthy '(zero? 0.0)'
+      truthy '(zero? ((fn [] 0.0)))'
+      throws '(zero? "0.0")'
+      throws '(zero? [])'
+      throws '(zero? nil)'
+
+  describe '(even? x)', ->
+    it 'returns true if and only if x is an even integer', ->
+      truthy '(even? 0)'
+      truthy '(even? 68)'
+      falsy '(even? 69)'
+      truthy '(even? ((fn [] -56)))'
+      falsy '(even? ((fn [] -57)))'
+      throws '(even? 0.0)'
+      throws '(even? 2.0)'
+      throws '(even? "0.0")'
+
+  describe '(odd? x)', ->
+    it 'returns true if and only if x is an odd integer', ->
+      falsy '(odd? 0)'
+      falsy '(odd? 68)'
+      truthy '(odd? 69)'
+      falsy '(odd? ((fn [] -56)))'
+      truthy '(odd? ((fn [] -57)))'
+      throws '(odd? 1.0)'
+      throws '(odd? "1.0")'
+
   describe '(contains? coll key)', ->
     it 'returns true if the collection contains the given key', ->
       throws '(contains? #{nil 2} nil 2)'
