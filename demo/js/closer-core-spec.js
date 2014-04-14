@@ -270,6 +270,54 @@
       assert.numbers(args);
       return new types.Boolean(allEqual(_.uniq(args)));
     },
+    '<': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val < values[idx + 1]);
+      }), true));
+    },
+    '>': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val > values[idx + 1]);
+      }), true));
+    },
+    '<=': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val <= values[idx + 1]);
+      }), true));
+    },
+    '>=': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val >= values[idx + 1]);
+      }), true));
+    },
     'identical?': function(x, y) {
       assert.arity(2, 2, arguments);
       if (_.every([x, y], function(arg) {
@@ -2014,12 +2062,55 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       });
     });
     describe('(== x y & more)', function() {
-      return it('returns true if all its arguments are numeric and equal, or if given only 1 argument', function() {
+      return it('returns true if all its arguments are numeric and equal', function() {
         throws('(==)');
         throws('(== "hello" "hello")');
-        truthy('(== 1)');
         truthy('(== [1 2 3])');
         return truthy('(let [a 2] (== a a 2.0 (/ 8 (+ 2 2.0))))');
+      });
+    });
+    describe('(< x y & more)', function() {
+      return it('returns true if its arguments are in monotonically increasing order', function() {
+        throws('(<)');
+        throws('(< "hello" "hello")');
+        truthy('(< [1 2 3])');
+        truthy('(< 0.76 3.45 (+ 2 2) 5)');
+        falsy('(< 0.76 3.45 (+ 2 2) 3)');
+        falsy('(< 0.76 3.45 (+ 2 2) 4)');
+        return throws('(< 0.76 3.45 (+ 2 2) nil)');
+      });
+    });
+    describe('(> x y & more)', function() {
+      return it('returns true if its arguments are in monotonically decreasing order', function() {
+        throws('(>)');
+        throws('(> "hello" "hello")');
+        truthy('(> [1 2 3])');
+        truthy('(> 5 (+ 2 2) 3.45 0.76)');
+        falsy('(> 3 (+ 2 2) 3.45 0.76)');
+        falsy('(> 4 (+ 2 2) 3.45 0.76)');
+        return throws('(> nil (+ 2 2) 3.45 0.76)');
+      });
+    });
+    describe('(<= x y & more)', function() {
+      return it('returns true if its arguments are in monotonically non-decreasing order', function() {
+        throws('(<=)');
+        throws('(<= "hello" "hello")');
+        truthy('(<= [1 2 3])');
+        truthy('(<= 0.76 3.45 (+ 2 2) 5)');
+        falsy('(<= 0.76 3.45 (+ 2 2) 3)');
+        truthy('(<= 0.76 3.45 (+ 2 2) 4)');
+        return throws('(<= 0.76 3.45 (+ 2 2) nil)');
+      });
+    });
+    describe('(>= x y & more)', function() {
+      return it('returns true if its arguments are in monotonically non-increasing order', function() {
+        throws('(>=)');
+        throws('(>= "hello" "hello")');
+        truthy('(>= [1 2 3])');
+        truthy('(>= 5 (+ 2 2) 3.45 0.76)');
+        falsy('(>= 3 (+ 2 2) 3.45 0.76)');
+        truthy('(>= 4 (+ 2 2) 3.45 0.76)');
+        return throws('(>= nil (+ 2 2) 3.45 0.76)');
       });
     });
     describe('(identical? x y)', function() {

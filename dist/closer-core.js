@@ -270,6 +270,54 @@
       assert.numbers(args);
       return new types.Boolean(allEqual(_.uniq(args)));
     },
+    '<': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val < values[idx + 1]);
+      }), true));
+    },
+    '>': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val > values[idx + 1]);
+      }), true));
+    },
+    '<=': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val <= values[idx + 1]);
+      }), true));
+    },
+    '>=': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(1, Infinity, arguments);
+      if (args.length === 1) {
+        return types.Boolean["true"];
+      }
+      assert.numbers(args);
+      return new types.Boolean(_.reduce(getValues(args), (function(result, val, idx, values) {
+        return result && (idx + 1 === values.length || val >= values[idx + 1]);
+      }), true));
+    },
     'identical?': function(x, y) {
       assert.arity(2, 2, arguments);
       if (_.every([x, y], function(arg) {

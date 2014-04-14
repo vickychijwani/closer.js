@@ -145,12 +145,51 @@ describe 'Closer core library', ->
       truthy '(not= #{1 2} [2 1])'
 
   describe '(== x y & more)', ->
-    it 'returns true if all its arguments are numeric and equal, or if given only 1 argument', ->
+    it 'returns true if all its arguments are numeric and equal', ->
       throws '(==)'
       throws '(== "hello" "hello")'
-      truthy '(== 1)'
       truthy '(== [1 2 3])'  # always truthy for 1 arg irrespective of type
       truthy '(let [a 2] (== a a 2.0 (/ 8 (+ 2 2.0))))'
+
+  describe '(< x y & more)', ->
+    it 'returns true if its arguments are in monotonically increasing order', ->
+      throws '(<)'
+      throws '(< "hello" "hello")'
+      truthy '(< [1 2 3])'  # always truthy for 1 arg irrespective of type
+      truthy '(< 0.76 3.45 (+ 2 2) 5)'
+      falsy '(< 0.76 3.45 (+ 2 2) 3)'
+      falsy '(< 0.76 3.45 (+ 2 2) 4)'
+      throws '(< 0.76 3.45 (+ 2 2) nil)'
+
+  describe '(> x y & more)', ->
+    it 'returns true if its arguments are in monotonically decreasing order', ->
+      throws '(>)'
+      throws '(> "hello" "hello")'
+      truthy '(> [1 2 3])'  # always truthy for 1 arg irrespective of type
+      truthy '(> 5 (+ 2 2) 3.45 0.76)'
+      falsy '(> 3 (+ 2 2) 3.45 0.76)'
+      falsy '(> 4 (+ 2 2) 3.45 0.76)'
+      throws '(> nil (+ 2 2) 3.45 0.76)'
+
+  describe '(<= x y & more)', ->
+    it 'returns true if its arguments are in monotonically non-decreasing order', ->
+      throws '(<=)'
+      throws '(<= "hello" "hello")'
+      truthy '(<= [1 2 3])'  # always truthy for 1 arg irrespective of type
+      truthy '(<= 0.76 3.45 (+ 2 2) 5)'
+      falsy '(<= 0.76 3.45 (+ 2 2) 3)'
+      truthy '(<= 0.76 3.45 (+ 2 2) 4)'
+      throws '(<= 0.76 3.45 (+ 2 2) nil)'
+
+  describe '(>= x y & more)', ->
+    it 'returns true if its arguments are in monotonically non-increasing order', ->
+      throws '(>=)'
+      throws '(>= "hello" "hello")'
+      truthy '(>= [1 2 3])'  # always truthy for 1 arg irrespective of type
+      truthy '(>= 5 (+ 2 2) 3.45 0.76)'
+      falsy '(>= 3 (+ 2 2) 3.45 0.76)'
+      truthy '(>= 4 (+ 2 2) 3.45 0.76)'
+      throws '(>= nil (+ 2 2) 3.45 0.76)'
 
   describe '(identical? x y)', ->
     it 'returns true if x and y are the same object', ->

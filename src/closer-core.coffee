@@ -131,6 +131,38 @@ core =
     assert.numbers args
     new types.Boolean allEqual _.uniq args
 
+  '<': (args...) ->
+    assert.arity 1, Infinity, arguments
+    return types.Boolean.true if args.length is 1
+    assert.numbers args
+    new types.Boolean _.reduce getValues(args), ((result, val, idx, values) ->
+      result and (idx+1 is values.length or val < values[idx+1])
+    ), true
+
+  '>': (args...) ->
+    assert.arity 1, Infinity, arguments
+    return types.Boolean.true if args.length is 1
+    assert.numbers args
+    new types.Boolean _.reduce getValues(args), ((result, val, idx, values) ->
+      result and (idx+1 is values.length or val > values[idx+1])
+    ), true
+
+  '<=': (args...) ->
+    assert.arity 1, Infinity, arguments
+    return types.Boolean.true if args.length is 1
+    assert.numbers args
+    new types.Boolean _.reduce getValues(args), ((result, val, idx, values) ->
+      result and (idx+1 is values.length or val <= values[idx+1])
+    ), true
+
+  '>=': (args...) ->
+    assert.arity 1, Infinity, arguments
+    return types.Boolean.true if args.length is 1
+    assert.numbers args
+    new types.Boolean _.reduce getValues(args), ((result, val, idx, values) ->
+      result and (idx+1 is values.length or val >= values[idx+1])
+    ), true
+
   'identical?': (x, y) ->
     assert.arity 2, 2, arguments
     return core['='](x, y) if _.every [x, y], (arg) -> arg.type in ['Integer', 'Boolean', 'Nil']
