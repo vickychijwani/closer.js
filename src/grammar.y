@@ -83,7 +83,8 @@ LetBinding
 LetBindings
   : LetBindings LetBinding {
         $$ = $LetBindings;
-        var binding = yy.Node('VariableDeclaration', 'let', [$LetBinding], yy.loc(@LetBinding));
+        // TODO let bindings are supposed to be local!
+        var binding = yy.Node('VariableDeclaration', 'var', [$LetBinding], yy.loc(@LetBinding));
         $LetBindings.push(binding);
     }
   | { $$ = []; }

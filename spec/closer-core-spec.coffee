@@ -154,7 +154,7 @@ describe 'Closer core library', ->
       eq '(identical? true true)', types.Boolean.true
       eq '(identical? nil nil)', types.Boolean.true
       eq '(identical? #{1 2} #{1 2})', types.Boolean.false
-      eq '(def a #{1 2}) (identical? a a)', types.Boolean.true
+      eq '(let [a #{1 2}] (identical? a a))', types.Boolean.true
       # different from standard Clojure behaviour; string interning cannot be emulated
       eq '(identical? "string" "string")', types.Boolean.false
 

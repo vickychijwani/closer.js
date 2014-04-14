@@ -1065,7 +1065,8 @@ case 24:
 break;
 case 25:
         this.$ = $$[$0-1];
-        var binding = yy.Node('VariableDeclaration', 'let', [$$[$0]], yy.loc(_$[$0]));
+        // TODO let bindings are supposed to be local!
+        var binding = yy.Node('VariableDeclaration', 'var', [$$[$0]], yy.loc(_$[$0]));
         $$[$0-1].push(binding);
     
 break;
@@ -1997,7 +1998,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(identical? true true)', types.Boolean["true"]);
         eq('(identical? nil nil)', types.Boolean["true"]);
         eq('(identical? #{1 2} #{1 2})', types.Boolean["false"]);
-        eq('(def a #{1 2}) (identical? a a)', types.Boolean["true"]);
+        eq('(let [a #{1 2}] (identical? a a))', types.Boolean["true"]);
         return eq('(identical? "string" "string")', types.Boolean["false"]);
       });
     });
@@ -2177,8 +2178,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return {
       type: 'VariableDeclaration',
-      kind: args[0],
-      declarations: args.slice(1)
+      kind: 'var',
+      declarations: args
     };
   };
 

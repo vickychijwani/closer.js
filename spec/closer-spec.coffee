@@ -172,7 +172,6 @@ describe 'Closer parser', ->
   it 'parses an unbound var definition', ->
     expect(closer.parse('(def var-name)')).toDeepEqual Program(
       VariableDeclaration(
-        'var',
         VariableDeclarator(
           Identifier('var-name'),
           null)))
@@ -180,7 +179,6 @@ describe 'Closer parser', ->
   it 'parses a var bound to a literal', ->
     expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual Program(
       VariableDeclaration(
-        'var',
         VariableDeclarator(
           Identifier('greeting'),
           String('Hello'))))
@@ -188,7 +186,6 @@ describe 'Closer parser', ->
   it 'parses a var bound to the result of an expression', ->
     expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual Program(
       VariableDeclaration(
-        'var',
         VariableDeclarator(
           Identifier('sum'),
           CallExpression(
@@ -198,7 +195,6 @@ describe 'Closer parser', ->
   it 'parses a var bound to an fn form', ->
     expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual Program(
       VariableDeclaration(
-        'var',
         VariableDeclarator(
           Identifier('add'),
           FunctionExpression(
@@ -218,12 +214,10 @@ describe 'Closer parser', ->
     expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual Program(
       BlockStatement(
         VariableDeclaration(
-          'let',
           VariableDeclarator(
             Identifier('x'),
             Integer(3))),
         VariableDeclaration(
-          'let',
           VariableDeclarator(
             Identifier('y'),
             CallExpression(

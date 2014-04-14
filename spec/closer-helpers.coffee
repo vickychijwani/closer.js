@@ -67,8 +67,8 @@ exports.ReturnStatement = (argument) ->
 
 exports.VariableDeclaration = (args...) ->
   type: 'VariableDeclaration'
-  kind: args[0]
-  declarations: args.slice(1)
+  kind: 'var'
+  declarations: args
 
 exports.VariableDeclarator = (id, init) ->
   type: 'VariableDeclarator'
