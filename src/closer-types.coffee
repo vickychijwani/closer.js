@@ -56,6 +56,12 @@ types.Sequence = ['items']
 
 types.Map = ['keys', 'values']
 
+types.Seq = class extends types.Collection
+  items: -> @value
+  @typeName: 'Seq'
+  @startDelimiter: '('
+  @endDelimiter: ')'
+
 types.Vector = class extends types.Collection
   items: -> @value
   keys: -> _.map _.range(@value.length), (idx) -> new types.Integer idx
@@ -97,7 +103,7 @@ types.HashMap = class extends types.Collection
         throw new DuplicateKeyError(key) if core['='](key, uniq).value
       uniques.push key
     super { keys: keys, values: values }
-  items: -> _.zip @keys(), @values()
+  items: -> _.map _.zip(@keys(), @values()), (pair) -> new types.Vector(pair)
   keys: -> @value.keys
   values: -> @value.values
   @typeName: 'HashMap'

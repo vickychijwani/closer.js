@@ -419,3 +419,16 @@ describe 'Closer core library', ->
       nil '(get \'(45 89 32) 89)'
       nil '(get \'(45 89 32) 1)'
       eq '(get "qwerty" 2)', new types.String 'e'
+
+  describe '(seq coll)', ->
+    it 'returns a seq on the collection, or nil if it is empty or nil', ->
+      throws '(seq [1 2 3] [4 5 6])'
+      throws '(seq true)'
+      nil '(seq nil)'
+      nil '(seq "")'
+      nil '(seq {})'
+      eq '(seq "qwe")', new types.Seq [new types.String('q'), new types.String('w'), new types.String('e')]
+      eq '(seq [1 2 3])', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
+      eq '(seq \'(1 2 3))', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
+      eq '(seq #{1 2 3})', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
+      eq '(seq {1 2 3 4})', new types.Seq [new types.Vector([new types.Integer(1), new types.Integer(2)]), new types.Vector([new types.Integer(3), new types.Integer(4)])]

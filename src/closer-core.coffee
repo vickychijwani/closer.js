@@ -282,6 +282,12 @@ core =
       core['='](key, key2).isTrue()
     if index is -1 then notFound else coll.values()[index]
 
+  'seq': (coll) ->
+    assert.arity 1, 1, arguments
+    assert.types [coll], [types.Nil, types.String, types.Collection]
+    return types.Nil.nil if core['count'](coll).value is 0
+    new types.Seq coll.items()
+
 
 module.exports = core
 

@@ -481,6 +481,14 @@
       } else {
         return coll.values()[index];
       }
+    },
+    'seq': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      if (core['count'](coll).value === 0) {
+        return types.Nil.nil;
+      }
+      return new types.Seq(coll.items());
     }
   };
 
@@ -690,6 +698,27 @@
 
   types.Map = ['keys', 'values'];
 
+  types.Seq = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.prototype.items = function() {
+      return this.value;
+    };
+
+    _Class.typeName = 'Seq';
+
+    _Class.startDelimiter = '(';
+
+    _Class.endDelimiter = ')';
+
+    return _Class;
+
+  })(types.Collection);
+
   types.Vector = (function(_super) {
     __extends(_Class, _super);
 
@@ -807,7 +836,9 @@
     }
 
     _Class.prototype.items = function() {
-      return _.zip(this.keys(), this.values());
+      return _.map(_.zip(this.keys(), this.values()), function(pair) {
+        return new types.Vector(pair);
+      });
     };
 
     _Class.prototype.keys = function() {
@@ -2581,7 +2612,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(not-empty "hello")', new types.String("hello"));
       });
     });
-    return describe('(get coll key not-found)', function() {
+    describe('(get coll key not-found)', function() {
       return it('returns the value mapped to key if present, else not-found or nil', function() {
         throws('(get [1 2 3])');
         nil('(get nil 2)');
@@ -2597,6 +2628,20 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(get \'(45 89 32) 89)');
         nil('(get \'(45 89 32) 1)');
         return eq('(get "qwerty" 2)', new types.String('e'));
+      });
+    });
+    return describe('(seq coll)', function() {
+      return it('returns a seq on the collection, or nil if it is empty or nil', function() {
+        throws('(seq [1 2 3] [4 5 6])');
+        throws('(seq true)');
+        nil('(seq nil)');
+        nil('(seq "")');
+        nil('(seq {})');
+        eq('(seq "qwe")', new types.Seq([new types.String('q'), new types.String('w'), new types.String('e')]));
+        eq('(seq [1 2 3])', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
+        eq('(seq \'(1 2 3))', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
+        eq('(seq #{1 2 3})', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
+        return eq('(seq {1 2 3 4})', new types.Seq([new types.Vector([new types.Integer(1), new types.Integer(2)]), new types.Vector([new types.Integer(3), new types.Integer(4)])]));
       });
     });
   });
