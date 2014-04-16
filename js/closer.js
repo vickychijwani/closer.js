@@ -458,7 +458,7 @@ case 12: this.$ = parseCollectionLiteral('Vector', getValueIfUndefined($$[$0-1],
 break;
 case 13: this.$ = parseCollectionLiteral('List', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 14: this.$ = parseCollectionLiteral('HashMap', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); console.log(JSON.stringify($$[$0-1], null, 4)); 
+case 14: this.$ = parseCollectionLiteral('HashMap', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
 case 15: this.$ = parseCollectionLiteral('HashSet', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
