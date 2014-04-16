@@ -1882,7 +1882,7 @@ case 25:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:([\s]+))/,/^(?:([-+]?([1-9][0-9]+|[0-9])))/,/^(?:([-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))))/,/^(?:("([^\"\\]|\\[\'\"\\bfnrt])+"))/,/^(?:(;[^\r\n]*))/,/^(?:&)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:#)/,/^(?:')/,/^(?:def)/,/^(?:fn)/,/^(?:defn)/,/^(?:if)/,/^(?:when)/,/^(?:do)/,/^(?:let)/,/^(?:true)/,/^(?:false)/,/^(?:nil)/,/^(?:([a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.:]*))/,/^(?:.)/],
+rules: [/^(?:([\s]+))/,/^(?:([-+]?([1-9][0-9]+|[0-9])))/,/^(?:([-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))))/,/^(?:("([^\"\\]|\\[\'\"\\bfnrt])*"))/,/^(?:(;[^\r\n]*))/,/^(?:&)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:#)/,/^(?:')/,/^(?:def)/,/^(?:fn)/,/^(?:defn)/,/^(?:if)/,/^(?:when)/,/^(?:do)/,/^(?:let)/,/^(?:true)/,/^(?:false)/,/^(?:nil)/,/^(?:([a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.:]*))/,/^(?:.)/],
 conditions: {"regex":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],"inclusive":true},"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],"inclusive":true}}
 };
 return lexer;
@@ -2125,7 +2125,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       return expect(closer.parse('x\n')).toDeepEqual(Program(ExpressionStatement(Identifier('x'))));
     });
     it('parses integer, float, string, boolean, and nil literals', function() {
-      return expect(closer.parse('-24\n-23.67\n-22.45E-5\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual(Program(ExpressionStatement(Integer(UnaryExpression('-', 24))), ExpressionStatement(Float(UnaryExpression('-', 23.67))), ExpressionStatement(Float(UnaryExpression('-', 22.45e-5))), ExpressionStatement(String('string')), ExpressionStatement(Boolean(true)), ExpressionStatement(Boolean(false)), ExpressionStatement(Nil())));
+      return expect(closer.parse('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual(Program(ExpressionStatement(Integer(UnaryExpression('-', 24))), ExpressionStatement(Float(UnaryExpression('-', 23.67))), ExpressionStatement(Float(UnaryExpression('-', 22.45e-5))), ExpressionStatement(String('')), ExpressionStatement(String('string')), ExpressionStatement(Boolean(true)), ExpressionStatement(Boolean(false)), ExpressionStatement(Nil())));
     });
     it('parses vector and list literals', function() {
       return expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual(Program(ExpressionStatement(Vector([])), ExpressionStatement(Vector([String('string'), Boolean(true)])), ExpressionStatement(List([])), ExpressionStatement(List([String('string'), Boolean(true)]))));

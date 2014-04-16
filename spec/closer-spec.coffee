@@ -47,10 +47,11 @@ describe 'Closer parser', ->
       ExpressionStatement(Identifier('x')))
 
   it 'parses integer, float, string, boolean, and nil literals', ->
-    expect(closer.parse('-24\n-23.67\n-22.45E-5\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
+    expect(closer.parse('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
       ExpressionStatement(Integer(UnaryExpression('-', 24))),
       ExpressionStatement(Float(UnaryExpression('-', 23.67))),
       ExpressionStatement(Float(UnaryExpression('-', 22.45e-5))),
+      ExpressionStatement(String('')),
       ExpressionStatement(String('string')),
       ExpressionStatement(Boolean(true)),
       ExpressionStatement(Boolean(false)),
