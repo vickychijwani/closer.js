@@ -431,6 +431,15 @@
       assert.arity(1, 1, arguments);
       assert.types([coll], [types.Nil, types.String, types.Collection]);
       return new types.Integer(coll instanceof types.Nil ? 0 : coll.value.length);
+    },
+    'empty': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.BaseType]);
+      if (coll instanceof types.Collection) {
+        return new types[coll.type]([]);
+      } else {
+        return types.Nil.nil;
+      }
     }
   };
 
@@ -1949,7 +1958,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer":4,"../closer-core":2,"../closer-types":3,"escodegen":10,"estraverse":26}],8:[function(_dereq_,module,exports){
 (function() {
-  var eq, evaluate, falsy, global_helpers, helpers, throws, truthy, types;
+  var eq, evaluate, falsy, global_helpers, helpers, nil, throws, truthy, types;
 
   types = _dereq_('../closer-types');
 
@@ -1981,6 +1990,10 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
   falsy = function(src) {
     return eq(src, types.Boolean["false"]);
+  };
+
+  nil = function(src) {
+    return eq(src, types.Nil.nil);
   };
 
   describe('Closer core library', function() {
@@ -2355,7 +2368,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(str [1 2 \'(3 4 5)])', new types.String('[1 2 (3 4 5)]'));
       });
     });
-    return describe('(count coll)', function() {
+    describe('(count coll)', function() {
       return it('returns the number of items the collection', function() {
         throws('(count [1 2 3] "hello")');
         throws('(count 1)');
@@ -2364,6 +2377,16 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(count "hello")', new types.Integer(5));
         eq('(count [1 2 3])', new types.Integer(3));
         return eq('(count [1 2 #{3 4 5}])', new types.Integer(3));
+      });
+    });
+    return describe('(empty coll)', function() {
+      return it('returns an empty collection of the same category as coll, or nil', function() {
+        throws('(empty)');
+        nil('(empty 1)');
+        nil('(empty "hello")');
+        eq('(empty [1 2 #{3 4}])', new types.Vector([]));
+        eq('(empty \'(1 2))', new types.List([]));
+        return eq('(empty #{1 2})', new types.HashSet([]));
       });
     });
   });
