@@ -1,3 +1,4 @@
+_ = require 'lodash-node'
 types = require '../closer-types'
 global_helpers = require './closer-helpers'
 helpers = require './closer-core-helpers'
@@ -10,87 +11,97 @@ truthy = (src) -> eq src, types.Boolean.true
 falsy = (src) -> eq src, types.Boolean.false
 nil = (src) -> eq src, types.Nil.nil
 
+int = (x) -> new types.Integer x
+float = (x) -> new types.Float x
+str = (x) -> new types.String x
+key = (x) -> new types.Keyword x
+seq = (xs...) -> new types.Seq _.flatten xs
+vec = (xs...) -> new types.Vector _.flatten xs
+list = (xs...) -> new types.List _.flatten xs
+set = (xs...) -> new types.HashSet _.flatten xs
+map = (xs...) -> new types.HashMap _.flatten xs
+
 describe 'Closer core library', ->
 
   # arithmetic
   describe '(+ x y & more)', ->
     it 'adds the given numbers', ->
       throws '(+ "string")'
-      eq '(+)', new types.Integer 0
-      eq '(+ 3.3 0 -6e2 2)', new types.Float -594.7
+      eq '(+)', int 0
+      eq '(+ 3.3 0 -6e2 2)', float -594.7
 
   describe '(- x y & more)', ->
     it 'subtracts all but the first number from the first one', ->
       throws '(-)'
       throws '(- "string")'
-      eq '(- -3.54)', new types.Float 3.54
-      eq '(- 10 3.5 -4)', new types.Float 10.5
+      eq '(- -3.54)', float 3.54
+      eq '(- 10 3.5 -4)', float 10.5
 
   describe '(* x y & more)', ->
     it 'multiplies the given numbers', ->
       throws '(* "string")'
-      eq '(*)', new types.Integer 1
-      eq '(* 3 -6)', new types.Integer -18
+      eq '(*)', int 1
+      eq '(* 3 -6)', int -18
 
   describe '(/ x y & more)', ->
     it 'divides the first number by the rest', ->
       throws '(/)'
       throws '(/ "string")'
-      eq '(/ -4)', new types.Float -0.25
-      eq '(/ 14 -2)', new types.Integer -7
-      eq '(/ 14 -2.0)', new types.Float -7
-      eq '(/ 14 -2 -2)', new types.Float 3.5
+      eq '(/ -4)', float -0.25
+      eq '(/ 14 -2)', int -7
+      eq '(/ 14 -2.0)', float -7
+      eq '(/ 14 -2 -2)', float 3.5
 
   describe '(inc x)', ->
     it 'increments x by 1', ->
       throws '(inc 2 3 4)'
       throws '(inc "string")'
-      eq '(inc -2e-3)', new types.Float 0.998
+      eq '(inc -2e-3)', float 0.998
 
   describe '(dec x)', ->
     it 'decrements x by 1', ->
       throws '(dec 2 3 4)'
       throws '(dec "string")'
-      eq '(dec -2e-3)', new types.Float -1.002
+      eq '(dec -2e-3)', float -1.002
 
   describe '(max x y & more)', ->
     it 'finds the maximum of the given numbers', ->
       throws '(max)'
       throws '(max "string" [1 2])'
-      eq '(max -1e10 653.32 1.345e4)', new types.Float 1.345e4
+      eq '(max -1e10 653.32 1.345e4)', float 1.345e4
 
   describe '(min x y & more)', ->
     it 'finds the minimum of the given numbers', ->
       throws '(min)'
       throws '(min "string" [1 2])'
-      eq '(min -1e10 653.32 1.345e4)', new types.Float -1e10
+      eq '(min -1e10 653.32 1.345e4)', float -1e10
 
   describe '(quot num div)', ->
     it 'computes the quotient of dividing num by div', ->
       throws '(quot 10)'
       throws '(quot [1 2] 3)'
-      eq '(quot 10 3)', new types.Integer 3
-      eq '(quot -5.9 3)', new types.Float -1.0
-      eq '(quot -10 -3)', new types.Integer 3
-      eq '(quot 10 -3)', new types.Integer -3
+      eq '(quot 10 3)', int 3
+      eq '(quot -5.9 3)', float -1.0
+      eq '(quot -10 -3)', int 3
+      eq '(quot 10 -3)', int -3
 
   describe '(rem num div)', ->
     it 'computes the remainder of dividing num by div (same as % in other languages)', ->
       throws '(rem 10)'
       throws '(rem [1 2] 3)'
-      eq '(rem 10.1 3)', new types.Float 10.1 % 3
-      eq '(rem -10.1 3)', new types.Float -10.1 % 3
-      eq '(rem -10.1 -3)', new types.Float -10.1 % -3
-      eq '(rem 10.1 -3)', new types.Float 10.1 % -3
+      eq '(rem 10.1 3)', float 10.1 % 3
+      eq '(rem -10.1 3)', float -10.1 % 3
+      eq '(rem -10.1 -3)', float -10.1 % -3
+      eq '(rem 10.1 -3)', float 10.1 % -3
 
   describe '(mod num div)', ->
     it 'computes the modulus of num and div (NOT the same as % in other languages)', ->
       throws '(mod 10)'
       throws '(mod [1 2] 3)'
-      eq '(mod 10.1 3)', new types.Float 10.1 % 3
-      eq '(mod -10.1 3)', new types.Float 3 - 10.1 % 3
-      eq '(mod -10.1 -3)', new types.Float -10.1 % 3
-      eq '(mod 10.1 -3)', new types.Float 10.1 % 3 - 3
+      eq '(mod 10.1 3)', float 10.1 % 3
+      eq '(mod -10.1 3)', float 3 - 10.1 % 3
+      eq '(mod -10.1 -3)', float -10.1 % 3
+      eq '(mod 10.1 -3)', float 10.1 % 3 - 3
 
 
   # comparison
@@ -357,18 +368,18 @@ describe 'Closer core library', ->
   # string
   describe '(str x & ys)', ->
     it 'concatenates the string values of each of its arguments', ->
-      eq '(str)', new types.String ''
-      eq '(str nil)', new types.String ''
-      eq '(str 34)', new types.String '34'
-      eq '(str 34.45)', new types.String '34.45'
-      eq '(str 3e3)', new types.String '3000'    # different from standard Clojure
-      eq '(str 3e-4)', new types.String '0.0003'    # different from standard Clojure
-      eq '(str 1 true "hello" :keyword)', new types.String '1truehello:keyword'
-      eq '(str [1 2 :key])', new types.String '[1 2 :key]'
-      eq '(str \'(1 2 3))', new types.String '(1 2 3)'
-      eq '(str #{1 2 3})', new types.String '#{1 2 3}'
-      eq '(str {1 2 3 4})', new types.String '{1 2, 3 4}'
-      eq '(str [1 2 \'(3 4 5)])', new types.String '[1 2 (3 4 5)]'
+      eq '(str)', str ''
+      eq '(str nil)', str ''
+      eq '(str 34)', str '34'
+      eq '(str 34.45)', str '34.45'
+      eq '(str 3e3)', str '3000'    # different from standard Clojure
+      eq '(str 3e-4)', str '0.0003'    # different from standard Clojure
+      eq '(str 1 true "hello" :keyword)', str '1truehello:keyword'
+      eq '(str [1 2 :key])', str '[1 2 :key]'
+      eq '(str \'(1 2 3))', str '(1 2 3)'
+      eq '(str #{1 2 3})', str '#{1 2 3}'
+      eq '(str {1 2 3 4})', str '{1 2, 3 4}'
+      eq '(str [1 2 \'(3 4 5)])', str '[1 2 (3 4 5)]'
 
 
   # collections
@@ -377,21 +388,21 @@ describe 'Closer core library', ->
       throws '(count [1 2 3] "hello")'
       throws '(count 1)'
       throws '(count true)'
-      eq '(count nil)', new types.Integer 0
-      eq '(count "hello")', new types.Integer 5
-      eq '(count [1 2 3])', new types.Integer 3
-      eq '(count [1 2 #{3 4 5}])', new types.Integer 3
-      eq '(count {:key1 "value1" :key2 "value2"})', new types.Integer 2
+      eq '(count nil)', int 0
+      eq '(count "hello")', int 5
+      eq '(count [1 2 3])', int 3
+      eq '(count [1 2 #{3 4 5}])', int 3
+      eq '(count {:key1 "value1" :key2 "value2"})', int 2
 
   describe '(empty coll)', ->
     it 'returns an empty collection of the same category as coll, or nil', ->
       throws '(empty)'
       nil '(empty 1)'
       nil '(empty "hello")'
-      eq '(empty [1 2 #{3 4}])', new types.Vector([])
-      eq '(empty \'(1 2))', new types.List([])
-      eq '(empty #{1 2})', new types.HashSet([])
-      eq '(empty {1 2})', new types.HashMap([])
+      eq '(empty [1 2 #{3 4}])', vec()
+      eq '(empty \'(1 2))', list()
+      eq '(empty #{1 2})', set()
+      eq '(empty {1 2})', map()
 
   describe '(not-empty coll)', ->
     it 'if coll is empty, returns nil, else coll', ->
@@ -399,9 +410,9 @@ describe 'Closer core library', ->
       throws '(not-empty 1)'
       nil '(not-empty nil)'
       nil '(not-empty #{})'
-      eq '(not-empty #{1})', new types.HashSet([new types.Integer 1])
+      eq '(not-empty #{1})', set(int 1)
       nil '(not-empty "")'
-      eq '(not-empty "hello")', new types.String "hello"
+      eq '(not-empty "hello")', str "hello"
 
   describe '(get coll key not-found)', ->
     it 'returns the value mapped to key if present, else not-found or nil', ->
@@ -409,16 +420,16 @@ describe 'Closer core library', ->
       nil '(get nil 2)'
       nil '(get 2 2)'
       nil '(get {:k1 "v1" :k2 "v2"} :k3)'
-      eq '(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', new types.Keyword 'not-found'
-      eq '(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', new types.String 'v2'
+      eq '(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', key 'not-found'
+      eq '(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', str 'v2'
       nil '(get #{45 89 32} 1)'
-      eq '(get #{45 89 32} 89)', new types.Integer 89
-      eq '(get [45 89 32] 1)', new types.Integer 89
+      eq '(get #{45 89 32} 89)', int 89
+      eq '(get [45 89 32] 1)', int 89
       nil '(get [45 89 32] 89)'
       nil '(get \'(45 89 32) 1)'
       nil '(get \'(45 89 32) 89)'
       nil '(get \'(45 89 32) 1)'
-      eq '(get "qwerty" 2)', new types.String 'e'
+      eq '(get "qwerty" 2)', str 'e'
 
   describe '(seq coll)', ->
     it 'returns a seq on the collection, or nil if it is empty or nil', ->
@@ -427,14 +438,14 @@ describe 'Closer core library', ->
       nil '(seq nil)'
       nil '(seq "")'
       nil '(seq {})'
-      eq '(seq "qwe")', new types.Seq [new types.String('q'), new types.String('w'), new types.String('e')]
-      eq '(seq [1 2 3])', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
-      eq '(seq \'(1 2 3))', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
-      eq '(seq #{1 2 3})', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
-      eq '(seq {1 2 3 4})', new types.Seq [new types.Vector([new types.Integer(1), new types.Integer(2)]), new types.Vector([new types.Integer(3), new types.Integer(4)])]
+      eq '(seq "qwe")', seq str('q'), str('w'), str('e')
+      eq '(seq [1 2 3])', seq int(1), int(2), int(3)
+      eq '(seq \'(1 2 3))', seq int(1), int(2), int(3)
+      eq '(seq #{1 2 3})', seq int(1), int(2), int(3)
+      eq '(seq {1 2 3 4})', seq vec(int(1), int(2)), vec(int(3), int(4))
 
   describe '(identity x)', ->
     it 'returns its argument', ->
       throws '(identity 34 45)'
       nil '(identity nil)'
-      eq '(identity {:k1 "v1" :k2 #{1 2}})', new types.HashMap [new types.Keyword('k1'), new types.String('v1'), new types.Keyword('k2'), new types.HashSet([new types.Integer(1), new types.Integer(2)])]
+      eq '(identity {:k1 "v1" :k2 #{1 2}})', map key('k1'), str('v1'), key('k2'), set(int(1), int(2))
