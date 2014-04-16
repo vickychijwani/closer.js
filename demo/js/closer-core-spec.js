@@ -440,6 +440,15 @@
       } else {
         return types.Nil.nil;
       }
+    },
+    'not-empty': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      if (coll instanceof types.Nil || coll.value.length === 0) {
+        return types.Nil.nil;
+      } else {
+        return coll;
+      }
     }
   };
 
@@ -2379,7 +2388,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(count [1 2 #{3 4 5}])', new types.Integer(3));
       });
     });
-    return describe('(empty coll)', function() {
+    describe('(empty coll)', function() {
       return it('returns an empty collection of the same category as coll, or nil', function() {
         throws('(empty)');
         nil('(empty 1)');
@@ -2387,6 +2396,17 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(empty [1 2 #{3 4}])', new types.Vector([]));
         eq('(empty \'(1 2))', new types.List([]));
         return eq('(empty #{1 2})', new types.HashSet([]));
+      });
+    });
+    return describe('(not-empty coll)', function() {
+      return it('if coll is empty, returns nil, else coll', function() {
+        throws('(not-empty)');
+        throws('(not-empty 1)');
+        nil('(not-empty nil)');
+        nil('(not-empty #{})');
+        eq('(not-empty #{1})', new types.HashSet([new types.Integer(1)]));
+        nil('(not-empty "")');
+        return eq('(not-empty "hello")', new types.String("hello"));
       });
     });
   });

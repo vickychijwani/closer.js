@@ -265,6 +265,11 @@ core =
     assert.types [coll], [types.BaseType]
     if coll instanceof types.Collection then new types[coll.type]([]) else types.Nil.nil
 
+  'not-empty': (coll) ->
+    assert.arity 1, 1, arguments
+    assert.types [coll], [types.Nil, types.String, types.Collection]
+    if coll instanceof types.Nil or coll.value.length is 0 then types.Nil.nil else coll
+
 
 module.exports = core
 

@@ -377,3 +377,13 @@ describe 'Closer core library', ->
       eq '(empty [1 2 #{3 4}])', new types.Vector([])
       eq '(empty \'(1 2))', new types.List([])
       eq '(empty #{1 2})', new types.HashSet([])
+
+  describe '(not-empty coll)', ->
+    it 'if coll is empty, returns nil, else coll', ->
+      throws '(not-empty)'
+      throws '(not-empty 1)'
+      nil '(not-empty nil)'
+      nil '(not-empty #{})'
+      eq '(not-empty #{1})', new types.HashSet([new types.Integer 1])
+      nil '(not-empty "")'
+      eq '(not-empty "hello")', new types.String "hello"
