@@ -237,6 +237,23 @@ core =
     core.boolean(arg).complement()
 
 
+  # string
+  'str': (args...) ->
+    assert.arity 0, Infinity, arguments
+    assert.types args, [types.BaseType]
+    return new types.String '' if args.length is 0
+    str = ''
+    for arg in args
+      str += switch
+        when arg instanceof types.Nil then ''
+        when arg instanceof types.Collection
+          type = types[arg.type]
+          collStr = _.map(arg.value, (item) -> core['str'](item).value).join ' '
+          type.startDelimiter + collStr + type.endDelimiter
+        else arg.value.toString()
+    new types.String str
+
+
 module.exports = core
 
 # requires go here, because of circular dependency

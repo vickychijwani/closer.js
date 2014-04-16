@@ -39,15 +39,21 @@ types.Nil = class extends types.Primitive
 # collection types
 types.Collection = class extends types.BaseType
   @typeName: 'Collection'
+  @startDelimiter: 'Collection('
+  @endDelimiter: ')'
 
 types.Sequential = class extends types.Collection
   @typeName: 'Sequential'
 
 types.Vector = class extends types.Sequential
   @typeName: 'Vector'
+  @startDelimiter = '['
+  @endDelimiter = ']'
 
 types.List = class extends types.Sequential
   @typeName: 'List'
+  @startDelimiter = '('
+  @endDelimiter = ')'
 
 types.HashSet = class extends types.Collection
   constructor: (values) ->
@@ -59,6 +65,8 @@ types.HashSet = class extends types.Collection
       uniques.push(val) if isNew
     super uniques
   @typeName: 'HashSet'
+  @startDelimiter = '#{'
+  @endDelimiter = '}'
 
 
 # utilities

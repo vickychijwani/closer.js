@@ -398,6 +398,34 @@
     'not': function(arg) {
       assert.arity(1, 1, arguments);
       return core.boolean(arg).complement();
+    },
+    'str': function() {
+      var arg, args, collStr, str, type, _i, _len;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(0, Infinity, arguments);
+      assert.types(args, [types.BaseType]);
+      if (args.length === 0) {
+        return new types.String('');
+      }
+      str = '';
+      for (_i = 0, _len = args.length; _i < _len; _i++) {
+        arg = args[_i];
+        str += (function() {
+          switch (false) {
+            case !(arg instanceof types.Nil):
+              return '';
+            case !(arg instanceof types.Collection):
+              type = types[arg.type];
+              collStr = _.map(arg.value, function(item) {
+                return core['str'](item).value;
+              }).join(' ');
+              return type.startDelimiter + collStr + type.endDelimiter;
+            default:
+              return arg.value.toString();
+          }
+        })();
+      }
+      return new types.String(str);
     }
   };
 
@@ -560,6 +588,10 @@
 
     _Class.typeName = 'Collection';
 
+    _Class.startDelimiter = 'Collection(';
+
+    _Class.endDelimiter = ')';
+
     return _Class;
 
   })(types.BaseType);
@@ -586,6 +618,10 @@
 
     _Class.typeName = 'Vector';
 
+    _Class.startDelimiter = '[';
+
+    _Class.endDelimiter = ']';
+
     return _Class;
 
   })(types.Sequential);
@@ -598,6 +634,10 @@
     }
 
     _Class.typeName = 'List';
+
+    _Class.startDelimiter = '(';
+
+    _Class.endDelimiter = ')';
 
     return _Class;
 
@@ -622,6 +662,10 @@
     }
 
     _Class.typeName = 'HashSet';
+
+    _Class.startDelimiter = '#{';
+
+    _Class.endDelimiter = '}';
 
     return _Class;
 

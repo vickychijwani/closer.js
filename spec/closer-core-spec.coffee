@@ -338,3 +338,20 @@ describe 'Closer core library', ->
       falsy '(not "hello")'
       falsy '(not [1 2])'
       falsy '(not (fn [x y] (+ x y)))'
+
+
+  # string
+  describe '(str x & ys)', ->
+    it 'concatenates the string values of each of its arguments', ->
+      eq '(str)', new types.String ''
+      eq '(str nil)', new types.String ''
+      eq '(str 34)', new types.String '34'
+      eq '(str 34.45)', new types.String '34.45'
+      eq '(str 3e3)', new types.String '3000'    # different from standard Clojure
+      eq '(str 3e-4)', new types.String '0.0003'    # different from standard Clojure
+      eq '(str true)', new types.String 'true'
+      eq '(str "hello")', new types.String 'hello'
+      eq '(str [1 2 3])', new types.String '[1 2 3]'
+      eq '(str \'(1 2 3))', new types.String '(1 2 3)'
+      eq '(str #{1 2 3})', new types.String '#{1 2 3}'
+      eq '(str [1 2 \'(3 4 5)])', new types.String '[1 2 (3 4 5)]'
