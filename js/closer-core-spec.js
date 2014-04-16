@@ -489,6 +489,11 @@
         return types.Nil.nil;
       }
       return new types.Seq(coll.items());
+    },
+    'identity': function(x) {
+      assert.arity(1, 1, arguments);
+      assert.types([x], [types.BaseType]);
+      return x;
     }
   };
 
@@ -2630,7 +2635,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(get "qwerty" 2)', new types.String('e'));
       });
     });
-    return describe('(seq coll)', function() {
+    describe('(seq coll)', function() {
       return it('returns a seq on the collection, or nil if it is empty or nil', function() {
         throws('(seq [1 2 3] [4 5 6])');
         throws('(seq true)');
@@ -2642,6 +2647,13 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(seq \'(1 2 3))', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
         eq('(seq #{1 2 3})', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
         return eq('(seq {1 2 3 4})', new types.Seq([new types.Vector([new types.Integer(1), new types.Integer(2)]), new types.Vector([new types.Integer(3), new types.Integer(4)])]));
+      });
+    });
+    return describe('(identity x)', function() {
+      return it('returns its argument', function() {
+        throws('(identity 34 45)');
+        nil('(identity nil)');
+        return eq('(identity {:k1 "v1" :k2 #{1 2}})', new types.HashMap([new types.Keyword('k1'), new types.String('v1'), new types.Keyword('k2'), new types.HashSet([new types.Integer(1), new types.Integer(2)])]));
       });
     });
   });

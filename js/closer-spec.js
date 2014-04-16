@@ -489,6 +489,11 @@
         return types.Nil.nil;
       }
       return new types.Seq(coll.items());
+    },
+    'identity': function(x) {
+      assert.arity(1, 1, arguments);
+      assert.types([x], [types.BaseType]);
+      return x;
     }
   };
 
