@@ -842,7 +842,7 @@
 
     _Class.prototype.items = function() {
       return _.map(_.zip(this.keys(), this.values()), function(pair) {
-        return new types.Vector(pair);
+        return new types.MapEntry(pair);
       });
     };
 
@@ -863,6 +863,36 @@
     return _Class;
 
   })(types.Collection);
+
+  types.MapEntry = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class(items) {
+      if (items.length !== 2) {
+        throw new Error('a map entry must have exactly 1 key and 1 value');
+      }
+      _Class.__super__.constructor.call(this, items);
+      delete this.keys;
+      delete this.values;
+    }
+
+    _Class.prototype.key = function() {
+      return this.value[0];
+    };
+
+    _Class.prototype.value = function() {
+      return this.value[1];
+    };
+
+    _Class.typeName = 'MapEntry';
+
+    _Class.startDelimiter = '[';
+
+    _Class.endDelimiter = ']';
+
+    return _Class;
+
+  })(types.Vector);
 
   DuplicateKeyError = (function(_super) {
     __extends(DuplicateKeyError, _super);

@@ -842,7 +842,7 @@
 
     _Class.prototype.items = function() {
       return _.map(_.zip(this.keys(), this.values()), function(pair) {
-        return new types.Vector(pair);
+        return new types.MapEntry(pair);
       });
     };
 
@@ -863,6 +863,36 @@
     return _Class;
 
   })(types.Collection);
+
+  types.MapEntry = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class(items) {
+      if (items.length !== 2) {
+        throw new Error('a map entry must have exactly 1 key and 1 value');
+      }
+      _Class.__super__.constructor.call(this, items);
+      delete this.keys;
+      delete this.values;
+    }
+
+    _Class.prototype.key = function() {
+      return this.value[0];
+    };
+
+    _Class.prototype.value = function() {
+      return this.value[1];
+    };
+
+    _Class.typeName = 'MapEntry';
+
+    _Class.startDelimiter = '[';
+
+    _Class.endDelimiter = ']';
+
+    return _Class;
+
+  })(types.Vector);
 
   DuplicateKeyError = (function(_super) {
     __extends(DuplicateKeyError, _super);
@@ -2160,7 +2190,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer":4,"../closer-core":2,"../closer-types":3,"escodegen":10,"estraverse":26}],8:[function(_dereq_,module,exports){
 (function() {
-  var eq, evaluate, falsy, float, global_helpers, helpers, int, key, list, map, nil, seq, set, str, throws, truthy, types, vec, _,
+  var eq, evaluate, falsy, float, global_helpers, helpers, int, key, list, map, mapEntry, nil, seq, set, str, throws, truthy, types, vec, _,
     __slice = [].slice;
 
   _ = _dereq_('lodash-node');
@@ -2245,6 +2275,12 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     var xs;
     xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return new types.HashMap(_.flatten(xs));
+  };
+
+  mapEntry = function() {
+    var xs;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return new types.MapEntry(_.flatten(xs));
   };
 
   describe('Closer core library', function() {
@@ -2626,9 +2662,11 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(str 3e-4)', str('0.0003'));
         eq('(str 1 true "hello" :keyword)', str('1truehello:keyword'));
         eq('(str [1 2 :key])', str('[1 2 :key]'));
+        eq('(str (seq [1 2 :key]))', str('(1 2 :key)'));
         eq('(str \'(1 2 3))', str('(1 2 3)'));
         eq('(str #{1 2 3})', str('#{1 2 3}'));
         eq('(str {1 2 3 4})', str('{1 2, 3 4}'));
+        eq('(str (seq {1 2 3 4}))', str('([1 2] [3 4])'));
         return eq('(str [1 2 \'(3 4 5)])', str('[1 2 (3 4 5)]'));
       });
     });
@@ -2695,7 +2733,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(seq [1 2 3])', seq(int(1), int(2), int(3)));
         eq('(seq \'(1 2 3))', seq(int(1), int(2), int(3)));
         eq('(seq #{1 2 3})', seq(int(1), int(2), int(3)));
-        return eq('(seq {1 2 3 4})', seq(vec(int(1), int(2)), vec(int(3), int(4))));
+        return eq('(seq {1 2 3 4})', seq(mapEntry(int(1), int(2)), mapEntry(int(3), int(4))));
       });
     });
     return describe('(identity x)', function() {

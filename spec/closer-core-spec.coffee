@@ -20,6 +20,7 @@ vec = (xs...) -> new types.Vector _.flatten xs
 list = (xs...) -> new types.List _.flatten xs
 set = (xs...) -> new types.HashSet _.flatten xs
 map = (xs...) -> new types.HashMap _.flatten xs
+mapEntry = (xs...) -> new types.MapEntry _.flatten xs
 
 describe 'Closer core library', ->
 
@@ -376,9 +377,11 @@ describe 'Closer core library', ->
       eq '(str 3e-4)', str '0.0003'    # different from standard Clojure
       eq '(str 1 true "hello" :keyword)', str '1truehello:keyword'
       eq '(str [1 2 :key])', str '[1 2 :key]'
+      eq '(str (seq [1 2 :key]))', str '(1 2 :key)'
       eq '(str \'(1 2 3))', str '(1 2 3)'
       eq '(str #{1 2 3})', str '#{1 2 3}'
       eq '(str {1 2 3 4})', str '{1 2, 3 4}'
+      eq '(str (seq {1 2 3 4}))', str '([1 2] [3 4])'
       eq '(str [1 2 \'(3 4 5)])', str '[1 2 (3 4 5)]'
 
 
@@ -442,7 +445,7 @@ describe 'Closer core library', ->
       eq '(seq [1 2 3])', seq int(1), int(2), int(3)
       eq '(seq \'(1 2 3))', seq int(1), int(2), int(3)
       eq '(seq #{1 2 3})', seq int(1), int(2), int(3)
-      eq '(seq {1 2 3 4})', seq vec(int(1), int(2)), vec(int(3), int(4))
+      eq '(seq {1 2 3 4})', seq mapEntry(int(1), int(2)), mapEntry(int(3), int(4))
 
   describe '(identity x)', ->
     it 'returns its argument', ->

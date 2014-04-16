@@ -103,12 +103,24 @@ types.HashMap = class extends types.Collection
         throw new DuplicateKeyError(key) if core['='](key, uniq).value
       uniques.push key
     super { keys: keys, values: values }
-  items: -> _.map _.zip(@keys(), @values()), (pair) -> new types.Vector(pair)
+  items: -> _.map _.zip(@keys(), @values()), (pair) -> new types.MapEntry(pair)
   keys: -> @value.keys
   values: -> @value.values
   @typeName: 'HashMap'
   @startDelimiter = '{'
   @endDelimiter = '}'
+
+types.MapEntry = class extends types.Vector
+  constructor: (items) ->
+    throw new Error 'a map entry must have exactly 1 key and 1 value' unless items.length is 2
+    super items
+    delete @keys
+    delete @values
+  key: -> @value[0]
+  value: -> @value[1]
+  @typeName: 'MapEntry'
+  @startDelimiter: '['
+  @endDelimiter: ']'
 
 class DuplicateKeyError extends Error
   constructor: (key) ->
