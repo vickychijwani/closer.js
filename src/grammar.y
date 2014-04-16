@@ -23,6 +23,7 @@ Atom
   | 'true' { $$ = parseLiteral('Boolean', true, @1, yytext, yy); }
   | 'false' { $$ = parseLiteral('Boolean', false, @1, yytext, yy); }
   | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
+  | COLON IDENTIFIER { $$ = parseLiteral('Keyword', String($2), yy.loc(@2), yytext, yy); }
   | Identifier
   ;
 

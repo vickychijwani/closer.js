@@ -35,6 +35,9 @@ types.Nil = class extends types.Primitive
   @typeName: 'Nil'
   @nil: new @ null, 'Nil'
 
+types.Keyword = class extends types.Primitive
+  @typeName: 'Keyword'
+
 
 # collection types
 types.Collection = class extends types.BaseType

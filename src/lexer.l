@@ -2,7 +2,7 @@ WHITESPACE      [\s]+
 INTEGER         [-+]?([1-9][0-9]+|[0-9])
 FLOAT           [-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])*\"
-IDENTIFIER      [a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.:]*
+IDENTIFIER      [a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.]*
 COMMENT         \;[^\r\n]*
 
 %s regex
@@ -38,6 +38,7 @@ COMMENT         \;[^\r\n]*
 '}' return '}';
 '#' return 'SHARP';
 '\'' return 'QUOTE';
+':' return 'COLON';
 
 'def'   return 'DEF';
 'fn'    return 'FN';

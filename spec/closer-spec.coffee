@@ -7,6 +7,7 @@ Float = helpers['Float']
 String = helpers['String']
 Boolean = helpers['Boolean']
 Nil = helpers['Nil']
+Keyword = helpers['Keyword']
 Vector = helpers['Vector']
 List = helpers['List']
 HashSet = helpers['HashSet']
@@ -56,6 +57,10 @@ describe 'Closer parser', ->
       ExpressionStatement(Boolean(true)),
       ExpressionStatement(Boolean(false)),
       ExpressionStatement(Nil()))
+
+  it 'parses keywords', ->
+    expect(closer.parse(':keyword')).toDeepEqual Program(
+      ExpressionStatement(Keyword('keyword')))
 
   it 'parses vector and list literals', ->
     expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual Program(
