@@ -253,11 +253,17 @@ core =
         else arg.value.toString()
     new types.String str
 
+
   # collections
   'count': (coll) ->
     assert.arity 1, 1, arguments
     assert.types [coll], [types.Nil, types.String, types.Collection]
     new types.Integer(if coll instanceof types.Nil then 0 else coll.value.length)
+
+  'empty': (coll) ->
+    assert.arity 1, 1, arguments
+    assert.types [coll], [types.BaseType]
+    if coll instanceof types.Collection then new types[coll.type]([]) else types.Nil.nil
 
 
 module.exports = core

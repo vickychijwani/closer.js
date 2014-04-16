@@ -431,6 +431,15 @@
       assert.arity(1, 1, arguments);
       assert.types([coll], [types.Nil, types.String, types.Collection]);
       return new types.Integer(coll instanceof types.Nil ? 0 : coll.value.length);
+    },
+    'empty': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.BaseType]);
+      if (coll instanceof types.Collection) {
+        return new types[coll.type]([]);
+      } else {
+        return types.Nil.nil;
+      }
     }
   };
 

@@ -8,6 +8,7 @@ eq = (src, expected) -> expect(evaluate src).toDeepEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
 truthy = (src) -> eq src, types.Boolean.true
 falsy = (src) -> eq src, types.Boolean.false
+nil = (src) -> eq src, types.Nil.nil
 
 describe 'Closer core library', ->
 
@@ -367,3 +368,12 @@ describe 'Closer core library', ->
       eq '(count "hello")', new types.Integer 5
       eq '(count [1 2 3])', new types.Integer 3
       eq '(count [1 2 #{3 4 5}])', new types.Integer 3
+
+  describe '(empty coll)', ->
+    it 'returns an empty collection of the same category as coll, or nil', ->
+      throws '(empty)'
+      nil '(empty 1)'
+      nil '(empty "hello")'
+      eq '(empty [1 2 #{3 4}])', new types.Vector([])
+      eq '(empty \'(1 2))', new types.List([])
+      eq '(empty #{1 2})', new types.HashSet([])
