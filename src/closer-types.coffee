@@ -71,6 +71,27 @@ types.HashSet = class extends types.Collection
   @startDelimiter = '#{'
   @endDelimiter = '}'
 
+types.HashMap = class extends types.Collection
+  constructor: (items) ->
+    # TODO HashMap isn't really a HashMap
+    @type = @constructor.typeName
+    @keys = _.filter items, (item, index) -> index % 2 is 0
+    @values = _.difference items, @keys
+    uniques = []
+    _.each @keys, (key) ->
+      _.each uniques, (uniq) ->
+        throw new DuplicateKeyError(key) if core['='](key, uniq).value
+      uniques.push key
+  @typeName: 'HashMap'
+  @startDelimiter = '{'
+  @endDelimiter = '}'
+
+class DuplicateKeyError extends Error
+  constructor: (key) ->
+    Error.captureStackTrace @, @.constructor
+    @name = 'DuplicateKeyError'
+    @message = "Duplicate key: #{core['str'](key).value}"
+
 
 # utilities
 types.getResultType = (nums) ->

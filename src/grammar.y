@@ -30,6 +30,7 @@ Atom
 CollectionLiteral
   : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('Vector', getValueIfUndefined($items, []), @items, yy); }
   | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('List', getValueIfUndefined($items, []), @items, yy); }
+  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('HashMap', getValueIfUndefined($items, []), @items, yy); }
   | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('HashSet', getValueIfUndefined($items, []), @items, yy); }
   ;
 
@@ -122,6 +123,11 @@ SExprStmt
             $$ = $SExpr;
         }
     }
+  ;
+
+SExprPairs
+  : { $$ = []; }
+  | SExprPairs SExpr SExpr { $$ = $SExprPairs; $SExprPairs.push($2, $3); }
   ;
 
 SExprs

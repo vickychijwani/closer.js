@@ -466,7 +466,7 @@
 
 },{"./assert":1,"./closer-types":3,"lodash-node":77}],3:[function(_dereq_,module,exports){
 (function() {
-  var core, types, _,
+  var DuplicateKeyError, core, types, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -708,6 +708,50 @@
     return _Class;
 
   })(types.Collection);
+
+  types.HashMap = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class(items) {
+      var uniques;
+      this.type = this.constructor.typeName;
+      this.keys = _.filter(items, function(item, index) {
+        return index % 2 === 0;
+      });
+      this.values = _.difference(items, this.keys);
+      uniques = [];
+      _.each(this.keys, function(key) {
+        _.each(uniques, function(uniq) {
+          if (core['='](key, uniq).value) {
+            throw new DuplicateKeyError(key);
+          }
+        });
+        return uniques.push(key);
+      });
+    }
+
+    _Class.typeName = 'HashMap';
+
+    _Class.startDelimiter = '{';
+
+    _Class.endDelimiter = '}';
+
+    return _Class;
+
+  })(types.Collection);
+
+  DuplicateKeyError = (function(_super) {
+    __extends(DuplicateKeyError, _super);
+
+    function DuplicateKeyError(key) {
+      Error.captureStackTrace(this, this.constructor);
+      this.name = 'DuplicateKeyError';
+      this.message = "Duplicate key: " + (core['str'](key).value);
+    }
+
+    return DuplicateKeyError;
+
+  })(Error);
 
   types.getResultType = function(nums) {
     if (_.some(nums, function(n) {
