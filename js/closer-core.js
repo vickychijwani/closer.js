@@ -322,7 +322,7 @@
       assert.arity(2, 2, arguments);
       if (_.every([x, y], function(arg) {
         var _ref;
-        return (_ref = arg.type) === 'Integer' || _ref === 'Boolean' || _ref === 'Nil';
+        return (_ref = arg.type) === 'Integer' || _ref === 'Boolean' || _ref === 'Nil' || _ref === 'Keyword';
       })) {
         return core['='](x, y);
       }
@@ -414,6 +414,8 @@
           switch (false) {
             case !(arg instanceof types.Nil):
               return '';
+            case !(arg instanceof types.Keyword):
+              return ":" + arg.value;
             case !(arg instanceof types.Collection):
               type = types[arg.type];
               collStr = _.map(arg.value, function(item) {
@@ -597,6 +599,19 @@
     _Class.typeName = 'Nil';
 
     _Class.nil = new _Class(null, 'Nil');
+
+    return _Class;
+
+  })(types.Primitive);
+
+  types.Keyword = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.typeName = 'Keyword';
 
     return _Class;
 
