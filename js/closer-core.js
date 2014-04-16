@@ -426,6 +426,11 @@
         })();
       }
       return new types.String(str);
+    },
+    'count': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      return new types.Integer(coll instanceof types.Nil ? 0 : coll.value.length);
     }
   };
 
