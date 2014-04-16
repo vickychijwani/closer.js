@@ -481,6 +481,14 @@
       } else {
         return coll.values()[index];
       }
+    },
+    'seq': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      if (core['count'](coll).value === 0) {
+        return types.Nil.nil;
+      }
+      return new types.Seq(coll.items());
     }
   };
 
@@ -690,6 +698,27 @@
 
   types.Map = ['keys', 'values'];
 
+  types.Seq = (function(_super) {
+    __extends(_Class, _super);
+
+    function _Class() {
+      return _Class.__super__.constructor.apply(this, arguments);
+    }
+
+    _Class.prototype.items = function() {
+      return this.value;
+    };
+
+    _Class.typeName = 'Seq';
+
+    _Class.startDelimiter = '(';
+
+    _Class.endDelimiter = ')';
+
+    return _Class;
+
+  })(types.Collection);
+
   types.Vector = (function(_super) {
     __extends(_Class, _super);
 
@@ -807,7 +836,9 @@
     }
 
     _Class.prototype.items = function() {
-      return _.zip(this.keys(), this.values());
+      return _.map(_.zip(this.keys(), this.values()), function(pair) {
+        return new types.Vector(pair);
+      });
     };
 
     _Class.prototype.keys = function() {
