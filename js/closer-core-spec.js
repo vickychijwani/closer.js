@@ -2268,6 +2268,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         falsy('(= true (= 4 (* 2 3)))');
         truthy('(= :keyword :keyword)');
         falsy('(= 1 [1])');
+        falsy('(= [3 4] [4 3])');
         truthy('(= [3 4] \'(3 4))');
         truthy('(= [3 4] \'((+ 2 1) (/ 16 4)))');
         falsy('(= [3 4] \'((+ 2 1) (/ 16 8)))');
@@ -2293,6 +2294,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         truthy('(not= true (= 4 (* 2 3)))');
         falsy('(not= :keyword :keyword)');
         truthy('(not= 1 [1])');
+        truthy('(not= [3 4] [4 3])');
         falsy('(not= [3 4] \'(3 4))');
         falsy('(not= [3 4] \'((+ 2 1) (/ 16 4)))');
         truthy('(not= [3 4] \'((+ 2 1) (/ 16 8)))');
