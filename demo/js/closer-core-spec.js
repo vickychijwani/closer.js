@@ -208,18 +208,42 @@
       return new type(rem === 0 || sameSign(num, div) ? rem : rem + div.value);
     },
     '=': function() {
-      var args, values;
+      var args, itemsArray, map1;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       assert.arity(1, Infinity, arguments);
       args = _.uniq(args);
       if (args.length === 1) {
         return types.Boolean["true"];
       }
-      values = getValues(args);
       if (_.every(args, function(arg) {
-        return arg instanceof types.Sequential;
+        return arg instanceof types.Primitive;
+      }) && allOfSameType(args)) {
+        return new types.Boolean(allEqual(args));
+      }
+      if (_.every(args, function(arg) {
+        return types["implements"](arg, types.Map);
       })) {
-        return new types.Boolean(_.reduce(_.zip(values), (function(result, items) {
+        if (_.uniq(_.map(args, function(arg) {
+          return arg.keys().length;
+        })).length !== 1) {
+          return types.Boolean["false"];
+        }
+        map1 = _.first(args);
+        return new types.Boolean(_.reduce(_.rest(args), (function(result, map2) {
+          return result && _.every(map1.keys(), function(key1) {
+            return core['contains?'](map2, key1).isTrue() && _.every(map2.keys(), function(key2) {
+              return core['contains?'](map1, key2).isTrue() && _.every(map1.keys(), function(key) {
+                return core['='](core.get(map1, key), core.get(map2, key)).isTrue();
+              });
+            });
+          });
+        }), true));
+      }
+      if (_.every(args, function(arg) {
+        return types["implements"](arg, types.Sequence);
+      })) {
+        itemsArray = _.invoke(args, 'items');
+        return new types.Boolean(_.reduce(_.zip(itemsArray), (function(result, items) {
           if (__indexOf.call(_.map(items, function(item) {
             return typeof item;
           }), 'undefined') >= 0) {
@@ -228,31 +252,7 @@
           return result && core['='].apply(this, items).isTrue();
         }), true));
       }
-      if (_.every(args, function(arg) {
-        return arg instanceof types.HashSet;
-      })) {
-        if (_.uniq(_.map(values, 'length')).length !== 1) {
-          return types.Boolean["false"];
-        }
-        return new types.Boolean(_.reduce(_.rest(args), (function(result, set1) {
-          var set2;
-          set2 = _.first(args);
-          return result && _.every(set1.value, function(item1) {
-            return core['contains?'](set2, item1).isTrue() && _.every(set2.value, function(item2) {
-              return core['contains?'](set1, item2).isTrue();
-            });
-          });
-        }), true));
-      }
-      if (_.some(args, function(arg) {
-        return arg instanceof types.Collection;
-      })) {
-        return types.Boolean["false"];
-      }
-      if (!allOfSameType(args)) {
-        return types.Boolean["false"];
-      }
-      return new types.Boolean(allEqual(args));
+      return types.Boolean["false"];
     },
     'not=': function() {
       var args;
@@ -377,14 +377,10 @@
       return core['not'](core['even?'](x));
     },
     'contains?': function(coll, key) {
-      var _ref;
       assert.arity(2, 2, arguments);
       assert.collections(coll);
       assert.notTypes([coll], [types.List]);
-      if (coll instanceof types.Vector) {
-        return new types.Boolean((0 <= (_ref = key.value) && _ref < coll.value.length));
-      }
-      return new types.Boolean(_.any(coll.value, function(item) {
+      return new types.Boolean(_.any(coll.keys(), function(item) {
         return core['='](key, item).isTrue();
       }));
     },
@@ -416,6 +412,12 @@
               return '';
             case !(arg instanceof types.Keyword):
               return ":" + arg.value;
+            case !(arg instanceof types.HashMap):
+              type = types[arg.type];
+              collStr = _.map(_.zip(arg.keys(), arg.values()), function(pair) {
+                return core['str'](pair[0]).value + ' ' + core['str'](pair[1]).value;
+              }).join(', ');
+              return type.startDelimiter + collStr + type.endDelimiter;
             case !(arg instanceof types.Collection):
               type = types[arg.type];
               collStr = _.map(arg.value, function(item) {
@@ -432,7 +434,16 @@
     'count': function(coll) {
       assert.arity(1, 1, arguments);
       assert.types([coll], [types.Nil, types.String, types.Collection]);
-      return new types.Integer(coll instanceof types.Nil ? 0 : coll.value.length);
+      return new types.Integer((function() {
+        switch (false) {
+          case !(coll instanceof types.Nil):
+            return 0;
+          case !types["implements"](coll, types.Map):
+            return coll.keys().length;
+          default:
+            return coll.value.length;
+        }
+      })());
     },
     'empty': function(coll) {
       assert.arity(1, 1, arguments);
@@ -446,10 +457,29 @@
     'not-empty': function(coll) {
       assert.arity(1, 1, arguments);
       assert.types([coll], [types.Nil, types.String, types.Collection]);
-      if (coll instanceof types.Nil || coll.value.length === 0) {
+      if (core['count'](coll).value === 0) {
         return types.Nil.nil;
       } else {
         return coll;
+      }
+    },
+    'get': function(coll, key, notFound) {
+      var index;
+      if (notFound == null) {
+        notFound = types.Nil.nil;
+      }
+      assert.arity(2, 3, arguments);
+      assert.types([coll, key, notFound], [types.BaseType]);
+      if (!types["implements"](coll, types.Map)) {
+        return notFound;
+      }
+      index = _.findIndex(coll.keys(), function(key2) {
+        return core['='](key, key2).isTrue();
+      });
+      if (index === -1) {
+        return notFound;
+      } else {
+        return coll.values()[index];
       }
     }
   };
@@ -471,6 +501,12 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   types = {};
+
+  types["implements"] = function(obj, methods) {
+    return _.every(_.flatten(methods), function(m) {
+      return typeof obj[m] === "function";
+    });
+  };
 
   types.BaseType = (function() {
     function _Class(value, type) {
@@ -558,6 +594,22 @@
       return _Class.__super__.constructor.apply(this, arguments);
     }
 
+    _Class.prototype.items = function() {
+      return _.map(_.toArray(this.value), function(char) {
+        return new types.String(char);
+      });
+    };
+
+    _Class.prototype.keys = function() {
+      return _.map(_.range(this.value.length), function(idx) {
+        return new types.Integer(idx);
+      });
+    };
+
+    _Class.prototype.values = function() {
+      return this.items();
+    };
+
     _Class.typeName = 'String';
 
     return _Class;
@@ -634,18 +686,9 @@
 
   })(types.BaseType);
 
-  types.Sequential = (function(_super) {
-    __extends(_Class, _super);
+  types.Sequence = ['items'];
 
-    function _Class() {
-      return _Class.__super__.constructor.apply(this, arguments);
-    }
-
-    _Class.typeName = 'Sequential';
-
-    return _Class;
-
-  })(types.Collection);
+  types.Map = ['keys', 'values'];
 
   types.Vector = (function(_super) {
     __extends(_Class, _super);
@@ -653,6 +696,20 @@
     function _Class() {
       return _Class.__super__.constructor.apply(this, arguments);
     }
+
+    _Class.prototype.items = function() {
+      return this.value;
+    };
+
+    _Class.prototype.keys = function() {
+      return _.map(_.range(this.value.length), function(idx) {
+        return new types.Integer(idx);
+      });
+    };
+
+    _Class.prototype.values = function() {
+      return this.items();
+    };
 
     _Class.typeName = 'Vector';
 
@@ -662,7 +719,7 @@
 
     return _Class;
 
-  })(types.Sequential);
+  })(types.Collection);
 
   types.List = (function(_super) {
     __extends(_Class, _super);
@@ -670,6 +727,10 @@
     function _Class() {
       return _Class.__super__.constructor.apply(this, arguments);
     }
+
+    _Class.prototype.items = function() {
+      return this.value;
+    };
 
     _Class.typeName = 'List';
 
@@ -679,7 +740,7 @@
 
     return _Class;
 
-  })(types.Sequential);
+  })(types.Collection);
 
   types.HashSet = (function(_super) {
     __extends(_Class, _super);
@@ -699,6 +760,18 @@
       _Class.__super__.constructor.call(this, uniques);
     }
 
+    _Class.prototype.items = function() {
+      return this.value;
+    };
+
+    _Class.prototype.keys = function() {
+      return this.value;
+    };
+
+    _Class.prototype.values = function() {
+      return this.value;
+    };
+
     _Class.typeName = 'HashSet';
 
     _Class.startDelimiter = '#{';
@@ -713,12 +786,11 @@
     __extends(_Class, _super);
 
     function _Class(items) {
-      var uniques;
-      this.type = this.constructor.typeName;
-      this.keys = _.filter(items, function(item, index) {
+      var keys, uniques, values;
+      keys = _.filter(items, function(item, index) {
         return index % 2 === 0;
       });
-      this.values = _.difference(items, this.keys);
+      values = _.difference(items, keys);
       uniques = [];
       _.each(this.keys, function(key) {
         _.each(uniques, function(uniq) {
@@ -728,7 +800,23 @@
         });
         return uniques.push(key);
       });
+      _Class.__super__.constructor.call(this, {
+        keys: keys,
+        values: values
+      });
     }
+
+    _Class.prototype.items = function() {
+      return _.zip(this.keys(), this.values());
+    };
+
+    _Class.prototype.keys = function() {
+      return this.value.keys;
+    };
+
+    _Class.prototype.values = function() {
+      return this.value.values;
+    };
 
     _Class.typeName = 'HashMap';
 
@@ -1231,7 +1319,7 @@ case 12: this.$ = parseCollectionLiteral('Vector', getValueIfUndefined($$[$0-1],
 break;
 case 13: this.$ = parseCollectionLiteral('List', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 14: this.$ = parseCollectionLiteral('HashMap', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); console.log(JSON.stringify($$[$0-1], null, 4)); 
+case 14: this.$ = parseCollectionLiteral('HashMap', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
 case 15: this.$ = parseCollectionLiteral('HashSet', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
@@ -2179,11 +2267,13 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         truthy('(= true (= 4 (* 2 2)))');
         falsy('(= true (= 4 (* 2 3)))');
         truthy('(= :keyword :keyword)');
+        falsy('(= 1 [1])');
         truthy('(= [3 4] \'(3 4))');
         truthy('(= [3 4] \'((+ 2 1) (/ 16 4)))');
         falsy('(= [3 4] \'((+ 2 1) (/ 16 8)))');
         falsy('(= [3 4] \'((+ 2 1) (/ 16 4) 5))');
         truthy('(= #{1 2} #{2 1})');
+        truthy('(= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
         falsy('(= #{1 2} #{2 1 3})');
         return falsy('(= #{1 2} [2 1])');
       });
@@ -2202,11 +2292,13 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         falsy('(not= true (= 4 (* 2 2)))');
         truthy('(not= true (= 4 (* 2 3)))');
         falsy('(not= :keyword :keyword)');
+        truthy('(not= 1 [1])');
         falsy('(not= [3 4] \'(3 4))');
         falsy('(not= [3 4] \'((+ 2 1) (/ 16 4)))');
         truthy('(not= [3 4] \'((+ 2 1) (/ 16 8)))');
         truthy('(not= [3 4] \'((+ 2 1) (/ 16 4) 5))');
         falsy('(not= #{1 2} #{2 1})');
+        falsy('(not= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
         truthy('(not= #{1 2} #{2 1 3})');
         return truthy('(not= #{1 2} [2 1])');
       });
@@ -2400,7 +2492,9 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         throws('(contains? \'(1 2) 2)');
         truthy('(contains? #{nil 2} nil)');
         falsy('(contains? #{1 2} 3)');
-        truthy('(contains? #{#{1 2}} #{2 1})');
+        truthy('(contains? #{{1 2}} {1 2})');
+        falsy('(contains? #{{1 2}} {2 1})');
+        truthy('(contains? {#{1 2} true} #{2 1})');
         truthy('(contains? #{[1 2]} \'(1 2))');
         falsy('(contains? #{[1 2]} \'(2 1))');
         truthy('(contains? [98 54] 0)');
@@ -2447,6 +2541,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(str [1 2 :key])', new types.String('[1 2 :key]'));
         eq('(str \'(1 2 3))', new types.String('(1 2 3)'));
         eq('(str #{1 2 3})', new types.String('#{1 2 3}'));
+        eq('(str {1 2 3 4})', new types.String('{1 2, 3 4}'));
         return eq('(str [1 2 \'(3 4 5)])', new types.String('[1 2 (3 4 5)]'));
       });
     });
@@ -2458,7 +2553,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(count nil)', new types.Integer(0));
         eq('(count "hello")', new types.Integer(5));
         eq('(count [1 2 3])', new types.Integer(3));
-        return eq('(count [1 2 #{3 4 5}])', new types.Integer(3));
+        eq('(count [1 2 #{3 4 5}])', new types.Integer(3));
+        return eq('(count {:key1 "value1" :key2 "value2"})', new types.Integer(2));
       });
     });
     describe('(empty coll)', function() {
@@ -2468,10 +2564,11 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(empty "hello")');
         eq('(empty [1 2 #{3 4}])', new types.Vector([]));
         eq('(empty \'(1 2))', new types.List([]));
-        return eq('(empty #{1 2})', new types.HashSet([]));
+        eq('(empty #{1 2})', new types.HashSet([]));
+        return eq('(empty {1 2})', new types.HashMap([]));
       });
     });
-    return describe('(not-empty coll)', function() {
+    describe('(not-empty coll)', function() {
       return it('if coll is empty, returns nil, else coll', function() {
         throws('(not-empty)');
         throws('(not-empty 1)');
@@ -2480,6 +2577,24 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(not-empty #{1})', new types.HashSet([new types.Integer(1)]));
         nil('(not-empty "")');
         return eq('(not-empty "hello")', new types.String("hello"));
+      });
+    });
+    return describe('(get coll key not-found)', function() {
+      return it('returns the value mapped to key if present, else not-found or nil', function() {
+        throws('(get [1 2 3])');
+        nil('(get nil 2)');
+        nil('(get 2 2)');
+        nil('(get {:k1 "v1" :k2 "v2"} :k3)');
+        eq('(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', new types.Keyword('not-found'));
+        eq('(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', new types.String('v2'));
+        nil('(get #{45 89 32} 1)');
+        eq('(get #{45 89 32} 89)', new types.Integer(89));
+        eq('(get [45 89 32] 1)', new types.Integer(89));
+        nil('(get [45 89 32] 89)');
+        nil('(get \'(45 89 32) 1)');
+        nil('(get \'(45 89 32) 89)');
+        nil('(get \'(45 89 32) 1)');
+        return eq('(get "qwerty" 2)', new types.String('e'));
       });
     });
   });

@@ -94,32 +94,30 @@ core =
 
     args = _.uniq args   # remove duplicates
     return types.Boolean.true if args.length is 1
-    values = getValues(args)
 
-    if _.every(args, (arg) -> arg instanceof types.Sequential)
-      return new types.Boolean _.reduce _.zip(values), ((result, items) ->
+    if _.every(args, (arg) -> arg instanceof types.Primitive) and allOfSameType args
+      return new types.Boolean allEqual args
+
+    if _.every(args, (arg) -> types.implements arg, types.Map)
+      # maps can't be equal unless they are of equal size
+      return types.Boolean.false unless _.uniq(_.map args, (arg) -> arg.keys().length).length is 1
+      map1 = _.first args
+      return new types.Boolean _.reduce _.rest(args), ((result, map2) ->
+        result and
+        _.every map1.keys(), (key1) -> core['contains?'](map2, key1).isTrue() and
+        _.every map2.keys(), (key2) -> core['contains?'](map1, key2).isTrue() and
+        _.every map1.keys(), (key) -> core['='](core.get(map1, key), core.get(map2, key)).isTrue()
+      ), true
+
+    if _.every(args, (arg) -> types.implements arg, types.Sequence)
+      itemsArray = _.invoke args, 'items'
+      return new types.Boolean _.reduce _.zip(itemsArray), ((result, items) ->
         # if values contains arrays of unequal length, items can contain undefined
         return false if 'undefined' in _.map items, (item) -> typeof item
         result and core['='].apply(@, items).isTrue()
       ), true
 
-    if _.every(args, (arg) -> arg instanceof types.HashSet)
-      # sets can't be equal unless they are of equal cardinality
-      return types.Boolean.false unless _.uniq(_.map values, 'length').length is 1
-      return new types.Boolean _.reduce _.rest(args), ((result, set1) ->
-        set2 = _.first(args)
-        result and
-        _.every set1.value, (item1) -> core['contains?'](set2, item1).isTrue() and
-        _.every set2.value, (item2) -> core['contains?'](set1, item2).isTrue()
-      ), true
-
-    # a primitive can never equal a collection
-    return types.Boolean.false if _.some(args, (arg) -> arg instanceof types.Collection)
-
-    return types.Boolean.false unless allOfSameType args
-
-    # at this point all the arguments are: 1) primitives, and 2) of the same type
-    new types.Boolean allEqual args
+    types.Boolean.false
 
   'not=': (args...) ->
     assert.arity 1, Infinity, arguments
@@ -220,10 +218,7 @@ core =
     assert.arity 2, 2, arguments
     assert.collections coll
     assert.notTypes [coll], [types.List]
-    if coll instanceof types.Vector
-      return new types.Boolean(0 <= key.value < coll.value.length)
-    new types.Boolean _.any coll.value, (item) ->
-      core['='](key, item).isTrue()
+    new types.Boolean _.any coll.keys(), (item) -> core['='](key, item).isTrue()
 
 
   # logic
@@ -247,6 +242,11 @@ core =
       str += switch
         when arg instanceof types.Nil then ''
         when arg instanceof types.Keyword then ":#{arg.value}"
+        when arg instanceof types.HashMap
+          type = types[arg.type]
+          collStr = _.map(_.zip(arg.keys(), arg.values()), (pair) ->
+            core['str'](pair[0]).value + ' ' + core['str'](pair[1]).value).join ', '
+          type.startDelimiter + collStr + type.endDelimiter
         when arg instanceof types.Collection
           type = types[arg.type]
           collStr = _.map(arg.value, (item) -> core['str'](item).value).join ' '
@@ -259,7 +259,10 @@ core =
   'count': (coll) ->
     assert.arity 1, 1, arguments
     assert.types [coll], [types.Nil, types.String, types.Collection]
-    new types.Integer(if coll instanceof types.Nil then 0 else coll.value.length)
+    new types.Integer switch
+      when coll instanceof types.Nil then 0
+      when types.implements(coll, types.Map) then coll.keys().length
+      else coll.value.length
 
   'empty': (coll) ->
     assert.arity 1, 1, arguments
@@ -269,7 +272,15 @@ core =
   'not-empty': (coll) ->
     assert.arity 1, 1, arguments
     assert.types [coll], [types.Nil, types.String, types.Collection]
-    if coll instanceof types.Nil or coll.value.length is 0 then types.Nil.nil else coll
+    if core['count'](coll).value is 0 then types.Nil.nil else coll
+
+  'get': (coll, key, notFound = types.Nil.nil) ->
+    assert.arity 2, 3, arguments
+    assert.types [coll, key, notFound], [types.BaseType]
+    return notFound unless types.implements coll, types.Map
+    index = _.findIndex coll.keys(), (key2) ->
+      core['='](key, key2).isTrue()
+    if index is -1 then notFound else coll.values()[index]
 
 
 module.exports = core

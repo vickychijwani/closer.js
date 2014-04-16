@@ -1,5 +1,9 @@
 types = {}
 
+types.implements = (obj, methods) ->
+  _.every _.flatten(methods), (m) -> typeof obj[m] is "function"
+
+
 types.BaseType = class
   constructor: (value, type = @constructor.typeName) ->
     @type = type
@@ -23,6 +27,9 @@ types.Float = class extends types.Number
   @typeName: 'Float'
 
 types.String = class extends types.Primitive
+  items: -> _.map _.toArray(@value), (char) -> new types.String char
+  keys: -> _.map _.range(@value.length), (idx) -> new types.Integer idx
+  values: -> @items()
   @typeName: 'String'
 
 types.Boolean = class extends types.Primitive
@@ -45,15 +52,20 @@ types.Collection = class extends types.BaseType
   @startDelimiter: 'Collection('
   @endDelimiter: ')'
 
-types.Sequential = class extends types.Collection
-  @typeName: 'Sequential'
+types.Sequence = ['items']
 
-types.Vector = class extends types.Sequential
+types.Map = ['keys', 'values']
+
+types.Vector = class extends types.Collection
+  items: -> @value
+  keys: -> _.map _.range(@value.length), (idx) -> new types.Integer idx
+  values: -> @items()
   @typeName: 'Vector'
   @startDelimiter = '['
   @endDelimiter = ']'
 
-types.List = class extends types.Sequential
+types.List = class extends types.Collection
+  items: -> @value
   @typeName: 'List'
   @startDelimiter = '('
   @endDelimiter = ')'
@@ -67,6 +79,9 @@ types.HashSet = class extends types.Collection
         core['not='](val, uniq).value
       uniques.push(val) if isNew
     super uniques
+  items: -> @value
+  keys: -> @value
+  values: -> @value
   @typeName: 'HashSet'
   @startDelimiter = '#{'
   @endDelimiter = '}'
@@ -74,14 +89,17 @@ types.HashSet = class extends types.Collection
 types.HashMap = class extends types.Collection
   constructor: (items) ->
     # TODO HashMap isn't really a HashMap
-    @type = @constructor.typeName
-    @keys = _.filter items, (item, index) -> index % 2 is 0
-    @values = _.difference items, @keys
+    keys = _.filter items, (item, index) -> index % 2 is 0
+    values = _.difference items, keys
     uniques = []
     _.each @keys, (key) ->
       _.each uniques, (uniq) ->
         throw new DuplicateKeyError(key) if core['='](key, uniq).value
       uniques.push key
+    super { keys: keys, values: values }
+  items: -> _.zip @keys(), @values()
+  keys: -> @value.keys
+  values: -> @value.values
   @typeName: 'HashMap'
   @startDelimiter = '{'
   @endDelimiter = '}'

@@ -108,11 +108,13 @@ describe 'Closer core library', ->
       truthy '(= true (= 4 (* 2 2)))'
       falsy '(= true (= 4 (* 2 3)))'
       truthy '(= :keyword :keyword)'
+      falsy '(= 1 [1])'
       truthy '(= [3 4] \'(3 4))'
       truthy '(= [3 4] \'((+ 2 1) (/ 16 4)))'
       falsy '(= [3 4] \'((+ 2 1) (/ 16 8)))'
       falsy '(= [3 4] \'((+ 2 1) (/ 16 4) 5))'
       truthy '(= #{1 2} #{2 1})'
+      truthy '(= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})'
       falsy '(= #{1 2} #{2 1 3})'
       falsy '(= #{1 2} [2 1])'
 
@@ -130,11 +132,13 @@ describe 'Closer core library', ->
       falsy '(not= true (= 4 (* 2 2)))'
       truthy '(not= true (= 4 (* 2 3)))'
       falsy '(not= :keyword :keyword)'
+      truthy '(not= 1 [1])'
       falsy '(not= [3 4] \'(3 4))'
       falsy '(not= [3 4] \'((+ 2 1) (/ 16 4)))'
       truthy '(not= [3 4] \'((+ 2 1) (/ 16 8)))'
       truthy '(not= [3 4] \'((+ 2 1) (/ 16 4) 5))'
       falsy '(not= #{1 2} #{2 1})'
+      falsy '(not= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})'
       truthy '(not= #{1 2} #{2 1 3})'
       truthy '(not= #{1 2} [2 1])'
 
@@ -310,7 +314,9 @@ describe 'Closer core library', ->
       throws '(contains? \'(1 2) 2)'  # not supported for lists
       truthy '(contains? #{nil 2} nil)'
       falsy '(contains? #{1 2} 3)'
-      truthy '(contains? #{#{1 2}} #{2 1})'
+      truthy '(contains? #{{1 2}} {1 2})'
+      falsy '(contains? #{{1 2}} {2 1})'
+      truthy '(contains? {#{1 2} true} #{2 1})'
       truthy '(contains? #{[1 2]} \'(1 2))'
       falsy '(contains? #{[1 2]} \'(2 1))'
       # when coll is a vector, contains? checks if key is a valid index into it
@@ -359,6 +365,7 @@ describe 'Closer core library', ->
       eq '(str [1 2 :key])', new types.String '[1 2 :key]'
       eq '(str \'(1 2 3))', new types.String '(1 2 3)'
       eq '(str #{1 2 3})', new types.String '#{1 2 3}'
+      eq '(str {1 2 3 4})', new types.String '{1 2, 3 4}'
       eq '(str [1 2 \'(3 4 5)])', new types.String '[1 2 (3 4 5)]'
 
 
@@ -372,6 +379,7 @@ describe 'Closer core library', ->
       eq '(count "hello")', new types.Integer 5
       eq '(count [1 2 3])', new types.Integer 3
       eq '(count [1 2 #{3 4 5}])', new types.Integer 3
+      eq '(count {:key1 "value1" :key2 "value2"})', new types.Integer 2
 
   describe '(empty coll)', ->
     it 'returns an empty collection of the same category as coll, or nil', ->
@@ -381,6 +389,7 @@ describe 'Closer core library', ->
       eq '(empty [1 2 #{3 4}])', new types.Vector([])
       eq '(empty \'(1 2))', new types.List([])
       eq '(empty #{1 2})', new types.HashSet([])
+      eq '(empty {1 2})', new types.HashMap([])
 
   describe '(not-empty coll)', ->
     it 'if coll is empty, returns nil, else coll', ->
@@ -391,3 +400,20 @@ describe 'Closer core library', ->
       eq '(not-empty #{1})', new types.HashSet([new types.Integer 1])
       nil '(not-empty "")'
       eq '(not-empty "hello")', new types.String "hello"
+
+  describe '(get coll key not-found)', ->
+    it 'returns the value mapped to key if present, else not-found or nil', ->
+      throws '(get [1 2 3])'
+      nil '(get nil 2)'
+      nil '(get 2 2)'
+      nil '(get {:k1 "v1" :k2 "v2"} :k3)'
+      eq '(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', new types.Keyword 'not-found'
+      eq '(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', new types.String 'v2'
+      nil '(get #{45 89 32} 1)'
+      eq '(get #{45 89 32} 89)', new types.Integer 89
+      eq '(get [45 89 32] 1)', new types.Integer 89
+      nil '(get [45 89 32] 89)'
+      nil '(get \'(45 89 32) 1)'
+      nil '(get \'(45 89 32) 89)'
+      nil '(get \'(45 89 32) 1)'
+      eq '(get "qwerty" 2)', new types.String 'e'
