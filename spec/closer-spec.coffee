@@ -87,6 +87,9 @@ describe 'Closer parser', ->
         Boolean(true)])))
     expect(-> closer.parse('{1 2 3}')).toThrow()
 
+  it 'parses commas as whitespace', ->
+    expect(closer.parse(',,, ,,,  ,,\n')).toDeepEqual Program()
+
 
   # functions
   it 'parses a function call with 0 arguments', ->
