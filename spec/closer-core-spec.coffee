@@ -107,6 +107,7 @@ describe 'Closer core library', ->
       truthy '(= "hello" "hello")'
       truthy '(= true (= 4 (* 2 2)))'
       falsy '(= true (= 4 (* 2 3)))'
+      truthy '(= :keyword :keyword)'
       truthy '(= [3 4] \'(3 4))'
       truthy '(= [3 4] \'((+ 2 1) (/ 16 4)))'
       falsy '(= [3 4] \'((+ 2 1) (/ 16 8)))'
@@ -128,6 +129,7 @@ describe 'Closer core library', ->
       falsy '(not= "hello" "hello")'
       falsy '(not= true (= 4 (* 2 2)))'
       truthy '(not= true (= 4 (* 2 3)))'
+      falsy '(not= :keyword :keyword)'
       falsy '(not= [3 4] \'(3 4))'
       falsy '(not= [3 4] \'((+ 2 1) (/ 16 4)))'
       truthy '(not= [3 4] \'((+ 2 1) (/ 16 8)))'
@@ -190,6 +192,7 @@ describe 'Closer core library', ->
       falsy '(identical? 1.56 1.56)'
       truthy '(identical? true true)'
       truthy '(identical? nil nil)'
+      truthy '(identical? :keyword :keyword)'
       falsy '(identical? #{1 2} #{1 2})'
       truthy '(let [a #{1 2}] (identical? a a))'
       # different from standard Clojure behaviour; string interning cannot be emulated
@@ -326,6 +329,7 @@ describe 'Closer core library', ->
       truthy '(boolean true)'
       truthy '(boolean 34.75)'
       truthy '(boolean "hello")'
+      truthy '(boolean :keyword)'
       truthy '(boolean [1 2])'
       truthy '(boolean (fn [x y] (+ x y)))'
 
@@ -337,6 +341,7 @@ describe 'Closer core library', ->
       falsy '(not true)'
       falsy '(not 34.75)'
       falsy '(not "hello")'
+      falsy '(not :keyword)'
       falsy '(not [1 2])'
       falsy '(not (fn [x y] (+ x y)))'
 
@@ -352,7 +357,8 @@ describe 'Closer core library', ->
       eq '(str 3e-4)', new types.String '0.0003'    # different from standard Clojure
       eq '(str true)', new types.String 'true'
       eq '(str "hello")', new types.String 'hello'
-      eq '(str [1 2 3])', new types.String '[1 2 3]'
+      eq '(str :keyword)', new types.String ':keyword'
+      eq '(str [1 2 :key])', new types.String '[1 2 :key]'
       eq '(str \'(1 2 3))', new types.String '(1 2 3)'
       eq '(str #{1 2 3})', new types.String '#{1 2 3}'
       eq '(str [1 2 \'(3 4 5)])', new types.String '[1 2 (3 4 5)]'

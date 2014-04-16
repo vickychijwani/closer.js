@@ -165,7 +165,7 @@ core =
 
   'identical?': (x, y) ->
     assert.arity 2, 2, arguments
-    return core['='](x, y) if _.every [x, y], (arg) -> arg.type in ['Integer', 'Boolean', 'Nil']
+    return core['='](x, y) if _.every [x, y], (arg) -> arg.type in ['Integer', 'Boolean', 'Nil', 'Keyword']
     new types.Boolean(x is y)
 
   'true?': (arg) ->
@@ -246,6 +246,7 @@ core =
     for arg in args
       str += switch
         when arg instanceof types.Nil then ''
+        when arg instanceof types.Keyword then ":#{arg.value}"
         when arg instanceof types.Collection
           type = types[arg.type]
           collStr = _.map(arg.value, (item) -> core['str'](item).value).join ' '
