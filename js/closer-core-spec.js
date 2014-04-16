@@ -2160,7 +2160,10 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer":4,"../closer-core":2,"../closer-types":3,"escodegen":10,"estraverse":26}],8:[function(_dereq_,module,exports){
 (function() {
-  var eq, evaluate, falsy, global_helpers, helpers, nil, throws, truthy, types;
+  var eq, evaluate, falsy, float, global_helpers, helpers, int, key, list, map, nil, seq, set, str, throws, truthy, types, vec, _,
+    __slice = [].slice;
+
+  _ = _dereq_('lodash-node');
 
   types = _dereq_('../closer-types');
 
@@ -2198,95 +2201,141 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     return eq(src, types.Nil.nil);
   };
 
+  int = function(x) {
+    return new types.Integer(x);
+  };
+
+  float = function(x) {
+    return new types.Float(x);
+  };
+
+  str = function(x) {
+    return new types.String(x);
+  };
+
+  key = function(x) {
+    return new types.Keyword(x);
+  };
+
+  seq = function() {
+    var xs;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return new types.Seq(_.flatten(xs));
+  };
+
+  vec = function() {
+    var xs;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return new types.Vector(_.flatten(xs));
+  };
+
+  list = function() {
+    var xs;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return new types.List(_.flatten(xs));
+  };
+
+  set = function() {
+    var xs;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return new types.HashSet(_.flatten(xs));
+  };
+
+  map = function() {
+    var xs;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return new types.HashMap(_.flatten(xs));
+  };
+
   describe('Closer core library', function() {
     describe('(+ x y & more)', function() {
       return it('adds the given numbers', function() {
         throws('(+ "string")');
-        eq('(+)', new types.Integer(0));
-        return eq('(+ 3.3 0 -6e2 2)', new types.Float(-594.7));
+        eq('(+)', int(0));
+        return eq('(+ 3.3 0 -6e2 2)', float(-594.7));
       });
     });
     describe('(- x y & more)', function() {
       return it('subtracts all but the first number from the first one', function() {
         throws('(-)');
         throws('(- "string")');
-        eq('(- -3.54)', new types.Float(3.54));
-        return eq('(- 10 3.5 -4)', new types.Float(10.5));
+        eq('(- -3.54)', float(3.54));
+        return eq('(- 10 3.5 -4)', float(10.5));
       });
     });
     describe('(* x y & more)', function() {
       return it('multiplies the given numbers', function() {
         throws('(* "string")');
-        eq('(*)', new types.Integer(1));
-        return eq('(* 3 -6)', new types.Integer(-18));
+        eq('(*)', int(1));
+        return eq('(* 3 -6)', int(-18));
       });
     });
     describe('(/ x y & more)', function() {
       return it('divides the first number by the rest', function() {
         throws('(/)');
         throws('(/ "string")');
-        eq('(/ -4)', new types.Float(-0.25));
-        eq('(/ 14 -2)', new types.Integer(-7));
-        eq('(/ 14 -2.0)', new types.Float(-7));
-        return eq('(/ 14 -2 -2)', new types.Float(3.5));
+        eq('(/ -4)', float(-0.25));
+        eq('(/ 14 -2)', int(-7));
+        eq('(/ 14 -2.0)', float(-7));
+        return eq('(/ 14 -2 -2)', float(3.5));
       });
     });
     describe('(inc x)', function() {
       return it('increments x by 1', function() {
         throws('(inc 2 3 4)');
         throws('(inc "string")');
-        return eq('(inc -2e-3)', new types.Float(0.998));
+        return eq('(inc -2e-3)', float(0.998));
       });
     });
     describe('(dec x)', function() {
       return it('decrements x by 1', function() {
         throws('(dec 2 3 4)');
         throws('(dec "string")');
-        return eq('(dec -2e-3)', new types.Float(-1.002));
+        return eq('(dec -2e-3)', float(-1.002));
       });
     });
     describe('(max x y & more)', function() {
       return it('finds the maximum of the given numbers', function() {
         throws('(max)');
         throws('(max "string" [1 2])');
-        return eq('(max -1e10 653.32 1.345e4)', new types.Float(1.345e4));
+        return eq('(max -1e10 653.32 1.345e4)', float(1.345e4));
       });
     });
     describe('(min x y & more)', function() {
       return it('finds the minimum of the given numbers', function() {
         throws('(min)');
         throws('(min "string" [1 2])');
-        return eq('(min -1e10 653.32 1.345e4)', new types.Float(-1e10));
+        return eq('(min -1e10 653.32 1.345e4)', float(-1e10));
       });
     });
     describe('(quot num div)', function() {
       return it('computes the quotient of dividing num by div', function() {
         throws('(quot 10)');
         throws('(quot [1 2] 3)');
-        eq('(quot 10 3)', new types.Integer(3));
-        eq('(quot -5.9 3)', new types.Float(-1.0));
-        eq('(quot -10 -3)', new types.Integer(3));
-        return eq('(quot 10 -3)', new types.Integer(-3));
+        eq('(quot 10 3)', int(3));
+        eq('(quot -5.9 3)', float(-1.0));
+        eq('(quot -10 -3)', int(3));
+        return eq('(quot 10 -3)', int(-3));
       });
     });
     describe('(rem num div)', function() {
       return it('computes the remainder of dividing num by div (same as % in other languages)', function() {
         throws('(rem 10)');
         throws('(rem [1 2] 3)');
-        eq('(rem 10.1 3)', new types.Float(10.1 % 3));
-        eq('(rem -10.1 3)', new types.Float(-10.1 % 3));
-        eq('(rem -10.1 -3)', new types.Float(-10.1 % -3));
-        return eq('(rem 10.1 -3)', new types.Float(10.1 % -3));
+        eq('(rem 10.1 3)', float(10.1 % 3));
+        eq('(rem -10.1 3)', float(-10.1 % 3));
+        eq('(rem -10.1 -3)', float(-10.1 % -3));
+        return eq('(rem 10.1 -3)', float(10.1 % -3));
       });
     });
     describe('(mod num div)', function() {
       return it('computes the modulus of num and div (NOT the same as % in other languages)', function() {
         throws('(mod 10)');
         throws('(mod [1 2] 3)');
-        eq('(mod 10.1 3)', new types.Float(10.1 % 3));
-        eq('(mod -10.1 3)', new types.Float(3 - 10.1 % 3));
-        eq('(mod -10.1 -3)', new types.Float(-10.1 % 3));
-        return eq('(mod 10.1 -3)', new types.Float(10.1 % 3 - 3));
+        eq('(mod 10.1 3)', float(10.1 % 3));
+        eq('(mod -10.1 3)', float(3 - 10.1 % 3));
+        eq('(mod -10.1 -3)', float(-10.1 % 3));
+        return eq('(mod 10.1 -3)', float(10.1 % 3 - 3));
       });
     });
     describe('(= x y & more)', function() {
@@ -2569,18 +2618,18 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(str x & ys)', function() {
       return it('concatenates the string values of each of its arguments', function() {
-        eq('(str)', new types.String(''));
-        eq('(str nil)', new types.String(''));
-        eq('(str 34)', new types.String('34'));
-        eq('(str 34.45)', new types.String('34.45'));
-        eq('(str 3e3)', new types.String('3000'));
-        eq('(str 3e-4)', new types.String('0.0003'));
-        eq('(str 1 true "hello" :keyword)', new types.String('1truehello:keyword'));
-        eq('(str [1 2 :key])', new types.String('[1 2 :key]'));
-        eq('(str \'(1 2 3))', new types.String('(1 2 3)'));
-        eq('(str #{1 2 3})', new types.String('#{1 2 3}'));
-        eq('(str {1 2 3 4})', new types.String('{1 2, 3 4}'));
-        return eq('(str [1 2 \'(3 4 5)])', new types.String('[1 2 (3 4 5)]'));
+        eq('(str)', str(''));
+        eq('(str nil)', str(''));
+        eq('(str 34)', str('34'));
+        eq('(str 34.45)', str('34.45'));
+        eq('(str 3e3)', str('3000'));
+        eq('(str 3e-4)', str('0.0003'));
+        eq('(str 1 true "hello" :keyword)', str('1truehello:keyword'));
+        eq('(str [1 2 :key])', str('[1 2 :key]'));
+        eq('(str \'(1 2 3))', str('(1 2 3)'));
+        eq('(str #{1 2 3})', str('#{1 2 3}'));
+        eq('(str {1 2 3 4})', str('{1 2, 3 4}'));
+        return eq('(str [1 2 \'(3 4 5)])', str('[1 2 (3 4 5)]'));
       });
     });
     describe('(count coll)', function() {
@@ -2588,11 +2637,11 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         throws('(count [1 2 3] "hello")');
         throws('(count 1)');
         throws('(count true)');
-        eq('(count nil)', new types.Integer(0));
-        eq('(count "hello")', new types.Integer(5));
-        eq('(count [1 2 3])', new types.Integer(3));
-        eq('(count [1 2 #{3 4 5}])', new types.Integer(3));
-        return eq('(count {:key1 "value1" :key2 "value2"})', new types.Integer(2));
+        eq('(count nil)', int(0));
+        eq('(count "hello")', int(5));
+        eq('(count [1 2 3])', int(3));
+        eq('(count [1 2 #{3 4 5}])', int(3));
+        return eq('(count {:key1 "value1" :key2 "value2"})', int(2));
       });
     });
     describe('(empty coll)', function() {
@@ -2600,10 +2649,10 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         throws('(empty)');
         nil('(empty 1)');
         nil('(empty "hello")');
-        eq('(empty [1 2 #{3 4}])', new types.Vector([]));
-        eq('(empty \'(1 2))', new types.List([]));
-        eq('(empty #{1 2})', new types.HashSet([]));
-        return eq('(empty {1 2})', new types.HashMap([]));
+        eq('(empty [1 2 #{3 4}])', vec());
+        eq('(empty \'(1 2))', list());
+        eq('(empty #{1 2})', set());
+        return eq('(empty {1 2})', map());
       });
     });
     describe('(not-empty coll)', function() {
@@ -2612,9 +2661,9 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         throws('(not-empty 1)');
         nil('(not-empty nil)');
         nil('(not-empty #{})');
-        eq('(not-empty #{1})', new types.HashSet([new types.Integer(1)]));
+        eq('(not-empty #{1})', set(int(1)));
         nil('(not-empty "")');
-        return eq('(not-empty "hello")', new types.String("hello"));
+        return eq('(not-empty "hello")', str("hello"));
       });
     });
     describe('(get coll key not-found)', function() {
@@ -2623,16 +2672,16 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(get nil 2)');
         nil('(get 2 2)');
         nil('(get {:k1 "v1" :k2 "v2"} :k3)');
-        eq('(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', new types.Keyword('not-found'));
-        eq('(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', new types.String('v2'));
+        eq('(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', key('not-found'));
+        eq('(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', str('v2'));
         nil('(get #{45 89 32} 1)');
-        eq('(get #{45 89 32} 89)', new types.Integer(89));
-        eq('(get [45 89 32] 1)', new types.Integer(89));
+        eq('(get #{45 89 32} 89)', int(89));
+        eq('(get [45 89 32] 1)', int(89));
         nil('(get [45 89 32] 89)');
         nil('(get \'(45 89 32) 1)');
         nil('(get \'(45 89 32) 89)');
         nil('(get \'(45 89 32) 1)');
-        return eq('(get "qwerty" 2)', new types.String('e'));
+        return eq('(get "qwerty" 2)', str('e'));
       });
     });
     describe('(seq coll)', function() {
@@ -2642,25 +2691,25 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(seq nil)');
         nil('(seq "")');
         nil('(seq {})');
-        eq('(seq "qwe")', new types.Seq([new types.String('q'), new types.String('w'), new types.String('e')]));
-        eq('(seq [1 2 3])', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
-        eq('(seq \'(1 2 3))', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
-        eq('(seq #{1 2 3})', new types.Seq([new types.Integer(1), new types.Integer(2), new types.Integer(3)]));
-        return eq('(seq {1 2 3 4})', new types.Seq([new types.Vector([new types.Integer(1), new types.Integer(2)]), new types.Vector([new types.Integer(3), new types.Integer(4)])]));
+        eq('(seq "qwe")', seq(str('q'), str('w'), str('e')));
+        eq('(seq [1 2 3])', seq(int(1), int(2), int(3)));
+        eq('(seq \'(1 2 3))', seq(int(1), int(2), int(3)));
+        eq('(seq #{1 2 3})', seq(int(1), int(2), int(3)));
+        return eq('(seq {1 2 3 4})', seq(vec(int(1), int(2)), vec(int(3), int(4))));
       });
     });
     return describe('(identity x)', function() {
       return it('returns its argument', function() {
         throws('(identity 34 45)');
         nil('(identity nil)');
-        return eq('(identity {:k1 "v1" :k2 #{1 2}})', new types.HashMap([new types.Keyword('k1'), new types.String('v1'), new types.Keyword('k2'), new types.HashSet([new types.Integer(1), new types.Integer(2)])]));
+        return eq('(identity {:k1 "v1" :k2 #{1 2}})', map(key('k1'), str('v1'), key('k2'), set(int(1), int(2))));
       });
     });
   });
 
 }).call(this);
 
-},{"../closer-types":3,"./closer-core-helpers":7,"./closer-helpers":9}],9:[function(_dereq_,module,exports){
+},{"../closer-types":3,"./closer-core-helpers":7,"./closer-helpers":9,"lodash-node":114}],9:[function(_dereq_,module,exports){
 (function() {
   var closer, json_diff, type, types,
     __slice = [].slice;
