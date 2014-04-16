@@ -432,3 +432,9 @@ describe 'Closer core library', ->
       eq '(seq \'(1 2 3))', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
       eq '(seq #{1 2 3})', new types.Seq [new types.Integer(1), new types.Integer(2), new types.Integer(3)]
       eq '(seq {1 2 3 4})', new types.Seq [new types.Vector([new types.Integer(1), new types.Integer(2)]), new types.Vector([new types.Integer(3), new types.Integer(4)])]
+
+  describe '(identity x)', ->
+    it 'returns its argument', ->
+      throws '(identity 34 45)'
+      nil '(identity nil)'
+      eq '(identity {:k1 "v1" :k2 #{1 2}})', new types.HashMap [new types.Keyword('k1'), new types.String('v1'), new types.Keyword('k2'), new types.HashSet([new types.Integer(1), new types.Integer(2)])]

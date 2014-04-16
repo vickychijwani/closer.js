@@ -288,6 +288,11 @@ core =
     return types.Nil.nil if core['count'](coll).value is 0
     new types.Seq coll.items()
 
+  'identity': (x) ->
+    assert.arity 1, 1, arguments
+    assert.types [x], [types.BaseType]
+    x
+
 
 module.exports = core
 
