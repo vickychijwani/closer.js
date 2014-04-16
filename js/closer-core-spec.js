@@ -398,6 +398,34 @@
     'not': function(arg) {
       assert.arity(1, 1, arguments);
       return core.boolean(arg).complement();
+    },
+    'str': function() {
+      var arg, args, collStr, str, type, _i, _len;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(0, Infinity, arguments);
+      assert.types(args, [types.BaseType]);
+      if (args.length === 0) {
+        return new types.String('');
+      }
+      str = '';
+      for (_i = 0, _len = args.length; _i < _len; _i++) {
+        arg = args[_i];
+        str += (function() {
+          switch (false) {
+            case !(arg instanceof types.Nil):
+              return '';
+            case !(arg instanceof types.Collection):
+              type = types[arg.type];
+              collStr = _.map(arg.value, function(item) {
+                return core['str'](item).value;
+              }).join(' ');
+              return type.startDelimiter + collStr + type.endDelimiter;
+            default:
+              return arg.value.toString();
+          }
+        })();
+      }
+      return new types.String(str);
     }
   };
 
@@ -560,6 +588,10 @@
 
     _Class.typeName = 'Collection';
 
+    _Class.startDelimiter = 'Collection(';
+
+    _Class.endDelimiter = ')';
+
     return _Class;
 
   })(types.BaseType);
@@ -586,6 +618,10 @@
 
     _Class.typeName = 'Vector';
 
+    _Class.startDelimiter = '[';
+
+    _Class.endDelimiter = ']';
+
     return _Class;
 
   })(types.Sequential);
@@ -598,6 +634,10 @@
     }
 
     _Class.typeName = 'List';
+
+    _Class.startDelimiter = '(';
+
+    _Class.endDelimiter = ')';
 
     return _Class;
 
@@ -622,6 +662,10 @@
     }
 
     _Class.typeName = 'HashSet';
+
+    _Class.startDelimiter = '#{';
+
+    _Class.endDelimiter = '}';
 
     return _Class;
 
@@ -2278,7 +2322,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return truthy('(boolean (fn [x y] (+ x y)))');
       });
     });
-    return describe('(not x)', function() {
+    describe('(not x)', function() {
       return it('returns the complement of (boolean x) (true for nil and false, else false)', function() {
         throws('(not nil false)');
         truthy('(not nil)');
@@ -2288,6 +2332,22 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         falsy('(not "hello")');
         falsy('(not [1 2])');
         return falsy('(not (fn [x y] (+ x y)))');
+      });
+    });
+    return describe('(str x & ys)', function() {
+      return it('concatenates the string values of each of its arguments', function() {
+        eq('(str)', new types.String(''));
+        eq('(str nil)', new types.String(''));
+        eq('(str 34)', new types.String('34'));
+        eq('(str 34.45)', new types.String('34.45'));
+        eq('(str 3e3)', new types.String('3000'));
+        eq('(str 3e-4)', new types.String('0.0003'));
+        eq('(str true)', new types.String('true'));
+        eq('(str "hello")', new types.String('hello'));
+        eq('(str [1 2 3])', new types.String('[1 2 3]'));
+        eq('(str \'(1 2 3))', new types.String('(1 2 3)'));
+        eq('(str #{1 2 3})', new types.String('#{1 2 3}'));
+        return eq('(str [1 2 \'(3 4 5)])', new types.String('[1 2 (3 4 5)]'));
       });
     });
   });
