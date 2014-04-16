@@ -426,6 +426,11 @@
         })();
       }
       return new types.String(str);
+    },
+    'count': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      return new types.Integer(coll instanceof types.Nil ? 0 : coll.value.length);
     }
   };
 
@@ -2334,7 +2339,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return falsy('(not (fn [x y] (+ x y)))');
       });
     });
-    return describe('(str x & ys)', function() {
+    describe('(str x & ys)', function() {
       return it('concatenates the string values of each of its arguments', function() {
         eq('(str)', new types.String(''));
         eq('(str nil)', new types.String(''));
@@ -2348,6 +2353,17 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(str \'(1 2 3))', new types.String('(1 2 3)'));
         eq('(str #{1 2 3})', new types.String('#{1 2 3}'));
         return eq('(str [1 2 \'(3 4 5)])', new types.String('[1 2 (3 4 5)]'));
+      });
+    });
+    return describe('(count coll)', function() {
+      return it('returns the number of items the collection', function() {
+        throws('(count [1 2 3] "hello")');
+        throws('(count 1)');
+        throws('(count true)');
+        eq('(count nil)', new types.Integer(0));
+        eq('(count "hello")', new types.Integer(5));
+        eq('(count [1 2 3])', new types.Integer(3));
+        return eq('(count [1 2 #{3 4 5}])', new types.Integer(3));
       });
     });
   });

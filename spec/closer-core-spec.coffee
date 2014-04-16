@@ -355,3 +355,15 @@ describe 'Closer core library', ->
       eq '(str \'(1 2 3))', new types.String '(1 2 3)'
       eq '(str #{1 2 3})', new types.String '#{1 2 3}'
       eq '(str [1 2 \'(3 4 5)])', new types.String '[1 2 (3 4 5)]'
+
+
+  # collections
+  describe '(count coll)', ->
+    it 'returns the number of items the collection', ->
+      throws '(count [1 2 3] "hello")'
+      throws '(count 1)'
+      throws '(count true)'
+      eq '(count nil)', new types.Integer 0
+      eq '(count "hello")', new types.Integer 5
+      eq '(count [1 2 3])', new types.Integer 3
+      eq '(count [1 2 #{3 4 5}])', new types.Integer 3
