@@ -440,6 +440,15 @@
       } else {
         return types.Nil.nil;
       }
+    },
+    'not-empty': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      if (coll instanceof types.Nil || coll.value.length === 0) {
+        return types.Nil.nil;
+      } else {
+        return coll;
+      }
     }
   };
 
