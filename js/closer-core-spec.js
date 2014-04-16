@@ -2393,9 +2393,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(str 34.45)', new types.String('34.45'));
         eq('(str 3e3)', new types.String('3000'));
         eq('(str 3e-4)', new types.String('0.0003'));
-        eq('(str true)', new types.String('true'));
-        eq('(str "hello")', new types.String('hello'));
-        eq('(str :keyword)', new types.String(':keyword'));
+        eq('(str 1 true "hello" :keyword)', new types.String('1truehello:keyword'));
         eq('(str [1 2 :key])', new types.String('[1 2 :key]'));
         eq('(str \'(1 2 3))', new types.String('(1 2 3)'));
         eq('(str #{1 2 3})', new types.String('#{1 2 3}'));
