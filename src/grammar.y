@@ -23,15 +23,15 @@ Atom
   | 'true' { $$ = parseLiteral('Boolean', true, @1, yytext, yy); }
   | 'false' { $$ = parseLiteral('Boolean', false, @1, yytext, yy); }
   | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
-  | COLON IDENTIFIER { $$ = parseLiteral('Keyword', String($2), yy.loc(@2), yytext, yy); }
+  | COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
   | Identifier
   ;
 
 CollectionLiteral
-  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('Vector', getValueIfUndefined($items, []), @items, yy); }
-  | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('List', getValueIfUndefined($items, []), @items, yy); }
-  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('HashMap', getValueIfUndefined($items, []), @items, yy); }
-  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('HashSet', getValueIfUndefined($items, []), @items, yy); }
+  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('vector', getValueIfUndefined($items, []), @items, yy); }
+  | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('list', getValueIfUndefined($items, []), @items, yy); }
+  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash_map', getValueIfUndefined($items, []), @items, yy); }
+  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('set', getValueIfUndefined($items, []), @items, yy); }
   ;
 
 RestArgs
@@ -210,17 +210,16 @@ function parseNumLiteral(type, token, loc, yy, yytext) {
     return node;
 }
 
-function parseLiteral(type, value, loc, raw, yy) {
-    return parseLiteralCommon(type, yy.Node('Literal', value, loc, raw), loc, yy);
+function parseLiteral(type, value, rawloc, raw, yy) {
+    var loc = yy.loc(rawloc);
+    return yy.Node('Literal', value, loc, raw);
+//    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [lit], loc);
 }
 
-function parseCollectionLiteral(type, items, loc, yy) {
-    return parseLiteralCommon(type, yy.Node('ArrayExpression', items, loc), loc, yy);
-}
-
-function parseLiteralCommon(type, value, loc, yy) {
-    loc = yy.loc(loc);
-    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [value], loc);
+function parseCollectionLiteral(type, items, rawloc, yy) {
+    var loc = yy.loc(rawloc);
+    var array = yy.Node('ArrayExpression', items, loc);
+    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), type === 'set' ? [array] : items, loc);
 }
 
 function parseNum(num) {

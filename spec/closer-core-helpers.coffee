@@ -3,6 +3,7 @@ core = require '../closer-core'
 types = require '../closer-types'
 escodegen = require 'escodegen'
 estraverse = require 'estraverse'
+mori = require 'mori'
 
 wireCallsToCore = (ast) ->
   estraverse.replace ast,
@@ -17,6 +18,12 @@ wireCallsToCore = (ast) ->
       else if node.type is 'NewExpression' and node.callee.type is 'Identifier' and node.callee.name of types
         # FIXME same evil here with types
         calleeObj = closer.node 'Identifier', 'types', node.loc
+        calleeProp = closer.node 'Identifier', node.callee.name, node.loc
+        node.callee = closer.node 'MemberExpression',
+          calleeObj, calleeProp, false, node.loc
+      else if node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name of mori
+        # FIXME same evil here with mori
+        calleeObj = closer.node 'Identifier', 'mori', node.loc
         calleeProp = closer.node 'Identifier', node.callee.name, node.loc
         node.callee = closer.node 'MemberExpression',
           calleeObj, calleeProp, false, node.loc

@@ -216,13 +216,12 @@ core =
 
   'contains?': (coll, key) ->
     assert.arity 2, 2, arguments
-    assert.collections coll
-    assert.notTypes [coll], [types.List]
-    new types.Boolean _.any coll.keys(), (item) -> core['='](key, item).isTrue()
+    assert.associative coll
+    m.has_key coll, key
 
   'empty?': (coll) ->
     assert.arity 1, 1, arguments
-    core.not core.seq coll
+    m.is_empty coll
 
 
   # logic
@@ -262,16 +261,14 @@ core =
   # collections
   'count': (coll) ->
     assert.arity 1, 1, arguments
-    assert.types [coll], [types.Nil, types.String, types.Collection]
-    new types.Integer switch
-      when coll instanceof types.Nil then 0
-      when types.implements(coll, types.Map) then coll.keys().length
-      else coll.value.length
+    assert.seqable coll
+    m.count coll
 
   'empty': (coll) ->
     assert.arity 1, 1, arguments
-    assert.types [coll], [types.BaseType]
-    if coll instanceof types.Collection then new types[coll.type]([]) else types.Nil.nil
+    try m.empty coll
+    catch error
+      null
 
   'not-empty': (coll) ->
     assert.arity 1, 1, arguments
@@ -288,13 +285,11 @@ core =
 
   'seq': (coll) ->
     assert.arity 1, 1, arguments
-    assert.types [coll], [types.Nil, types.String, types.Collection]
-    return types.Nil.nil if core['count'](coll).value is 0
-    new types.Seq coll.items()
+    assert.seqable coll
+    m.seq coll
 
   'identity': (x) ->
     assert.arity 1, 1, arguments
-    assert.types [x], [types.BaseType]
     x
 
 
@@ -303,5 +298,6 @@ module.exports = core
 # requires go here, because of circular dependency
 # see https://coderwall.com/p/myzvmg for more
 _ = require 'lodash-node'
+m = require 'mori'
 types = require './closer-types'
 assert = require './assert'

@@ -452,15 +452,15 @@ case 8: this.$ = parseLiteral('Boolean', false, _$[$0], yytext, yy);
 break;
 case 9: this.$ = parseLiteral('Nil', null, _$[$0], yytext, yy); 
 break;
-case 10: this.$ = parseLiteral('Keyword', String($$[$0]), yy.loc(_$[$0]), yytext, yy); 
+case 10: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(_$[$0])), [yy.Node('Literal', String($$[$0]), yy.loc(_$[$0]))], yy.loc(_$[$0])); 
 break;
-case 12: this.$ = parseCollectionLiteral('Vector', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 12: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 13: this.$ = parseCollectionLiteral('List', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 13: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 14: this.$ = parseCollectionLiteral('HashMap', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 14: this.$ = parseCollectionLiteral('hash_map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 15: this.$ = parseCollectionLiteral('HashSet', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 15: this.$ = parseCollectionLiteral('set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
 case 16: this.$ = $$[$0]; 
 break;
@@ -748,17 +748,16 @@ function parseNumLiteral(type, token, loc, yy, yytext) {
     return node;
 }
 
-function parseLiteral(type, value, loc, raw, yy) {
-    return parseLiteralCommon(type, yy.Node('Literal', value, loc, raw), loc, yy);
+function parseLiteral(type, value, rawloc, raw, yy) {
+    var loc = yy.loc(rawloc);
+    return yy.Node('Literal', value, loc, raw);
+//    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [lit], loc);
 }
 
-function parseCollectionLiteral(type, items, loc, yy) {
-    return parseLiteralCommon(type, yy.Node('ArrayExpression', items, loc), loc, yy);
-}
-
-function parseLiteralCommon(type, value, loc, yy) {
-    loc = yy.loc(loc);
-    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [value], loc);
+function parseCollectionLiteral(type, items, rawloc, yy) {
+    var loc = yy.loc(rawloc);
+    var array = yy.Node('ArrayExpression', items, loc);
+    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), type === 'set' ? [array] : items, loc);
 }
 
 function parseNum(num) {

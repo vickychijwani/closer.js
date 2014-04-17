@@ -30,7 +30,7 @@ beforeEach ->
   @addMatchers toDeepEqual: helpers.toDeepEqual
 
 
-describe 'Closer parser', ->
+xdescribe 'Closer parser', ->
 
   # atoms
   it 'parses an empty program', ->
