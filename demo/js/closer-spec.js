@@ -384,6 +384,10 @@
         return core['='](key, item).isTrue();
       }));
     },
+    'empty?': function(coll) {
+      assert.arity(1, 1, arguments);
+      return core.not(core.seq(coll));
+    },
     'boolean': function(arg) {
       assert.arity(1, 1, arguments);
       if (!(arg instanceof types.BaseType)) {

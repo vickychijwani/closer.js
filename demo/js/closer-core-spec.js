@@ -384,6 +384,10 @@
         return core['='](key, item).isTrue();
       }));
     },
+    'empty?': function(coll) {
+      assert.arity(1, 1, arguments);
+      return core.not(core.seq(coll));
+    },
     'boolean': function(arg) {
       assert.arity(1, 1, arguments);
       if (!(arg instanceof types.BaseType)) {
@@ -2624,6 +2628,19 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         truthy('(contains? [98 54] 1)');
         falsy('(contains? [98 54] 2)');
         return falsy('(contains? [98 54] 98)');
+      });
+    });
+    describe('(empty? coll)', function() {
+      return it('returns true if coll has no items - same as (not (seq coll))', function() {
+        throws('(empty? 3)');
+        throws('(empty? [] \'())');
+        truthy('(empty? nil)');
+        truthy('(empty? "")');
+        falsy('(empty? "string")');
+        falsy('(empty? [1 2 3])');
+        truthy('(empty? [])');
+        falsy('(empty? {:k1 "v1" :k2 "v2"})');
+        return truthy('(empty? #{})');
       });
     });
     describe('(boolean x)', function() {

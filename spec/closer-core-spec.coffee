@@ -339,6 +339,18 @@ describe 'Closer core library', ->
       falsy '(contains? [98 54] 2)'
       falsy '(contains? [98 54] 98)'
 
+  describe '(empty? coll)', ->
+    it 'returns true if coll has no items - same as (not (seq coll))', ->
+      throws '(empty? 3)'
+      throws '(empty? [] \'())'
+      truthy '(empty? nil)'
+      truthy '(empty? "")'
+      falsy '(empty? "string")'
+      falsy '(empty? [1 2 3])'
+      truthy '(empty? [])'
+      falsy '(empty? {:k1 "v1" :k2 "v2"})'
+      truthy '(empty? #{})'
+
 
   # logic
   describe '(boolean x)', ->

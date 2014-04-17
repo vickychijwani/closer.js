@@ -220,6 +220,10 @@ core =
     assert.notTypes [coll], [types.List]
     new types.Boolean _.any coll.keys(), (item) -> core['='](key, item).isTrue()
 
+  'empty?': (coll) ->
+    assert.arity 1, 1, arguments
+    core.not core.seq coll
+
 
   # logic
   'boolean': (arg) ->
