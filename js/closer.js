@@ -740,10 +740,10 @@ var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpressi
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;
     if (token[0] === '-') {
-        node = parseLiteral(type, -parseNum(token), loc, yytext, yy);
-        node.arguments[0] = yy.Node('UnaryExpression', '-', node.arguments[0], true, yy.loc(loc));
+        node = parseLiteral(type, -Number(token), loc, yytext, yy);
+        node = yy.Node('UnaryExpression', '-', node, true, yy.loc(loc));
     } else {
-        node = parseLiteral(type, parseNum(token), loc, yytext, yy);
+        node = parseLiteral(type, Number(token), loc, yytext, yy);
     }
     return node;
 }
@@ -758,17 +758,6 @@ function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
     var array = yy.Node('ArrayExpression', items, loc);
     return yy.Node('CallExpression', yy.Node('Identifier', type, loc), type === 'set' ? [array] : items, loc);
-}
-
-function parseNum(num) {
-    if (num[0] === '0') {
-        if (num[1] === 'x' || num[1] === 'X') {
-            return parseInt(num, 16);
-        }
-        return parseInt(num, 8);
-    } else {
-        return Number(num);
-    }
 }
 
 function parseString(str) {
