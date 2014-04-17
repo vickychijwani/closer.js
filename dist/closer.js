@@ -756,8 +756,8 @@ function parseLiteral(type, value, rawloc, raw, yy) {
 
 function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
-    var array = yy.Node('ArrayExpression', items, loc);
-    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), type === 'set' ? [array] : items, loc);
+    var value = type === 'set' ? [yy.Node('ArrayExpression', items, loc)] : items;
+    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), value, loc);
 }
 
 function parseString(str) {

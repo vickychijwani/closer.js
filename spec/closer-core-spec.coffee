@@ -1,6 +1,5 @@
 _ = require 'lodash-node'
 mori = require 'mori'
-types = require '../closer-types'
 global_helpers = require './closer-helpers'
 helpers = require './closer-core-helpers'
 evaluate = helpers.evaluate

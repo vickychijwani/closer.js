@@ -227,5 +227,4 @@ module.exports = core
 # see https://coderwall.com/p/myzvmg for more
 _ = require 'lodash-node'
 m = require 'mori'
-types = require './closer-types'
 assert = require './assert'

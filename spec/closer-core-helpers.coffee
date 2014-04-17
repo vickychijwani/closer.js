@@ -1,6 +1,5 @@
 closer = require '../closer'
 core = require '../closer-core'
-types = require '../closer-types'
 escodegen = require 'escodegen'
 estraverse = require 'estraverse'
 mori = require 'mori'

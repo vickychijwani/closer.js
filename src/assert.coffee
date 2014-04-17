@@ -12,9 +12,6 @@ class ArgTypeError extends Error
     @name = 'ArgTypeError'
     @message = "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
 
-checkTypes = (args, expectedTypes) ->
-  _.every args, (arg) -> _.some(expectedTypes, (type) -> arg instanceof type)
-
 unexpectedTypes = (args, expectedTypes) ->
   _.find args, (arg) -> not _.any(expectedTypes, (type) -> mori['is_' + type](arg))
 
@@ -28,10 +25,6 @@ assert =
     if unexpectedArg = unexpectedTypes args, expectedTypes
       throw new Error "#{unexpectedArg} is not of type #{expectedTypes.join(' or ')}"
 
-  notTypes: (args, expectedTypes) ->
-    if checkTypes args, expectedTypes
-      throw new ArgTypeError args, expectedTypes
-
   numbers: (args...) ->
     unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number')
     if unexpectedArg isnt undefined
@@ -41,9 +34,6 @@ assert =
     unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number' and arg % 1 is 0)
     if unexpectedArg isnt undefined
       throw new Error "#{unexpectedArg} is not a integer"
-
-  collections: (args...) ->
-    assert.types _.flatten(args, true), [types.Collection]
 
   associative: (args...) ->
     if unexpectedArg = unexpectedTypes args, ['associative', 'set']
@@ -66,4 +56,3 @@ module.exports = assert
 # see https://coderwall.com/p/myzvmg for more
 _ = require 'lodash-node'
 mori = require 'mori'
-types = require './closer-types'
