@@ -1,6 +1,6 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.closerCore=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var ArgTypeError, ArityError, assert, firstFailure, mori, unexpectedTypes, _,
+  var ArgTypeError, ArityError, assert, firstFailure, mori, _,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
@@ -21,26 +21,15 @@
   ArgTypeError = (function(_super) {
     __extends(ArgTypeError, _super);
 
-    function ArgTypeError(args, expectedTypes) {
-      var actual, expected;
+    function ArgTypeError(message) {
       Error.captureStackTrace(this, this.constructor);
-      actual = _.pluck(args, 'type');
-      expected = _.pluck(expectedTypes, 'typeName');
       this.name = 'ArgTypeError';
-      this.message = "Expected " + (expected.join(' or ')) + ", got [" + (actual.join(', ')) + "]";
+      this.message = message;
     }
 
     return ArgTypeError;
 
   })(Error);
-
-  unexpectedTypes = function(args, expectedTypes) {
-    return _.find(args, function(arg) {
-      return !_.any(expectedTypes, function(type) {
-        return mori['is_' + type](arg);
-      });
-    });
-  };
 
   firstFailure = function(args, testFn) {
     return _.find(args, function(arg) {
@@ -49,12 +38,6 @@
   };
 
   assert = {
-    types: function(args, expectedTypes) {
-      var unexpectedArg;
-      if (unexpectedArg = unexpectedTypes(args, expectedTypes)) {
-        throw new Error("" + unexpectedArg + " is not of type " + (expectedTypes.join(' or ')));
-      }
-    },
     numbers: function() {
       var args, unexpectedArg;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -62,7 +45,7 @@
         return typeof arg === 'number';
       });
       if (unexpectedArg !== void 0) {
-        throw new Error("" + unexpectedArg + " is not a number");
+        throw new ArgTypeError("" + unexpectedArg + " is not a number");
       }
     },
     integers: function() {
@@ -72,14 +55,16 @@
         return typeof arg === 'number' && arg % 1 === 0;
       });
       if (unexpectedArg !== void 0) {
-        throw new Error("" + unexpectedArg + " is not a integer");
+        throw new ArgTypeError("" + unexpectedArg + " is not a integer");
       }
     },
     associative: function() {
       var args, unexpectedArg;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (unexpectedArg = unexpectedTypes(args, ['associative', 'set'])) {
-        throw new Error("" + unexpectedArg + " is not an associative collection");
+      if (unexpectedArg = firstFailure(args, function(arg) {
+        return mori.is_associative(arg) || mori.is_set(arg);
+      })) {
+        throw new ArgTypeError("" + unexpectedArg + " is not an associative collection");
       }
     },
     seqable: function() {
@@ -89,7 +74,7 @@
         return mori.is_seqable(arg) || _.isString(arg);
       });
       if (unexpectedArg) {
-        throw new Error("" + unexpectedArg + " is not seqable");
+        throw new ArgTypeError("" + unexpectedArg + " is not seqable");
       }
     },
     arity: function() {
