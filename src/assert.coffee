@@ -33,7 +33,14 @@ assert =
       throw new ArgTypeError args, expectedTypes
 
   numbers: (args...) ->
-    assert.types _.flatten(args, true), [types.Number]
+    unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number')
+    if unexpectedArg isnt undefined
+      throw new Error "#{unexpectedArg} is not a number"
+
+  integers: (args...) ->
+    unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number' and arg % 1 is 0)
+    if unexpectedArg isnt undefined
+      throw new Error "#{unexpectedArg} is not a integer"
 
   collections: (args...) ->
     assert.types _.flatten(args, true), [types.Collection]
