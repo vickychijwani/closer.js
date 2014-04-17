@@ -1,26 +1,29 @@
 _ = require 'lodash-node'
-types = require '../closer-types'
+mori = require 'mori'
 global_helpers = require './closer-helpers'
 helpers = require './closer-core-helpers'
 evaluate = helpers.evaluate
 
-beforeEach -> @addMatchers toDeepEqual: global_helpers.toDeepEqual
-eq = (src, expected) -> expect(evaluate src).toDeepEqual expected
-throws = (src) -> expect(-> evaluate src).toThrow()
-truthy = (src) -> eq src, types.Boolean.true
-falsy = (src) -> eq src, types.Boolean.false
-nil = (src) -> eq src, types.Nil.nil
+beforeEach ->
+  @addMatchers
+    # custom matcher to compare mori collections
+    toMoriEqual: (expected) ->
+      @message = ->
+        "Expected #{@actual} to equal #{expected}"
+      mori.equals(@actual, expected)
 
-int = (x) -> new types.Integer x
-float = (x) -> new types.Float x
-str = (x) -> new types.String x
-key = (x) -> new types.Keyword x
-seq = (xs...) -> new types.Seq _.flatten xs
-vec = (xs...) -> new types.Vector _.flatten xs
-list = (xs...) -> new types.List _.flatten xs
-set = (xs...) -> new types.HashSet _.flatten xs
-map = (xs...) -> new types.HashMap _.flatten xs
-mapEntry = (xs...) -> new types.MapEntry _.flatten xs
+eq = (src, expected) -> expect(evaluate src).toMoriEqual expected
+throws = (src) -> expect(-> evaluate src).toThrow()
+truthy = (src) -> expect(evaluate src).toEqual true
+falsy = (src) -> expect(evaluate src).toEqual false
+nil = (src) -> expect(evaluate src).toEqual null
+
+key = (x) -> mori.keyword x
+seq = (seqable) -> mori.seq seqable
+vec = (xs...) -> mori.vector.apply @, _.flatten xs
+list = (xs...) -> mori.list.apply @, _.flatten xs
+set = (xs...) -> mori.set _.flatten xs
+map = (xs...) -> mori.hash_map.apply @, _.flatten xs
 
 describe 'Closer core library', ->
 
@@ -28,81 +31,81 @@ describe 'Closer core library', ->
   describe '(+ x y & more)', ->
     it 'adds the given numbers', ->
       throws '(+ "string")'
-      eq '(+)', int 0
-      eq '(+ 3.3 0 -6e2 2)', float -594.7
+      eq '(+)', 0
+      eq '(+ 3.3 0 -6e2 2)', -594.7
 
   describe '(- x y & more)', ->
     it 'subtracts all but the first number from the first one', ->
       throws '(-)'
       throws '(- "string")'
-      eq '(- -3.54)', float 3.54
-      eq '(- 10 3.5 -4)', float 10.5
+      eq '(- -3.54)', 3.54
+      eq '(- 10 3.5 -4)', 10.5
 
   describe '(* x y & more)', ->
     it 'multiplies the given numbers', ->
       throws '(* "string")'
-      eq '(*)', int 1
-      eq '(* 3 -6)', int -18
+      eq '(*)', 1
+      eq '(* 3 -6)', -18
 
   describe '(/ x y & more)', ->
     it 'divides the first number by the rest', ->
       throws '(/)'
       throws '(/ "string")'
-      eq '(/ -4)', float -0.25
-      eq '(/ 14 -2)', int -7
-      eq '(/ 14 -2.0)', float -7
-      eq '(/ 14 -2 -2)', float 3.5
+      eq '(/ -4)', -0.25
+      eq '(/ 14 -2)', -7
+      eq '(/ 14 -2.0)', -7
+      eq '(/ 14 -2 -2)', 3.5
 
   describe '(inc x)', ->
     it 'increments x by 1', ->
       throws '(inc 2 3 4)'
       throws '(inc "string")'
-      eq '(inc -2e-3)', float 0.998
+      eq '(inc -2e-3)', 0.998
 
   describe '(dec x)', ->
     it 'decrements x by 1', ->
       throws '(dec 2 3 4)'
       throws '(dec "string")'
-      eq '(dec -2e-3)', float -1.002
+      eq '(dec -2e-3)', -1.002
 
   describe '(max x y & more)', ->
     it 'finds the maximum of the given numbers', ->
       throws '(max)'
       throws '(max "string" [1 2])'
-      eq '(max -1e10 653.32 1.345e4)', float 1.345e4
+      eq '(max -1e10 653.32 1.345e4)', 1.345e4
 
   describe '(min x y & more)', ->
     it 'finds the minimum of the given numbers', ->
       throws '(min)'
       throws '(min "string" [1 2])'
-      eq '(min -1e10 653.32 1.345e4)', float -1e10
+      eq '(min -1e10 653.32 1.345e4)', -1e10
 
   describe '(quot num div)', ->
     it 'computes the quotient of dividing num by div', ->
       throws '(quot 10)'
       throws '(quot [1 2] 3)'
-      eq '(quot 10 3)', int 3
-      eq '(quot -5.9 3)', float -1.0
-      eq '(quot -10 -3)', int 3
-      eq '(quot 10 -3)', int -3
+      eq '(quot 10 3)', 3
+      eq '(quot -5.9 3)', -1.0
+      eq '(quot -10 -3)', 3
+      eq '(quot 10 -3)', -3
 
   describe '(rem num div)', ->
     it 'computes the remainder of dividing num by div (same as % in other languages)', ->
       throws '(rem 10)'
       throws '(rem [1 2] 3)'
-      eq '(rem 10.1 3)', float 10.1 % 3
-      eq '(rem -10.1 3)', float -10.1 % 3
-      eq '(rem -10.1 -3)', float -10.1 % -3
-      eq '(rem 10.1 -3)', float 10.1 % -3
+      eq '(rem 10.1 3)', 10.1 % 3
+      eq '(rem -10.1 3)', -10.1 % 3
+      eq '(rem -10.1 -3)', -10.1 % -3
+      eq '(rem 10.1 -3)', 10.1 % -3
 
   describe '(mod num div)', ->
     it 'computes the modulus of num and div (NOT the same as % in other languages)', ->
       throws '(mod 10)'
       throws '(mod [1 2] 3)'
-      eq '(mod 10.1 3)', float 10.1 % 3
-      eq '(mod -10.1 3)', float 3 - 10.1 % 3
-      eq '(mod -10.1 -3)', float -10.1 % 3
-      eq '(mod 10.1 -3)', float 10.1 % 3 - 3
+      eq '(mod 10.1 3)', 10.1 % 3
+      eq '(mod -10.1 3)', 3 - 10.1 % 3
+      eq '(mod -10.1 -3)', -10.1 % 3
+      eq '(mod 10.1 -3)', 10.1 % 3 - 3
 
 
   # comparison
@@ -114,7 +117,7 @@ describe 'Closer core library', ->
       truthy '(= (fn [x y] (+ x y)))'   # always returns true for 1 arg
       truthy '(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))'
       falsy '(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))'
-      falsy '(= 1 1.0)'
+      truthy '(= 1 1.0)'   # different from standard Clojure
       truthy '(= 1.0 (/ 2.0 2))'
       truthy '(= "hello" "hello")'
       truthy '(= true (= 4 (* 2 2)))'
@@ -139,7 +142,7 @@ describe 'Closer core library', ->
       falsy '(not= (fn [x y] (+ x y)))'   # always falsy for 1 arg
       falsy '(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))'
       truthy '(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))'
-      truthy '(not= 1 1.0)'
+      falsy '(not= 1 1.0)'   # different from standard Clojure
       falsy '(not= 1.0 (/ 2.0 2))'
       falsy '(not= "hello" "hello")'
       falsy '(not= true (= 4 (* 2 2)))'
@@ -207,14 +210,13 @@ describe 'Closer core library', ->
     it 'returns true if x and y are the same object', ->
       throws '(identical? 1 1 1)'
       truthy '(identical? 1 1)'
-      falsy '(identical? 1.56 1.56)'
+      truthy '(identical? 1.56 1.56)'   # different from standard Clojure
       truthy '(identical? true true)'
       truthy '(identical? nil nil)'
-      truthy '(identical? :keyword :keyword)'
+      falsy '(identical? :keyword :keyword)'   # different from standard Clojure
       falsy '(identical? #{1 2} #{1 2})'
       truthy '(let [a #{1 2}] (identical? a a))'
-      # different from standard Clojure behaviour; string interning cannot be emulated
-      falsy '(identical? "string" "string")'
+      truthy '(identical? "string" "string")'
 
   describe '(true? x)', ->
     it 'returns true if and only if x is the value true', ->
@@ -227,14 +229,14 @@ describe 'Closer core library', ->
     it 'returns true if and only if x is the value false', ->
       throws '(false? nil false)'
       truthy '(false? false)'
-      falsy '(false? "hello")'
+      falsy '(false? nil)'
       falsy '(false? (fn []))'
 
   describe '(nil? x)', ->
     it 'returns true if and only if x is the value nil', ->
       throws '(nil? nil false)'
       truthy '(nil? nil)'
-      falsy '(nil? "hello")'
+      falsy '(nil? false)'
       falsy '(nil? (fn []))'
 
   describe '(some? x)', ->
@@ -248,7 +250,6 @@ describe 'Closer core library', ->
     it 'returns true if and only if x is a number', ->
       truthy '(number? 0)'
       truthy '(number? 0.0)'
-      truthy '(number? ((fn [] 0)))'
       falsy '(number? "0")'
       falsy '(number? [])'
       falsy '(number? nil)'
@@ -256,8 +257,8 @@ describe 'Closer core library', ->
   describe '(integer? x)', ->
     it 'returns true if and only if x is an integer', ->
       truthy '(integer? 0)'
-      falsy '(integer? 0.0)'
-      truthy '(integer? ((fn [] 0)))'
+      truthy '(integer? 0.0)'   # different from standard Clojure
+      falsy '(integer? 0.1)'
       falsy '(integer? "0")'
       falsy '(integer? [])'
       falsy '(integer? nil)'
@@ -265,8 +266,8 @@ describe 'Closer core library', ->
   describe '(float? x)', ->
     it 'returns true if and only if x is a floating-point number', ->
       falsy '(float? 0)'
-      truthy '(float? 0.0)'
-      truthy '(float? ((fn [] 0.0)))'
+      falsy '(float? 0.0)'   # different from standard Clojure
+      truthy '(float? 0.1)'
       falsy '(float? "0.0")'
       falsy '(float? [])'
       falsy '(float? nil)'
@@ -275,7 +276,6 @@ describe 'Closer core library', ->
     it 'returns true if and only if x is numerically 0', ->
       truthy '(zero? 0)'
       truthy '(zero? 0.0)'
-      truthy '(zero? ((fn [] 0.0)))'
       throws '(zero? "0.0")'
       throws '(zero? [])'
       throws '(zero? nil)'
@@ -305,10 +305,7 @@ describe 'Closer core library', ->
       truthy '(even? 0)'
       truthy '(even? 68)'
       falsy '(even? 69)'
-      truthy '(even? ((fn [] -56)))'
-      falsy '(even? ((fn [] -57)))'
-      throws '(even? 0.0)'
-      throws '(even? 2.0)'
+      truthy '(even? 0.0)'    # different from standard Clojure
       throws '(even? "0.0")'
 
   describe '(odd? x)', ->
@@ -316,9 +313,7 @@ describe 'Closer core library', ->
       falsy '(odd? 0)'
       falsy '(odd? 68)'
       truthy '(odd? 69)'
-      falsy '(odd? ((fn [] -56)))'
-      truthy '(odd? ((fn [] -57)))'
-      throws '(odd? 1.0)'
+      truthy '(odd? 1.0)'    # different from standard Clojure
       throws '(odd? "1.0")'
 
   describe '(contains? coll key)', ->
@@ -333,7 +328,7 @@ describe 'Closer core library', ->
       truthy '(contains? {#{1 2} true} #{2 1})'
       truthy '(contains? #{[1 2]} \'(1 2))'
       falsy '(contains? #{[1 2]} \'(2 1))'
-      # when coll is a vector, contains? checks if key is a valid index into it
+#      # when coll is a vector, contains? checks if key is a valid index into it
       truthy '(contains? [98 54] 0)'
       truthy '(contains? [98 54] 1)'
       falsy '(contains? [98 54] 2)'
@@ -381,20 +376,20 @@ describe 'Closer core library', ->
   # string
   describe '(str x & ys)', ->
     it 'concatenates the string values of each of its arguments', ->
-      eq '(str)', str ''
-      eq '(str nil)', str ''
-      eq '(str 34)', str '34'
-      eq '(str 34.45)', str '34.45'
-      eq '(str 3e3)', str '3000'    # different from standard Clojure
-      eq '(str 3e-4)', str '0.0003'    # different from standard Clojure
-      eq '(str 1 true "hello" :keyword)', str '1truehello:keyword'
-      eq '(str [1 2 :key])', str '[1 2 :key]'
-      eq '(str (seq [1 2 :key]))', str '(1 2 :key)'
-      eq '(str \'(1 2 3))', str '(1 2 3)'
-      eq '(str #{1 2 3})', str '#{1 2 3}'
-      eq '(str {1 2 3 4})', str '{1 2, 3 4}'
-      eq '(str (seq {1 2 3 4}))', str '([1 2] [3 4])'
-      eq '(str [1 2 \'(3 4 5)])', str '[1 2 (3 4 5)]'
+      eq '(str)', ''
+      eq '(str nil)', ''
+      eq '(str 34)', '34'
+      eq '(str 34.45)', '34.45'
+      eq '(str 3e3)', '3000'    # different from standard Clojure
+      eq '(str 3e-4)', '0.0003'    # different from standard Clojure
+      eq '(str 1 true "hello" :keyword)', '1truehello:keyword'
+      eq '(str [1 2 :key])', '[1 2 :key]'
+      eq '(str (seq [1 2 :key]))', '(1 2 :key)'
+      eq '(str \'(1 2 3))', '(1 2 3)'
+      eq '(str #{1 2 3})', '#{1 2 3}'
+      eq '(str {1 2 3 4})', '{1 2, 3 4}'
+      eq '(str (seq {1 2 3 4}))', '([1 2] [3 4])'
+      eq '(str [1 2 \'(3 4 5)])', '[1 2 (3 4 5)]'
 
 
   # collections
@@ -403,11 +398,11 @@ describe 'Closer core library', ->
       throws '(count [1 2 3] "hello")'
       throws '(count 1)'
       throws '(count true)'
-      eq '(count nil)', int 0
-      eq '(count "hello")', int 5
-      eq '(count [1 2 3])', int 3
-      eq '(count [1 2 #{3 4 5}])', int 3
-      eq '(count {:key1 "value1" :key2 "value2"})', int 2
+      eq '(count nil)', 0
+      eq '(count "hello")', 5
+      eq '(count [1 2 3])', 3
+      eq '(count [1 2 #{3 4 5}])', 3
+      eq '(count {:key1 "value1" :key2 "value2"})', 2
 
   describe '(empty coll)', ->
     it 'returns an empty collection of the same category as coll, or nil', ->
@@ -425,9 +420,9 @@ describe 'Closer core library', ->
       throws '(not-empty 1)'
       nil '(not-empty nil)'
       nil '(not-empty #{})'
-      eq '(not-empty #{1})', set(int 1)
+      eq '(not-empty #{1})', set 1
       nil '(not-empty "")'
-      eq '(not-empty "hello")', str "hello"
+      eq '(not-empty "hello")', 'hello'
 
   describe '(get coll key not-found)', ->
     it 'returns the value mapped to key if present, else not-found or nil', ->
@@ -436,15 +431,16 @@ describe 'Closer core library', ->
       nil '(get 2 2)'
       nil '(get {:k1 "v1" :k2 "v2"} :k3)'
       eq '(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', key 'not-found'
-      eq '(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', str 'v2'
+      eq '(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', 'v2'
+      eq '(get {#{35 49} true} #{49 35})', true
       nil '(get #{45 89 32} 1)'
-      eq '(get #{45 89 32} 89)', int 89
-      eq '(get [45 89 32] 1)', int 89
+      eq '(get #{45 89 32} 89)', 89
+      eq '(get [45 89 32] 1)', 89
       nil '(get [45 89 32] 89)'
       nil '(get \'(45 89 32) 1)'
       nil '(get \'(45 89 32) 89)'
       nil '(get \'(45 89 32) 1)'
-      eq '(get "qwerty" 2)', str 'e'
+      eq '(get "qwerty" 2)', 'e'
 
   describe '(seq coll)', ->
     it 'returns a seq on the collection, or nil if it is empty or nil', ->
@@ -453,14 +449,14 @@ describe 'Closer core library', ->
       nil '(seq nil)'
       nil '(seq "")'
       nil '(seq {})'
-      eq '(seq "qwe")', seq str('q'), str('w'), str('e')
-      eq '(seq [1 2 3])', seq int(1), int(2), int(3)
-      eq '(seq \'(1 2 3))', seq int(1), int(2), int(3)
-      eq '(seq #{1 2 3})', seq int(1), int(2), int(3)
-      eq '(seq {1 2 3 4})', seq mapEntry(int(1), int(2)), mapEntry(int(3), int(4))
+      eq '(seq "qwe")', seq 'qwe'
+      eq '(seq [1 2 3])', seq vec 1, 2, 3
+      eq '(seq \'(1 2 3))', seq list 1, 2, 3
+      eq '(seq #{1 2 3})', seq set 1, 2, 3
+      eq '(seq {1 2 3 4})', seq map 1, 2, 3, 4
 
   describe '(identity x)', ->
     it 'returns its argument', ->
       throws '(identity 34 45)'
       nil '(identity nil)'
-      eq '(identity {:k1 "v1" :k2 #{1 2}})', map key('k1'), str('v1'), key('k2'), set(int(1), int(2))
+      eq '(identity {:k1 "v1" :k2 #{1 2}})', map key('k1'), 'v1', key('k2'), set(1, 2)

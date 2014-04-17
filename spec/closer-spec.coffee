@@ -2,16 +2,16 @@ closer = require '../closer'
 json_diff = require 'json-diff'
 
 helpers = require './closer-helpers'
-Integer = helpers['Integer']
-Float = helpers['Float']
-String = helpers['String']
-Boolean = helpers['Boolean']
-Nil = helpers['Nil']
-Keyword = helpers['Keyword']
-Vector = helpers['Vector']
-List = helpers['List']
-HashSet = helpers['HashSet']
-HashMap = helpers['HashMap']
+Integer = helpers.Literal
+Float = helpers.Literal
+String = helpers.Literal
+Boolean = helpers.Literal
+Nil = helpers.Literal
+Keyword = helpers['keyword']
+Vector = helpers['vector']
+List = helpers['list']
+HashSet = helpers['set']
+HashMap = helpers['hash_map']
 Identifier = helpers.Identifier
 UnaryExpression = helpers.UnaryExpression
 CallExpression = helpers.CallExpression
@@ -50,9 +50,9 @@ describe 'Closer parser', ->
 
   it 'parses integer, float, string, boolean, and nil literals', ->
     expect(closer.parse('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
-      ExpressionStatement(Integer(UnaryExpression('-', 24))),
-      ExpressionStatement(Float(UnaryExpression('-', 23.67))),
-      ExpressionStatement(Float(UnaryExpression('-', 22.45e-5))),
+      ExpressionStatement(UnaryExpression('-', Integer(24))),
+      ExpressionStatement(UnaryExpression('-', Float(23.67))),
+      ExpressionStatement(UnaryExpression('-', Float(22.45e-5))),
       ExpressionStatement(String('')),
       ExpressionStatement(String('string')),
       ExpressionStatement(Boolean(true)),
@@ -65,26 +65,26 @@ describe 'Closer parser', ->
 
   it 'parses vector and list literals', ->
     expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual Program(
-      ExpressionStatement(Vector([])),
-      ExpressionStatement(Vector([
+      ExpressionStatement(Vector()),
+      ExpressionStatement(Vector(
         String('string'),
-        Boolean(true)])),
-      ExpressionStatement(List([])),
-      ExpressionStatement(List([
+        Boolean(true))),
+      ExpressionStatement(List()),
+      ExpressionStatement(List(
         String('string'),
-        Boolean(true)])))
+        Boolean(true))))
 
   it 'parses set and map literals', ->
     expect(closer.parse('#{} #{"string" true}')).toDeepEqual Program(
-      ExpressionStatement(HashSet([])),
-      ExpressionStatement(HashSet([
+      ExpressionStatement(HashSet()),
+      ExpressionStatement(HashSet(
         String('string'),
-        Boolean(true)])))
+        Boolean(true))))
     expect(closer.parse('{} {"string" true}')).toDeepEqual Program(
-      ExpressionStatement(HashMap([])),
-      ExpressionStatement(HashMap([
+      ExpressionStatement(HashMap()),
+      ExpressionStatement(HashMap(
         String('string'),
-        Boolean(true)])))
+        Boolean(true))))
     expect(-> closer.parse('{1 2 3}')).toThrow()
 
   it 'parses commas as whitespace', ->

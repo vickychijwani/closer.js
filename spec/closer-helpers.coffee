@@ -7,25 +7,22 @@ exports.toDeepEqual = (expected) ->
   typeof json_diff.diff(@actual, expected) is 'undefined'
 
 closer = require '../closer'
-types = require '../closer-types'
 
-for type of types
+for type in ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq']
   exports[type] = ((type2) ->
-    (value) ->
-      value = if type2 is 'Nil' then null else value
-      valueProp = if value?.type is 'UnaryExpression'
-        value.argument = closer.node 'Literal', value.argument
-        value
-      else if types[type2].prototype instanceof types.Collection
-        closer.node 'ArrayExpression', value
-      else
-        closer.node 'Literal', value
-      closer.node('NewExpression', closer.node('Identifier', type2), [valueProp])
+    (items...) ->
+      items = if type2 is 'keyword' then [closer.node('Literal', items[0])] else items
+      args = if type2 is 'set' then [closer.node('ArrayExpression', items)] else items
+      closer.node('CallExpression', closer.node('Identifier', type2), args)
   )(type)
 
 exports.Identifier = (name) ->
   type: 'Identifier'
   name: name
+
+exports.Literal = (value = null) ->
+  type: 'Literal'
+  value: value
 
 exports.UnaryExpression = (operator, argument) ->
   type: 'UnaryExpression'

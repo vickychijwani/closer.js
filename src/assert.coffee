@@ -5,32 +5,34 @@ class ArityError extends Error
     @message = "Expected #{expected_min}..#{expected_max} args, got #{actual}"
 
 class ArgTypeError extends Error
-  constructor: (args, expectedTypes) ->
+  constructor: (message) ->
     Error.captureStackTrace @, @.constructor
-    actual = _.pluck args, 'type'
-    expected = _.pluck expectedTypes, 'typeName'
     @name = 'ArgTypeError'
-    @message = "Expected #{expected.join(' or ')}, got [#{actual.join(', ')}]"
+    @message = message
 
-checkTypes = (args, expectedTypes) ->
-  _.every args, (arg) -> _.some(expectedTypes, (type) -> arg instanceof type)
+firstFailure = (args, testFn) ->
+  _.find args, (arg) -> not testFn(arg)
 
 assert =
 
-  # throws TypeError if any of the given literals is not of one of the given types
-  types: (args, expectedTypes) ->
-    unless checkTypes args, expectedTypes
-      throw new ArgTypeError args, expectedTypes
-
-  notTypes: (args, expectedTypes) ->
-    if checkTypes args, expectedTypes
-      throw new ArgTypeError args, expectedTypes
-
   numbers: (args...) ->
-    assert.types _.flatten(args, true), [types.Number]
+    unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number')
+    if unexpectedArg isnt undefined
+      throw new ArgTypeError "#{unexpectedArg} is not a number"
 
-  collections: (args...) ->
-    assert.types _.flatten(args, true), [types.Collection]
+  integers: (args...) ->
+    unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number' and arg % 1 is 0)
+    if unexpectedArg isnt undefined
+      throw new ArgTypeError "#{unexpectedArg} is not a integer"
+
+  associative: (args...) ->
+    if unexpectedArg = firstFailure(args, (arg) -> mori.is_associative(arg) or mori.is_set(arg))
+      throw new ArgTypeError "#{unexpectedArg} is not an associative collection"
+
+  seqable: (args...) ->
+    unexpectedArg = firstFailure args, (arg) -> mori.is_seqable(arg) or _.isString(arg)
+    if unexpectedArg
+      throw new ArgTypeError "#{unexpectedArg} is not seqable"
 
   arity: (expected_min, expected_max, args...) ->
     args = _.flatten args, true
@@ -43,4 +45,4 @@ module.exports = assert
 # requires go here, because of circular dependency
 # see https://coderwall.com/p/myzvmg for more
 _ = require 'lodash-node'
-types = require './closer-types'
+mori = require 'mori'
