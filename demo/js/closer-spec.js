@@ -494,6 +494,14 @@
       }
       return new types.Seq(coll.items());
     },
+    'first': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      if (core.count(coll).value === 0) {
+        return types.Nil.nil;
+      }
+      return core.seq(coll).items()[0];
+    },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
       assert.types([x], [types.BaseType]);

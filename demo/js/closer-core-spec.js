@@ -494,6 +494,14 @@
       }
       return new types.Seq(coll.items());
     },
+    'first': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.types([coll], [types.Nil, types.String, types.Collection]);
+      if (core.count(coll).value === 0) {
+        return types.Nil.nil;
+      }
+      return core.seq(coll).items()[0];
+    },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
       assert.types([x], [types.BaseType]);
@@ -2751,6 +2759,17 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(seq \'(1 2 3))', seq(int(1), int(2), int(3)));
         eq('(seq #{1 2 3})', seq(int(1), int(2), int(3)));
         return eq('(seq {1 2 3 4})', seq(mapEntry(int(1), int(2)), mapEntry(int(3), int(4))));
+      });
+    });
+    describe('(first coll)', function() {
+      return it('returns the first item in the collection, or nil if coll is nil', function() {
+        throws('(first [1 2 3] [4 5 6])');
+        throws('(first 3)');
+        nil('(first nil)');
+        nil('(first [])');
+        nil('(first "")');
+        eq('(first "string")', str('s'));
+        return eq('(first \'(1 2 3))', int(1));
       });
     });
     return describe('(identity x)', function() {

@@ -459,6 +459,16 @@ describe 'Closer core library', ->
       eq '(seq #{1 2 3})', seq int(1), int(2), int(3)
       eq '(seq {1 2 3 4})', seq mapEntry(int(1), int(2)), mapEntry(int(3), int(4))
 
+  describe '(first coll)', ->
+    it 'returns the first item in the collection, or nil if coll is nil', ->
+      throws '(first [1 2 3] [4 5 6])'
+      throws '(first 3)'
+      nil '(first nil)'
+      nil '(first [])'
+      nil '(first "")'
+      eq '(first "string")', str 's'
+      eq '(first \'(1 2 3))', int 1
+
   describe '(identity x)', ->
     it 'returns its argument', ->
       throws '(identity 34 45)'
