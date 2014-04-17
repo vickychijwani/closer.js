@@ -42,6 +42,7 @@
     "json-diff": "^0.3.1"
   },
   "dependencies": {
-    "lodash-node": "^2.4.1"
+    "lodash-node": "^2.4.1",
+    "mori": "^0.2.6"
   }
 }
