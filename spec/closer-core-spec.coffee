@@ -347,6 +347,21 @@ describe 'Closer core library', ->
       falsy '(empty? {:k1 "v1" :k2 "v2"})'
       truthy '(empty? #{})'
 
+  describe '(vector? coll)', ->
+    it 'returns true if coll is a vector', ->
+      falsy '(vector? 3)'
+      falsy '(vector? \'())'
+      truthy '(vector? [])'
+      throws '(vector? [] [])'
+      truthy '(vector? (first (seq {1 2})))'
+
+  describe '(map? coll)', ->
+    it 'returns true if coll is a map', ->
+      falsy '(map? 3)'
+      falsy '(map? #{})'
+      truthy '(map? {})'
+      throws '(map? {} {})'
+
 
   # logic
   describe '(boolean x)', ->
@@ -485,6 +500,34 @@ describe 'Closer core library', ->
       nil '(next "s")'
       eq '(next "string")', seq('tring')
       eq '(next \'(1 2 3))', seq([2, 3])
+
+  describe '(cons x seq)', ->
+    it 'returns a new seq of the form (x seq)', ->
+      throws '(cons 1 2 [3 4 5])'
+      eq '(cons 3 nil)', seq [3]   # creates empty seq from nil
+      eq '(cons nil nil)', seq [null]
+      throws '(cons nil 3)'   # can't create seq from integer
+      eq '(cons true "string")', seq [true, 's', 't', 'r', 'i', 'n', 'g']
+      eq '(cons 1 {1 2 3 4})', seq [1, vec(1, 2), vec(3, 4)]
+
+  describe '(conj coll x & xs)', ->
+    it 'adds xs to coll in the most efficient way possible', ->
+      throws '(conj [1 2 3])'
+      throws '(conj "string" "s")'
+      eq '(conj #{1 2 3} 4 true)', set 1, 2, 3, 4, true
+      eq '(conj nil 1)', seq [1]   # creates empty seq from nil
+      eq '(conj {1 2} [3 4])', map 1, 2, 3, 4
+      throws '(conj {1 2} [3 4 5 6])'   # vector args must be pairs; no more, no less
+      eq '(conj {1 2} [3 4] [5 6])', map 1, 2, 3, 4, 5, 6   # ... like this
+      eq '(conj {1 2} {3 4 5 6})', map 1, 2, 3, 4, 5, 6
+      throws '(conj {1 2} \'(3 4))'   # can't conj list on map
+      throws '(conj {1 2} #{3 4})'   # can't conj set on map
+      eq '(conj [1] 2 3)', vec 1, 2, 3   # appends to vectors
+      eq '(conj (seq [1]) 2 3)', seq [3, 2, 1]   # prepends to seqs
+      eq '(conj \'(1) 2 3)', list 3, 2, 1   # prepends to lists
+      eq '(conj #{1 2} [3])', set 1, 2, vec(3)   # whole collection is inserted as is
+      eq '(conj [1 2] [3])', vec 1, 2, vec(3)   # whole collection is inserted as is
+      eq '(conj \'(1 2) [3])', list vec(3), 1, 2   # whole collection is inserted as is
 
   describe '(identity x)', ->
     it 'returns its argument', ->

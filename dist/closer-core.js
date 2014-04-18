@@ -325,6 +325,14 @@
       assert.arity(1, 1, arguments);
       return m.is_empty(coll);
     },
+    'vector?': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.is_vector(coll);
+    },
+    'map?': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.is_map(coll);
+    },
     'boolean': function(arg) {
       assert.arity(1, 1, arguments);
       return arg !== false && arg !== null;
@@ -393,6 +401,21 @@
       } else {
         return rest;
       }
+    },
+    'cons': function(x, seq) {
+      assert.arity(2, 2, arguments);
+      return m.cons(x, seq);
+    },
+    'conj': function() {
+      var coll, xs;
+      coll = arguments[0], xs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity(2, Infinity, arguments);
+      if (core['map?'](coll) && _.any(xs, function(x) {
+        return core['vector?'](x) && core.count(x) !== 2;
+      })) {
+        throw new TypeError('vector args to conjoin to a map must be pairs');
+      }
+      return m.conj.apply(this, _.flatten([coll, xs]));
     },
     'identity': function(x) {
       assert.arity(1, 1, arguments);

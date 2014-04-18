@@ -325,6 +325,14 @@
       assert.arity(1, 1, arguments);
       return m.is_empty(coll);
     },
+    'vector?': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.is_vector(coll);
+    },
+    'map?': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.is_map(coll);
+    },
     'boolean': function(arg) {
       assert.arity(1, 1, arguments);
       return arg !== false && arg !== null;
@@ -393,6 +401,21 @@
       } else {
         return rest;
       }
+    },
+    'cons': function(x, seq) {
+      assert.arity(2, 2, arguments);
+      return m.cons(x, seq);
+    },
+    'conj': function() {
+      var coll, xs;
+      coll = arguments[0], xs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity(2, Infinity, arguments);
+      if (core['map?'](coll) && _.any(xs, function(x) {
+        return core['vector?'](x) && core.count(x) !== 2;
+      })) {
+        throw new TypeError('vector args to conjoin to a map must be pairs');
+      }
+      return m.conj.apply(this, _.flatten([coll, xs]));
     },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
@@ -2094,6 +2117,23 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return truthy('(empty? #{})');
       });
     });
+    describe('(vector? coll)', function() {
+      return it('returns true if coll is a vector', function() {
+        falsy('(vector? 3)');
+        falsy('(vector? \'())');
+        truthy('(vector? [])');
+        throws('(vector? [] [])');
+        return truthy('(vector? (first (seq {1 2})))');
+      });
+    });
+    describe('(map? coll)', function() {
+      return it('returns true if coll is a map', function() {
+        falsy('(map? 3)');
+        falsy('(map? #{})');
+        truthy('(map? {})');
+        return throws('(map? {} {})');
+      });
+    });
     describe('(boolean x)', function() {
       return it('coerces x into a boolean value (false for nil and false, else true)', function() {
         throws('(boolean nil false)');
@@ -2236,6 +2276,36 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(next "s")');
         eq('(next "string")', seq('tring'));
         return eq('(next \'(1 2 3))', seq([2, 3]));
+      });
+    });
+    describe('(cons x seq)', function() {
+      return it('returns a new seq of the form (x seq)', function() {
+        throws('(cons 1 2 [3 4 5])');
+        eq('(cons 3 nil)', seq([3]));
+        eq('(cons nil nil)', seq([null]));
+        throws('(cons nil 3)');
+        eq('(cons true "string")', seq([true, 's', 't', 'r', 'i', 'n', 'g']));
+        return eq('(cons 1 {1 2 3 4})', seq([1, vec(1, 2), vec(3, 4)]));
+      });
+    });
+    describe('(conj coll x & xs)', function() {
+      return it('adds xs to coll in the most efficient way possible', function() {
+        throws('(conj [1 2 3])');
+        throws('(conj "string" "s")');
+        eq('(conj #{1 2 3} 4 true)', set(1, 2, 3, 4, true));
+        eq('(conj nil 1)', seq([1]));
+        eq('(conj {1 2} [3 4])', map(1, 2, 3, 4));
+        throws('(conj {1 2} [3 4 5 6])');
+        eq('(conj {1 2} [3 4] [5 6])', map(1, 2, 3, 4, 5, 6));
+        eq('(conj {1 2} {3 4 5 6})', map(1, 2, 3, 4, 5, 6));
+        throws('(conj {1 2} \'(3 4))');
+        throws('(conj {1 2} #{3 4})');
+        eq('(conj [1] 2 3)', vec(1, 2, 3));
+        eq('(conj (seq [1]) 2 3)', seq([3, 2, 1]));
+        eq('(conj \'(1) 2 3)', list(3, 2, 1));
+        eq('(conj #{1 2} [3])', set(1, 2, vec(3)));
+        eq('(conj [1 2] [3])', vec(1, 2, vec(3)));
+        return eq('(conj \'(1 2) [3])', list(vec(3), 1, 2));
       });
     });
     return describe('(identity x)', function() {

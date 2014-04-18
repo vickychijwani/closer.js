@@ -172,6 +172,14 @@ core =
     assert.arity 1, 1, arguments
     m.is_empty coll
 
+  'vector?': (coll) ->
+    assert.arity 1, 1, arguments
+    m.is_vector coll
+
+  'map?': (coll) ->
+    assert.arity 1, 1, arguments
+    m.is_map coll
+
 
   # logic
   'boolean': (arg) ->
@@ -228,6 +236,16 @@ core =
     assert.arity 1, 1, arguments
     rest = core.rest coll
     if core['empty?'](rest) then null else rest
+
+  'cons': (x, seq) ->
+    assert.arity 2, 2, arguments
+    m.cons x, seq
+
+  'conj': (coll, xs...) ->
+    assert.arity 2, Infinity, arguments
+    if core['map?'](coll) and _.any(xs, (x) -> core['vector?'](x) and core.count(x) isnt 2)
+      throw new TypeError 'vector args to conjoin to a map must be pairs'
+    m.conj.apply @, _.flatten [coll, xs]
 
   'identity': (x) ->
     assert.arity 1, 1, arguments
