@@ -8,10 +8,12 @@
   ArityError = (function(_super) {
     __extends(ArityError, _super);
 
-    function ArityError(expected_min, expected_max, actual) {
+    function ArityError() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       Error.captureStackTrace(this, this.constructor);
       this.name = 'ArityError';
-      this.message = "Expected " + expected_min + ".." + expected_max + " args, got " + actual;
+      this.message = args.length === 3 ? "Expected " + args[0] + ".." + args[1] + " args, got " + args[2] : args[0];
     }
 
     return ArityError;
@@ -83,6 +85,12 @@
       args = _.flatten(args, true);
       if (!((expected_min <= (_ref = args.length) && _ref <= expected_max))) {
         throw new ArityError(expected_min, expected_max, args.length);
+      }
+    },
+    arity_custom: function(args, checkFn) {
+      var msg;
+      if (msg = checkFn(args)) {
+        throw new ArityError(msg);
       }
     }
   };
@@ -416,6 +424,25 @@
         throw new TypeError('vector args to conjoin to a map must be pairs');
       }
       return m.conj.apply(this, _.flatten([coll, xs]));
+    },
+    'assoc': function() {
+      var kvs, map;
+      map = arguments[0], kvs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity_custom(arguments, function(args) {
+        if (args.length < 3 || args.length % 2 === 0) {
+          return "Expected odd number of args (at least 3), got " + args.length;
+        }
+      });
+      return m.assoc.apply(this, _.flatten([map, kvs]));
+    },
+    'dissoc': function() {
+      var keys, map;
+      map = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity(1, Infinity, arguments);
+      if (keys.length === 0) {
+        return map;
+      }
+      return m.dissoc.apply(this, _.flatten([map, keys]));
     },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
@@ -2288,7 +2315,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(cons 1 {1 2 3 4})', seq([1, vec(1, 2), vec(3, 4)]));
       });
     });
-    describe('(conj coll x & xs)', function() {
+    describe('(conj coll & xs)', function() {
       return it('adds xs to coll in the most efficient way possible', function() {
         throws('(conj [1 2 3])');
         throws('(conj "string" "s")');
@@ -2306,6 +2333,33 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(conj #{1 2} [3])', set(1, 2, vec(3)));
         eq('(conj [1 2] [3])', vec(1, 2, vec(3)));
         return eq('(conj \'(1 2) [3])', list(vec(3), 1, 2));
+      });
+    });
+    describe('(assoc map & kvs)', function() {
+      return it('adds / updates the given key-value pairs in the given map / vector', function() {
+        throws('(assoc #{1 2} 3 3)');
+        throws('(assoc \'(1 2) 3 3)');
+        throws('(assoc "string" 1 "h")');
+        eq('(assoc {1 2 3 4} 1 3 4 5)', map(1, 3, 3, 4, 4, 5));
+        throws('(assoc {1 2} 3 4 5)');
+        eq('(assoc [1 2 3] 3 4)', vec(1, 2, 3, 4));
+        throws('(assoc [1 2 3] 4 4)');
+        throws('(assoc [1 2 3] 3)');
+        eq('(assoc {1 2} nil 4)', map(1, 2, null, 4));
+        return throws('(assoc [1 2] nil 4)');
+      });
+    });
+    describe('(dissoc map & keys)', function() {
+      return it('removes entries corresponding to the given keys from map', function() {
+        throws('(dissoc #{1 2} 0)');
+        throws('(dissoc \'(1 2) 0)');
+        throws('(dissoc "string" 0)');
+        throws('(dissoc [1 2] 0)');
+        eq('(dissoc {1 2})', map(1, 2));
+        eq('(dissoc [1 2])', vec(1, 2));
+        eq('(dissoc {1 2, 3 4, 5 6} 3 5)', map(1, 2));
+        eq('(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map(1, 2));
+        return nil('(dissoc nil (fn []) true)');
       });
     });
     return describe('(identity x)', function() {
