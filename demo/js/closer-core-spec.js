@@ -376,6 +376,24 @@
       assert.seqable(coll);
       return m.seq(coll);
     },
+    'first': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.first(coll);
+    },
+    'rest': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.rest(coll);
+    },
+    'next': function(coll) {
+      var rest;
+      assert.arity(1, 1, arguments);
+      rest = core.rest(coll);
+      if (core['empty?'](rest)) {
+        return null;
+      } else {
+        return rest;
+      }
+    },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
       return x;
@@ -1645,7 +1663,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 },{"../closer":3,"../closer-core":2,"escodegen":9,"estraverse":25,"mori":215}],7:[function(_dereq_,module,exports){
 (function() {
-  var eq, evaluate, falsy, global_helpers, helpers, key, list, map, mori, nil, seq, set, throws, truthy, vec, _,
+  var emptySeq, eq, evaluate, falsy, global_helpers, helpers, key, list, map, mori, nil, seq, set, throws, truthy, vec, _,
     __slice = [].slice;
 
   _ = _dereq_('lodash-node');
@@ -1697,6 +1715,10 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
   seq = function(seqable) {
     return mori.seq(seqable);
+  };
+
+  emptySeq = function() {
+    return mori.empty(mori.seq([1]));
   };
 
   vec = function() {
@@ -2181,6 +2203,39 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(seq \'(1 2 3))', seq(list(1, 2, 3)));
         eq('(seq #{1 2 3})', seq(set(1, 2, 3)));
         return eq('(seq {1 2 3 4})', seq(map(1, 2, 3, 4)));
+      });
+    });
+    describe('(first coll)', function() {
+      return it('returns the first item in the collection, or nil if coll is nil', function() {
+        throws('(first [1 2 3] [4 5 6])');
+        throws('(first 3)');
+        nil('(first nil)');
+        nil('(first [])');
+        nil('(first "")');
+        eq('(first "string")', 's');
+        return eq('(first \'(1 2 3))', 1);
+      });
+    });
+    describe('(rest coll)', function() {
+      return it('returns all but the first item in the collection, or an empty seq if there are no more', function() {
+        throws('(rest [1 2 3] [4 5 6])');
+        throws('(rest 3)');
+        eq('(rest nil)', emptySeq());
+        eq('(rest [])', emptySeq());
+        eq('(rest "s")', emptySeq());
+        eq('(rest "string")', seq('tring'));
+        return eq('(rest \'(1 2 3))', seq([2, 3]));
+      });
+    });
+    describe('(next coll)', function() {
+      return it('returns all but the first item in the collection, or nil if there are no more', function() {
+        throws('(next [1 2 3] [4 5 6])');
+        throws('(next 3)');
+        nil('(next nil)');
+        nil('(next [])');
+        nil('(next "s")');
+        eq('(next "string")', seq('tring'));
+        return eq('(next \'(1 2 3))', seq([2, 3]));
       });
     });
     return describe('(identity x)', function() {

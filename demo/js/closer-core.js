@@ -376,6 +376,24 @@
       assert.seqable(coll);
       return m.seq(coll);
     },
+    'first': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.first(coll);
+    },
+    'rest': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.rest(coll);
+    },
+    'next': function(coll) {
+      var rest;
+      assert.arity(1, 1, arguments);
+      rest = core.rest(coll);
+      if (core['empty?'](rest)) {
+        return null;
+      } else {
+        return rest;
+      }
+    },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
       return x;

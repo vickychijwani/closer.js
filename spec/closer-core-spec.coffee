@@ -20,6 +20,7 @@ nil = (src) -> expect(evaluate src).toEqual null
 
 key = (x) -> mori.keyword x
 seq = (seqable) -> mori.seq seqable
+emptySeq = -> mori.empty mori.seq [1]
 vec = (xs...) -> mori.vector.apply @, _.flatten xs
 list = (xs...) -> mori.list.apply @, _.flatten xs
 set = (xs...) -> mori.set _.flatten xs
@@ -454,6 +455,36 @@ describe 'Closer core library', ->
       eq '(seq \'(1 2 3))', seq list 1, 2, 3
       eq '(seq #{1 2 3})', seq set 1, 2, 3
       eq '(seq {1 2 3 4})', seq map 1, 2, 3, 4
+
+  describe '(first coll)', ->
+    it 'returns the first item in the collection, or nil if coll is nil', ->
+      throws '(first [1 2 3] [4 5 6])'
+      throws '(first 3)'
+      nil '(first nil)'
+      nil '(first [])'
+      nil '(first "")'
+      eq '(first "string")', 's'
+      eq '(first \'(1 2 3))', 1
+
+  describe '(rest coll)', ->
+    it 'returns all but the first item in the collection, or an empty seq if there are no more', ->
+      throws '(rest [1 2 3] [4 5 6])'
+      throws '(rest 3)'
+      eq '(rest nil)', emptySeq()
+      eq '(rest [])', emptySeq()
+      eq '(rest "s")', emptySeq()
+      eq '(rest "string")', seq('tring')
+      eq '(rest \'(1 2 3))', seq([2, 3])
+
+  describe '(next coll)', ->
+    it 'returns all but the first item in the collection, or nil if there are no more', ->
+      throws '(next [1 2 3] [4 5 6])'
+      throws '(next 3)'
+      nil '(next nil)'
+      nil '(next [])'
+      nil '(next "s")'
+      eq '(next "string")', seq('tring')
+      eq '(next \'(1 2 3))', seq([2, 3])
 
   describe '(identity x)', ->
     it 'returns its argument', ->

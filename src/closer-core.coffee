@@ -216,6 +216,19 @@ core =
     assert.seqable coll
     m.seq coll
 
+  'first': (coll) ->
+    assert.arity 1, 1, arguments
+    m.first coll
+
+  'rest': (coll) ->
+    assert.arity 1, 1, arguments
+    m.rest coll
+
+  'next': (coll) ->
+    assert.arity 1, 1, arguments
+    rest = core.rest coll
+    if core['empty?'](rest) then null else rest
+
   'identity': (x) ->
     assert.arity 1, 1, arguments
     x
