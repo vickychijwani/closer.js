@@ -510,7 +510,7 @@ describe 'Closer core library', ->
       eq '(cons true "string")', seq [true, 's', 't', 'r', 'i', 'n', 'g']
       eq '(cons 1 {1 2 3 4})', seq [1, vec(1, 2), vec(3, 4)]
 
-  describe '(conj coll x & xs)', ->
+  describe '(conj coll & xs)', ->
     it 'adds xs to coll in the most efficient way possible', ->
       throws '(conj [1 2 3])'
       throws '(conj "string" "s")'
@@ -528,6 +528,31 @@ describe 'Closer core library', ->
       eq '(conj #{1 2} [3])', set 1, 2, vec(3)   # whole collection is inserted as is
       eq '(conj [1 2] [3])', vec 1, 2, vec(3)   # whole collection is inserted as is
       eq '(conj \'(1 2) [3])', list vec(3), 1, 2   # whole collection is inserted as is
+
+  describe '(assoc map & kvs)', ->
+    it 'adds / updates the given key-value pairs in the given map / vector', ->
+      throws '(assoc #{1 2} 3 3)'   # doesn't work with sets
+      throws '(assoc \'(1 2) 3 3)'   # doesn't work with lists
+      throws '(assoc "string" 1 "h")'   # doesn't work with strings
+      eq '(assoc {1 2 3 4} 1 3 4 5)', map 1, 3, 3, 4, 4, 5   # replaces as well as adds pairs
+      throws '(assoc {1 2} 3 4 5)'   # needs even number of rest args
+      eq '(assoc [1 2 3] 3 4)', vec 1, 2, 3, 4
+      throws '(assoc [1 2 3] 4 4)'   # index must be <= (count vector)
+      throws '(assoc [1 2 3] 3)'   # needs even number of rest args
+      eq '(assoc {1 2} nil 4)', map 1, 2, null, 4
+      throws '(assoc [1 2] nil 4)'   # key must be integer in case of vector
+
+  describe '(dissoc map & keys)', ->
+    it 'removes entries corresponding to the given keys from map', ->
+      throws '(dissoc #{1 2} 0)'   # doesn't work with sets
+      throws '(dissoc \'(1 2) 0)'   # doesn't work with lists
+      throws '(dissoc "string" 0)'   # doesn't work with strings
+      throws '(dissoc [1 2] 0)'   # doesn't work with vectors
+      eq '(dissoc {1 2})', map 1, 2
+      eq '(dissoc [1 2])', vec 1, 2   # works with 1 arg irrespective of type
+      eq '(dissoc {1 2, 3 4, 5 6} 3 5)', map 1, 2
+      eq '(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map 1, 2
+      nil '(dissoc nil (fn []) true)'   # works with nil irrespective of rest args
 
   describe '(identity x)', ->
     it 'returns its argument', ->

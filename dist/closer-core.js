@@ -8,10 +8,12 @@
   ArityError = (function(_super) {
     __extends(ArityError, _super);
 
-    function ArityError(expected_min, expected_max, actual) {
+    function ArityError() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       Error.captureStackTrace(this, this.constructor);
       this.name = 'ArityError';
-      this.message = "Expected " + expected_min + ".." + expected_max + " args, got " + actual;
+      this.message = args.length === 3 ? "Expected " + args[0] + ".." + args[1] + " args, got " + args[2] : args[0];
     }
 
     return ArityError;
@@ -83,6 +85,12 @@
       args = _.flatten(args, true);
       if (!((expected_min <= (_ref = args.length) && _ref <= expected_max))) {
         throw new ArityError(expected_min, expected_max, args.length);
+      }
+    },
+    arity_custom: function(args, checkFn) {
+      var msg;
+      if (msg = checkFn(args)) {
+        throw new ArityError(msg);
       }
     }
   };
@@ -416,6 +424,25 @@
         throw new TypeError('vector args to conjoin to a map must be pairs');
       }
       return m.conj.apply(this, _.flatten([coll, xs]));
+    },
+    'assoc': function() {
+      var kvs, map;
+      map = arguments[0], kvs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity_custom(arguments, function(args) {
+        if (args.length < 3 || args.length % 2 === 0) {
+          return "Expected odd number of args (at least 3), got " + args.length;
+        }
+      });
+      return m.assoc.apply(this, _.flatten([map, kvs]));
+    },
+    'dissoc': function() {
+      var keys, map;
+      map = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity(1, Infinity, arguments);
+      if (keys.length === 0) {
+        return map;
+      }
+      return m.dissoc.apply(this, _.flatten([map, keys]));
     },
     'identity': function(x) {
       assert.arity(1, 1, arguments);

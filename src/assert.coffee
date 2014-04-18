@@ -1,8 +1,10 @@
 class ArityError extends Error
-  constructor: (expected_min, expected_max, actual) ->
+  constructor: (args...) ->
     Error.captureStackTrace @, @.constructor
     @name = 'ArityError'
-    @message = "Expected #{expected_min}..#{expected_max} args, got #{actual}"
+    @message = if args.length is 3
+      "Expected #{args[0]}..#{args[1]} args, got #{args[2]}"
+    else args[0]
 
 class ArgTypeError extends Error
   constructor: (message) ->
@@ -38,6 +40,10 @@ assert =
     args = _.flatten args, true
     unless expected_min <= args.length <= expected_max
       throw new ArityError expected_min, expected_max, args.length
+
+  arity_custom: (args, checkFn) ->
+    if msg = checkFn args
+      throw new ArityError msg
 
 
 module.exports = assert

@@ -247,6 +247,17 @@ core =
       throw new TypeError 'vector args to conjoin to a map must be pairs'
     m.conj.apply @, _.flatten [coll, xs]
 
+  'assoc': (map, kvs...) ->
+    assert.arity_custom arguments, (args) ->
+      if args.length < 3 or args.length % 2 is 0
+        "Expected odd number of args (at least 3), got #{args.length}"
+    m.assoc.apply @, _.flatten [map, kvs]
+
+  'dissoc': (map, keys...) ->
+    assert.arity 1, Infinity, arguments
+    return map if keys.length is 0
+    m.dissoc.apply @, _.flatten [map, keys]
+
   'identity': (x) ->
     assert.arity 1, 1, arguments
     x
