@@ -249,6 +249,16 @@ core =
     throw new Error "index out of bounds" if _.isString(coll) and index >= coll.length and notFound is undefined
     if notFound isnt undefined then m.nth(coll, index, notFound) else m.nth(coll, index)
 
+  'peek': (coll) ->
+    assert.arity 1, 1, arguments
+    assert.stack coll
+    m.peek coll
+
+  'pop': (coll) ->
+    assert.arity 1, 1, arguments
+    assert.stack coll
+    m.pop coll
+
   'cons': (x, seq) ->
     assert.arity 2, 2, arguments
     m.cons x, seq

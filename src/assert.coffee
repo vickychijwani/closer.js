@@ -41,6 +41,11 @@ assert =
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not sequential"
 
+  stack: (args...) ->
+    unexpectedArg = firstFailure args, (arg) -> mori.is_vector(arg) or mori.is_list(arg)
+    if unexpectedArg
+      throw new ArgTypeError "#{unexpectedArg} does not support stack operations"
+
   arity: (expected_min, expected_max, args...) ->
     args = _.flatten args, true
     unless expected_min <= args.length <= expected_max

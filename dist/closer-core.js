@@ -89,6 +89,16 @@
         throw new ArgTypeError("" + unexpectedArg + " is not sequential");
       }
     },
+    stack: function() {
+      var args, unexpectedArg;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      unexpectedArg = firstFailure(args, function(arg) {
+        return mori.is_vector(arg) || mori.is_list(arg);
+      });
+      if (unexpectedArg) {
+        throw new ArgTypeError("" + unexpectedArg + " does not support stack operations");
+      }
+    },
     arity: function() {
       var args, expected_max, expected_min, _ref;
       expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -439,6 +449,16 @@
       } else {
         return m.nth(coll, index);
       }
+    },
+    'peek': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.stack(coll);
+      return m.peek(coll);
+    },
+    'pop': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.stack(coll);
+      return m.pop(coll);
     },
     'cons': function(x, seq) {
       assert.arity(2, 2, arguments);

@@ -429,6 +429,7 @@ describe 'Closer core library', ->
       eq '(empty \'(1 2))', list()
       eq '(empty #{1 2})', set()
       eq '(empty {1 2})', map()
+      eq '(empty (seq #{1 2}))', emptySeq()
 
   describe '(not-empty coll)', ->
     it 'if coll is empty, returns nil, else coll', ->
@@ -521,6 +522,7 @@ describe 'Closer core library', ->
 
   describe '(nth coll index not-found)', ->
     it 'returns the value at index in coll, takes O(n) time on lists and seqs', ->
+      throws '(nth [1 2] 0 0 0)'
       throws '(nth #{1 2} 0)'   # doesn't work with sets
       throws '(nth {1 2} 0)'   # doesn't work with maps
       nil '(nth nil 3)'
@@ -535,6 +537,32 @@ describe 'Closer core library', ->
       eq '(nth "string" 6 "not-found")', 'not-found'
       eq '(nth \'(1 2 3 4) 3)', 4   # takes O(n) time
       eq '(nth (seq #{1 2 3 4}) 3)', 4   # takes O(n) time
+
+  describe '(peek coll)', ->
+    it 'returns the first item of a list or the last item of a vector', ->
+      throws '(peek [1 2] [3 4])'   # wrong arity
+      throws '(peek #{1 2})'   # doesn't work with sets
+      throws '(peek {1 2})'   # doesn't work with maps
+      throws '(peek (seq #{1 2}))'   # doesn't work with seqs
+      throws '(peek "string")'   # doesn't work with strings
+      nil '(peek nil)'
+      nil '(peek [])'
+      nil '(peek \'())'
+      eq '(peek \'(1 2 3))', 1   # returns first item of list
+      eq '(peek [1 2 3])', 3   # returns last item of vector
+
+  describe '(pop coll)', ->
+    it 'returns coll with (peek coll) removed, throws if coll is empty', ->
+      throws '(pop [1 2] [3 4])'   # wrong arity
+      throws '(pop #{1 2})'   # doesn't work with sets
+      throws '(pop {1 2})'   # doesn't work with maps
+      throws '(pop (seq #{1 2}))'   # doesn't work with seqs
+      throws '(pop "string")'   # doesn't work with strings
+      nil '(pop nil)'
+      throws '(pop [])'
+      throws '(pop \'())'
+      eq '(pop \'(1 2 3))', list 2, 3   # returns all but first item of list
+      eq '(pop [1 2 3])', vec 1, 2   # returns all but last item of vector
 
   describe '(cons x seq)', ->
     it 'returns a new seq of the form (x seq)', ->
