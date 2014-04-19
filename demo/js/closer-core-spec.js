@@ -475,6 +475,13 @@
       }
       return m.conj.apply(this, _.flatten([coll, xs]));
     },
+    'into': function(to, from) {
+      assert.arity(2, 2, arguments);
+      if (to === null && from === null) {
+        return null;
+      }
+      return m.reduce(core.conj, to, from);
+    },
     'assoc': function() {
       var kvs, map;
       map = arguments[0], kvs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
@@ -2450,6 +2457,28 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(conj #{1 2} [3])', set(1, 2, vec(3)));
         eq('(conj [1 2] [3])', vec(1, 2, vec(3)));
         return eq('(conj \'(1 2) [3])', list(vec(3), 1, 2));
+      });
+    });
+    describe('(into to from)', function() {
+      return it('conjs all items from the second collection into the first', function() {
+        throws('(into [])');
+        nil('(into nil nil)');
+        eq('(into :key nil)', key('key'));
+        eq('(into :key [])', key('key'));
+        throws('(into :key [1])');
+        eq('(into [1 2] [3 4])', vec(1, 2, 3, 4));
+        eq('(into nil [3 4])', seq([4, 3]));
+        eq('(into \'(1 2) [3 4])', list(4, 3, 1, 2));
+        eq('(into [1 2] \'(3 4))', list(1, 2, 3, 4));
+        eq('(into #{1 2} [3 4])', set(1, 2, 3, 4));
+        eq('(into {1 2} {3 4})', map(1, 2, 3, 4));
+        throws('(into {1 2} [3 4])');
+        eq('(into {1 2} [[3 4]])', map(1, 2, 3, 4));
+        throws('(into {1 2} [[3]])');
+        throws('(into {1 2} [[3 4 5]])');
+        eq('(into {1 2} \'([3 4]))', map(1, 2, 3, 4));
+        eq('(into {1 2} #{[3 4]})', map(1, 2, 3, 4));
+        return throws('(into {1 2} [\'(3 4)])');
       });
     });
     describe('(assoc map & kvs)', function() {

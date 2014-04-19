@@ -592,6 +592,27 @@ describe 'Closer core library', ->
       eq '(conj [1 2] [3])', vec 1, 2, vec(3)   # whole collection is inserted as is
       eq '(conj \'(1 2) [3])', list vec(3), 1, 2   # whole collection is inserted as is
 
+  describe '(into to from)', ->
+    it 'conjs all items from the second collection into the first', ->
+      throws '(into [])'
+      nil '(into nil nil)'
+      eq '(into :key nil)', key 'key'   # if from is nil, returns to as it is
+      eq '(into :key [])', key 'key'   # if from is empty, returns to as it is
+      throws '(into :key [1])'   # keyword is not a collection
+      eq '(into [1 2] [3 4])', vec 1, 2, 3, 4
+      eq '(into nil [3 4])', seq [4, 3]    # creates seq from nil
+      eq '(into \'(1 2) [3 4])', list 4, 3, 1, 2    # prepends to lists
+      eq '(into [1 2] \'(3 4))', list 1, 2, 3, 4
+      eq '(into #{1 2} [3 4])', set 1, 2, 3, 4
+      eq '(into {1 2} {3 4})', map 1, 2, 3, 4
+      throws '(into {1 2} [3 4])'    # needs collection of vectors, or a map
+      eq '(into {1 2} [[3 4]])', map 1, 2, 3, 4
+      throws '(into {1 2} [[3]])'    # vector args to conj must be pairs
+      throws '(into {1 2} [[3 4 5]])'    # vector args to conj must be pairs
+      eq '(into {1 2} \'([3 4]))', map 1, 2, 3, 4
+      eq '(into {1 2} #{[3 4]})', map 1, 2, 3, 4
+      throws '(into {1 2} [\'(3 4)])'    # only vectors (pairs) can be conjed into maps
+
   describe '(assoc map & kvs)', ->
     it 'adds / updates the given key-value pairs in the given map / vector', ->
       throws '(assoc #{1 2} 3 3)'   # doesn't work with sets

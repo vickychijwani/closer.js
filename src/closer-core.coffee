@@ -269,6 +269,11 @@ core =
       throw new TypeError 'vector args to conjoin to a map must be pairs'
     m.conj.apply @, _.flatten [coll, xs]
 
+  'into': (to, from) ->
+    assert.arity 2, 2, arguments
+    return null if to is null and from is null
+    m.reduce core.conj, to, from
+
   'assoc': (map, kvs...) ->
     assert.arity_custom arguments, (args) ->
       if args.length < 3 or args.length % 2 is 0
