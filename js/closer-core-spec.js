@@ -89,6 +89,16 @@
         throw new ArgTypeError("" + unexpectedArg + " is not sequential");
       }
     },
+    stack: function() {
+      var args, unexpectedArg;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      unexpectedArg = firstFailure(args, function(arg) {
+        return mori.is_vector(arg) || mori.is_list(arg);
+      });
+      if (unexpectedArg) {
+        throw new ArgTypeError("" + unexpectedArg + " does not support stack operations");
+      }
+    },
     arity: function() {
       var args, expected_max, expected_min, _ref;
       expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -439,6 +449,16 @@
       } else {
         return m.nth(coll, index);
       }
+    },
+    'peek': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.stack(coll);
+      return m.peek(coll);
+    },
+    'pop': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.stack(coll);
+      return m.pop(coll);
     },
     'cons': function(x, seq) {
       assert.arity(2, 2, arguments);
@@ -2255,7 +2275,8 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(empty [1 2 #{3 4}])', vec());
         eq('(empty \'(1 2))', list());
         eq('(empty #{1 2})', set());
-        return eq('(empty {1 2})', map());
+        eq('(empty {1 2})', map());
+        return eq('(empty (seq #{1 2}))', emptySeq());
       });
     });
     describe('(not-empty coll)', function() {
@@ -2356,6 +2377,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
     });
     describe('(nth coll index not-found)', function() {
       return it('returns the value at index in coll, takes O(n) time on lists and seqs', function() {
+        throws('(nth [1 2] 0 0 0)');
         throws('(nth #{1 2} 0)');
         throws('(nth {1 2} 0)');
         nil('(nth nil 3)');
@@ -2370,6 +2392,34 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(nth "string" 6 "not-found")', 'not-found');
         eq('(nth \'(1 2 3 4) 3)', 4);
         return eq('(nth (seq #{1 2 3 4}) 3)', 4);
+      });
+    });
+    describe('(peek coll)', function() {
+      return it('returns the first item of a list or the last item of a vector', function() {
+        throws('(peek [1 2] [3 4])');
+        throws('(peek #{1 2})');
+        throws('(peek {1 2})');
+        throws('(peek (seq #{1 2}))');
+        throws('(peek "string")');
+        nil('(peek nil)');
+        nil('(peek [])');
+        nil('(peek \'())');
+        eq('(peek \'(1 2 3))', 1);
+        return eq('(peek [1 2 3])', 3);
+      });
+    });
+    describe('(pop coll)', function() {
+      return it('returns coll with (peek coll) removed, throws if coll is empty', function() {
+        throws('(pop [1 2] [3 4])');
+        throws('(pop #{1 2})');
+        throws('(pop {1 2})');
+        throws('(pop (seq #{1 2}))');
+        throws('(pop "string")');
+        nil('(pop nil)');
+        throws('(pop [])');
+        throws('(pop \'())');
+        eq('(pop \'(1 2 3))', list(2, 3));
+        return eq('(pop [1 2 3])', vec(1, 2));
       });
     });
     describe('(cons x seq)', function() {
