@@ -79,6 +79,16 @@
         throw new ArgTypeError("" + unexpectedArg + " is not seqable");
       }
     },
+    sequential: function() {
+      var args, unexpectedArg;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      unexpectedArg = firstFailure(args, function(arg) {
+        return mori.is_sequential(arg) || _.isString(arg);
+      });
+      if (unexpectedArg) {
+        throw new ArgTypeError("" + unexpectedArg + " is not sequential");
+      }
+    },
     arity: function() {
       var args, expected_max, expected_min, _ref;
       expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -408,6 +418,26 @@
         return null;
       } else {
         return rest;
+      }
+    },
+    'last': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.last(coll);
+    },
+    'nth': function(coll, index, notFound) {
+      assert.arity(2, 3, arguments);
+      assert.sequential(coll);
+      assert.numbers(index);
+      if (coll === null) {
+        return (notFound !== void 0 ? notFound : null);
+      }
+      if (_.isString(coll) && index >= coll.length && notFound === void 0) {
+        throw new Error("index out of bounds");
+      }
+      if (notFound !== void 0) {
+        return m.nth(coll, index, notFound);
+      } else {
+        return m.nth(coll, index);
       }
     },
     'cons': function(x, seq) {
@@ -2280,7 +2310,9 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(first [])');
         nil('(first "")');
         eq('(first "string")', 's');
-        return eq('(first \'(1 2 3))', 1);
+        eq('(first \'(1 2 3))', 1);
+        eq('(first #{1 2 3})', 1);
+        return eq('(first {1 2 3 4})', vec(1, 2));
       });
     });
     describe('(rest coll)', function() {
@@ -2291,7 +2323,9 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(rest [])', emptySeq());
         eq('(rest "s")', emptySeq());
         eq('(rest "string")', seq('tring'));
-        return eq('(rest \'(1 2 3))', seq([2, 3]));
+        eq('(rest \'(1 2 3))', seq([2, 3]));
+        eq('(rest #{1 2 3})', seq([2, 3]));
+        return eq('(rest {1 2 3 4})', seq([vec(3, 4)]));
       });
     });
     describe('(next coll)', function() {
@@ -2302,7 +2336,40 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         nil('(next [])');
         nil('(next "s")');
         eq('(next "string")', seq('tring'));
-        return eq('(next \'(1 2 3))', seq([2, 3]));
+        eq('(next \'(1 2 3))', seq([2, 3]));
+        eq('(next #{1 2 3})', seq([2, 3]));
+        return eq('(next {1 2 3 4})', seq([vec(3, 4)]));
+      });
+    });
+    describe('(last coll)', function() {
+      return it('returns the last item in coll, in linear time', function() {
+        throws('(last [1 2 3] [4 5 6])');
+        throws('(last 3)');
+        nil('(last nil)');
+        nil('(last [])');
+        nil('(last "")');
+        eq('(last "string")', 'g');
+        eq('(last \'(1 2 3))', 3);
+        eq('(last #{1 2 3})', 3);
+        return eq('(last {1 2 3 4})', vec(3, 4));
+      });
+    });
+    describe('(nth coll index not-found)', function() {
+      return it('returns the value at index in coll, takes O(n) time on lists and seqs', function() {
+        throws('(nth #{1 2} 0)');
+        throws('(nth {1 2} 0)');
+        nil('(nth nil 3)');
+        eq('(nth [1 2] 0)', 1);
+        eq('(nth [1 2] 0.45)', 1);
+        throws('(nth [1 2] nil)');
+        throws('(nth [1 2] nil "not-found")');
+        throws('(nth [1 2] 2)');
+        eq('(nth [1 2] 2 "not-found")', 'not-found');
+        eq('(nth "string" 0)', 's');
+        throws('(nth "string" 6)');
+        eq('(nth "string" 6 "not-found")', 'not-found');
+        eq('(nth \'(1 2 3 4) 3)', 4);
+        return eq('(nth (seq #{1 2 3 4}) 3)', 4);
       });
     });
     describe('(cons x seq)', function() {
