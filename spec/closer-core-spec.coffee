@@ -480,6 +480,8 @@ describe 'Closer core library', ->
       nil '(first "")'
       eq '(first "string")', 's'
       eq '(first \'(1 2 3))', 1
+      eq '(first #{1 2 3})', 1
+      eq '(first {1 2 3 4})', vec 1, 2
 
   describe '(rest coll)', ->
     it 'returns all but the first item in the collection, or an empty seq if there are no more', ->
@@ -488,8 +490,10 @@ describe 'Closer core library', ->
       eq '(rest nil)', emptySeq()
       eq '(rest [])', emptySeq()
       eq '(rest "s")', emptySeq()
-      eq '(rest "string")', seq('tring')
-      eq '(rest \'(1 2 3))', seq([2, 3])
+      eq '(rest "string")', seq 'tring'
+      eq '(rest \'(1 2 3))', seq [2, 3]
+      eq '(rest #{1 2 3})', seq [2, 3]
+      eq '(rest {1 2 3 4})', seq [vec 3, 4]
 
   describe '(next coll)', ->
     it 'returns all but the first item in the collection, or nil if there are no more', ->
@@ -500,6 +504,37 @@ describe 'Closer core library', ->
       nil '(next "s")'
       eq '(next "string")', seq('tring')
       eq '(next \'(1 2 3))', seq([2, 3])
+      eq '(next #{1 2 3})', seq [2, 3]
+      eq '(next {1 2 3 4})', seq [vec 3, 4]
+
+  describe '(last coll)', ->
+    it 'returns the last item in coll, in linear time', ->
+      throws '(last [1 2 3] [4 5 6])'
+      throws '(last 3)'
+      nil '(last nil)'
+      nil '(last [])'
+      nil '(last "")'
+      eq '(last "string")', 'g'
+      eq '(last \'(1 2 3))', 3
+      eq '(last #{1 2 3})', 3
+      eq '(last {1 2 3 4})', vec 3, 4
+
+  describe '(nth coll index not-found)', ->
+    it 'returns the value at index in coll, takes O(n) time on lists and seqs', ->
+      throws '(nth #{1 2} 0)'   # doesn't work with sets
+      throws '(nth {1 2} 0)'   # doesn't work with maps
+      nil '(nth nil 3)'
+      eq '(nth [1 2] 0)', 1    # takes constant time
+      eq '(nth [1 2] 0.45)', 1   # float truncated to int
+      throws '(nth [1 2] nil)'   # index must be a number
+      throws '(nth [1 2] nil "not-found")'   # index must be a number
+      throws '(nth [1 2] 2)'   # index out of bounds
+      eq '(nth [1 2] 2 "not-found")', 'not-found'
+      eq '(nth "string" 0)', 's'   # works with strings
+      throws '(nth "string" 6)'   # index out of bounds
+      eq '(nth "string" 6 "not-found")', 'not-found'
+      eq '(nth \'(1 2 3 4) 3)', 4   # takes O(n) time
+      eq '(nth (seq #{1 2 3 4}) 3)', 4   # takes O(n) time
 
   describe '(cons x seq)', ->
     it 'returns a new seq of the form (x seq)', ->

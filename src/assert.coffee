@@ -36,6 +36,11 @@ assert =
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not seqable"
 
+  sequential: (args...) ->
+    unexpectedArg = firstFailure args, (arg) -> mori.is_sequential(arg) or _.isString(arg)
+    if unexpectedArg
+      throw new ArgTypeError "#{unexpectedArg} is not sequential"
+
   arity: (expected_min, expected_max, args...) ->
     args = _.flatten args, true
     unless expected_min <= args.length <= expected_max

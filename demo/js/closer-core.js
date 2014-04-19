@@ -79,6 +79,16 @@
         throw new ArgTypeError("" + unexpectedArg + " is not seqable");
       }
     },
+    sequential: function() {
+      var args, unexpectedArg;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      unexpectedArg = firstFailure(args, function(arg) {
+        return mori.is_sequential(arg) || _.isString(arg);
+      });
+      if (unexpectedArg) {
+        throw new ArgTypeError("" + unexpectedArg + " is not sequential");
+      }
+    },
     arity: function() {
       var args, expected_max, expected_min, _ref;
       expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -408,6 +418,26 @@
         return null;
       } else {
         return rest;
+      }
+    },
+    'last': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.last(coll);
+    },
+    'nth': function(coll, index, notFound) {
+      assert.arity(2, 3, arguments);
+      assert.sequential(coll);
+      assert.numbers(index);
+      if (coll === null) {
+        return (notFound !== void 0 ? notFound : null);
+      }
+      if (_.isString(coll) && index >= coll.length && notFound === void 0) {
+        throw new Error("index out of bounds");
+      }
+      if (notFound !== void 0) {
+        return m.nth(coll, index, notFound);
+      } else {
+        return m.nth(coll, index);
       }
     },
     'cons': function(x, seq) {

@@ -237,6 +237,18 @@ core =
     rest = core.rest coll
     if core['empty?'](rest) then null else rest
 
+  'last': (coll) ->
+    assert.arity 1, 1, arguments
+    m.last coll
+
+  'nth': (coll, index, notFound) ->
+    assert.arity 2, 3, arguments
+    assert.sequential coll
+    assert.numbers index     # float is cast to int
+    return (if notFound isnt undefined then notFound else null) if coll is null
+    throw new Error "index out of bounds" if _.isString(coll) and index >= coll.length and notFound is undefined
+    if notFound isnt undefined then m.nth(coll, index, notFound) else m.nth(coll, index)
+
   'cons': (x, seq) ->
     assert.arity 2, 2, arguments
     m.cons x, seq
