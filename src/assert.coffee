@@ -50,6 +50,11 @@ assert =
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} does not support stack operations"
 
+  function: (args...) ->
+    unexpectedArg = firstFailure args, (arg) -> typeof arg is 'function'
+    if unexpectedArg
+      throw new ArgTypeError "#{unexpectedArg} is not a function"
+
   arity: (expected_min, expected_max, args...) ->
     args = _.flatten args, true
     unless expected_min <= args.length <= expected_max

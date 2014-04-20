@@ -20,6 +20,11 @@ wireCallsToCore = (ast) ->
         calleeProp = closer.node 'Identifier', node.callee.name, node.loc
         node.callee = closer.node 'MemberExpression',
           calleeObj, calleeProp, false, node.loc
+      else if node.type is 'Identifier' and node.name of core
+        # FIXME same evil here with mori
+        obj = closer.node 'Identifier', 'core', node.loc
+        prop = closer.node 'Literal', node.name, node.loc
+        node = closer.node 'MemberExpression', obj, prop, true, node.loc
       node
   ast
 

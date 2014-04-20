@@ -108,6 +108,16 @@
         throw new ArgTypeError("" + unexpectedArg + " does not support stack operations");
       }
     },
+    "function": function() {
+      var args, unexpectedArg;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      unexpectedArg = firstFailure(args, function(arg) {
+        return typeof arg === 'function';
+      });
+      if (unexpectedArg) {
+        throw new ArgTypeError("" + unexpectedArg + " is not a function");
+      }
+    },
     arity: function() {
       var args, expected_max, expected_min, _ref;
       expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
@@ -529,6 +539,13 @@
     'identity': function(x) {
       assert.arity(1, 1, arguments);
       return x;
+    },
+    'map': function() {
+      var colls, f;
+      f = arguments[0], colls = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity(2, Infinity, arguments);
+      assert["function"](f);
+      return m.map.apply(this, arguments);
     }
   };
 
@@ -1767,7 +1784,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
   wireCallsToCore = function(ast) {
     estraverse.replace(ast, {
       enter: function(node) {
-        var calleeObj, calleeProp;
+        var calleeObj, calleeProp, obj, prop;
         if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name in core) {
           calleeObj = closer.node('Identifier', 'core', node.loc);
           calleeProp = closer.node('Literal', node.callee.name, node.loc);
@@ -1776,6 +1793,10 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
           calleeObj = closer.node('Identifier', 'mori', node.loc);
           calleeProp = closer.node('Identifier', node.callee.name, node.loc);
           node.callee = closer.node('MemberExpression', calleeObj, calleeProp, false, node.loc);
+        } else if (node.type === 'Identifier' && node.name in core) {
+          obj = closer.node('Identifier', 'core', node.loc);
+          prop = closer.node('Literal', node.name, node.loc);
+          node = closer.node('MemberExpression', obj, prop, true, node.loc);
         }
         return node;
       }
@@ -2566,11 +2587,19 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return throws('(find "string" 2)');
       });
     });
-    return describe('(identity x)', function() {
+    describe('(identity x)', function() {
       return it('returns its argument', function() {
         throws('(identity 34 45)');
         nil('(identity nil)');
         return eq('(identity {:k1 "v1" :k2 #{1 2}})', map(key('k1'), 'v1', key('k2'), set(1, 2)));
+      });
+    });
+    return describe('(map f colls)', function() {
+      return it('applies f sequentially to every item in the given collections', function() {
+        throws('(map +)');
+        eq('(map inc [1 2 3])', seq([2, 3, 4]));
+        eq('(map + [1 2] \'(3 4) #{5 6})', seq([9, 12]));
+        return eq('(map first {:a 1, :b 2})', seq([key('a'), key('b')]));
       });
     });
   });

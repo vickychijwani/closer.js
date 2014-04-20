@@ -673,3 +673,10 @@ describe 'Closer core library', ->
       throws '(identity 34 45)'
       nil '(identity nil)'
       eq '(identity {:k1 "v1" :k2 #{1 2}})', map key('k1'), 'v1', key('k2'), set(1, 2)
+
+  describe '(map f colls)', ->
+    it 'applies f sequentially to every item in the given collections', ->
+      throws '(map +)'
+      eq '(map inc [1 2 3])', seq [2, 3, 4]
+      eq '(map + [1 2] \'(3 4) #{5 6})', seq [9, 12]
+      eq '(map first {:a 1, :b 2})', seq [key('a'), key('b')]

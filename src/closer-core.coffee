@@ -303,6 +303,11 @@ core =
     assert.arity 1, 1, arguments
     x
 
+  'map': (f, colls...) ->
+    assert.arity 2, Infinity, arguments
+    assert.function f
+    m.map.apply @, arguments
+
 
 module.exports = core
 
