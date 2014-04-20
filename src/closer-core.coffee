@@ -165,7 +165,7 @@ core =
 
   'contains?': (coll, key) ->
     assert.arity 2, 2, arguments
-    assert.associative coll
+    assert.associativeOrSet coll
     m.has_key coll, key
 
   'empty?': (coll) ->
@@ -284,6 +284,11 @@ core =
     assert.arity 1, Infinity, arguments
     return map if keys.length is 0
     m.dissoc.apply @, _.flatten [map, keys]
+
+  'find': (map, key) ->
+    assert.arity 2, 2, arguments
+    assert.associative map
+    m.find map, key
 
   'identity': (x) ->
     assert.arity 1, 1, arguments

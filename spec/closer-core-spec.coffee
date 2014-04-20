@@ -638,6 +638,17 @@ describe 'Closer core library', ->
       eq '(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map 1, 2
       nil '(dissoc nil (fn []) true)'   # works with nil irrespective of rest args
 
+  describe '(find map key)', ->
+    it 'returns the map entry for a given key', ->
+      throws '(find {:a 1 :b 2} :a :b)'
+      nil '(find nil nil)'
+      nil '(find nil 3)'
+      eq '(find {:a 1 :b 2} :a)', vec key('a'), 1
+      eq '(find [1 2 3 4] 2)', vec 2, 3
+      throws '(find \'(1 2 3 4) 2)'
+      throws '(find #{1 2 3 4} 2)'
+      throws '(find "string" 2)'
+
   describe '(identity x)', ->
     it 'returns its argument', ->
       throws '(identity 34 45)'

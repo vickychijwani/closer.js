@@ -27,8 +27,12 @@ assert =
     if unexpectedArg isnt undefined
       throw new ArgTypeError "#{unexpectedArg} is not a integer"
 
-  associative: (args...) ->
+  associativeOrSet: (args...) ->
     if unexpectedArg = firstFailure(args, (arg) -> mori.is_associative(arg) or mori.is_set(arg))
+      throw new ArgTypeError "#{unexpectedArg} is not a set or an associative collection"
+
+  associative: (args...) ->
+    if unexpectedArg = firstFailure(args, (arg) -> mori.is_associative(arg))
       throw new ArgTypeError "#{unexpectedArg} is not an associative collection"
 
   seqable: (args...) ->
