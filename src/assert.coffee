@@ -13,7 +13,7 @@ class ArgTypeError extends Error
     @message = message
 
 firstFailure = (args, testFn) ->
-  _.find args, (arg) -> not testFn(arg)
+  _.find _.flatten(args), (arg) -> not testFn(arg)
 
 assert =
 

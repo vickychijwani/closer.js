@@ -274,6 +274,15 @@ core =
     return null if to is null and from is null
     m.reduce core.conj, to, from
 
+  'concat': (seqs...) ->
+    assert.arity 0, Infinity, arguments
+    assert.seqable seqs
+    m.concat.apply @, seqs
+
+  'flatten': (coll) ->
+    assert.arity 1, 1, arguments
+    m.flatten coll
+
   'assoc': (map, kvs...) ->
     assert.arity_custom arguments, (args) ->
       if args.length < 3 or args.length % 2 is 0

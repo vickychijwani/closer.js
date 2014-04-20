@@ -613,6 +613,25 @@ describe 'Closer core library', ->
       eq '(into {1 2} #{[3 4]})', map 1, 2, 3, 4
       throws '(into {1 2} [\'(3 4)])'    # only vectors (pairs) can be conjed into maps
 
+  describe '(concat seqs)', ->
+    it 'concatenates the given seqables into one sequence', ->
+      eq '(concat)', emptySeq()
+      eq '(concat nil)', emptySeq()
+      eq '(concat #{1} [2] \'(3) {4 5} "67")', seq [1, 2, 3, vec(4, 5), '6', '7']
+      throws '(concat #{1} [2] \'(3) {4 5} "67" 3)'   # integer is not seqable
+      throws '(concat #{1} [2] \'(3) {4 5} "67" true)'   # boolean is not seqable
+
+  describe '(flatten coll)', ->
+    it 'converts an arbitrarily-nested collection into a flat sequence', ->
+      throws '(flatten)'
+      eq '(flatten nil)', emptySeq()
+      eq '(flatten 3)', emptySeq()    # doesn't throw
+      eq '(flatten "string")', emptySeq()
+      eq '(flatten [1 \'(2 [3])])', seq [1, 2, 3]
+      eq '(flatten #{1 2 #{3}})', emptySeq()    # doesn't work with sets
+      eq '(flatten {:a 1, :b 2})', emptySeq()    # doesn't work with maps
+      eq '(flatten (seq {:a 1, :b 2}))', seq [key('a'), 1, key('b'), 2]
+
   describe '(assoc map & kvs)', ->
     it 'adds / updates the given key-value pairs in the given map / vector', ->
       throws '(assoc #{1 2} 3 3)'   # doesn't work with sets
