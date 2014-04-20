@@ -34,7 +34,7 @@
   })(Error);
 
   firstFailure = function(args, testFn) {
-    return _.find(args, function(arg) {
+    return _.find(_.flatten(args), function(arg) {
       return !testFn(arg);
     });
   };
@@ -490,6 +490,17 @@
         return null;
       }
       return m.reduce(core.conj, to, from);
+    },
+    'concat': function() {
+      var seqs;
+      seqs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(0, Infinity, arguments);
+      assert.seqable(seqs);
+      return m.concat.apply(this, seqs);
+    },
+    'flatten': function(coll) {
+      assert.arity(1, 1, arguments);
+      return m.flatten(coll);
     },
     'assoc': function() {
       var kvs, map;
@@ -2493,6 +2504,27 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(into {1 2} \'([3 4]))', map(1, 2, 3, 4));
         eq('(into {1 2} #{[3 4]})', map(1, 2, 3, 4));
         return throws('(into {1 2} [\'(3 4)])');
+      });
+    });
+    describe('(concat seqs)', function() {
+      return it('concatenates the given seqables into one sequence', function() {
+        eq('(concat)', emptySeq());
+        eq('(concat nil)', emptySeq());
+        eq('(concat #{1} [2] \'(3) {4 5} "67")', seq([1, 2, 3, vec(4, 5), '6', '7']));
+        throws('(concat #{1} [2] \'(3) {4 5} "67" 3)');
+        return throws('(concat #{1} [2] \'(3) {4 5} "67" true)');
+      });
+    });
+    describe('(flatten coll)', function() {
+      return it('converts an arbitrarily-nested collection into a flat sequence', function() {
+        throws('(flatten)');
+        eq('(flatten nil)', emptySeq());
+        eq('(flatten 3)', emptySeq());
+        eq('(flatten "string")', emptySeq());
+        eq('(flatten [1 \'(2 [3])])', seq([1, 2, 3]));
+        eq('(flatten #{1 2 #{3}})', emptySeq());
+        eq('(flatten {:a 1, :b 2})', emptySeq());
+        return eq('(flatten (seq {:a 1, :b 2}))', seq([key('a'), 1, key('b'), 2]));
       });
     });
     describe('(assoc map & kvs)', function() {
