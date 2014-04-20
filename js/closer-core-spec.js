@@ -60,11 +60,20 @@
         throw new ArgTypeError("" + unexpectedArg + " is not a integer");
       }
     },
-    associative: function() {
+    associativeOrSet: function() {
       var args, unexpectedArg;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (unexpectedArg = firstFailure(args, function(arg) {
         return mori.is_associative(arg) || mori.is_set(arg);
+      })) {
+        throw new ArgTypeError("" + unexpectedArg + " is not a set or an associative collection");
+      }
+    },
+    associative: function() {
+      var args, unexpectedArg;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (unexpectedArg = firstFailure(args, function(arg) {
+        return mori.is_associative(arg);
       })) {
         throw new ArgTypeError("" + unexpectedArg + " is not an associative collection");
       }
@@ -346,7 +355,7 @@
     },
     'contains?': function(coll, key) {
       assert.arity(2, 2, arguments);
-      assert.associative(coll);
+      assert.associativeOrSet(coll);
       return m.has_key(coll, key);
     },
     'empty?': function(coll) {
@@ -500,6 +509,11 @@
         return map;
       }
       return m.dissoc.apply(this, _.flatten([map, keys]));
+    },
+    'find': function(map, key) {
+      assert.arity(2, 2, arguments);
+      assert.associative(map);
+      return m.find(map, key);
     },
     'identity': function(x) {
       assert.arity(1, 1, arguments);
@@ -2506,6 +2520,18 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(dissoc {1 2, 3 4, 5 6} 3 5)', map(1, 2));
         eq('(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map(1, 2));
         return nil('(dissoc nil (fn []) true)');
+      });
+    });
+    describe('(find map key)', function() {
+      return it('returns the map entry for a given key', function() {
+        throws('(find {:a 1 :b 2} :a :b)');
+        nil('(find nil nil)');
+        nil('(find nil 3)');
+        eq('(find {:a 1 :b 2} :a)', vec(key('a'), 1));
+        eq('(find [1 2 3 4] 2)', vec(2, 3));
+        throws('(find \'(1 2 3 4) 2)');
+        throws('(find #{1 2 3 4} 2)');
+        return throws('(find "string" 2)');
       });
     });
     return describe('(identity x)', function() {
