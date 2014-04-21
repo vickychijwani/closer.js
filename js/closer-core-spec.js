@@ -512,6 +512,11 @@
       assert.arity(1, 1, arguments);
       return m.flatten(coll);
     },
+    'reverse': function(coll) {
+      assert.arity(1, 1, arguments);
+      assert.seqable(coll);
+      return m.reverse(coll);
+    },
     'assoc': function() {
       var kvs, map;
       map = arguments[0], kvs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
@@ -546,6 +551,13 @@
       assert.arity(2, Infinity, arguments);
       assert["function"](f);
       return m.map.apply(this, arguments);
+    },
+    'mapcat': function() {
+      var colls, f;
+      f = arguments[0], colls = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assert.arity(2, Infinity, arguments);
+      assert["function"](f);
+      return m.mapcat.apply(this, arguments);
     }
   };
 
@@ -2548,6 +2560,18 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(flatten (seq {:a 1, :b 2}))', seq([key('a'), 1, key('b'), 2]));
       });
     });
+    describe('(reverse coll)', function() {
+      return it('reverses the collection', function() {
+        throws('(reverse)');
+        eq('(reverse nil)', emptySeq());
+        throws('(reverse 3)');
+        eq('(reverse "")', emptySeq());
+        eq('(reverse "string")', seq(['g', 'n', 'i', 'r', 't', 's']));
+        eq('(reverse [1 2 \'(3 4)])', seq([list(3, 4), 2, 1]));
+        eq('(reverse #{1 2 3})', seq([3, 2, 1]));
+        return eq('(reverse {:a 1 :b 2})', seq([vec(key('b'), 2), vec(key('a'), 1)]));
+      });
+    });
     describe('(assoc map & kvs)', function() {
       return it('adds / updates the given key-value pairs in the given map / vector', function() {
         throws('(assoc #{1 2} 3 3)');
@@ -2594,12 +2618,18 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(identity {:k1 "v1" :k2 #{1 2}})', map(key('k1'), 'v1', key('k2'), set(1, 2)));
       });
     });
-    return describe('(map f colls)', function() {
+    describe('(map f colls)', function() {
       return it('applies f sequentially to every item in the given collections', function() {
         throws('(map +)');
         eq('(map inc [1 2 3])', seq([2, 3, 4]));
         eq('(map + [1 2] \'(3 4) #{5 6})', seq([9, 12]));
         return eq('(map first {:a 1, :b 2})', seq([key('a'), key('b')]));
+      });
+    });
+    return describe('(mapcat f colls)', function() {
+      return it('applies concat to the result of applying map to f and colls', function() {
+        throws('(mapcat +)');
+        return eq('(mapcat reverse {2 1, 4 3, 6 5})', seq([1, 2, 3, 4, 5, 6]));
       });
     });
   });
