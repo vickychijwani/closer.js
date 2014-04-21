@@ -632,6 +632,17 @@ describe 'Closer core library', ->
       eq '(flatten {:a 1, :b 2})', emptySeq()    # doesn't work with maps
       eq '(flatten (seq {:a 1, :b 2}))', seq [key('a'), 1, key('b'), 2]
 
+  describe '(reverse coll)', ->
+    it 'reverses the collection', ->
+      throws '(reverse)'
+      eq '(reverse nil)', emptySeq()
+      throws '(reverse 3)'
+      eq '(reverse "")', emptySeq()
+      eq '(reverse "string")', seq ['g', 'n', 'i', 'r', 't', 's']
+      eq '(reverse [1 2 \'(3 4)])', seq [list(3, 4), 2, 1]
+      eq '(reverse #{1 2 3})', seq [3, 2, 1]
+      eq '(reverse {:a 1 :b 2})', seq [vec(key('b'), 2), vec(key('a'), 1)]
+
   describe '(assoc map & kvs)', ->
     it 'adds / updates the given key-value pairs in the given map / vector', ->
       throws '(assoc #{1 2} 3 3)'   # doesn't work with sets
@@ -680,3 +691,10 @@ describe 'Closer core library', ->
       eq '(map inc [1 2 3])', seq [2, 3, 4]
       eq '(map + [1 2] \'(3 4) #{5 6})', seq [9, 12]
       eq '(map first {:a 1, :b 2})', seq [key('a'), key('b')]
+
+  describe '(mapcat f colls)', ->
+    it 'applies concat to the result of applying map to f and colls', ->
+      throws '(mapcat +)'
+      # throws '(mapcat inc [1 2 3])'   # f must return a collection
+      eq '(mapcat reverse {2 1, 4 3, 6 5})',
+        seq [1, 2, 3, 4, 5, 6]

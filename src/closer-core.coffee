@@ -283,6 +283,11 @@ core =
     assert.arity 1, 1, arguments
     m.flatten coll
 
+  'reverse': (coll) ->
+    assert.arity 1, 1, arguments
+    assert.seqable coll
+    m.reverse coll
+
   'assoc': (map, kvs...) ->
     assert.arity_custom arguments, (args) ->
       if args.length < 3 or args.length % 2 is 0
@@ -307,6 +312,11 @@ core =
     assert.arity 2, Infinity, arguments
     assert.function f
     m.map.apply @, arguments
+
+  'mapcat': (f, colls...) ->
+    assert.arity 2, Infinity, arguments
+    assert.function f
+    m.mapcat.apply @, arguments
 
 
 module.exports = core
