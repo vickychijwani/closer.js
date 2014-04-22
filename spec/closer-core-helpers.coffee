@@ -14,7 +14,7 @@ wireCallsToCore = (ast) ->
         calleeProp = closer.node 'Literal', node.callee.name, node.loc
         node.callee = closer.node 'MemberExpression',
           calleeObj, calleeProp, true, node.loc
-      else if node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name of mori
+      else if node.type is 'CallExpression' and node.callee.type is 'Identifier' and node.callee.name in ['list', 'vector', 'set', 'hash_map', 'keyword']
         # FIXME same evil here with mori
         calleeObj = closer.node 'Identifier', 'mori', node.loc
         calleeProp = closer.node 'Identifier', node.callee.name, node.loc

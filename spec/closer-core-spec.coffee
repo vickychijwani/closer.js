@@ -703,6 +703,7 @@ describe 'Closer core library', ->
     it 'returns a seq of the items in coll for which (pred item) is true', ->
       throws '(filter even?)'
       throws '(filter true [1 2 3 4])'   # pred must be a function
+      eq '(filter even? nil)', emptySeq()
       eq '(filter even? [1 2 3 4])', seq [2, 4]
       eq '(filter even? \'(1 2 3 4))', seq [2, 4]
       eq '(filter even? #{1 2 3 4})', seq [2, 4]
@@ -713,8 +714,31 @@ describe 'Closer core library', ->
     it 'returns a seq of the items in coll for which (pred item) is false', ->
       throws '(remove even?)'
       throws '(remove true [1 2 3 4])'   # pred must be a function
+      eq '(remove even? nil)', emptySeq()
       eq '(remove even? [1 2 3 4])', seq [1, 3]
       eq '(remove even? \'(1 2 3 4))', seq [1, 3]
       eq '(remove even? #{1 2 3 4})', seq [1, 3]
       eq '(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq [vec(4, 3)]
       eq '(remove (fn [s] (= s "s")) "strings")', seq ['t', 'r', 'i', 'n', 'g']
+
+  describe '(reduce f coll), (reduce f val coll)', ->
+    it 'applies f to the first item in coll, then to that result and the second item, and so on', ->
+      throws '(reduce +)'
+      throws '(reduce + 2)'
+      eq '(reduce + nil)', 0
+      eq '(reduce + [1 2 3 4])', 10
+      eq '(reduce + \'(1 2 3 4))', 10
+      eq '(reduce + #{1 2 3 4})', 10
+      eq '(reduce + 10 [1 2 3 4])', 20
+      eq '(reduce concat {1 2 3 4})', seq [1, 2, 3, 4]
+      throws '(reduce nil [1 2 3 4])'   # f must be a function
+
+  describe '(reduce-kv f init coll)', ->
+    it 'works like reduce, but f is given 3 arguments: result, key, and value', ->
+      throws '(reduce-kv +)'
+      throws '(reduce-kv + [1 2 3 4])'    # needs 3 args, unlike reduce
+      eq '(reduce-kv + 0 [0 1 2 3])', 12
+      eq '(reduce-kv + 0 {0 1 2 3})', 6
+      eq '(reduce-kv + 4 {0 1 2 3})', 10
+      throws '(reduce-kv + 0 #{0 1 2 3})'
+      throws '(reduce-kv + 0 \'(0 1 2 3))'

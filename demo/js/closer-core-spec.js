@@ -568,6 +568,18 @@
       assert.arity(2, 2, arguments);
       assert["function"](pred);
       return m.remove(pred, coll);
+    },
+    'reduce': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assert.arity(2, 3, arguments);
+      assert["function"](args[0]);
+      return m.reduce.apply(this, args);
+    },
+    'reduce-kv': function(f, init, coll) {
+      assert.arity(3, 3, arguments);
+      assert["function"](f);
+      return m.reduce_kv(f, init, coll);
     }
   };
 
@@ -1806,12 +1818,12 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
   wireCallsToCore = function(ast) {
     estraverse.replace(ast, {
       enter: function(node) {
-        var calleeObj, calleeProp, obj, prop;
+        var calleeObj, calleeProp, obj, prop, _ref;
         if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name in core) {
           calleeObj = closer.node('Identifier', 'core', node.loc);
           calleeProp = closer.node('Literal', node.callee.name, node.loc);
           node.callee = closer.node('MemberExpression', calleeObj, calleeProp, true, node.loc);
-        } else if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name in mori) {
+        } else if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && ((_ref = node.callee.name) === 'list' || _ref === 'vector' || _ref === 'set' || _ref === 'hash_map' || _ref === 'keyword')) {
           calleeObj = closer.node('Identifier', 'mori', node.loc);
           calleeProp = closer.node('Identifier', node.callee.name, node.loc);
           node.callee = closer.node('MemberExpression', calleeObj, calleeProp, false, node.loc);
@@ -2646,6 +2658,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
       return it('returns a seq of the items in coll for which (pred item) is true', function() {
         throws('(filter even?)');
         throws('(filter true [1 2 3 4])');
+        eq('(filter even? nil)', emptySeq());
         eq('(filter even? [1 2 3 4])', seq([2, 4]));
         eq('(filter even? \'(1 2 3 4))', seq([2, 4]));
         eq('(filter even? #{1 2 3 4})', seq([2, 4]));
@@ -2653,15 +2666,40 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(filter (fn [s] (= s "s")) "strings")', seq(['s', 's']));
       });
     });
-    return describe('(remove pred coll)', function() {
+    describe('(remove pred coll)', function() {
       return it('returns a seq of the items in coll for which (pred item) is false', function() {
         throws('(remove even?)');
         throws('(remove true [1 2 3 4])');
+        eq('(remove even? nil)', emptySeq());
         eq('(remove even? [1 2 3 4])', seq([1, 3]));
         eq('(remove even? \'(1 2 3 4))', seq([1, 3]));
         eq('(remove even? #{1 2 3 4})', seq([1, 3]));
         eq('(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(4, 3)]));
         return eq('(remove (fn [s] (= s "s")) "strings")', seq(['t', 'r', 'i', 'n', 'g']));
+      });
+    });
+    describe('(reduce f coll), (reduce f val coll)', function() {
+      return it('applies f to the first item in coll, then to that result and the second item, and so on', function() {
+        throws('(reduce +)');
+        throws('(reduce + 2)');
+        eq('(reduce + nil)', 0);
+        eq('(reduce + [1 2 3 4])', 10);
+        eq('(reduce + \'(1 2 3 4))', 10);
+        eq('(reduce + #{1 2 3 4})', 10);
+        eq('(reduce + 10 [1 2 3 4])', 20);
+        eq('(reduce concat {1 2 3 4})', seq([1, 2, 3, 4]));
+        return throws('(reduce nil [1 2 3 4])');
+      });
+    });
+    return describe('(reduce-kv f init coll)', function() {
+      return it('works like reduce, but f is given 3 arguments: result, key, and value', function() {
+        throws('(reduce-kv +)');
+        throws('(reduce-kv + [1 2 3 4])');
+        eq('(reduce-kv + 0 [0 1 2 3])', 12);
+        eq('(reduce-kv + 0 {0 1 2 3})', 6);
+        eq('(reduce-kv + 4 {0 1 2 3})', 10);
+        throws('(reduce-kv + 0 #{0 1 2 3})');
+        return throws('(reduce-kv + 0 \'(0 1 2 3))');
       });
     });
   });

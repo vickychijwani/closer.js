@@ -328,6 +328,17 @@ core =
     assert.function pred
     m.remove pred, coll
 
+  'reduce': (args...) ->
+    # args: f, [initial], coll
+    assert.arity 2, 3, arguments
+    assert.function args[0]
+    m.reduce.apply @, args
+
+  'reduce-kv': (f, init, coll) ->
+    assert.arity 3, 3, arguments
+    assert.function f
+    m.reduce_kv f, init, coll
+
 
 module.exports = core
 
