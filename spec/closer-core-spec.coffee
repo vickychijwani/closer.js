@@ -698,3 +698,23 @@ describe 'Closer core library', ->
       # throws '(mapcat inc [1 2 3])'   # f must return a collection
       eq '(mapcat reverse {2 1, 4 3, 6 5})',
         seq [1, 2, 3, 4, 5, 6]
+
+  describe '(filter pred coll)', ->
+    it 'returns a seq of the items in coll for which (pred item) is true', ->
+      throws '(filter even?)'
+      throws '(filter true [1 2 3 4])'   # pred must be a function
+      eq '(filter even? [1 2 3 4])', seq [2, 4]
+      eq '(filter even? \'(1 2 3 4))', seq [2, 4]
+      eq '(filter even? #{1 2 3 4})', seq [2, 4]
+      eq '(filter (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq [vec(1, 2)]
+      eq '(filter (fn [s] (= s "s")) "strings")', seq ['s', 's']
+
+  describe '(remove pred coll)', ->
+    it 'returns a seq of the items in coll for which (pred item) is false', ->
+      throws '(remove even?)'
+      throws '(remove true [1 2 3 4])'   # pred must be a function
+      eq '(remove even? [1 2 3 4])', seq [1, 3]
+      eq '(remove even? \'(1 2 3 4))', seq [1, 3]
+      eq '(remove even? #{1 2 3 4})', seq [1, 3]
+      eq '(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq [vec(4, 3)]
+      eq '(remove (fn [s] (= s "s")) "strings")', seq ['t', 'r', 'i', 'n', 'g']

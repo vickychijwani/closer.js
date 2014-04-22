@@ -318,6 +318,16 @@ core =
     assert.function f
     m.mapcat.apply @, arguments
 
+  'filter': (pred, coll) ->
+    assert.arity 2, 2, arguments
+    assert.function pred
+    m.filter pred, coll
+
+  'remove': (pred, coll) ->
+    assert.arity 2, 2, arguments
+    assert.function pred
+    m.remove pred, coll
+
 
 module.exports = core
 
