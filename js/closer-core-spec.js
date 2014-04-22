@@ -558,6 +558,16 @@
       assert.arity(2, Infinity, arguments);
       assert["function"](f);
       return m.mapcat.apply(this, arguments);
+    },
+    'filter': function(pred, coll) {
+      assert.arity(2, 2, arguments);
+      assert["function"](pred);
+      return m.filter(pred, coll);
+    },
+    'remove': function(pred, coll) {
+      assert.arity(2, 2, arguments);
+      assert["function"](pred);
+      return m.remove(pred, coll);
     }
   };
 
@@ -2626,10 +2636,32 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return eq('(map first {:a 1, :b 2})', seq([key('a'), key('b')]));
       });
     });
-    return describe('(mapcat f colls)', function() {
+    describe('(mapcat f colls)', function() {
       return it('applies concat to the result of applying map to f and colls', function() {
         throws('(mapcat +)');
         return eq('(mapcat reverse {2 1, 4 3, 6 5})', seq([1, 2, 3, 4, 5, 6]));
+      });
+    });
+    describe('(filter pred coll)', function() {
+      return it('returns a seq of the items in coll for which (pred item) is true', function() {
+        throws('(filter even?)');
+        throws('(filter true [1 2 3 4])');
+        eq('(filter even? [1 2 3 4])', seq([2, 4]));
+        eq('(filter even? \'(1 2 3 4))', seq([2, 4]));
+        eq('(filter even? #{1 2 3 4})', seq([2, 4]));
+        eq('(filter (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(1, 2)]));
+        return eq('(filter (fn [s] (= s "s")) "strings")', seq(['s', 's']));
+      });
+    });
+    return describe('(remove pred coll)', function() {
+      return it('returns a seq of the items in coll for which (pred item) is false', function() {
+        throws('(remove even?)');
+        throws('(remove true [1 2 3 4])');
+        eq('(remove even? [1 2 3 4])', seq([1, 3]));
+        eq('(remove even? \'(1 2 3 4))', seq([1, 3]));
+        eq('(remove even? #{1 2 3 4})', seq([1, 3]));
+        eq('(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(4, 3)]));
+        return eq('(remove (fn [s] (= s "s")) "strings")', seq(['t', 'r', 'i', 'n', 'g']));
       });
     });
   });
