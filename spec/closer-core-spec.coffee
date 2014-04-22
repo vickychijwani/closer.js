@@ -754,3 +754,27 @@ describe 'Closer core library', ->
       eq '(reduce-kv + 4 {0 1 2 3})', 10
       throws '(reduce-kv + 0 #{0 1 2 3})'
       throws '(reduce-kv + 0 \'(0 1 2 3))'
+
+  describe '(take n coll)', ->
+    it 'returns a seq of the first n items of coll, or all items if there are fewer than n', ->
+      throws '(take 10)'
+      throws '(take 10 3)'    # coll must be seqable
+      throws '(take "2" [1 2 3 4])'    # n must be a number
+      eq '(take 3 (range))', seq [0, 1, 2]
+      eq '(take 2 [1 2 3 4])', seq [1, 2]
+      eq '(take 2 \'(1 2 3 4))', seq [1, 2]
+      eq '(take 2 #{1 2 3 4})', seq [1, 2]
+      eq '(take 2 {1 2 3 4 5 6})', seq [vec(1, 2), vec(3, 4)]
+      eq '(take 2.1 [1 2 3 4])', seq [1, 2, 3]    # n is rounded up
+
+  describe '(drop n coll)', ->
+    it 'returns a seq of all but the first n items of coll, or an empty seq if there are fewer than n', ->
+      throws '(drop 10)'
+      throws '(drop 10 3)'    # coll must be seqable
+      throws '(drop "2" [1 2 3 4])'    # n must be a number
+      eq '(drop 3 (take 6 (range)))', seq [3, 4, 5]
+      eq '(drop 2 [1 2 3 4])', seq [3, 4]
+      eq '(drop 2 \'(1 2 3 4))', seq [3, 4]
+      eq '(drop 2 #{1 2 3 4})', seq [3, 4]
+      eq '(drop 2 {1 2 3 4 5 6})', seq [vec(5, 6)]
+      eq '(drop 2.1 [1 2 3 4])', seq [4]    # n is rounded up

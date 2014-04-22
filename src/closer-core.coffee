@@ -345,6 +345,18 @@ core =
     assert.function f
     m.reduce_kv f, init, coll
 
+  'take': (n, coll) ->
+    assert.arity 2, 2, arguments
+    assert.numbers n
+    assert.seqable coll
+    m.take n, coll
+
+  'drop': (n, coll) ->
+    assert.arity 2, 2, arguments
+    assert.numbers n
+    assert.seqable coll
+    m.drop n, coll
+
 
 module.exports = core
 
