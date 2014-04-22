@@ -587,6 +587,18 @@
       assert.arity(3, 3, arguments);
       assert["function"](f);
       return m.reduce_kv(f, init, coll);
+    },
+    'take': function(n, coll) {
+      assert.arity(2, 2, arguments);
+      assert.numbers(n);
+      assert.seqable(coll);
+      return m.take(n, coll);
+    },
+    'drop': function(n, coll) {
+      assert.arity(2, 2, arguments);
+      assert.numbers(n);
+      assert.seqable(coll);
+      return m.drop(n, coll);
     }
   };
 
@@ -2711,7 +2723,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         return throws('(reduce nil [1 2 3 4])');
       });
     });
-    return describe('(reduce-kv f init coll)', function() {
+    describe('(reduce-kv f init coll)', function() {
       return it('works like reduce, but f is given 3 arguments: result, key, and value', function() {
         throws('(reduce-kv +)');
         throws('(reduce-kv + [1 2 3 4])');
@@ -2720,6 +2732,32 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
         eq('(reduce-kv + 4 {0 1 2 3})', 10);
         throws('(reduce-kv + 0 #{0 1 2 3})');
         return throws('(reduce-kv + 0 \'(0 1 2 3))');
+      });
+    });
+    describe('(take n coll)', function() {
+      return it('returns a seq of the first n items of coll, or all items if there are fewer than n', function() {
+        throws('(take 10)');
+        throws('(take 10 3)');
+        throws('(take "2" [1 2 3 4])');
+        eq('(take 3 (range))', seq([0, 1, 2]));
+        eq('(take 2 [1 2 3 4])', seq([1, 2]));
+        eq('(take 2 \'(1 2 3 4))', seq([1, 2]));
+        eq('(take 2 #{1 2 3 4})', seq([1, 2]));
+        eq('(take 2 {1 2 3 4 5 6})', seq([vec(1, 2), vec(3, 4)]));
+        return eq('(take 2.1 [1 2 3 4])', seq([1, 2, 3]));
+      });
+    });
+    return describe('(drop n coll)', function() {
+      return it('returns a seq of all but the first n items of coll, or an empty seq if there are fewer than n', function() {
+        throws('(drop 10)');
+        throws('(drop 10 3)');
+        throws('(drop "2" [1 2 3 4])');
+        eq('(drop 3 (take 6 (range)))', seq([3, 4, 5]));
+        eq('(drop 2 [1 2 3 4])', seq([3, 4]));
+        eq('(drop 2 \'(1 2 3 4))', seq([3, 4]));
+        eq('(drop 2 #{1 2 3 4})', seq([3, 4]));
+        eq('(drop 2 {1 2 3 4 5 6})', seq([vec(5, 6)]));
+        return eq('(drop 2.1 [1 2 3 4])', seq([4]));
       });
     });
   });
