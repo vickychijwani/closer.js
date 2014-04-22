@@ -304,6 +304,12 @@ core =
     assert.associative map
     m.find map, key
 
+  'range': (args...) ->
+    # args: [] or [end] or [start end] or [start end step]
+    assert.arity 0, 3, arguments
+    assert.numbers args
+    m.range.apply @, args
+
   'identity': (x) ->
     assert.arity 1, 1, arguments
     x

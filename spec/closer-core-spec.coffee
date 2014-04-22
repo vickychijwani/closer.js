@@ -679,6 +679,18 @@ describe 'Closer core library', ->
       throws '(find #{1 2 3 4} 2)'
       throws '(find "string" 2)'
 
+  describe '(range), (range end), (range start end), (range start end step)', ->
+    it 'returns a seq of numbers in the range [start, end), where start defaults to 0, step to 1, and end to infinity', ->
+      throws '(range 1 10 2 2)'
+      eq '(nth (range) 23)', 23
+      eq '(range 5)', seq [0, 1, 2, 3, 4]
+      eq '(range 2 5)', seq [2, 3, 4]
+      eq '(range 1 10 2)', seq [1, 3, 5, 7, 9]
+      eq '(range 10 2 2)', emptySeq()
+      eq '(range 10 2 -2)', seq [10, 8, 6, 4]
+      eq '(range 1.2 6.9 1.6)', seq [1.2, 2.8, 4.4, 6.0]
+      throws '(range 1.2 6.9 "1.6")'
+
   describe '(identity x)', ->
     it 'returns its argument', ->
       throws '(identity 34 45)'
