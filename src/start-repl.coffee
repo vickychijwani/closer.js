@@ -1,8 +1,9 @@
-repl = require 'repl'
+nodeRepl = require 'repl'
 vm = require 'vm'
 
 core = require './closer-core'
 mori = require 'mori'
+repl = require './repl'
 
 sandbox = vm.createContext
   core: core
@@ -17,10 +18,10 @@ defaults =
     input = input.replace /^\(([\s\S]*)\n\)$/m, '$1'
 
     try
-      js = generateJS input
+      js = repl.generateJS input
       result = vm.runInNewContext js, sandbox
     catch e
     callback e, result
   useGlobal: true
 
-repl.start(defaults)
+nodeRepl.start(defaults)
