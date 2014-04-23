@@ -1,8 +1,7 @@
 _ = require 'lodash-node'
 mori = require 'mori'
-global_helpers = require './closer-helpers'
-helpers = require './closer-core-helpers'
-evaluate = helpers.evaluate
+repl = require '../repl'
+core = require '../closer-core'
 
 beforeEach ->
   @addMatchers
@@ -11,6 +10,9 @@ beforeEach ->
       @message = ->
         "Expected #{@actual} to equal #{expected}"
       mori.equals(@actual, expected)
+
+evaluate = (src, options) ->
+  eval repl.generateJS src, options
 
 eq = (src, expected) -> expect(evaluate src).toMoriEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
