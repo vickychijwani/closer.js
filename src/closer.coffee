@@ -1,4 +1,4 @@
-parser = require('./parser').parser
+parser = require('../lib/parser').parser
 nodes = require './nodes'
 
 # Define AST nodes

@@ -1,4 +1,4 @@
-closer = require '../lib/closer'
+closer = require '../src/closer'
 json_diff = require 'json-diff'
 
 helpers = require './closer-helpers'
