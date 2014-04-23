@@ -1,350 +1,4 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.closerSpec=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-(function() {
-  var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
-
-  parser = _dereq_('./parser').parser;
-
-  nodes = _dereq_('./nodes');
-
-  builder = {};
-
-  nodes.defineNodes(builder);
-
-  for (con in builder) {
-    parser.yy[con] = function(a, b, c, d, e, f, g, h) {
-      return builder[con](a, b, c, d, e, f, g, h);
-    };
-  }
-
-  parser.yy.Node = function(type, a, b, c, d, e, f, g, h) {
-    var buildName;
-    buildName = type[0].toLowerCase() + type.slice(1);
-    if (builder && buildName in builder) {
-      return builder[buildName](a, b, c, d, e, f, g, h);
-    } else {
-      throw new ReferenceError("no such node type: " + type);
-    }
-  };
-
-  parser.yy.locComb = function(start, end) {
-    start.last_line = end.last_line;
-    start.last_column = end.last_column;
-    return start;
-  };
-
-  parser.yy.loc = function(loc) {
-    var newLoc;
-    if (!this.locations) {
-      return null;
-    }
-    if ("length" in loc) {
-      loc = this.locComb(loc[0], loc[1]);
-    }
-    newLoc = {
-      start: {
-        line: this.startLine + loc.first_line - 1,
-        column: loc.first_column
-      },
-      end: {
-        line: this.startLine + loc.last_line - 1,
-        column: loc.last_column
-      }
-    };
-    return newLoc;
-  };
-
-  parser.yy.escapeString = function(s) {
-    return s.replace(/\\\n/, '').replace(/\\([^xubfnvrt0\\])/g, '$1');
-  };
-
-  oldParse = parser.parse;
-
-  parser.parse = function(source, options) {
-    this.yy.inRegex = false;
-    this.yy.raw = [];
-    this.yy.comments = [];
-    this.yy.options = options || {};
-    return oldParse.call(this, source);
-  };
-
-  Parser = (function() {
-    function Parser(options) {
-      this.yy.source = options.source || null;
-      this.yy.startLine = options.line || 1;
-      this.yy.locations = options.locations;
-    }
-
-    return Parser;
-
-  })();
-
-  Parser.prototype = parser;
-
-  Closer = (function() {
-    function Closer(options) {
-      this.parser = new Parser(options || {});
-    }
-
-    Closer.prototype.parse = function(source, options) {
-      return this.parser.parse(source, options);
-    };
-
-    return Closer;
-
-  })();
-
-  closer = {
-    parse: function(src, options) {
-      return new Closer(options).parse(src, options);
-    },
-    node: parser.yy.Node
-  };
-
-  module.exports = closer;
-
-}).call(this);
-
-},{"./nodes":2,"./parser":3}],2:[function(_dereq_,module,exports){
-(function() {
-  exports.defineNodes = function(builder) {
-    var convertExprToPattern, def, defaultIni, funIni;
-    defaultIni = function(loc) {
-      this.loc = loc;
-      return this;
-    };
-    def = function(name, ini) {
-      return builder[name[0].toLowerCase() + name.slice(1)] = function(a, b, c, d, e, f, g, h) {
-        var obj;
-        obj = {};
-        obj.type = name;
-        ini.call(obj, a, b, c, d, e, f, g, h);
-        delete obj.loc;
-        return obj;
-      };
-    };
-    convertExprToPattern = function(expr) {
-      if (expr.type === 'ObjectExpression') {
-        expr.type = 'ObjectPattern';
-      }
-      if (expr.type === 'ArrayExpression') {
-        return expr.type = 'ArrayPattern';
-      }
-    };
-    def('Program', function(elements, loc) {
-      this.body = elements;
-      return this.loc = loc;
-    });
-    def('ExpressionStatement', function(expression, loc) {
-      this.expression = expression;
-      return this.loc = loc;
-    });
-    def('BlockStatement', function(body, loc) {
-      this.body = body;
-      return this.loc = loc;
-    });
-    def('EmptyStatement', defaultIni);
-    def('Identifier', function(name, loc) {
-      this.name = name;
-      return this.loc = loc;
-    });
-    def('Literal', function(value, loc, raw) {
-      this.value = value;
-      return this.loc = loc;
-    });
-    def('ThisExpression', defaultIni);
-    def('VariableDeclaration', function(kind, declarations, loc) {
-      this.declarations = declarations;
-      this.kind = kind;
-      return this.loc = loc;
-    });
-    def('VariableDeclarator', function(id, init, loc) {
-      this.id = id;
-      this.init = init;
-      return this.loc = loc;
-    });
-    def('ArrayExpression', function(elements, loc) {
-      this.elements = elements;
-      return this.loc = loc;
-    });
-    def('ObjectExpression', function(properties, loc) {
-      this.properties = properties;
-      return this.loc = loc;
-    });
-    def('Property', function(key, value, kind, loc) {
-      this.key = key;
-      this.value = value;
-      this.kind = kind;
-      return this.loc = loc;
-    });
-    funIni = function(ident, params, rest, body, isGen, isExp, loc) {
-      this.id = ident;
-      this.params = params;
-      this.defaults = [];
-      this.rest = rest;
-      this.body = body;
-      this.loc = loc;
-      this.generator = isGen;
-      return this.expression = isExp;
-    };
-    def('FunctionDeclaration', funIni);
-    def('FunctionExpression', funIni);
-    def('ReturnStatement', function(argument, loc) {
-      this.argument = argument;
-      return this.loc = loc;
-    });
-    def('TryStatement', function(block, handlers, finalizer, loc) {
-      this.block = block;
-      this.handlers = handlers || [];
-      this.finalizer = finalizer;
-      return this.loc = loc;
-    });
-    def('CatchClause', function(param, guard, body, loc) {
-      this.param = param;
-      this.guard = guard;
-      this.body = body;
-      return this.loc = loc;
-    });
-    def('ThrowStatement', function(argument, loc) {
-      this.argument = argument;
-      return this.loc = loc;
-    });
-    def('LabeledStatement', function(label, body, loc) {
-      this.label = label;
-      this.body = body;
-      return this.loc = loc;
-    });
-    def('BreakStatement', function(label, loc) {
-      this.label = label;
-      return this.loc = loc;
-    });
-    def('ContinueStatement', function(label, loc) {
-      this.label = label;
-      return this.loc = loc;
-    });
-    def('SwitchStatement', function(discriminant, cases, lexical, loc) {
-      this.discriminant = discriminant;
-      if (cases.length) {
-        this.cases = cases;
-      }
-      return this.loc = loc;
-    });
-    def('SwitchCase', function(test, consequent, loc) {
-      this.test = test;
-      this.consequent = consequent;
-      return this.loc = loc;
-    });
-    def('WithStatement', function(object, body, loc) {
-      this.object = object;
-      this.body = body;
-      return this.loc = loc;
-    });
-    def('ConditionalExpression', function(test, consequent, alternate, loc) {
-      this.test = test;
-      this.consequent = consequent;
-      this.alternate = alternate;
-      return this.loc = loc;
-    });
-    def('SequenceExpression', function(expressions, loc) {
-      this.expressions = expressions;
-      return this.loc = loc;
-    });
-    def('BinaryExpression', function(op, left, right, loc) {
-      this.operator = op;
-      this.left = left;
-      this.right = right;
-      return this.loc = loc;
-    });
-    def('AssignmentExpression', function(op, left, right, loc) {
-      this.operator = op;
-      this.left = left;
-      this.right = right;
-      this.loc = loc;
-      return convertExprToPattern(left);
-    });
-    def('LogicalExpression', function(op, left, right, loc) {
-      this.operator = op;
-      this.left = left;
-      this.right = right;
-      return this.loc = loc;
-    });
-    def('UnaryExpression', function(operator, argument, prefix, loc) {
-      this.operator = operator;
-      this.argument = argument;
-      this.prefix = prefix;
-      return this.loc = loc;
-    });
-    def('UpdateExpression', function(operator, argument, prefix, loc) {
-      this.operator = operator;
-      this.argument = argument;
-      this.prefix = prefix;
-      return this.loc = loc;
-    });
-    def('CallExpression', function(callee, args, loc) {
-      this.callee = callee;
-      this["arguments"] = args;
-      return this.loc = loc;
-    });
-    def('NewExpression', function(callee, args, loc) {
-      this.callee = callee;
-      this["arguments"] = args;
-      return this.loc = loc;
-    });
-    def('MemberExpression', function(object, property, computed, loc) {
-      this.object = object;
-      this.property = property;
-      this.computed = computed;
-      return this.loc = loc;
-    });
-    def('DebuggerStatement', defaultIni);
-    def('Empty', defaultIni);
-    def('WhileStatement', function(test, body, loc) {
-      this.test = test;
-      this.body = body;
-      return this.loc = loc;
-    });
-    def('DoWhileStatement', function(body, test, loc) {
-      this.body = body;
-      this.test = test;
-      return this.loc = loc;
-    });
-    def('ForStatement', function(init, test, update, body, loc) {
-      this.init = init;
-      this.test = test;
-      this.update = update;
-      this.body = body;
-      this.loc = loc;
-      if (init) {
-        return convertExprToPattern(init);
-      }
-    });
-    def('ForInStatement', function(left, right, body, each, loc) {
-      this.left = left;
-      this.right = right;
-      this.body = body;
-      this.each = !!each;
-      this.loc = loc;
-      return convertExprToPattern(left);
-    });
-    def('IfStatement', function(test, consequent, alternate, loc) {
-      this.test = test;
-      this.consequent = consequent;
-      this.alternate = alternate;
-      return this.loc = loc;
-    });
-    def('ObjectPattern', function(properties, loc) {
-      this.properties = properties;
-      return this.loc = loc;
-    });
-    def('ArrayPattern', function(elements, loc) {
-      this.elements = elements;
-      return this.loc = loc;
-    });
-    return def;
-  };
-
-}).call(this);
-
-},{}],3:[function(_dereq_,module,exports){
 (function (process){
 /* parser generated by jison 0.4.13 */
 /*
@@ -1206,7 +860,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }
 }
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25,"fs":20,"path":26}],4:[function(_dereq_,module,exports){
+},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25,"fs":20,"path":26}],2:[function(_dereq_,module,exports){
 // Generated by IcedCoffeeScript 1.3.3f
 (function() {
   var Theme, color, colorize, colorizeToArray, colorizeToCallback, extendedTypeOf, subcolorizeToCallback,
@@ -1319,7 +973,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{"./util":6,"cli-color":7}],5:[function(_dereq_,module,exports){
+},{"./util":4,"cli-color":5}],3:[function(_dereq_,module,exports){
 // Generated by IcedCoffeeScript 1.3.3f
 (function() {
   var SequenceMatcher, arrayDiff, colorize, descalarize, diff, diffScore, diffString, diffWithScore, extendedTypeOf, findMatchingObject, isScalar, isScalarized, objectDiff, scalarize,
@@ -1544,7 +1198,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{"./colorize":4,"./util":6,"difflib":14}],6:[function(_dereq_,module,exports){
+},{"./colorize":2,"./util":4,"difflib":12}],4:[function(_dereq_,module,exports){
 // Generated by IcedCoffeeScript 1.3.3f
 (function() {
   var extendedTypeOf;
@@ -1567,7 +1221,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{}],7:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 var defineProperties = Object.defineProperties
@@ -1645,7 +1299,7 @@ module.exports = defineProperties(function (msg) {
 	};
 }));
 
-},{"es5-ext/lib/Object/map":11}],8:[function(_dereq_,module,exports){
+},{"es5-ext/lib/Object/map":9}],6:[function(_dereq_,module,exports){
 // Internal method, used by iteration functions.
 // Calls a function for each key-value pair found in object
 // Optionally takes compareFn to iterate object in specific order
@@ -1674,12 +1328,12 @@ module.exports = function (method) {
 	};
 };
 
-},{"./is-callable":10,"./valid-callable":12,"./valid-value":13}],9:[function(_dereq_,module,exports){
+},{"./is-callable":8,"./valid-callable":10,"./valid-value":11}],7:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('./_iterate')('forEach');
 
-},{"./_iterate":8}],10:[function(_dereq_,module,exports){
+},{"./_iterate":6}],8:[function(_dereq_,module,exports){
 // Inspired by: http://www.davidflanagan.com/2009/08/typeof-isfuncti.html
 
 'use strict';
@@ -1710,7 +1364,7 @@ module.exports = function (obj) {
 	}
 };
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 'use strict';
 
 var forEach = _dereq_('./for-each');
@@ -1723,7 +1377,7 @@ module.exports = function (obj, cb) {
 	return o;
 };
 
-},{"./for-each":9}],12:[function(_dereq_,module,exports){
+},{"./for-each":7}],10:[function(_dereq_,module,exports){
 'use strict';
 
 var isCallable = _dereq_('./is-callable');
@@ -1735,7 +1389,7 @@ module.exports = function (fn) {
 	return fn;
 };
 
-},{"./is-callable":10}],13:[function(_dereq_,module,exports){
+},{"./is-callable":8}],11:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function (value) {
@@ -1745,10 +1399,10 @@ module.exports = function (value) {
 	return value;
 };
 
-},{}],14:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 module.exports = _dereq_('./lib/difflib');
 
-},{"./lib/difflib":15}],15:[function(_dereq_,module,exports){
+},{"./lib/difflib":13}],13:[function(_dereq_,module,exports){
 // Generated by CoffeeScript 1.3.1
 
 /*
@@ -3236,10 +2890,10 @@ Class Differ:
 
 }).call(this);
 
-},{"assert":21,"heap":16}],16:[function(_dereq_,module,exports){
+},{"assert":21,"heap":14}],14:[function(_dereq_,module,exports){
 module.exports = _dereq_('./lib/heap');
 
-},{"./lib/heap":17}],17:[function(_dereq_,module,exports){
+},{"./lib/heap":15}],15:[function(_dereq_,module,exports){
 // Generated by CoffeeScript 1.6.3
 (function() {
   var Heap, defaultCmp, floor, heapify, heappop, heappush, heappushpop, heapreplace, insort, min, nlargest, nsmallest, updateItem, _siftdown, _siftup;
@@ -3608,13 +3262,13 @@ module.exports = _dereq_('./lib/heap');
 
 }).call(this);
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 var closer, json_diff, type, _i, _len, _ref,
   __slice = [].slice;
 
 json_diff = _dereq_('json-diff');
 
-closer = _dereq_('../lib/closer');
+closer = _dereq_('../src/closer');
 
 exports.toDeepEqual = function(expected) {
   this.message = function() {
@@ -3757,10 +3411,10 @@ exports.Program = function() {
 };
 
 
-},{"../lib/closer":1,"json-diff":5}],19:[function(_dereq_,module,exports){
+},{"../src/closer":18,"json-diff":3}],17:[function(_dereq_,module,exports){
 var BlockStatement, Boolean, CallExpression, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, Nil, Program, ReturnStatement, String, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, closer, helpers, json_diff;
 
-closer = _dereq_('../lib/closer');
+closer = _dereq_('../src/closer');
 
 json_diff = _dereq_('json-diff');
 
@@ -3905,7 +3559,349 @@ describe('Closer parser', function() {
 });
 
 
-},{"../lib/closer":1,"./closer-helpers":18,"json-diff":5}],20:[function(_dereq_,module,exports){
+},{"../src/closer":18,"./closer-helpers":16,"json-diff":3}],18:[function(_dereq_,module,exports){
+var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
+
+parser = _dereq_('../lib/parser').parser;
+
+nodes = _dereq_('./nodes');
+
+builder = {};
+
+nodes.defineNodes(builder);
+
+for (con in builder) {
+  parser.yy[con] = function(a, b, c, d, e, f, g, h) {
+    return builder[con](a, b, c, d, e, f, g, h);
+  };
+}
+
+parser.yy.Node = function(type, a, b, c, d, e, f, g, h) {
+  var buildName;
+  buildName = type[0].toLowerCase() + type.slice(1);
+  if (builder && buildName in builder) {
+    return builder[buildName](a, b, c, d, e, f, g, h);
+  } else {
+    throw new ReferenceError("no such node type: " + type);
+  }
+};
+
+parser.yy.locComb = function(start, end) {
+  start.last_line = end.last_line;
+  start.last_column = end.last_column;
+  return start;
+};
+
+parser.yy.loc = function(loc) {
+  var newLoc;
+  if (!this.locations) {
+    return null;
+  }
+  if ("length" in loc) {
+    loc = this.locComb(loc[0], loc[1]);
+  }
+  newLoc = {
+    start: {
+      line: this.startLine + loc.first_line - 1,
+      column: loc.first_column
+    },
+    end: {
+      line: this.startLine + loc.last_line - 1,
+      column: loc.last_column
+    }
+  };
+  return newLoc;
+};
+
+parser.yy.escapeString = function(s) {
+  return s.replace(/\\\n/, '').replace(/\\([^xubfnvrt0\\])/g, '$1');
+};
+
+oldParse = parser.parse;
+
+parser.parse = function(source, options) {
+  this.yy.inRegex = false;
+  this.yy.raw = [];
+  this.yy.comments = [];
+  this.yy.options = options || {};
+  return oldParse.call(this, source);
+};
+
+Parser = (function() {
+  function Parser(options) {
+    this.yy.source = options.source || null;
+    this.yy.startLine = options.line || 1;
+    this.yy.locations = options.locations;
+  }
+
+  return Parser;
+
+})();
+
+Parser.prototype = parser;
+
+Closer = (function() {
+  function Closer(options) {
+    this.parser = new Parser(options || {});
+  }
+
+  Closer.prototype.parse = function(source, options) {
+    return this.parser.parse(source, options);
+  };
+
+  return Closer;
+
+})();
+
+closer = {
+  parse: function(src, options) {
+    return new Closer(options).parse(src, options);
+  },
+  node: parser.yy.Node
+};
+
+module.exports = closer;
+
+
+},{"../lib/parser":1,"./nodes":19}],19:[function(_dereq_,module,exports){
+exports.defineNodes = function(builder) {
+  var convertExprToPattern, def, defaultIni, funIni;
+  defaultIni = function(loc) {
+    this.loc = loc;
+    return this;
+  };
+  def = function(name, ini) {
+    return builder[name[0].toLowerCase() + name.slice(1)] = function(a, b, c, d, e, f, g, h) {
+      var obj;
+      obj = {};
+      obj.type = name;
+      ini.call(obj, a, b, c, d, e, f, g, h);
+      delete obj.loc;
+      return obj;
+    };
+  };
+  convertExprToPattern = function(expr) {
+    if (expr.type === 'ObjectExpression') {
+      expr.type = 'ObjectPattern';
+    }
+    if (expr.type === 'ArrayExpression') {
+      return expr.type = 'ArrayPattern';
+    }
+  };
+  def('Program', function(elements, loc) {
+    this.body = elements;
+    return this.loc = loc;
+  });
+  def('ExpressionStatement', function(expression, loc) {
+    this.expression = expression;
+    return this.loc = loc;
+  });
+  def('BlockStatement', function(body, loc) {
+    this.body = body;
+    return this.loc = loc;
+  });
+  def('EmptyStatement', defaultIni);
+  def('Identifier', function(name, loc) {
+    this.name = name;
+    return this.loc = loc;
+  });
+  def('Literal', function(value, loc, raw) {
+    this.value = value;
+    return this.loc = loc;
+  });
+  def('ThisExpression', defaultIni);
+  def('VariableDeclaration', function(kind, declarations, loc) {
+    this.declarations = declarations;
+    this.kind = kind;
+    return this.loc = loc;
+  });
+  def('VariableDeclarator', function(id, init, loc) {
+    this.id = id;
+    this.init = init;
+    return this.loc = loc;
+  });
+  def('ArrayExpression', function(elements, loc) {
+    this.elements = elements;
+    return this.loc = loc;
+  });
+  def('ObjectExpression', function(properties, loc) {
+    this.properties = properties;
+    return this.loc = loc;
+  });
+  def('Property', function(key, value, kind, loc) {
+    this.key = key;
+    this.value = value;
+    this.kind = kind;
+    return this.loc = loc;
+  });
+  funIni = function(ident, params, rest, body, isGen, isExp, loc) {
+    this.id = ident;
+    this.params = params;
+    this.defaults = [];
+    this.rest = rest;
+    this.body = body;
+    this.loc = loc;
+    this.generator = isGen;
+    return this.expression = isExp;
+  };
+  def('FunctionDeclaration', funIni);
+  def('FunctionExpression', funIni);
+  def('ReturnStatement', function(argument, loc) {
+    this.argument = argument;
+    return this.loc = loc;
+  });
+  def('TryStatement', function(block, handlers, finalizer, loc) {
+    this.block = block;
+    this.handlers = handlers || [];
+    this.finalizer = finalizer;
+    return this.loc = loc;
+  });
+  def('CatchClause', function(param, guard, body, loc) {
+    this.param = param;
+    this.guard = guard;
+    this.body = body;
+    return this.loc = loc;
+  });
+  def('ThrowStatement', function(argument, loc) {
+    this.argument = argument;
+    return this.loc = loc;
+  });
+  def('LabeledStatement', function(label, body, loc) {
+    this.label = label;
+    this.body = body;
+    return this.loc = loc;
+  });
+  def('BreakStatement', function(label, loc) {
+    this.label = label;
+    return this.loc = loc;
+  });
+  def('ContinueStatement', function(label, loc) {
+    this.label = label;
+    return this.loc = loc;
+  });
+  def('SwitchStatement', function(discriminant, cases, lexical, loc) {
+    this.discriminant = discriminant;
+    if (cases.length) {
+      this.cases = cases;
+    }
+    return this.loc = loc;
+  });
+  def('SwitchCase', function(test, consequent, loc) {
+    this.test = test;
+    this.consequent = consequent;
+    return this.loc = loc;
+  });
+  def('WithStatement', function(object, body, loc) {
+    this.object = object;
+    this.body = body;
+    return this.loc = loc;
+  });
+  def('ConditionalExpression', function(test, consequent, alternate, loc) {
+    this.test = test;
+    this.consequent = consequent;
+    this.alternate = alternate;
+    return this.loc = loc;
+  });
+  def('SequenceExpression', function(expressions, loc) {
+    this.expressions = expressions;
+    return this.loc = loc;
+  });
+  def('BinaryExpression', function(op, left, right, loc) {
+    this.operator = op;
+    this.left = left;
+    this.right = right;
+    return this.loc = loc;
+  });
+  def('AssignmentExpression', function(op, left, right, loc) {
+    this.operator = op;
+    this.left = left;
+    this.right = right;
+    this.loc = loc;
+    return convertExprToPattern(left);
+  });
+  def('LogicalExpression', function(op, left, right, loc) {
+    this.operator = op;
+    this.left = left;
+    this.right = right;
+    return this.loc = loc;
+  });
+  def('UnaryExpression', function(operator, argument, prefix, loc) {
+    this.operator = operator;
+    this.argument = argument;
+    this.prefix = prefix;
+    return this.loc = loc;
+  });
+  def('UpdateExpression', function(operator, argument, prefix, loc) {
+    this.operator = operator;
+    this.argument = argument;
+    this.prefix = prefix;
+    return this.loc = loc;
+  });
+  def('CallExpression', function(callee, args, loc) {
+    this.callee = callee;
+    this["arguments"] = args;
+    return this.loc = loc;
+  });
+  def('NewExpression', function(callee, args, loc) {
+    this.callee = callee;
+    this["arguments"] = args;
+    return this.loc = loc;
+  });
+  def('MemberExpression', function(object, property, computed, loc) {
+    this.object = object;
+    this.property = property;
+    this.computed = computed;
+    return this.loc = loc;
+  });
+  def('DebuggerStatement', defaultIni);
+  def('Empty', defaultIni);
+  def('WhileStatement', function(test, body, loc) {
+    this.test = test;
+    this.body = body;
+    return this.loc = loc;
+  });
+  def('DoWhileStatement', function(body, test, loc) {
+    this.body = body;
+    this.test = test;
+    return this.loc = loc;
+  });
+  def('ForStatement', function(init, test, update, body, loc) {
+    this.init = init;
+    this.test = test;
+    this.update = update;
+    this.body = body;
+    this.loc = loc;
+    if (init) {
+      return convertExprToPattern(init);
+    }
+  });
+  def('ForInStatement', function(left, right, body, each, loc) {
+    this.left = left;
+    this.right = right;
+    this.body = body;
+    this.each = !!each;
+    this.loc = loc;
+    return convertExprToPattern(left);
+  });
+  def('IfStatement', function(test, consequent, alternate, loc) {
+    this.test = test;
+    this.consequent = consequent;
+    this.alternate = alternate;
+    return this.loc = loc;
+  });
+  def('ObjectPattern', function(properties, loc) {
+    this.properties = properties;
+    return this.loc = loc;
+  });
+  def('ArrayPattern', function(elements, loc) {
+    this.elements = elements;
+    return this.loc = loc;
+  });
+  return def;
+};
+
+
+},{}],20:[function(_dereq_,module,exports){
 
 },{}],21:[function(_dereq_,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -5181,6 +5177,6 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25}]},{},[19])
-(19)
+},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25}]},{},[17])
+(17)
 });
