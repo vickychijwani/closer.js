@@ -142,7 +142,7 @@
 
 }).call(this);
 
-},{"lodash-node":98,"mori":200}],2:[function(_dereq_,module,exports){
+},{"lodash-node":97,"mori":199}],2:[function(_dereq_,module,exports){
 (function() {
   var assert, core, m, _,
     __slice = [].slice;
@@ -612,7 +612,7 @@
 
 }).call(this);
 
-},{"./assert":1,"lodash-node":98,"mori":200}],3:[function(_dereq_,module,exports){
+},{"./assert":1,"lodash-node":97,"mori":199}],3:[function(_dereq_,module,exports){
 (function() {
   var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
 
@@ -1867,906 +1867,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{"./closer":3,"./closer-core":2,"escodegen":8,"estraverse":24,"mori":200}],7:[function(_dereq_,module,exports){
-(function() {
-  var core, emptySeq, eq, evaluate, falsy, key, list, map, mori, nil, repl, seq, set, throws, truthy, vec, _,
-    __slice = [].slice;
-
-  _ = _dereq_('lodash-node');
-
-  mori = _dereq_('mori');
-
-  repl = _dereq_('../repl');
-
-  core = _dereq_('../closer-core');
-
-  beforeEach(function() {
-    return this.addMatchers({
-      toMoriEqual: function(expected) {
-        this.message = function() {
-          return "Expected " + this.actual + " to equal " + expected;
-        };
-        return mori.equals(this.actual, expected);
-      }
-    });
-  });
-
-  evaluate = function(src, options) {
-    return eval(repl.generateJS(src, options));
-  };
-
-  eq = function(src, expected) {
-    return expect(evaluate(src)).toMoriEqual(expected);
-  };
-
-  throws = function(src) {
-    return expect(function() {
-      return evaluate(src);
-    }).toThrow();
-  };
-
-  truthy = function(src) {
-    return expect(evaluate(src)).toEqual(true);
-  };
-
-  falsy = function(src) {
-    return expect(evaluate(src)).toEqual(false);
-  };
-
-  nil = function(src) {
-    return expect(evaluate(src)).toEqual(null);
-  };
-
-  key = function(x) {
-    return mori.keyword(x);
-  };
-
-  seq = function(seqable) {
-    return mori.seq(seqable);
-  };
-
-  emptySeq = function() {
-    return mori.empty(mori.seq([1]));
-  };
-
-  vec = function() {
-    var xs;
-    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return mori.vector.apply(this, _.flatten(xs));
-  };
-
-  list = function() {
-    var xs;
-    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return mori.list.apply(this, _.flatten(xs));
-  };
-
-  set = function() {
-    var xs;
-    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return mori.set(_.flatten(xs));
-  };
-
-  map = function() {
-    var xs;
-    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return mori.hash_map.apply(this, _.flatten(xs));
-  };
-
-  describe('Closer core library', function() {
-    describe('(+ x y & more)', function() {
-      return it('adds the given numbers', function() {
-        throws('(+ "string")');
-        eq('(+)', 0);
-        return eq('(+ 3.3 0 -6e2 2)', -594.7);
-      });
-    });
-    describe('(- x y & more)', function() {
-      return it('subtracts all but the first number from the first one', function() {
-        throws('(-)');
-        throws('(- "string")');
-        eq('(- -3.54)', 3.54);
-        return eq('(- 10 3.5 -4)', 10.5);
-      });
-    });
-    describe('(* x y & more)', function() {
-      return it('multiplies the given numbers', function() {
-        throws('(* "string")');
-        eq('(*)', 1);
-        return eq('(* 3 -6)', -18);
-      });
-    });
-    describe('(/ x y & more)', function() {
-      return it('divides the first number by the rest', function() {
-        throws('(/)');
-        throws('(/ "string")');
-        eq('(/ -4)', -0.25);
-        eq('(/ 14 -2)', -7);
-        eq('(/ 14 -2.0)', -7);
-        return eq('(/ 14 -2 -2)', 3.5);
-      });
-    });
-    describe('(inc x)', function() {
-      return it('increments x by 1', function() {
-        throws('(inc 2 3 4)');
-        throws('(inc "string")');
-        return eq('(inc -2e-3)', 0.998);
-      });
-    });
-    describe('(dec x)', function() {
-      return it('decrements x by 1', function() {
-        throws('(dec 2 3 4)');
-        throws('(dec "string")');
-        return eq('(dec -2e-3)', -1.002);
-      });
-    });
-    describe('(max x y & more)', function() {
-      return it('finds the maximum of the given numbers', function() {
-        throws('(max)');
-        throws('(max "string" [1 2])');
-        return eq('(max -1e10 653.32 1.345e4)', 1.345e4);
-      });
-    });
-    describe('(min x y & more)', function() {
-      return it('finds the minimum of the given numbers', function() {
-        throws('(min)');
-        throws('(min "string" [1 2])');
-        return eq('(min -1e10 653.32 1.345e4)', -1e10);
-      });
-    });
-    describe('(quot num div)', function() {
-      return it('computes the quotient of dividing num by div', function() {
-        throws('(quot 10)');
-        throws('(quot [1 2] 3)');
-        eq('(quot 10 3)', 3);
-        eq('(quot -5.9 3)', -1.0);
-        eq('(quot -10 -3)', 3);
-        return eq('(quot 10 -3)', -3);
-      });
-    });
-    describe('(rem num div)', function() {
-      return it('computes the remainder of dividing num by div (same as % in other languages)', function() {
-        throws('(rem 10)');
-        throws('(rem [1 2] 3)');
-        eq('(rem 10.1 3)', 10.1 % 3);
-        eq('(rem -10.1 3)', -10.1 % 3);
-        eq('(rem -10.1 -3)', -10.1 % -3);
-        return eq('(rem 10.1 -3)', 10.1 % -3);
-      });
-    });
-    describe('(mod num div)', function() {
-      return it('computes the modulus of num and div (NOT the same as % in other languages)', function() {
-        throws('(mod 10)');
-        throws('(mod [1 2] 3)');
-        eq('(mod 10.1 3)', 10.1 % 3);
-        eq('(mod -10.1 3)', 3 - 10.1 % 3);
-        eq('(mod -10.1 -3)', -10.1 % 3);
-        return eq('(mod 10.1 -3)', 10.1 % 3 - 3);
-      });
-    });
-    describe('(= x y & more)', function() {
-      return it('returns true if all its arguments are equal (by value, not identity)', function() {
-        throws('(=)');
-        truthy('(= nil nil)');
-        truthy('(= 1)');
-        truthy('(= (fn [x y] (+ x y)))');
-        truthy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))');
-        falsy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))');
-        truthy('(= 1 1.0)');
-        truthy('(= 1.0 (/ 2.0 2))');
-        truthy('(= "hello" "hello")');
-        truthy('(= true (= 4 (* 2 2)))');
-        falsy('(= true (= 4 (* 2 3)))');
-        truthy('(= :keyword :keyword)');
-        falsy('(= 1 [1])');
-        falsy('(= [3 4] [4 3])');
-        truthy('(= [3 4] \'(3 4))');
-        truthy('(= [3 4] \'((+ 2 1) (/ 16 4)))');
-        falsy('(= [3 4] \'((+ 2 1) (/ 16 8)))');
-        falsy('(= [3 4] \'((+ 2 1) (/ 16 4) 5))');
-        truthy('(= #{1 2} #{2 1})');
-        truthy('(= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
-        falsy('(= #{1 2} #{2 1 3})');
-        return falsy('(= #{1 2} [2 1])');
-      });
-    });
-    describe('(not= x y & more)', function() {
-      return it('returns true if some of its arguments are unequal (by value, not identity)', function() {
-        throws('(not=)');
-        falsy('(not= nil nil)');
-        falsy('(not= 1)');
-        falsy('(not= (fn [x y] (+ x y)))');
-        falsy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))');
-        truthy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))');
-        falsy('(not= 1 1.0)');
-        falsy('(not= 1.0 (/ 2.0 2))');
-        falsy('(not= "hello" "hello")');
-        falsy('(not= true (= 4 (* 2 2)))');
-        truthy('(not= true (= 4 (* 2 3)))');
-        falsy('(not= :keyword :keyword)');
-        truthy('(not= 1 [1])');
-        truthy('(not= [3 4] [4 3])');
-        falsy('(not= [3 4] \'(3 4))');
-        falsy('(not= [3 4] \'((+ 2 1) (/ 16 4)))');
-        truthy('(not= [3 4] \'((+ 2 1) (/ 16 8)))');
-        truthy('(not= [3 4] \'((+ 2 1) (/ 16 4) 5))');
-        falsy('(not= #{1 2} #{2 1})');
-        falsy('(not= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
-        truthy('(not= #{1 2} #{2 1 3})');
-        return truthy('(not= #{1 2} [2 1])');
-      });
-    });
-    describe('(== x y & more)', function() {
-      return it('returns true if all its arguments are numeric and equal', function() {
-        throws('(==)');
-        throws('(== "hello" "hello")');
-        truthy('(== [1 2 3])');
-        return truthy('(let [a 2] (== a a 2.0 (/ 8 (+ 2 2.0))))');
-      });
-    });
-    describe('(< x y & more)', function() {
-      return it('returns true if its arguments are in monotonically increasing order', function() {
-        throws('(<)');
-        throws('(< "hello" "hello")');
-        truthy('(< [1 2 3])');
-        truthy('(< 0.76 3.45 (+ 2 2) 5)');
-        falsy('(< 0.76 3.45 (+ 2 2) 3)');
-        falsy('(< 0.76 3.45 (+ 2 2) 4)');
-        return throws('(< 0.76 3.45 (+ 2 2) nil)');
-      });
-    });
-    describe('(> x y & more)', function() {
-      return it('returns true if its arguments are in monotonically decreasing order', function() {
-        throws('(>)');
-        throws('(> "hello" "hello")');
-        truthy('(> [1 2 3])');
-        truthy('(> 5 (+ 2 2) 3.45 0.76)');
-        falsy('(> 3 (+ 2 2) 3.45 0.76)');
-        falsy('(> 4 (+ 2 2) 3.45 0.76)');
-        return throws('(> nil (+ 2 2) 3.45 0.76)');
-      });
-    });
-    describe('(<= x y & more)', function() {
-      return it('returns true if its arguments are in monotonically non-decreasing order', function() {
-        throws('(<=)');
-        throws('(<= "hello" "hello")');
-        truthy('(<= [1 2 3])');
-        truthy('(<= 0.76 3.45 (+ 2 2) 5)');
-        falsy('(<= 0.76 3.45 (+ 2 2) 3)');
-        truthy('(<= 0.76 3.45 (+ 2 2) 4)');
-        return throws('(<= 0.76 3.45 (+ 2 2) nil)');
-      });
-    });
-    describe('(>= x y & more)', function() {
-      return it('returns true if its arguments are in monotonically non-increasing order', function() {
-        throws('(>=)');
-        throws('(>= "hello" "hello")');
-        truthy('(>= [1 2 3])');
-        truthy('(>= 5 (+ 2 2) 3.45 0.76)');
-        falsy('(>= 3 (+ 2 2) 3.45 0.76)');
-        truthy('(>= 4 (+ 2 2) 3.45 0.76)');
-        return throws('(>= nil (+ 2 2) 3.45 0.76)');
-      });
-    });
-    describe('(identical? x y)', function() {
-      return it('returns true if x and y are the same object', function() {
-        throws('(identical? 1 1 1)');
-        truthy('(identical? 1 1)');
-        truthy('(identical? 1.56 1.56)');
-        truthy('(identical? true true)');
-        truthy('(identical? nil nil)');
-        falsy('(identical? :keyword :keyword)');
-        falsy('(identical? #{1 2} #{1 2})');
-        truthy('(let [a #{1 2}] (identical? a a))');
-        return truthy('(identical? "string" "string")');
-      });
-    });
-    describe('(true? x)', function() {
-      return it('returns true if and only if x is the value true', function() {
-        throws('(true? nil false)');
-        truthy('(true? true)');
-        falsy('(true? "hello")');
-        return falsy('(true? (fn []))');
-      });
-    });
-    describe('(false? x)', function() {
-      return it('returns true if and only if x is the value false', function() {
-        throws('(false? nil false)');
-        truthy('(false? false)');
-        falsy('(false? nil)');
-        return falsy('(false? (fn []))');
-      });
-    });
-    describe('(nil? x)', function() {
-      return it('returns true if and only if x is the value nil', function() {
-        throws('(nil? nil false)');
-        truthy('(nil? nil)');
-        falsy('(nil? false)');
-        return falsy('(nil? (fn []))');
-      });
-    });
-    describe('(some? x)', function() {
-      return it('returns true if and only if x is NOT the value nil', function() {
-        throws('(some? nil false)');
-        falsy('(some? nil)');
-        truthy('(some? "hello")');
-        return truthy('(some? (fn []))');
-      });
-    });
-    describe('(number? x)', function() {
-      return it('returns true if and only if x is a number', function() {
-        truthy('(number? 0)');
-        truthy('(number? 0.0)');
-        falsy('(number? "0")');
-        falsy('(number? [])');
-        return falsy('(number? nil)');
-      });
-    });
-    describe('(integer? x)', function() {
-      return it('returns true if and only if x is an integer', function() {
-        truthy('(integer? 0)');
-        truthy('(integer? 0.0)');
-        falsy('(integer? 0.1)');
-        falsy('(integer? "0")');
-        falsy('(integer? [])');
-        return falsy('(integer? nil)');
-      });
-    });
-    describe('(float? x)', function() {
-      return it('returns true if and only if x is a floating-point number', function() {
-        falsy('(float? 0)');
-        falsy('(float? 0.0)');
-        truthy('(float? 0.1)');
-        falsy('(float? "0.0")');
-        falsy('(float? [])');
-        return falsy('(float? nil)');
-      });
-    });
-    describe('(zero? x)', function() {
-      return it('returns true if and only if x is numerically 0', function() {
-        truthy('(zero? 0)');
-        truthy('(zero? 0.0)');
-        throws('(zero? "0.0")');
-        throws('(zero? [])');
-        return throws('(zero? nil)');
-      });
-    });
-    describe('(pos? x)', function() {
-      return it('returns true if and only if x is a number > 0', function() {
-        truthy('(pos? 3)');
-        truthy('(pos? 3.54)');
-        falsy('(pos? 0)');
-        falsy('(pos? -4.5)');
-        throws('(pos? "0.0")');
-        throws('(pos? [])');
-        return throws('(pos? nil)');
-      });
-    });
-    describe('(neg? x)', function() {
-      return it('returns true if and only if x is a number < 0', function() {
-        truthy('(neg? -3)');
-        truthy('(neg? -3.54)');
-        falsy('(neg? 0)');
-        falsy('(neg? 4.5)');
-        throws('(neg? "0.0")');
-        throws('(neg? [])');
-        return throws('(neg? nil)');
-      });
-    });
-    describe('(even? x)', function() {
-      return it('returns true if and only if x is an even integer', function() {
-        truthy('(even? 0)');
-        truthy('(even? 68)');
-        falsy('(even? 69)');
-        truthy('(even? 0.0)');
-        return throws('(even? "0.0")');
-      });
-    });
-    describe('(odd? x)', function() {
-      return it('returns true if and only if x is an odd integer', function() {
-        falsy('(odd? 0)');
-        falsy('(odd? 68)');
-        truthy('(odd? 69)');
-        truthy('(odd? 1.0)');
-        return throws('(odd? "1.0")');
-      });
-    });
-    describe('(contains? coll key)', function() {
-      return it('returns true if the collection contains the given key', function() {
-        throws('(contains? #{nil 2} nil 2)');
-        throws('(contains? "string" "str")');
-        throws('(contains? \'(1 2) 2)');
-        truthy('(contains? #{nil 2} nil)');
-        falsy('(contains? #{1 2} 3)');
-        truthy('(contains? #{{1 2}} {1 2})');
-        falsy('(contains? #{{1 2}} {2 1})');
-        truthy('(contains? {#{1 2} true} #{2 1})');
-        truthy('(contains? #{[1 2]} \'(1 2))');
-        falsy('(contains? #{[1 2]} \'(2 1))');
-        truthy('(contains? [98 54] 0)');
-        truthy('(contains? [98 54] 1)');
-        falsy('(contains? [98 54] 2)');
-        return falsy('(contains? [98 54] 98)');
-      });
-    });
-    describe('(empty? coll)', function() {
-      return it('returns true if coll has no items - same as (not (seq coll))', function() {
-        throws('(empty? 3)');
-        throws('(empty? [] \'())');
-        truthy('(empty? nil)');
-        truthy('(empty? "")');
-        falsy('(empty? "string")');
-        falsy('(empty? [1 2 3])');
-        truthy('(empty? [])');
-        falsy('(empty? {:k1 "v1" :k2 "v2"})');
-        return truthy('(empty? #{})');
-      });
-    });
-    describe('(vector? coll)', function() {
-      return it('returns true if coll is a vector', function() {
-        falsy('(vector? 3)');
-        falsy('(vector? \'())');
-        truthy('(vector? [])');
-        throws('(vector? [] [])');
-        return truthy('(vector? (first (seq {1 2})))');
-      });
-    });
-    describe('(map? coll)', function() {
-      return it('returns true if coll is a map', function() {
-        falsy('(map? 3)');
-        falsy('(map? #{})');
-        truthy('(map? {})');
-        return throws('(map? {} {})');
-      });
-    });
-    describe('(boolean x)', function() {
-      return it('coerces x into a boolean value (false for nil and false, else true)', function() {
-        throws('(boolean nil false)');
-        falsy('(boolean nil)');
-        falsy('(boolean false)');
-        truthy('(boolean true)');
-        truthy('(boolean 34.75)');
-        truthy('(boolean "hello")');
-        truthy('(boolean :keyword)');
-        truthy('(boolean [1 2])');
-        return truthy('(boolean (fn [x y] (+ x y)))');
-      });
-    });
-    describe('(not x)', function() {
-      return it('returns the complement of (boolean x) (true for nil and false, else false)', function() {
-        throws('(not nil false)');
-        truthy('(not nil)');
-        truthy('(not false)');
-        falsy('(not true)');
-        falsy('(not 34.75)');
-        falsy('(not "hello")');
-        falsy('(not :keyword)');
-        falsy('(not [1 2])');
-        return falsy('(not (fn [x y] (+ x y)))');
-      });
-    });
-    describe('(str x & ys)', function() {
-      return it('concatenates the string values of each of its arguments', function() {
-        eq('(str)', '');
-        eq('(str nil)', '');
-        eq('(str 34)', '34');
-        eq('(str 34.45)', '34.45');
-        eq('(str 3e3)', '3000');
-        eq('(str 3e-4)', '0.0003');
-        eq('(str 1 true "hello" :keyword)', '1truehello:keyword');
-        eq('(str [1 2 :key])', '[1 2 :key]');
-        eq('(str (seq [1 2 :key]))', '(1 2 :key)');
-        eq('(str \'(1 2 3))', '(1 2 3)');
-        eq('(str #{1 2 3})', '#{1 2 3}');
-        eq('(str {1 2 3 4})', '{1 2, 3 4}');
-        eq('(str (seq {1 2 3 4}))', '([1 2] [3 4])');
-        return eq('(str [1 2 \'(3 4 5)])', '[1 2 (3 4 5)]');
-      });
-    });
-    describe('(count coll)', function() {
-      return it('returns the number of items the collection', function() {
-        throws('(count [1 2 3] "hello")');
-        throws('(count 1)');
-        throws('(count true)');
-        eq('(count nil)', 0);
-        eq('(count "hello")', 5);
-        eq('(count [1 2 3])', 3);
-        eq('(count [1 2 #{3 4 5}])', 3);
-        return eq('(count {:key1 "value1" :key2 "value2"})', 2);
-      });
-    });
-    describe('(empty coll)', function() {
-      return it('returns an empty collection of the same category as coll, or nil', function() {
-        throws('(empty)');
-        nil('(empty 1)');
-        nil('(empty "hello")');
-        eq('(empty [1 2 #{3 4}])', vec());
-        eq('(empty \'(1 2))', list());
-        eq('(empty #{1 2})', set());
-        eq('(empty {1 2})', map());
-        return eq('(empty (seq #{1 2}))', emptySeq());
-      });
-    });
-    describe('(not-empty coll)', function() {
-      return it('if coll is empty, returns nil, else coll', function() {
-        throws('(not-empty)');
-        throws('(not-empty 1)');
-        nil('(not-empty nil)');
-        nil('(not-empty #{})');
-        eq('(not-empty #{1})', set(1));
-        nil('(not-empty "")');
-        return eq('(not-empty "hello")', 'hello');
-      });
-    });
-    describe('(get coll key not-found)', function() {
-      return it('returns the value mapped to key if present, else not-found or nil', function() {
-        throws('(get [1 2 3])');
-        nil('(get nil 2)');
-        nil('(get 2 2)');
-        nil('(get {:k1 "v1" :k2 "v2"} :k3)');
-        eq('(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', key('not-found'));
-        eq('(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', 'v2');
-        eq('(get {#{35 49} true} #{49 35})', true);
-        nil('(get #{45 89 32} 1)');
-        eq('(get #{45 89 32} 89)', 89);
-        eq('(get [45 89 32] 1)', 89);
-        nil('(get [45 89 32] 89)');
-        nil('(get \'(45 89 32) 1)');
-        nil('(get \'(45 89 32) 89)');
-        nil('(get \'(45 89 32) 1)');
-        return eq('(get "qwerty" 2)', 'e');
-      });
-    });
-    describe('(seq coll)', function() {
-      return it('returns a seq on the collection, or nil if it is empty or nil', function() {
-        throws('(seq [1 2 3] [4 5 6])');
-        throws('(seq true)');
-        nil('(seq nil)');
-        nil('(seq "")');
-        nil('(seq {})');
-        eq('(seq "qwe")', seq('qwe'));
-        eq('(seq [1 2 3])', seq(vec(1, 2, 3)));
-        eq('(seq \'(1 2 3))', seq(list(1, 2, 3)));
-        eq('(seq #{1 2 3})', seq(set(1, 2, 3)));
-        return eq('(seq {1 2 3 4})', seq(map(1, 2, 3, 4)));
-      });
-    });
-    describe('(first coll)', function() {
-      return it('returns the first item in the collection, or nil if coll is nil', function() {
-        throws('(first [1 2 3] [4 5 6])');
-        throws('(first 3)');
-        nil('(first nil)');
-        nil('(first [])');
-        nil('(first "")');
-        eq('(first "string")', 's');
-        eq('(first \'(1 2 3))', 1);
-        eq('(first #{1 2 3})', 1);
-        return eq('(first {1 2 3 4})', vec(1, 2));
-      });
-    });
-    describe('(rest coll)', function() {
-      return it('returns all but the first item in the collection, or an empty seq if there are no more', function() {
-        throws('(rest [1 2 3] [4 5 6])');
-        throws('(rest 3)');
-        eq('(rest nil)', emptySeq());
-        eq('(rest [])', emptySeq());
-        eq('(rest "s")', emptySeq());
-        eq('(rest "string")', seq('tring'));
-        eq('(rest \'(1 2 3))', seq([2, 3]));
-        eq('(rest #{1 2 3})', seq([2, 3]));
-        return eq('(rest {1 2 3 4})', seq([vec(3, 4)]));
-      });
-    });
-    describe('(next coll)', function() {
-      return it('returns all but the first item in the collection, or nil if there are no more', function() {
-        throws('(next [1 2 3] [4 5 6])');
-        throws('(next 3)');
-        nil('(next nil)');
-        nil('(next [])');
-        nil('(next "s")');
-        eq('(next "string")', seq('tring'));
-        eq('(next \'(1 2 3))', seq([2, 3]));
-        eq('(next #{1 2 3})', seq([2, 3]));
-        return eq('(next {1 2 3 4})', seq([vec(3, 4)]));
-      });
-    });
-    describe('(last coll)', function() {
-      return it('returns the last item in coll, in linear time', function() {
-        throws('(last [1 2 3] [4 5 6])');
-        throws('(last 3)');
-        nil('(last nil)');
-        nil('(last [])');
-        nil('(last "")');
-        eq('(last "string")', 'g');
-        eq('(last \'(1 2 3))', 3);
-        eq('(last #{1 2 3})', 3);
-        return eq('(last {1 2 3 4})', vec(3, 4));
-      });
-    });
-    describe('(nth coll index not-found)', function() {
-      return it('returns the value at index in coll, takes O(n) time on lists and seqs', function() {
-        throws('(nth [1 2] 0 0 0)');
-        throws('(nth #{1 2} 0)');
-        throws('(nth {1 2} 0)');
-        nil('(nth nil 3)');
-        eq('(nth [1 2] 0)', 1);
-        eq('(nth [1 2] 0.45)', 1);
-        throws('(nth [1 2] nil)');
-        throws('(nth [1 2] nil "not-found")');
-        throws('(nth [1 2] 2)');
-        eq('(nth [1 2] 2 "not-found")', 'not-found');
-        eq('(nth "string" 0)', 's');
-        throws('(nth "string" 6)');
-        eq('(nth "string" 6 "not-found")', 'not-found');
-        eq('(nth \'(1 2 3 4) 3)', 4);
-        return eq('(nth (seq #{1 2 3 4}) 3)', 4);
-      });
-    });
-    describe('(peek coll)', function() {
-      return it('returns the first item of a list or the last item of a vector', function() {
-        throws('(peek [1 2] [3 4])');
-        throws('(peek #{1 2})');
-        throws('(peek {1 2})');
-        throws('(peek (seq #{1 2}))');
-        throws('(peek "string")');
-        nil('(peek nil)');
-        nil('(peek [])');
-        nil('(peek \'())');
-        eq('(peek \'(1 2 3))', 1);
-        return eq('(peek [1 2 3])', 3);
-      });
-    });
-    describe('(pop coll)', function() {
-      return it('returns coll with (peek coll) removed, throws if coll is empty', function() {
-        throws('(pop [1 2] [3 4])');
-        throws('(pop #{1 2})');
-        throws('(pop {1 2})');
-        throws('(pop (seq #{1 2}))');
-        throws('(pop "string")');
-        nil('(pop nil)');
-        throws('(pop [])');
-        throws('(pop \'())');
-        eq('(pop \'(1 2 3))', list(2, 3));
-        return eq('(pop [1 2 3])', vec(1, 2));
-      });
-    });
-    describe('(cons x seq)', function() {
-      return it('returns a new seq of the form (x seq)', function() {
-        throws('(cons 1 2 [3 4 5])');
-        eq('(cons 3 nil)', seq([3]));
-        eq('(cons nil nil)', seq([null]));
-        throws('(cons nil 3)');
-        eq('(cons true "string")', seq([true, 's', 't', 'r', 'i', 'n', 'g']));
-        return eq('(cons 1 {1 2 3 4})', seq([1, vec(1, 2), vec(3, 4)]));
-      });
-    });
-    describe('(conj coll & xs)', function() {
-      return it('adds xs to coll in the most efficient way possible', function() {
-        throws('(conj [1 2 3])');
-        throws('(conj "string" "s")');
-        eq('(conj #{1 2 3} 4 true)', set(1, 2, 3, 4, true));
-        eq('(conj nil 1)', seq([1]));
-        eq('(conj {1 2} [3 4])', map(1, 2, 3, 4));
-        throws('(conj {1 2} [3 4 5 6])');
-        eq('(conj {1 2} [3 4] [5 6])', map(1, 2, 3, 4, 5, 6));
-        eq('(conj {1 2} {3 4 5 6})', map(1, 2, 3, 4, 5, 6));
-        throws('(conj {1 2} \'(3 4))');
-        throws('(conj {1 2} #{3 4})');
-        eq('(conj [1] 2 3)', vec(1, 2, 3));
-        eq('(conj (seq [1]) 2 3)', seq([3, 2, 1]));
-        eq('(conj \'(1) 2 3)', list(3, 2, 1));
-        eq('(conj #{1 2} [3])', set(1, 2, vec(3)));
-        eq('(conj [1 2] [3])', vec(1, 2, vec(3)));
-        return eq('(conj \'(1 2) [3])', list(vec(3), 1, 2));
-      });
-    });
-    describe('(into to from)', function() {
-      return it('conjs all items from the second collection into the first', function() {
-        throws('(into [])');
-        nil('(into nil nil)');
-        eq('(into :key nil)', key('key'));
-        eq('(into :key [])', key('key'));
-        throws('(into :key [1])');
-        eq('(into [1 2] [3 4])', vec(1, 2, 3, 4));
-        eq('(into nil [3 4])', seq([4, 3]));
-        eq('(into \'(1 2) [3 4])', list(4, 3, 1, 2));
-        eq('(into [1 2] \'(3 4))', list(1, 2, 3, 4));
-        eq('(into #{1 2} [3 4])', set(1, 2, 3, 4));
-        eq('(into {1 2} {3 4})', map(1, 2, 3, 4));
-        throws('(into {1 2} [3 4])');
-        eq('(into {1 2} [[3 4]])', map(1, 2, 3, 4));
-        throws('(into {1 2} [[3]])');
-        throws('(into {1 2} [[3 4 5]])');
-        eq('(into {1 2} \'([3 4]))', map(1, 2, 3, 4));
-        eq('(into {1 2} #{[3 4]})', map(1, 2, 3, 4));
-        return throws('(into {1 2} [\'(3 4)])');
-      });
-    });
-    describe('(concat seqs)', function() {
-      return it('concatenates the given seqables into one sequence', function() {
-        eq('(concat)', emptySeq());
-        eq('(concat nil)', emptySeq());
-        eq('(concat #{1} [2] \'(3) {4 5} "67")', seq([1, 2, 3, vec(4, 5), '6', '7']));
-        throws('(concat #{1} [2] \'(3) {4 5} "67" 3)');
-        return throws('(concat #{1} [2] \'(3) {4 5} "67" true)');
-      });
-    });
-    describe('(flatten coll)', function() {
-      return it('converts an arbitrarily-nested collection into a flat sequence', function() {
-        throws('(flatten)');
-        eq('(flatten nil)', emptySeq());
-        eq('(flatten 3)', emptySeq());
-        eq('(flatten "string")', emptySeq());
-        eq('(flatten [1 \'(2 [3])])', seq([1, 2, 3]));
-        eq('(flatten #{1 2 #{3}})', emptySeq());
-        eq('(flatten {:a 1, :b 2})', emptySeq());
-        return eq('(flatten (seq {:a 1, :b 2}))', seq([key('a'), 1, key('b'), 2]));
-      });
-    });
-    describe('(reverse coll)', function() {
-      return it('reverses the collection', function() {
-        throws('(reverse)');
-        eq('(reverse nil)', emptySeq());
-        throws('(reverse 3)');
-        eq('(reverse "")', emptySeq());
-        eq('(reverse "string")', seq(['g', 'n', 'i', 'r', 't', 's']));
-        eq('(reverse [1 2 \'(3 4)])', seq([list(3, 4), 2, 1]));
-        eq('(reverse #{1 2 3})', seq([3, 2, 1]));
-        return eq('(reverse {:a 1 :b 2})', seq([vec(key('b'), 2), vec(key('a'), 1)]));
-      });
-    });
-    describe('(assoc map & kvs)', function() {
-      return it('adds / updates the given key-value pairs in the given map / vector', function() {
-        throws('(assoc #{1 2} 3 3)');
-        throws('(assoc \'(1 2) 3 3)');
-        throws('(assoc "string" 1 "h")');
-        eq('(assoc {1 2 3 4} 1 3 4 5)', map(1, 3, 3, 4, 4, 5));
-        throws('(assoc {1 2} 3 4 5)');
-        eq('(assoc [1 2 3] 3 4)', vec(1, 2, 3, 4));
-        throws('(assoc [1 2 3] 4 4)');
-        throws('(assoc [1 2 3] 3)');
-        eq('(assoc {1 2} nil 4)', map(1, 2, null, 4));
-        return throws('(assoc [1 2] nil 4)');
-      });
-    });
-    describe('(dissoc map & keys)', function() {
-      return it('removes entries corresponding to the given keys from map', function() {
-        throws('(dissoc #{1 2} 0)');
-        throws('(dissoc \'(1 2) 0)');
-        throws('(dissoc "string" 0)');
-        throws('(dissoc [1 2] 0)');
-        eq('(dissoc {1 2})', map(1, 2));
-        eq('(dissoc [1 2])', vec(1, 2));
-        eq('(dissoc {1 2, 3 4, 5 6} 3 5)', map(1, 2));
-        eq('(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map(1, 2));
-        return nil('(dissoc nil (fn []) true)');
-      });
-    });
-    describe('(find map key)', function() {
-      return it('returns the map entry for a given key', function() {
-        throws('(find {:a 1 :b 2} :a :b)');
-        nil('(find nil nil)');
-        nil('(find nil 3)');
-        eq('(find {:a 1 :b 2} :a)', vec(key('a'), 1));
-        eq('(find [1 2 3 4] 2)', vec(2, 3));
-        throws('(find \'(1 2 3 4) 2)');
-        throws('(find #{1 2 3 4} 2)');
-        return throws('(find "string" 2)');
-      });
-    });
-    describe('(range), (range end), (range start end), (range start end step)', function() {
-      return it('returns a seq of numbers in the range [start, end), where start defaults to 0, step to 1, and end to infinity', function() {
-        throws('(range 1 10 2 2)');
-        eq('(nth (range) 23)', 23);
-        eq('(range 5)', seq([0, 1, 2, 3, 4]));
-        eq('(range 2 5)', seq([2, 3, 4]));
-        eq('(range 1 10 2)', seq([1, 3, 5, 7, 9]));
-        eq('(range 10 2 2)', emptySeq());
-        eq('(range 10 2 -2)', seq([10, 8, 6, 4]));
-        eq('(range 1.2 6.9 1.6)', seq([1.2, 2.8, 4.4, 6.0]));
-        return throws('(range 1.2 6.9 "1.6")');
-      });
-    });
-    describe('(identity x)', function() {
-      return it('returns its argument', function() {
-        throws('(identity 34 45)');
-        nil('(identity nil)');
-        return eq('(identity {:k1 "v1" :k2 #{1 2}})', map(key('k1'), 'v1', key('k2'), set(1, 2)));
-      });
-    });
-    describe('(map f colls)', function() {
-      return it('applies f sequentially to every item in the given collections', function() {
-        throws('(map +)');
-        eq('(map inc [1 2 3])', seq([2, 3, 4]));
-        eq('(map + [1 2] \'(3 4) #{5 6})', seq([9, 12]));
-        return eq('(map first {:a 1, :b 2})', seq([key('a'), key('b')]));
-      });
-    });
-    describe('(mapcat f colls)', function() {
-      return it('applies concat to the result of applying map to f and colls', function() {
-        throws('(mapcat +)');
-        return eq('(mapcat reverse {2 1, 4 3, 6 5})', seq([1, 2, 3, 4, 5, 6]));
-      });
-    });
-    describe('(filter pred coll)', function() {
-      return it('returns a seq of the items in coll for which (pred item) is true', function() {
-        throws('(filter even?)');
-        throws('(filter true [1 2 3 4])');
-        eq('(filter even? nil)', emptySeq());
-        eq('(filter even? [1 2 3 4])', seq([2, 4]));
-        eq('(filter even? \'(1 2 3 4))', seq([2, 4]));
-        eq('(filter even? #{1 2 3 4})', seq([2, 4]));
-        eq('(filter (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(1, 2)]));
-        return eq('(filter (fn [s] (= s "s")) "strings")', seq(['s', 's']));
-      });
-    });
-    describe('(remove pred coll)', function() {
-      return it('returns a seq of the items in coll for which (pred item) is false', function() {
-        throws('(remove even?)');
-        throws('(remove true [1 2 3 4])');
-        eq('(remove even? nil)', emptySeq());
-        eq('(remove even? [1 2 3 4])', seq([1, 3]));
-        eq('(remove even? \'(1 2 3 4))', seq([1, 3]));
-        eq('(remove even? #{1 2 3 4})', seq([1, 3]));
-        eq('(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(4, 3)]));
-        return eq('(remove (fn [s] (= s "s")) "strings")', seq(['t', 'r', 'i', 'n', 'g']));
-      });
-    });
-    describe('(reduce f coll), (reduce f val coll)', function() {
-      return it('applies f to the first item in coll, then to that result and the second item, and so on', function() {
-        throws('(reduce +)');
-        throws('(reduce + 2)');
-        eq('(reduce + nil)', 0);
-        eq('(reduce + [1 2 3 4])', 10);
-        eq('(reduce + \'(1 2 3 4))', 10);
-        eq('(reduce + #{1 2 3 4})', 10);
-        eq('(reduce + 10 [1 2 3 4])', 20);
-        eq('(reduce concat {1 2 3 4})', seq([1, 2, 3, 4]));
-        return throws('(reduce nil [1 2 3 4])');
-      });
-    });
-    describe('(reduce-kv f init coll)', function() {
-      return it('works like reduce, but f is given 3 arguments: result, key, and value', function() {
-        throws('(reduce-kv +)');
-        throws('(reduce-kv + [1 2 3 4])');
-        eq('(reduce-kv + 0 [0 1 2 3])', 12);
-        eq('(reduce-kv + 0 {0 1 2 3})', 6);
-        eq('(reduce-kv + 4 {0 1 2 3})', 10);
-        throws('(reduce-kv + 0 #{0 1 2 3})');
-        return throws('(reduce-kv + 0 \'(0 1 2 3))');
-      });
-    });
-    describe('(take n coll)', function() {
-      return it('returns a seq of the first n items of coll, or all items if there are fewer than n', function() {
-        throws('(take 10)');
-        throws('(take 10 3)');
-        throws('(take "2" [1 2 3 4])');
-        eq('(take 3 (range))', seq([0, 1, 2]));
-        eq('(take 2 [1 2 3 4])', seq([1, 2]));
-        eq('(take 2 \'(1 2 3 4))', seq([1, 2]));
-        eq('(take 2 #{1 2 3 4})', seq([1, 2]));
-        eq('(take 2 {1 2 3 4 5 6})', seq([vec(1, 2), vec(3, 4)]));
-        return eq('(take 2.1 [1 2 3 4])', seq([1, 2, 3]));
-      });
-    });
-    return describe('(drop n coll)', function() {
-      return it('returns a seq of all but the first n items of coll, or an empty seq if there are fewer than n', function() {
-        throws('(drop 10)');
-        throws('(drop 10 3)');
-        throws('(drop "2" [1 2 3 4])');
-        eq('(drop 3 (take 6 (range)))', seq([3, 4, 5]));
-        eq('(drop 2 [1 2 3 4])', seq([3, 4]));
-        eq('(drop 2 \'(1 2 3 4))', seq([3, 4]));
-        eq('(drop 2 #{1 2 3 4})', seq([3, 4]));
-        eq('(drop 2 {1 2 3 4 5 6})', seq([vec(5, 6)]));
-        return eq('(drop 2.1 [1 2 3 4])', seq([4]));
-      });
-    });
-  });
-
-}).call(this);
-
-},{"../closer-core":2,"../repl":6,"lodash-node":98,"mori":200}],8:[function(_dereq_,module,exports){
+},{"./closer":3,"./closer-core":2,"escodegen":7,"estraverse":23,"mori":199}],7:[function(_dereq_,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -4976,7 +4077,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":23,"estraverse":9,"esutils":12,"source-map":13}],9:[function(_dereq_,module,exports){
+},{"./package.json":22,"estraverse":8,"esutils":11,"source-map":12}],8:[function(_dereq_,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -5666,7 +4767,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -5758,7 +4859,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -5877,7 +4978,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":10}],12:[function(_dereq_,module,exports){
+},{"./code":9}],11:[function(_dereq_,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -5911,7 +5012,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":10,"./keyword":11}],13:[function(_dereq_,module,exports){
+},{"./code":9,"./keyword":10}],12:[function(_dereq_,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -5921,7 +5022,7 @@ exports.SourceMapGenerator = _dereq_('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = _dereq_('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = _dereq_('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":18,"./source-map/source-map-generator":19,"./source-map/source-node":20}],14:[function(_dereq_,module,exports){
+},{"./source-map/source-map-consumer":17,"./source-map/source-map-generator":18,"./source-map/source-node":19}],13:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -6020,7 +5121,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"./util":21,"amdefine":22}],15:[function(_dereq_,module,exports){
+},{"./util":20,"amdefine":21}],14:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -6166,7 +5267,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"./base64":16,"amdefine":22}],16:[function(_dereq_,module,exports){
+},{"./base64":15,"amdefine":21}],15:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -6210,7 +5311,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"amdefine":22}],17:[function(_dereq_,module,exports){
+},{"amdefine":21}],16:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -6293,7 +5394,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"amdefine":22}],18:[function(_dereq_,module,exports){
+},{"amdefine":21}],17:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -6773,7 +5874,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"./array-set":14,"./base64-vlq":15,"./binary-search":17,"./util":21,"amdefine":22}],19:[function(_dereq_,module,exports){
+},{"./array-set":13,"./base64-vlq":14,"./binary-search":16,"./util":20,"amdefine":21}],18:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7172,7 +6273,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"./array-set":14,"./base64-vlq":15,"./util":21,"amdefine":22}],20:[function(_dereq_,module,exports){
+},{"./array-set":13,"./base64-vlq":14,"./util":20,"amdefine":21}],19:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7561,7 +6662,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"./source-map-generator":19,"./util":21,"amdefine":22}],21:[function(_dereq_,module,exports){
+},{"./source-map-generator":18,"./util":20,"amdefine":21}],20:[function(_dereq_,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7865,7 +6966,7 @@ define(function (_dereq_, exports, module) {
 
 });
 
-},{"amdefine":22}],22:[function(_dereq_,module,exports){
+},{"amdefine":21}],21:[function(_dereq_,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 0.1.0 Copyright (c) 2011, The Dojo Foundation All Rights Reserved.
@@ -8167,8 +7268,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":202,"path":203}],23:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":202,"path":203}],22:[function(_dereq_,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -8238,9 +7339,9 @@ module.exports={
   "_from": "escodegen@"
 }
 
+},{}],23:[function(_dereq_,module,exports){
+module.exports=_dereq_(8)
 },{}],24:[function(_dereq_,module,exports){
-module.exports=_dereq_(9)
-},{}],25:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8282,7 +7383,7 @@ module.exports = {
   'zipObject': _dereq_('./arrays/zipObject')
 };
 
-},{"./arrays/compact":26,"./arrays/difference":27,"./arrays/findIndex":28,"./arrays/findLastIndex":29,"./arrays/first":30,"./arrays/flatten":31,"./arrays/indexOf":32,"./arrays/initial":33,"./arrays/intersection":34,"./arrays/last":35,"./arrays/lastIndexOf":36,"./arrays/pull":37,"./arrays/range":38,"./arrays/remove":39,"./arrays/rest":40,"./arrays/sortedIndex":41,"./arrays/union":42,"./arrays/uniq":43,"./arrays/without":44,"./arrays/xor":45,"./arrays/zip":46,"./arrays/zipObject":47}],26:[function(_dereq_,module,exports){
+},{"./arrays/compact":25,"./arrays/difference":26,"./arrays/findIndex":27,"./arrays/findLastIndex":28,"./arrays/first":29,"./arrays/flatten":30,"./arrays/indexOf":31,"./arrays/initial":32,"./arrays/intersection":33,"./arrays/last":34,"./arrays/lastIndexOf":35,"./arrays/pull":36,"./arrays/range":37,"./arrays/remove":38,"./arrays/rest":39,"./arrays/sortedIndex":40,"./arrays/union":41,"./arrays/uniq":42,"./arrays/without":43,"./arrays/xor":44,"./arrays/zip":45,"./arrays/zipObject":46}],25:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8322,7 +7423,7 @@ function compact(array) {
 
 module.exports = compact;
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8355,7 +7456,7 @@ function difference(array) {
 
 module.exports = difference;
 
-},{"../internals/baseDifference":105,"../internals/baseFlatten":106}],28:[function(_dereq_,module,exports){
+},{"../internals/baseDifference":104,"../internals/baseFlatten":105}],27:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8422,7 +7523,7 @@ function findIndex(array, callback, thisArg) {
 
 module.exports = findIndex;
 
-},{"../functions/createCallback":87}],29:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86}],28:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8487,7 +7588,7 @@ function findLastIndex(array, callback, thisArg) {
 
 module.exports = findLastIndex;
 
-},{"../functions/createCallback":87}],30:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86}],29:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8575,7 +7676,7 @@ function first(array, callback, thisArg) {
 
 module.exports = first;
 
-},{"../functions/createCallback":87,"../internals/slice":140}],31:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/slice":139}],30:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8643,7 +7744,7 @@ function flatten(array, isShallow, callback, thisArg) {
 
 module.exports = flatten;
 
-},{"../collections/map":67,"../internals/baseFlatten":106}],32:[function(_dereq_,module,exports){
+},{"../collections/map":66,"../internals/baseFlatten":105}],31:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8695,7 +7796,7 @@ function indexOf(array, value, fromIndex) {
 
 module.exports = indexOf;
 
-},{"../internals/baseIndexOf":107,"./sortedIndex":41}],33:[function(_dereq_,module,exports){
+},{"../internals/baseIndexOf":106,"./sortedIndex":40}],32:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8779,7 +7880,7 @@ function initial(array, callback, thisArg) {
 
 module.exports = initial;
 
-},{"../functions/createCallback":87,"../internals/slice":140}],34:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/slice":139}],33:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8864,7 +7965,7 @@ function intersection() {
 
 module.exports = intersection;
 
-},{"../internals/baseIndexOf":107,"../internals/cacheIndexOf":112,"../internals/createCache":117,"../internals/getArray":121,"../internals/largeArraySize":127,"../internals/releaseArray":135,"../internals/releaseObject":136,"../objects/isArguments":157,"../objects/isArray":158}],35:[function(_dereq_,module,exports){
+},{"../internals/baseIndexOf":106,"../internals/cacheIndexOf":111,"../internals/createCache":116,"../internals/getArray":120,"../internals/largeArraySize":126,"../internals/releaseArray":134,"../internals/releaseObject":135,"../objects/isArguments":156,"../objects/isArray":157}],34:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -8950,7 +8051,7 @@ function last(array, callback, thisArg) {
 
 module.exports = last;
 
-},{"../functions/createCallback":87,"../internals/slice":140}],36:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/slice":139}],35:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9006,7 +8107,7 @@ function lastIndexOf(array, value, fromIndex) {
 
 module.exports = lastIndexOf;
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9065,7 +8166,7 @@ function pull(array) {
 
 module.exports = pull;
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9136,7 +8237,7 @@ function range(start, end, step) {
 
 module.exports = range;
 
-},{}],39:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9209,7 +8310,7 @@ function remove(array, callback, thisArg) {
 
 module.exports = remove;
 
-},{"../functions/createCallback":87}],40:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86}],39:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9294,7 +8395,7 @@ function rest(array, callback, thisArg) {
 
 module.exports = rest;
 
-},{"../functions/createCallback":87,"../internals/slice":140}],41:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/slice":139}],40:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9373,7 +8474,7 @@ function sortedIndex(array, value, callback, thisArg) {
 
 module.exports = sortedIndex;
 
-},{"../functions/createCallback":87,"../utilities/identity":186}],42:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../utilities/identity":185}],41:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9405,7 +8506,7 @@ function union() {
 
 module.exports = union;
 
-},{"../internals/baseFlatten":106,"../internals/baseUniq":111}],43:[function(_dereq_,module,exports){
+},{"../internals/baseFlatten":105,"../internals/baseUniq":110}],42:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9476,7 +8577,7 @@ function uniq(array, isSorted, callback, thisArg) {
 
 module.exports = uniq;
 
-},{"../functions/createCallback":87,"../internals/baseUniq":111}],44:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/baseUniq":110}],43:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9509,7 +8610,7 @@ function without(array) {
 
 module.exports = without;
 
-},{"../internals/baseDifference":105,"../internals/slice":140}],45:[function(_dereq_,module,exports){
+},{"../internals/baseDifference":104,"../internals/slice":139}],44:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9557,7 +8658,7 @@ function xor() {
 
 module.exports = xor;
 
-},{"../internals/baseDifference":105,"../internals/baseUniq":111,"../objects/isArguments":157,"../objects/isArray":158}],46:[function(_dereq_,module,exports){
+},{"../internals/baseDifference":104,"../internals/baseUniq":110,"../objects/isArguments":156,"../objects/isArray":157}],45:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9599,7 +8700,7 @@ function zip() {
 
 module.exports = zip;
 
-},{"../collections/max":68,"../collections/pluck":70}],47:[function(_dereq_,module,exports){
+},{"../collections/max":67,"../collections/pluck":69}],46:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9649,7 +8750,7 @@ function zipObject(keys, values) {
 
 module.exports = zipObject;
 
-},{"../objects/isArray":158}],48:[function(_dereq_,module,exports){
+},{"../objects/isArray":157}],47:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9668,7 +8769,7 @@ module.exports = {
   'wrapperValueOf': _dereq_('./chaining/wrapperValueOf')
 };
 
-},{"./chaining/chain":49,"./chaining/tap":50,"./chaining/wrapperChain":51,"./chaining/wrapperToString":52,"./chaining/wrapperValueOf":53}],49:[function(_dereq_,module,exports){
+},{"./chaining/chain":48,"./chaining/tap":49,"./chaining/wrapperChain":50,"./chaining/wrapperToString":51,"./chaining/wrapperValueOf":52}],48:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9711,7 +8812,7 @@ function chain(value) {
 
 module.exports = chain;
 
-},{"../internals/lodashWrapper":128}],50:[function(_dereq_,module,exports){
+},{"../internals/lodashWrapper":127}],49:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9748,7 +8849,7 @@ function tap(value, interceptor) {
 
 module.exports = tap;
 
-},{}],51:[function(_dereq_,module,exports){
+},{}],50:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9790,7 +8891,7 @@ function wrapperChain() {
 
 module.exports = wrapperChain;
 
-},{}],52:[function(_dereq_,module,exports){
+},{}],51:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9818,7 +8919,7 @@ function wrapperToString() {
 
 module.exports = wrapperToString;
 
-},{}],53:[function(_dereq_,module,exports){
+},{}],52:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9849,7 +8950,7 @@ function wrapperValueOf() {
 
 module.exports = wrapperValueOf;
 
-},{"../collections/forEach":62,"../support":182}],54:[function(_dereq_,module,exports){
+},{"../collections/forEach":61,"../support":181}],53:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9900,7 +9001,7 @@ module.exports = {
   'where': _dereq_('./collections/where')
 };
 
-},{"./collections/at":55,"./collections/contains":56,"./collections/countBy":57,"./collections/every":58,"./collections/filter":59,"./collections/find":60,"./collections/findLast":61,"./collections/forEach":62,"./collections/forEachRight":63,"./collections/groupBy":64,"./collections/indexBy":65,"./collections/invoke":66,"./collections/map":67,"./collections/max":68,"./collections/min":69,"./collections/pluck":70,"./collections/reduce":71,"./collections/reduceRight":72,"./collections/reject":73,"./collections/sample":74,"./collections/shuffle":75,"./collections/size":76,"./collections/some":77,"./collections/sortBy":78,"./collections/toArray":79,"./collections/where":80}],55:[function(_dereq_,module,exports){
+},{"./collections/at":54,"./collections/contains":55,"./collections/countBy":56,"./collections/every":57,"./collections/filter":58,"./collections/find":59,"./collections/findLast":60,"./collections/forEach":61,"./collections/forEachRight":62,"./collections/groupBy":63,"./collections/indexBy":64,"./collections/invoke":65,"./collections/map":66,"./collections/max":67,"./collections/min":68,"./collections/pluck":69,"./collections/reduce":70,"./collections/reduceRight":71,"./collections/reject":72,"./collections/sample":73,"./collections/shuffle":74,"./collections/size":75,"./collections/some":76,"./collections/sortBy":77,"./collections/toArray":78,"./collections/where":79}],54:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -9948,7 +9049,7 @@ function at(collection) {
 
 module.exports = at;
 
-},{"../internals/baseFlatten":106,"../objects/isString":172}],56:[function(_dereq_,module,exports){
+},{"../internals/baseFlatten":105,"../objects/isString":171}],55:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10015,7 +9116,7 @@ function contains(collection, target, fromIndex) {
 
 module.exports = contains;
 
-},{"../internals/baseIndexOf":107,"../objects/forOwn":152,"../objects/isArray":158,"../objects/isString":172}],57:[function(_dereq_,module,exports){
+},{"../internals/baseIndexOf":106,"../objects/forOwn":151,"../objects/isArray":157,"../objects/isString":171}],56:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10072,7 +9173,7 @@ var countBy = createAggregator(function(result, value, key) {
 
 module.exports = countBy;
 
-},{"../internals/createAggregator":116}],58:[function(_dereq_,module,exports){
+},{"../internals/createAggregator":115}],57:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10148,7 +9249,7 @@ function every(collection, callback, thisArg) {
 
 module.exports = every;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152}],59:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151}],58:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10226,7 +9327,7 @@ function filter(collection, callback, thisArg) {
 
 module.exports = filter;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152}],60:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151}],59:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10308,7 +9409,7 @@ function find(collection, callback, thisArg) {
 
 module.exports = find;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152}],61:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151}],60:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10354,7 +9455,7 @@ function findLast(collection, callback, thisArg) {
 
 module.exports = findLast;
 
-},{"../functions/createCallback":87,"./forEachRight":63}],62:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"./forEachRight":62}],61:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10411,7 +9512,7 @@ function forEach(collection, callback, thisArg) {
 
 module.exports = forEach;
 
-},{"../internals/baseCreateCallback":103,"../objects/forOwn":152}],63:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../objects/forOwn":151}],62:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10465,7 +9566,7 @@ function forEachRight(collection, callback, thisArg) {
 
 module.exports = forEachRight;
 
-},{"../internals/baseCreateCallback":103,"../objects/forOwn":152,"../objects/isArray":158,"../objects/isString":172,"../objects/keys":174}],64:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../objects/forOwn":151,"../objects/isArray":157,"../objects/isString":171,"../objects/keys":173}],63:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10523,7 +9624,7 @@ var groupBy = createAggregator(function(result, value, key) {
 
 module.exports = groupBy;
 
-},{"../internals/createAggregator":116}],65:[function(_dereq_,module,exports){
+},{"../internals/createAggregator":115}],64:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10579,7 +9680,7 @@ var indexBy = createAggregator(function(result, value, key) {
 
 module.exports = indexBy;
 
-},{"../internals/createAggregator":116}],66:[function(_dereq_,module,exports){
+},{"../internals/createAggregator":115}],65:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10628,7 +9729,7 @@ function invoke(collection, methodName) {
 
 module.exports = invoke;
 
-},{"../internals/slice":140,"./forEach":62}],67:[function(_dereq_,module,exports){
+},{"../internals/slice":139,"./forEach":61}],66:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10700,7 +9801,7 @@ function map(collection, callback, thisArg) {
 
 module.exports = map;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152}],68:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151}],67:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10793,7 +9894,7 @@ function max(collection, callback, thisArg) {
 
 module.exports = max;
 
-},{"../functions/createCallback":87,"../internals/charAtCallback":114,"../objects/forOwn":152,"../objects/isArray":158,"../objects/isString":172,"./forEach":62}],69:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/charAtCallback":113,"../objects/forOwn":151,"../objects/isArray":157,"../objects/isString":171,"./forEach":61}],68:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10886,7 +9987,7 @@ function min(collection, callback, thisArg) {
 
 module.exports = min;
 
-},{"../functions/createCallback":87,"../internals/charAtCallback":114,"../objects/forOwn":152,"../objects/isArray":158,"../objects/isString":172,"./forEach":62}],70:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/charAtCallback":113,"../objects/forOwn":151,"../objects/isArray":157,"../objects/isString":171,"./forEach":61}],69:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10921,7 +10022,7 @@ var pluck = map;
 
 module.exports = pluck;
 
-},{"./map":67}],71:[function(_dereq_,module,exports){
+},{"./map":66}],70:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -10990,7 +10091,7 @@ function reduce(collection, callback, accumulator, thisArg) {
 
 module.exports = reduce;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152}],72:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151}],71:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11034,7 +10135,7 @@ function reduceRight(collection, callback, accumulator, thisArg) {
 
 module.exports = reduceRight;
 
-},{"../functions/createCallback":87,"./forEachRight":63}],73:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"./forEachRight":62}],72:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11093,7 +10194,7 @@ function reject(collection, callback, thisArg) {
 
 module.exports = reject;
 
-},{"../functions/createCallback":87,"./filter":59}],74:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"./filter":58}],73:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11144,7 +10245,7 @@ function sample(collection, n, guard) {
 
 module.exports = sample;
 
-},{"../internals/baseRandom":110,"../objects/isString":172,"../objects/values":181,"./shuffle":75}],75:[function(_dereq_,module,exports){
+},{"../internals/baseRandom":109,"../objects/isString":171,"../objects/values":180,"./shuffle":74}],74:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11185,7 +10286,7 @@ function shuffle(collection) {
 
 module.exports = shuffle;
 
-},{"../internals/baseRandom":110,"./forEach":62}],76:[function(_dereq_,module,exports){
+},{"../internals/baseRandom":109,"./forEach":61}],75:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11223,7 +10324,7 @@ function size(collection) {
 
 module.exports = size;
 
-},{"../objects/keys":174}],77:[function(_dereq_,module,exports){
+},{"../objects/keys":173}],76:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11301,7 +10402,7 @@ function some(collection, callback, thisArg) {
 
 module.exports = some;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152,"../objects/isArray":158}],78:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151,"../objects/isArray":157}],77:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11404,7 +10505,7 @@ function sortBy(collection, callback, thisArg) {
 
 module.exports = sortBy;
 
-},{"../functions/createCallback":87,"../internals/compareAscending":115,"../internals/getArray":121,"../internals/getObject":122,"../internals/releaseArray":135,"../internals/releaseObject":136,"../objects/isArray":158,"./forEach":62,"./map":67}],79:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/compareAscending":114,"../internals/getArray":120,"../internals/getObject":121,"../internals/releaseArray":134,"../internals/releaseObject":135,"../objects/isArray":157,"./forEach":61,"./map":66}],78:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11439,7 +10540,7 @@ function toArray(collection) {
 
 module.exports = toArray;
 
-},{"../internals/slice":140,"../objects/isString":172,"../objects/values":181}],80:[function(_dereq_,module,exports){
+},{"../internals/slice":139,"../objects/isString":171,"../objects/values":180}],79:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11479,7 +10580,7 @@ var where = filter;
 
 module.exports = where;
 
-},{"./filter":59}],81:[function(_dereq_,module,exports){
+},{"./filter":58}],80:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11508,7 +10609,7 @@ module.exports = {
   'wrap': _dereq_('./functions/wrap')
 };
 
-},{"./functions/after":82,"./functions/bind":83,"./functions/bindAll":84,"./functions/bindKey":85,"./functions/compose":86,"./functions/createCallback":87,"./functions/curry":88,"./functions/debounce":89,"./functions/defer":90,"./functions/delay":91,"./functions/memoize":92,"./functions/once":93,"./functions/partial":94,"./functions/partialRight":95,"./functions/throttle":96,"./functions/wrap":97}],82:[function(_dereq_,module,exports){
+},{"./functions/after":81,"./functions/bind":82,"./functions/bindAll":83,"./functions/bindKey":84,"./functions/compose":85,"./functions/createCallback":86,"./functions/curry":87,"./functions/debounce":88,"./functions/defer":89,"./functions/delay":90,"./functions/memoize":91,"./functions/once":92,"./functions/partial":93,"./functions/partialRight":94,"./functions/throttle":95,"./functions/wrap":96}],81:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11556,7 +10657,7 @@ function after(n, func) {
 
 module.exports = after;
 
-},{"../objects/isFunction":165}],83:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164}],82:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11598,7 +10699,7 @@ function bind(func, thisArg) {
 
 module.exports = bind;
 
-},{"../internals/createWrapper":118,"../internals/slice":140}],84:[function(_dereq_,module,exports){
+},{"../internals/createWrapper":117,"../internals/slice":139}],83:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11649,7 +10750,7 @@ function bindAll(object) {
 
 module.exports = bindAll;
 
-},{"../internals/baseFlatten":106,"../internals/createWrapper":118,"../objects/functions":154}],85:[function(_dereq_,module,exports){
+},{"../internals/baseFlatten":105,"../internals/createWrapper":117,"../objects/functions":153}],84:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11703,7 +10804,7 @@ function bindKey(object, key) {
 
 module.exports = bindKey;
 
-},{"../internals/createWrapper":118,"../internals/slice":140}],86:[function(_dereq_,module,exports){
+},{"../internals/createWrapper":117,"../internals/slice":139}],85:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11766,7 +10867,7 @@ function compose() {
 
 module.exports = compose;
 
-},{"../objects/isFunction":165}],87:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164}],86:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11849,7 +10950,7 @@ function createCallback(func, thisArg, argCount) {
 
 module.exports = createCallback;
 
-},{"../internals/baseCreateCallback":103,"../internals/baseIsEqual":108,"../objects/isObject":169,"../objects/keys":174,"../utilities/property":192}],88:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../internals/baseIsEqual":107,"../objects/isObject":168,"../objects/keys":173,"../utilities/property":191}],87:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -11895,7 +10996,7 @@ function curry(func, arity) {
 
 module.exports = curry;
 
-},{"../internals/createWrapper":118}],89:[function(_dereq_,module,exports){
+},{"../internals/createWrapper":117}],88:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12053,7 +11154,7 @@ function debounce(func, wait, options) {
 
 module.exports = debounce;
 
-},{"../objects/isFunction":165,"../objects/isObject":169,"../utilities/now":190}],90:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164,"../objects/isObject":168,"../utilities/now":189}],89:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12090,7 +11191,7 @@ function defer(func) {
 
 module.exports = defer;
 
-},{"../internals/slice":140,"../objects/isFunction":165}],91:[function(_dereq_,module,exports){
+},{"../internals/slice":139,"../objects/isFunction":164}],90:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12128,7 +11229,7 @@ function delay(func, wait) {
 
 module.exports = delay;
 
-},{"../internals/slice":140,"../objects/isFunction":165}],92:[function(_dereq_,module,exports){
+},{"../internals/slice":139,"../objects/isFunction":164}],91:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12201,7 +11302,7 @@ function memoize(func, resolver) {
 
 module.exports = memoize;
 
-},{"../internals/keyPrefix":126,"../objects/isFunction":165}],93:[function(_dereq_,module,exports){
+},{"../internals/keyPrefix":125,"../objects/isFunction":164}],92:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12251,7 +11352,7 @@ function once(func) {
 
 module.exports = once;
 
-},{"../objects/isFunction":165}],94:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164}],93:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12287,7 +11388,7 @@ function partial(func) {
 
 module.exports = partial;
 
-},{"../internals/createWrapper":118,"../internals/slice":140}],95:[function(_dereq_,module,exports){
+},{"../internals/createWrapper":117,"../internals/slice":139}],94:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12332,7 +11433,7 @@ function partialRight(func) {
 
 module.exports = partialRight;
 
-},{"../internals/createWrapper":118,"../internals/slice":140}],96:[function(_dereq_,module,exports){
+},{"../internals/createWrapper":117,"../internals/slice":139}],95:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12405,7 +11506,7 @@ function throttle(func, wait, options) {
 
 module.exports = throttle;
 
-},{"../objects/isFunction":165,"../objects/isObject":169,"./debounce":89}],97:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164,"../objects/isObject":168,"./debounce":88}],96:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12443,7 +11544,7 @@ function wrap(value, wrapper) {
 
 module.exports = wrap;
 
-},{"../internals/createWrapper":118}],98:[function(_dereq_,module,exports){
+},{"../internals/createWrapper":117}],97:[function(_dereq_,module,exports){
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -12799,7 +11900,7 @@ lodash.support = support;
 (lodash.templateSettings = utilities.templateSettings).imports._ = lodash;
 module.exports = lodash;
 
-},{"./arrays":25,"./chaining":48,"./collections":54,"./collections/forEach":62,"./functions":81,"./internals/lodashWrapper":128,"./objects":142,"./objects/forOwn":152,"./objects/isArray":158,"./support":182,"./utilities":183,"./utilities/mixin":187,"./utilities/templateSettings":196}],99:[function(_dereq_,module,exports){
+},{"./arrays":24,"./chaining":47,"./collections":53,"./collections/forEach":61,"./functions":80,"./internals/lodashWrapper":127,"./objects":141,"./objects/forOwn":151,"./objects/isArray":157,"./support":181,"./utilities":182,"./utilities/mixin":186,"./utilities/templateSettings":195}],98:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12814,7 +11915,7 @@ var arrayPool = [];
 
 module.exports = arrayPool;
 
-},{}],100:[function(_dereq_,module,exports){
+},{}],99:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -12878,7 +11979,7 @@ function baseBind(bindData) {
 
 module.exports = baseBind;
 
-},{"../objects/isObject":169,"./baseCreate":102,"./setBindData":137,"./slice":140}],101:[function(_dereq_,module,exports){
+},{"../objects/isObject":168,"./baseCreate":101,"./setBindData":136,"./slice":139}],100:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13032,7 +12133,7 @@ function baseClone(value, isDeep, callback, stackA, stackB) {
 
 module.exports = baseClone;
 
-},{"../collections/forEach":62,"../objects/assign":143,"../objects/forOwn":152,"../objects/isArray":158,"../objects/isObject":169,"./getArray":121,"./releaseArray":135,"./slice":140}],102:[function(_dereq_,module,exports){
+},{"../collections/forEach":61,"../objects/assign":142,"../objects/forOwn":151,"../objects/isArray":157,"../objects/isObject":168,"./getArray":120,"./releaseArray":134,"./slice":139}],101:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -13078,7 +12179,7 @@ if (!nativeCreate) {
 module.exports = baseCreate;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../objects/isObject":169,"../utilities/noop":189,"./isNative":125}],103:[function(_dereq_,module,exports){
+},{"../objects/isObject":168,"../utilities/noop":188,"./isNative":124}],102:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13160,7 +12261,7 @@ function baseCreateCallback(func, thisArg, argCount) {
 
 module.exports = baseCreateCallback;
 
-},{"../functions/bind":83,"../support":182,"../utilities/identity":186,"./setBindData":137}],104:[function(_dereq_,module,exports){
+},{"../functions/bind":82,"../support":181,"../utilities/identity":185,"./setBindData":136}],103:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13240,7 +12341,7 @@ function baseCreateWrapper(bindData) {
 
 module.exports = baseCreateWrapper;
 
-},{"../objects/isObject":169,"./baseCreate":102,"./setBindData":137,"./slice":140}],105:[function(_dereq_,module,exports){
+},{"../objects/isObject":168,"./baseCreate":101,"./setBindData":136,"./slice":139}],104:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13294,7 +12395,7 @@ function baseDifference(array, values) {
 
 module.exports = baseDifference;
 
-},{"./baseIndexOf":107,"./cacheIndexOf":112,"./createCache":117,"./largeArraySize":127,"./releaseObject":136}],106:[function(_dereq_,module,exports){
+},{"./baseIndexOf":106,"./cacheIndexOf":111,"./createCache":116,"./largeArraySize":126,"./releaseObject":135}],105:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13348,7 +12449,7 @@ function baseFlatten(array, isShallow, isStrict, fromIndex) {
 
 module.exports = baseFlatten;
 
-},{"../objects/isArguments":157,"../objects/isArray":158}],107:[function(_dereq_,module,exports){
+},{"../objects/isArguments":156,"../objects/isArray":157}],106:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13382,7 +12483,7 @@ function baseIndexOf(array, value, fromIndex) {
 
 module.exports = baseIndexOf;
 
-},{}],108:[function(_dereq_,module,exports){
+},{}],107:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13593,7 +12694,7 @@ function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
 
 module.exports = baseIsEqual;
 
-},{"../objects/forIn":150,"../objects/isFunction":165,"./getArray":121,"./objectTypes":131,"./releaseArray":135}],109:[function(_dereq_,module,exports){
+},{"../objects/forIn":149,"../objects/isFunction":164,"./getArray":120,"./objectTypes":130,"./releaseArray":134}],108:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13674,7 +12775,7 @@ function baseMerge(object, source, callback, stackA, stackB) {
 
 module.exports = baseMerge;
 
-},{"../collections/forEach":62,"../objects/forOwn":152,"../objects/isArray":158,"../objects/isPlainObject":170}],110:[function(_dereq_,module,exports){
+},{"../collections/forEach":61,"../objects/forOwn":151,"../objects/isArray":157,"../objects/isPlainObject":169}],109:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13705,7 +12806,7 @@ function baseRandom(min, max) {
 
 module.exports = baseRandom;
 
-},{}],111:[function(_dereq_,module,exports){
+},{}],110:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13771,7 +12872,7 @@ function baseUniq(array, isSorted, callback) {
 
 module.exports = baseUniq;
 
-},{"./baseIndexOf":107,"./cacheIndexOf":112,"./createCache":117,"./getArray":121,"./largeArraySize":127,"./releaseArray":135,"./releaseObject":136}],112:[function(_dereq_,module,exports){
+},{"./baseIndexOf":106,"./cacheIndexOf":111,"./createCache":116,"./getArray":120,"./largeArraySize":126,"./releaseArray":134,"./releaseObject":135}],111:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13812,7 +12913,7 @@ function cacheIndexOf(cache, value) {
 
 module.exports = cacheIndexOf;
 
-},{"./baseIndexOf":107,"./keyPrefix":126}],113:[function(_dereq_,module,exports){
+},{"./baseIndexOf":106,"./keyPrefix":125}],112:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13852,7 +12953,7 @@ function cachePush(value) {
 
 module.exports = cachePush;
 
-},{"./keyPrefix":126}],114:[function(_dereq_,module,exports){
+},{"./keyPrefix":125}],113:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13876,7 +12977,7 @@ function charAtCallback(value) {
 
 module.exports = charAtCallback;
 
-},{}],115:[function(_dereq_,module,exports){
+},{}],114:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13925,7 +13026,7 @@ function compareAscending(a, b) {
 
 module.exports = compareAscending;
 
-},{}],116:[function(_dereq_,module,exports){
+},{}],115:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -13972,7 +13073,7 @@ function createAggregator(setter) {
 
 module.exports = createAggregator;
 
-},{"../functions/createCallback":87,"../objects/forOwn":152,"../objects/isArray":158}],117:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../objects/forOwn":151,"../objects/isArray":157}],116:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14019,7 +13120,7 @@ function createCache(array) {
 
 module.exports = createCache;
 
-},{"./cachePush":113,"./getObject":122,"./releaseObject":136}],118:[function(_dereq_,module,exports){
+},{"./cachePush":112,"./getObject":121,"./releaseObject":135}],117:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14127,7 +13228,7 @@ function createWrapper(func, bitmask, partialArgs, partialRightArgs, thisArg, ar
 
 module.exports = createWrapper;
 
-},{"../objects/isFunction":165,"./baseBind":100,"./baseCreateWrapper":104,"./slice":140}],119:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164,"./baseBind":99,"./baseCreateWrapper":103,"./slice":139}],118:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14151,7 +13252,7 @@ function escapeHtmlChar(match) {
 
 module.exports = escapeHtmlChar;
 
-},{"./htmlEscapes":123}],120:[function(_dereq_,module,exports){
+},{"./htmlEscapes":122}],119:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14186,7 +13287,7 @@ function escapeStringChar(match) {
 
 module.exports = escapeStringChar;
 
-},{}],121:[function(_dereq_,module,exports){
+},{}],120:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14209,7 +13310,7 @@ function getArray() {
 
 module.exports = getArray;
 
-},{"./arrayPool":99}],122:[function(_dereq_,module,exports){
+},{"./arrayPool":98}],121:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14246,7 +13347,7 @@ function getObject() {
 
 module.exports = getObject;
 
-},{"./objectPool":130}],123:[function(_dereq_,module,exports){
+},{"./objectPool":129}],122:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14274,7 +13375,7 @@ var htmlEscapes = {
 
 module.exports = htmlEscapes;
 
-},{}],124:[function(_dereq_,module,exports){
+},{}],123:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14291,7 +13392,7 @@ var htmlUnescapes = invert(htmlEscapes);
 
 module.exports = htmlUnescapes;
 
-},{"../objects/invert":156,"./htmlEscapes":123}],125:[function(_dereq_,module,exports){
+},{"../objects/invert":155,"./htmlEscapes":122}],124:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14327,7 +13428,7 @@ function isNative(value) {
 
 module.exports = isNative;
 
-},{}],126:[function(_dereq_,module,exports){
+},{}],125:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14342,7 +13443,7 @@ var keyPrefix = +new Date + '';
 
 module.exports = keyPrefix;
 
-},{}],127:[function(_dereq_,module,exports){
+},{}],126:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14357,7 +13458,7 @@ var largeArraySize = 75;
 
 module.exports = largeArraySize;
 
-},{}],128:[function(_dereq_,module,exports){
+},{}],127:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14382,7 +13483,7 @@ function lodashWrapper(value, chainAll) {
 
 module.exports = lodashWrapper;
 
-},{}],129:[function(_dereq_,module,exports){
+},{}],128:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14397,7 +13498,7 @@ var maxPoolSize = 40;
 
 module.exports = maxPoolSize;
 
-},{}],130:[function(_dereq_,module,exports){
+},{}],129:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14412,7 +13513,7 @@ var objectPool = [];
 
 module.exports = objectPool;
 
-},{}],131:[function(_dereq_,module,exports){
+},{}],130:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14434,7 +13535,7 @@ var objectTypes = {
 
 module.exports = objectTypes;
 
-},{}],132:[function(_dereq_,module,exports){
+},{}],131:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14451,7 +13552,7 @@ var reEscapedHtml = RegExp('(' + keys(htmlUnescapes).join('|') + ')', 'g');
 
 module.exports = reEscapedHtml;
 
-},{"../objects/keys":174,"./htmlUnescapes":124}],133:[function(_dereq_,module,exports){
+},{"../objects/keys":173,"./htmlUnescapes":123}],132:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14466,7 +13567,7 @@ var reInterpolate = /<%=([\s\S]+?)%>/g;
 
 module.exports = reInterpolate;
 
-},{}],134:[function(_dereq_,module,exports){
+},{}],133:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14483,7 +13584,7 @@ var reUnescapedHtml = RegExp('[' + keys(htmlEscapes).join('') + ']', 'g');
 
 module.exports = reUnescapedHtml;
 
-},{"../objects/keys":174,"./htmlEscapes":123}],135:[function(_dereq_,module,exports){
+},{"../objects/keys":173,"./htmlEscapes":122}],134:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14510,7 +13611,7 @@ function releaseArray(array) {
 
 module.exports = releaseArray;
 
-},{"./arrayPool":99,"./maxPoolSize":129}],136:[function(_dereq_,module,exports){
+},{"./arrayPool":98,"./maxPoolSize":128}],135:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14541,7 +13642,7 @@ function releaseObject(object) {
 
 module.exports = releaseObject;
 
-},{"./maxPoolSize":129,"./objectPool":130}],137:[function(_dereq_,module,exports){
+},{"./maxPoolSize":128,"./objectPool":129}],136:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14586,7 +13687,7 @@ var setBindData = !defineProperty ? noop : function(func, value) {
 
 module.exports = setBindData;
 
-},{"../utilities/noop":189,"./isNative":125}],138:[function(_dereq_,module,exports){
+},{"../utilities/noop":188,"./isNative":124}],137:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14640,7 +13741,7 @@ function shimIsPlainObject(value) {
 
 module.exports = shimIsPlainObject;
 
-},{"../objects/forIn":150,"../objects/isFunction":165}],139:[function(_dereq_,module,exports){
+},{"../objects/forIn":149,"../objects/isFunction":164}],138:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14680,7 +13781,7 @@ var shimKeys = function(object) {
 
 module.exports = shimKeys;
 
-},{"./objectTypes":131}],140:[function(_dereq_,module,exports){
+},{"./objectTypes":130}],139:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14720,7 +13821,7 @@ function slice(array, start, end) {
 
 module.exports = slice;
 
-},{}],141:[function(_dereq_,module,exports){
+},{}],140:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14744,7 +13845,7 @@ function unescapeHtmlChar(match) {
 
 module.exports = unescapeHtmlChar;
 
-},{"./htmlUnescapes":124}],142:[function(_dereq_,module,exports){
+},{"./htmlUnescapes":123}],141:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14798,7 +13899,7 @@ module.exports = {
   'values': _dereq_('./objects/values')
 };
 
-},{"./objects/assign":143,"./objects/clone":144,"./objects/cloneDeep":145,"./objects/create":146,"./objects/defaults":147,"./objects/findKey":148,"./objects/findLastKey":149,"./objects/forIn":150,"./objects/forInRight":151,"./objects/forOwn":152,"./objects/forOwnRight":153,"./objects/functions":154,"./objects/has":155,"./objects/invert":156,"./objects/isArguments":157,"./objects/isArray":158,"./objects/isBoolean":159,"./objects/isDate":160,"./objects/isElement":161,"./objects/isEmpty":162,"./objects/isEqual":163,"./objects/isFinite":164,"./objects/isFunction":165,"./objects/isNaN":166,"./objects/isNull":167,"./objects/isNumber":168,"./objects/isObject":169,"./objects/isPlainObject":170,"./objects/isRegExp":171,"./objects/isString":172,"./objects/isUndefined":173,"./objects/keys":174,"./objects/mapValues":175,"./objects/merge":176,"./objects/omit":177,"./objects/pairs":178,"./objects/pick":179,"./objects/transform":180,"./objects/values":181}],143:[function(_dereq_,module,exports){
+},{"./objects/assign":142,"./objects/clone":143,"./objects/cloneDeep":144,"./objects/create":145,"./objects/defaults":146,"./objects/findKey":147,"./objects/findLastKey":148,"./objects/forIn":149,"./objects/forInRight":150,"./objects/forOwn":151,"./objects/forOwnRight":152,"./objects/functions":153,"./objects/has":154,"./objects/invert":155,"./objects/isArguments":156,"./objects/isArray":157,"./objects/isBoolean":158,"./objects/isDate":159,"./objects/isElement":160,"./objects/isEmpty":161,"./objects/isEqual":162,"./objects/isFinite":163,"./objects/isFunction":164,"./objects/isNaN":165,"./objects/isNull":166,"./objects/isNumber":167,"./objects/isObject":168,"./objects/isPlainObject":169,"./objects/isRegExp":170,"./objects/isString":171,"./objects/isUndefined":172,"./objects/keys":173,"./objects/mapValues":174,"./objects/merge":175,"./objects/omit":176,"./objects/pairs":177,"./objects/pick":178,"./objects/transform":179,"./objects/values":180}],142:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14870,7 +13971,7 @@ var assign = function(object, source, guard) {
 
 module.exports = assign;
 
-},{"../internals/baseCreateCallback":103,"../internals/objectTypes":131,"./keys":174}],144:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../internals/objectTypes":130,"./keys":173}],143:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14935,7 +14036,7 @@ function clone(value, isDeep, callback, thisArg) {
 
 module.exports = clone;
 
-},{"../internals/baseClone":101,"../internals/baseCreateCallback":103}],145:[function(_dereq_,module,exports){
+},{"../internals/baseClone":100,"../internals/baseCreateCallback":102}],144:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -14994,7 +14095,7 @@ function cloneDeep(value, callback, thisArg) {
 
 module.exports = cloneDeep;
 
-},{"../internals/baseClone":101,"../internals/baseCreateCallback":103}],146:[function(_dereq_,module,exports){
+},{"../internals/baseClone":100,"../internals/baseCreateCallback":102}],145:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15044,7 +14145,7 @@ function create(prototype, properties) {
 
 module.exports = create;
 
-},{"../internals/baseCreate":102,"./assign":143}],147:[function(_dereq_,module,exports){
+},{"../internals/baseCreate":101,"./assign":142}],146:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15100,7 +14201,7 @@ var defaults = function(object, source, guard) {
 
 module.exports = defaults;
 
-},{"../internals/objectTypes":131,"./keys":174}],148:[function(_dereq_,module,exports){
+},{"../internals/objectTypes":130,"./keys":173}],147:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15167,7 +14268,7 @@ function findKey(object, callback, thisArg) {
 
 module.exports = findKey;
 
-},{"../functions/createCallback":87,"./forOwn":152}],149:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"./forOwn":151}],148:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15234,7 +14335,7 @@ function findLastKey(object, callback, thisArg) {
 
 module.exports = findLastKey;
 
-},{"../functions/createCallback":87,"./forOwnRight":153}],150:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"./forOwnRight":152}],149:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15290,7 +14391,7 @@ var forIn = function(collection, callback, thisArg) {
 
 module.exports = forIn;
 
-},{"../internals/baseCreateCallback":103,"../internals/objectTypes":131}],151:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../internals/objectTypes":130}],150:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15349,7 +14450,7 @@ function forInRight(object, callback, thisArg) {
 
 module.exports = forInRight;
 
-},{"../internals/baseCreateCallback":103,"./forIn":150}],152:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"./forIn":149}],151:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15401,7 +14502,7 @@ var forOwn = function(collection, callback, thisArg) {
 
 module.exports = forOwn;
 
-},{"../internals/baseCreateCallback":103,"../internals/objectTypes":131,"./keys":174}],153:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../internals/objectTypes":130,"./keys":173}],152:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15447,7 +14548,7 @@ function forOwnRight(object, callback, thisArg) {
 
 module.exports = forOwnRight;
 
-},{"../internals/baseCreateCallback":103,"./keys":174}],154:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"./keys":173}],153:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15486,7 +14587,7 @@ function functions(object) {
 
 module.exports = functions;
 
-},{"./forIn":150,"./isFunction":165}],155:[function(_dereq_,module,exports){
+},{"./forIn":149,"./isFunction":164}],154:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15523,7 +14624,7 @@ function has(object, key) {
 
 module.exports = has;
 
-},{}],156:[function(_dereq_,module,exports){
+},{}],155:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15562,7 +14663,7 @@ function invert(object) {
 
 module.exports = invert;
 
-},{"./keys":174}],157:[function(_dereq_,module,exports){
+},{"./keys":173}],156:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15604,7 +14705,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{}],158:[function(_dereq_,module,exports){
+},{}],157:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15651,7 +14752,7 @@ var isArray = nativeIsArray || function(value) {
 
 module.exports = isArray;
 
-},{"../internals/isNative":125}],159:[function(_dereq_,module,exports){
+},{"../internals/isNative":124}],158:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15690,7 +14791,7 @@ function isBoolean(value) {
 
 module.exports = isBoolean;
 
-},{}],160:[function(_dereq_,module,exports){
+},{}],159:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15728,7 +14829,7 @@ function isDate(value) {
 
 module.exports = isDate;
 
-},{}],161:[function(_dereq_,module,exports){
+},{}],160:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15757,7 +14858,7 @@ function isElement(value) {
 
 module.exports = isElement;
 
-},{}],162:[function(_dereq_,module,exports){
+},{}],161:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15822,7 +14923,7 @@ function isEmpty(value) {
 
 module.exports = isEmpty;
 
-},{"./forOwn":152,"./isFunction":165}],163:[function(_dereq_,module,exports){
+},{"./forOwn":151,"./isFunction":164}],162:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15878,7 +14979,7 @@ function isEqual(a, b, callback, thisArg) {
 
 module.exports = isEqual;
 
-},{"../internals/baseCreateCallback":103,"../internals/baseIsEqual":108}],164:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../internals/baseIsEqual":107}],163:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -15928,7 +15029,7 @@ function isFinite(value) {
 module.exports = isFinite;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],165:[function(_dereq_,module,exports){
+},{}],164:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -15957,7 +15058,7 @@ function isFunction(value) {
 
 module.exports = isFunction;
 
-},{}],166:[function(_dereq_,module,exports){
+},{}],165:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16001,7 +15102,7 @@ function isNaN(value) {
 
 module.exports = isNaN;
 
-},{"./isNumber":168}],167:[function(_dereq_,module,exports){
+},{"./isNumber":167}],166:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16033,7 +15134,7 @@ function isNull(value) {
 
 module.exports = isNull;
 
-},{}],168:[function(_dereq_,module,exports){
+},{}],167:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16074,7 +15175,7 @@ function isNumber(value) {
 
 module.exports = isNumber;
 
-},{}],169:[function(_dereq_,module,exports){
+},{}],168:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16115,7 +15216,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{"../internals/objectTypes":131}],170:[function(_dereq_,module,exports){
+},{"../internals/objectTypes":130}],169:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16177,7 +15278,7 @@ var isPlainObject = !getPrototypeOf ? shimIsPlainObject : function(value) {
 
 module.exports = isPlainObject;
 
-},{"../internals/isNative":125,"../internals/shimIsPlainObject":138}],171:[function(_dereq_,module,exports){
+},{"../internals/isNative":124,"../internals/shimIsPlainObject":137}],170:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16215,7 +15316,7 @@ function isRegExp(value) {
 
 module.exports = isRegExp;
 
-},{}],172:[function(_dereq_,module,exports){
+},{}],171:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16254,7 +15355,7 @@ function isString(value) {
 
 module.exports = isString;
 
-},{}],173:[function(_dereq_,module,exports){
+},{}],172:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16283,7 +15384,7 @@ function isUndefined(value) {
 
 module.exports = isUndefined;
 
-},{}],174:[function(_dereq_,module,exports){
+},{}],173:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16321,7 +15422,7 @@ var keys = !nativeKeys ? shimKeys : function(object) {
 
 module.exports = keys;
 
-},{"../internals/isNative":125,"../internals/shimKeys":139,"./isObject":169}],175:[function(_dereq_,module,exports){
+},{"../internals/isNative":124,"../internals/shimKeys":138,"./isObject":168}],174:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16381,7 +15482,7 @@ function mapValues(object, callback, thisArg) {
 
 module.exports = mapValues;
 
-},{"../functions/createCallback":87,"./forOwn":152}],176:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"./forOwn":151}],175:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16480,7 +15581,7 @@ function merge(object) {
 
 module.exports = merge;
 
-},{"../internals/baseCreateCallback":103,"../internals/baseMerge":109,"../internals/getArray":121,"../internals/releaseArray":135,"../internals/slice":140,"./isObject":169}],177:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102,"../internals/baseMerge":108,"../internals/getArray":120,"../internals/releaseArray":134,"../internals/slice":139,"./isObject":168}],176:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16549,7 +15650,7 @@ function omit(object, callback, thisArg) {
 
 module.exports = omit;
 
-},{"../functions/createCallback":87,"../internals/baseDifference":105,"../internals/baseFlatten":106,"./forIn":150}],178:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/baseDifference":104,"../internals/baseFlatten":105,"./forIn":149}],177:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16589,7 +15690,7 @@ function pairs(object) {
 
 module.exports = pairs;
 
-},{"./keys":174}],179:[function(_dereq_,module,exports){
+},{"./keys":173}],178:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16656,7 +15757,7 @@ function pick(object, callback, thisArg) {
 
 module.exports = pick;
 
-},{"../functions/createCallback":87,"../internals/baseFlatten":106,"./forIn":150,"./isObject":169}],180:[function(_dereq_,module,exports){
+},{"../functions/createCallback":86,"../internals/baseFlatten":105,"./forIn":149,"./isObject":168}],179:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16725,7 +15826,7 @@ function transform(object, callback, accumulator, thisArg) {
 
 module.exports = transform;
 
-},{"../collections/forEach":62,"../functions/createCallback":87,"../internals/baseCreate":102,"./forOwn":152,"./isArray":158}],181:[function(_dereq_,module,exports){
+},{"../collections/forEach":61,"../functions/createCallback":86,"../internals/baseCreate":101,"./forOwn":151,"./isArray":157}],180:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16763,7 +15864,7 @@ function values(object) {
 
 module.exports = values;
 
-},{"./keys":174}],182:[function(_dereq_,module,exports){
+},{"./keys":173}],181:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -16807,7 +15908,7 @@ support.funcNames = typeof Function.name == 'string';
 module.exports = support;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./internals/isNative":125}],183:[function(_dereq_,module,exports){
+},{"./internals/isNative":124}],182:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16837,7 +15938,7 @@ module.exports = {
   'uniqueId': _dereq_('./utilities/uniqueId')
 };
 
-},{"./functions/createCallback":87,"./utilities/constant":184,"./utilities/escape":185,"./utilities/identity":186,"./utilities/mixin":187,"./utilities/noConflict":188,"./utilities/noop":189,"./utilities/now":190,"./utilities/parseInt":191,"./utilities/property":192,"./utilities/random":193,"./utilities/result":194,"./utilities/template":195,"./utilities/templateSettings":196,"./utilities/times":197,"./utilities/unescape":198,"./utilities/uniqueId":199}],184:[function(_dereq_,module,exports){
+},{"./functions/createCallback":86,"./utilities/constant":183,"./utilities/escape":184,"./utilities/identity":185,"./utilities/mixin":186,"./utilities/noConflict":187,"./utilities/noop":188,"./utilities/now":189,"./utilities/parseInt":190,"./utilities/property":191,"./utilities/random":192,"./utilities/result":193,"./utilities/template":194,"./utilities/templateSettings":195,"./utilities/times":196,"./utilities/unescape":197,"./utilities/uniqueId":198}],183:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16870,7 +15971,7 @@ function constant(value) {
 
 module.exports = constant;
 
-},{}],185:[function(_dereq_,module,exports){
+},{}],184:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16903,7 +16004,7 @@ function escape(string) {
 
 module.exports = escape;
 
-},{"../internals/escapeHtmlChar":119,"../internals/reUnescapedHtml":134,"../objects/keys":174}],186:[function(_dereq_,module,exports){
+},{"../internals/escapeHtmlChar":118,"../internals/reUnescapedHtml":133,"../objects/keys":173}],185:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -16933,7 +16034,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],187:[function(_dereq_,module,exports){
+},{}],186:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17023,7 +16124,7 @@ function mixin(object, source, options) {
 
 module.exports = mixin;
 
-},{"../collections/forEach":62,"../objects/functions":154,"../objects/isFunction":165,"../objects/isObject":169}],188:[function(_dereq_,module,exports){
+},{"../collections/forEach":61,"../objects/functions":153,"../objects/isFunction":164,"../objects/isObject":168}],187:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -17057,7 +16158,7 @@ function noConflict() {
 module.exports = noConflict;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],189:[function(_dereq_,module,exports){
+},{}],188:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17085,7 +16186,7 @@ function noop() {
 
 module.exports = noop;
 
-},{}],190:[function(_dereq_,module,exports){
+},{}],189:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17115,7 +16216,7 @@ var now = isNative(now = Date.now) && now || function() {
 
 module.exports = now;
 
-},{"../internals/isNative":125}],191:[function(_dereq_,module,exports){
+},{"../internals/isNative":124}],190:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -17172,7 +16273,7 @@ var parseInt = nativeParseInt(whitespace + '08') == 8 ? nativeParseInt : functio
 module.exports = parseInt;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../objects/isString":172}],192:[function(_dereq_,module,exports){
+},{"../objects/isString":171}],191:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17214,7 +16315,7 @@ function property(key) {
 
 module.exports = property;
 
-},{}],193:[function(_dereq_,module,exports){
+},{}],192:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17289,7 +16390,7 @@ function random(min, max, floating) {
 
 module.exports = random;
 
-},{"../internals/baseRandom":110}],194:[function(_dereq_,module,exports){
+},{"../internals/baseRandom":109}],193:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17336,7 +16437,7 @@ function result(object, key) {
 
 module.exports = result;
 
-},{"../objects/isFunction":165}],195:[function(_dereq_,module,exports){
+},{"../objects/isFunction":164}],194:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17554,7 +16655,7 @@ function template(text, data, options) {
 
 module.exports = template;
 
-},{"../internals/escapeStringChar":120,"../internals/reInterpolate":133,"../objects/defaults":147,"../objects/keys":174,"../objects/values":181,"./escape":185,"./templateSettings":196}],196:[function(_dereq_,module,exports){
+},{"../internals/escapeStringChar":119,"../internals/reInterpolate":132,"../objects/defaults":146,"../objects/keys":173,"../objects/values":180,"./escape":184,"./templateSettings":195}],195:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17629,7 +16730,7 @@ var templateSettings = {
 
 module.exports = templateSettings;
 
-},{"../internals/reInterpolate":133,"./escape":185}],197:[function(_dereq_,module,exports){
+},{"../internals/reInterpolate":132,"./escape":184}],196:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17677,7 +16778,7 @@ function times(n, callback, thisArg) {
 
 module.exports = times;
 
-},{"../internals/baseCreateCallback":103}],198:[function(_dereq_,module,exports){
+},{"../internals/baseCreateCallback":102}],197:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17711,7 +16812,7 @@ function unescape(string) {
 
 module.exports = unescape;
 
-},{"../internals/reEscapedHtml":132,"../internals/unescapeHtmlChar":141,"../objects/keys":174}],199:[function(_dereq_,module,exports){
+},{"../internals/reEscapedHtml":131,"../internals/unescapeHtmlChar":140,"../objects/keys":173}],198:[function(_dereq_,module,exports){
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash modularize modern exports="node" -o ./modern/`
@@ -17747,7 +16848,7 @@ function uniqueId(prefix) {
 
 module.exports = uniqueId;
 
-},{}],200:[function(_dereq_,module,exports){
+},{}],199:[function(_dereq_,module,exports){
 (function(definition){if(typeof exports==="object"){module.exports=definition();}else if(typeof define==="function"&&define.amd){define(definition);}else{mori=definition();}})(function(){return function(){
 var f,aa=this;
 function m(a){var b=typeof a;if("object"==b)if(a){if(a instanceof Array)return"array";if(a instanceof Object)return b;var c=Object.prototype.toString.call(a);if("[object Window]"==c)return"object";if("[object Array]"==c||"number"==typeof a.length&&"undefined"!=typeof a.splice&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("splice"))return"array";if("[object Function]"==c||"undefined"!=typeof a.call&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("call"))return"function"}else return"null";else if("function"==
@@ -18084,7 +17185,904 @@ n("mori.zip.insert_right",function(a,b){var c=O.c(a,0,null),d=O.c(a,1,null),d=Dc
 n("mori.zip.next",function(a){if(Pb.a(wg,a.b?a.b(1):a.call(null,1)))return a;var b;b=bh(a);b=p(b)?eh(a):b;if(p(b))return b;b=gh(a);if(p(b))return b;for(;;)if(p(fh(a))){b=gh(fh(a));if(p(b))return b;a=fh(a)}else return new X(null,2,5,Y,[ah(a),wg],null)});n("mori.zip.prev",function(a){var b=ih(a);if(p(b))for(a=b;;)if(b=bh(a),b=p(b)?eh(a):b,p(b))a=hh(b);else return a;else return fh(a)});n("mori.zip.is_end",function(a){return Pb.a(wg,a.b?a.b(1):a.call(null,1))});
 n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf,b):b,c=P.a(b,xg),d=P.a(b,tg),e=P.a(b,sg),g=P.a(b,rg);if(null==b)throw"Remove at top";if(0<N(c))for(a=M(new X(null,2,5,Y,[nc(c),Q.e(b,xg,oc(c),H([vg,!0],0))],null),mc(a));;)if(b=bh(a),b=p(b)?eh(a):b,p(b))a=hh(b);else return a;else return M(new X(null,2,5,Y,[dh(a,nc(e),g),p(d)?Q.c(d,vg,!0):d],null),mc(a))});n("mori.mutable.thaw",function(a){return Ab(a)});n("mori.mutable.freeze",od);n("mori.mutable.conj1",function(a,b){return a.qa(null,b)});n("mori.mutable.conj",pd);n("mori.mutable.assoc",qd);n("mori.mutable.dissoc",rd);n("mori.mutable.pop",function(a){return Gb(a)});n("mori.mutable.disj",sd);;return this.mori;}.call({});});
 
-},{}],201:[function(_dereq_,module,exports){
+},{}],200:[function(_dereq_,module,exports){
+var core, emptySeq, eq, evaluate, falsy, key, list, map, mori, nil, repl, seq, set, throws, truthy, vec, _,
+  __slice = [].slice;
+
+_ = _dereq_('lodash-node');
+
+mori = _dereq_('mori');
+
+repl = _dereq_('../lib/repl');
+
+core = _dereq_('../lib/closer-core');
+
+beforeEach(function() {
+  return this.addMatchers({
+    toMoriEqual: function(expected) {
+      this.message = function() {
+        return "Expected " + this.actual + " to equal " + expected;
+      };
+      return mori.equals(this.actual, expected);
+    }
+  });
+});
+
+evaluate = function(src, options) {
+  return eval(repl.generateJS(src, options));
+};
+
+eq = function(src, expected) {
+  return expect(evaluate(src)).toMoriEqual(expected);
+};
+
+throws = function(src) {
+  return expect(function() {
+    return evaluate(src);
+  }).toThrow();
+};
+
+truthy = function(src) {
+  return expect(evaluate(src)).toEqual(true);
+};
+
+falsy = function(src) {
+  return expect(evaluate(src)).toEqual(false);
+};
+
+nil = function(src) {
+  return expect(evaluate(src)).toEqual(null);
+};
+
+key = function(x) {
+  return mori.keyword(x);
+};
+
+seq = function(seqable) {
+  return mori.seq(seqable);
+};
+
+emptySeq = function() {
+  return mori.empty(mori.seq([1]));
+};
+
+vec = function() {
+  var xs;
+  xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return mori.vector.apply(this, _.flatten(xs));
+};
+
+list = function() {
+  var xs;
+  xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return mori.list.apply(this, _.flatten(xs));
+};
+
+set = function() {
+  var xs;
+  xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return mori.set(_.flatten(xs));
+};
+
+map = function() {
+  var xs;
+  xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return mori.hash_map.apply(this, _.flatten(xs));
+};
+
+describe('Closer core library', function() {
+  describe('(+ x y & more)', function() {
+    return it('adds the given numbers', function() {
+      throws('(+ "string")');
+      eq('(+)', 0);
+      return eq('(+ 3.3 0 -6e2 2)', -594.7);
+    });
+  });
+  describe('(- x y & more)', function() {
+    return it('subtracts all but the first number from the first one', function() {
+      throws('(-)');
+      throws('(- "string")');
+      eq('(- -3.54)', 3.54);
+      return eq('(- 10 3.5 -4)', 10.5);
+    });
+  });
+  describe('(* x y & more)', function() {
+    return it('multiplies the given numbers', function() {
+      throws('(* "string")');
+      eq('(*)', 1);
+      return eq('(* 3 -6)', -18);
+    });
+  });
+  describe('(/ x y & more)', function() {
+    return it('divides the first number by the rest', function() {
+      throws('(/)');
+      throws('(/ "string")');
+      eq('(/ -4)', -0.25);
+      eq('(/ 14 -2)', -7);
+      eq('(/ 14 -2.0)', -7);
+      return eq('(/ 14 -2 -2)', 3.5);
+    });
+  });
+  describe('(inc x)', function() {
+    return it('increments x by 1', function() {
+      throws('(inc 2 3 4)');
+      throws('(inc "string")');
+      return eq('(inc -2e-3)', 0.998);
+    });
+  });
+  describe('(dec x)', function() {
+    return it('decrements x by 1', function() {
+      throws('(dec 2 3 4)');
+      throws('(dec "string")');
+      return eq('(dec -2e-3)', -1.002);
+    });
+  });
+  describe('(max x y & more)', function() {
+    return it('finds the maximum of the given numbers', function() {
+      throws('(max)');
+      throws('(max "string" [1 2])');
+      return eq('(max -1e10 653.32 1.345e4)', 1.345e4);
+    });
+  });
+  describe('(min x y & more)', function() {
+    return it('finds the minimum of the given numbers', function() {
+      throws('(min)');
+      throws('(min "string" [1 2])');
+      return eq('(min -1e10 653.32 1.345e4)', -1e10);
+    });
+  });
+  describe('(quot num div)', function() {
+    return it('computes the quotient of dividing num by div', function() {
+      throws('(quot 10)');
+      throws('(quot [1 2] 3)');
+      eq('(quot 10 3)', 3);
+      eq('(quot -5.9 3)', -1.0);
+      eq('(quot -10 -3)', 3);
+      return eq('(quot 10 -3)', -3);
+    });
+  });
+  describe('(rem num div)', function() {
+    return it('computes the remainder of dividing num by div (same as % in other languages)', function() {
+      throws('(rem 10)');
+      throws('(rem [1 2] 3)');
+      eq('(rem 10.1 3)', 10.1 % 3);
+      eq('(rem -10.1 3)', -10.1 % 3);
+      eq('(rem -10.1 -3)', -10.1 % -3);
+      return eq('(rem 10.1 -3)', 10.1 % -3);
+    });
+  });
+  describe('(mod num div)', function() {
+    return it('computes the modulus of num and div (NOT the same as % in other languages)', function() {
+      throws('(mod 10)');
+      throws('(mod [1 2] 3)');
+      eq('(mod 10.1 3)', 10.1 % 3);
+      eq('(mod -10.1 3)', 3 - 10.1 % 3);
+      eq('(mod -10.1 -3)', -10.1 % 3);
+      return eq('(mod 10.1 -3)', 10.1 % 3 - 3);
+    });
+  });
+  describe('(= x y & more)', function() {
+    return it('returns true if all its arguments are equal (by value, not identity)', function() {
+      throws('(=)');
+      truthy('(= nil nil)');
+      truthy('(= 1)');
+      truthy('(= (fn [x y] (+ x y)))');
+      truthy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))');
+      falsy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))');
+      truthy('(= 1 1.0)');
+      truthy('(= 1.0 (/ 2.0 2))');
+      truthy('(= "hello" "hello")');
+      truthy('(= true (= 4 (* 2 2)))');
+      falsy('(= true (= 4 (* 2 3)))');
+      truthy('(= :keyword :keyword)');
+      falsy('(= 1 [1])');
+      falsy('(= [3 4] [4 3])');
+      truthy('(= [3 4] \'(3 4))');
+      truthy('(= [3 4] \'((+ 2 1) (/ 16 4)))');
+      falsy('(= [3 4] \'((+ 2 1) (/ 16 8)))');
+      falsy('(= [3 4] \'((+ 2 1) (/ 16 4) 5))');
+      truthy('(= #{1 2} #{2 1})');
+      truthy('(= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
+      falsy('(= #{1 2} #{2 1 3})');
+      return falsy('(= #{1 2} [2 1])');
+    });
+  });
+  describe('(not= x y & more)', function() {
+    return it('returns true if some of its arguments are unequal (by value, not identity)', function() {
+      throws('(not=)');
+      falsy('(not= nil nil)');
+      falsy('(not= 1)');
+      falsy('(not= (fn [x y] (+ x y)))');
+      falsy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))');
+      truthy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))');
+      falsy('(not= 1 1.0)');
+      falsy('(not= 1.0 (/ 2.0 2))');
+      falsy('(not= "hello" "hello")');
+      falsy('(not= true (= 4 (* 2 2)))');
+      truthy('(not= true (= 4 (* 2 3)))');
+      falsy('(not= :keyword :keyword)');
+      truthy('(not= 1 [1])');
+      truthy('(not= [3 4] [4 3])');
+      falsy('(not= [3 4] \'(3 4))');
+      falsy('(not= [3 4] \'((+ 2 1) (/ 16 4)))');
+      truthy('(not= [3 4] \'((+ 2 1) (/ 16 8)))');
+      truthy('(not= [3 4] \'((+ 2 1) (/ 16 4) 5))');
+      falsy('(not= #{1 2} #{2 1})');
+      falsy('(not= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
+      truthy('(not= #{1 2} #{2 1 3})');
+      return truthy('(not= #{1 2} [2 1])');
+    });
+  });
+  describe('(== x y & more)', function() {
+    return it('returns true if all its arguments are numeric and equal', function() {
+      throws('(==)');
+      throws('(== "hello" "hello")');
+      truthy('(== [1 2 3])');
+      return truthy('(let [a 2] (== a a 2.0 (/ 8 (+ 2 2.0))))');
+    });
+  });
+  describe('(< x y & more)', function() {
+    return it('returns true if its arguments are in monotonically increasing order', function() {
+      throws('(<)');
+      throws('(< "hello" "hello")');
+      truthy('(< [1 2 3])');
+      truthy('(< 0.76 3.45 (+ 2 2) 5)');
+      falsy('(< 0.76 3.45 (+ 2 2) 3)');
+      falsy('(< 0.76 3.45 (+ 2 2) 4)');
+      return throws('(< 0.76 3.45 (+ 2 2) nil)');
+    });
+  });
+  describe('(> x y & more)', function() {
+    return it('returns true if its arguments are in monotonically decreasing order', function() {
+      throws('(>)');
+      throws('(> "hello" "hello")');
+      truthy('(> [1 2 3])');
+      truthy('(> 5 (+ 2 2) 3.45 0.76)');
+      falsy('(> 3 (+ 2 2) 3.45 0.76)');
+      falsy('(> 4 (+ 2 2) 3.45 0.76)');
+      return throws('(> nil (+ 2 2) 3.45 0.76)');
+    });
+  });
+  describe('(<= x y & more)', function() {
+    return it('returns true if its arguments are in monotonically non-decreasing order', function() {
+      throws('(<=)');
+      throws('(<= "hello" "hello")');
+      truthy('(<= [1 2 3])');
+      truthy('(<= 0.76 3.45 (+ 2 2) 5)');
+      falsy('(<= 0.76 3.45 (+ 2 2) 3)');
+      truthy('(<= 0.76 3.45 (+ 2 2) 4)');
+      return throws('(<= 0.76 3.45 (+ 2 2) nil)');
+    });
+  });
+  describe('(>= x y & more)', function() {
+    return it('returns true if its arguments are in monotonically non-increasing order', function() {
+      throws('(>=)');
+      throws('(>= "hello" "hello")');
+      truthy('(>= [1 2 3])');
+      truthy('(>= 5 (+ 2 2) 3.45 0.76)');
+      falsy('(>= 3 (+ 2 2) 3.45 0.76)');
+      truthy('(>= 4 (+ 2 2) 3.45 0.76)');
+      return throws('(>= nil (+ 2 2) 3.45 0.76)');
+    });
+  });
+  describe('(identical? x y)', function() {
+    return it('returns true if x and y are the same object', function() {
+      throws('(identical? 1 1 1)');
+      truthy('(identical? 1 1)');
+      truthy('(identical? 1.56 1.56)');
+      truthy('(identical? true true)');
+      truthy('(identical? nil nil)');
+      falsy('(identical? :keyword :keyword)');
+      falsy('(identical? #{1 2} #{1 2})');
+      truthy('(let [a #{1 2}] (identical? a a))');
+      return truthy('(identical? "string" "string")');
+    });
+  });
+  describe('(true? x)', function() {
+    return it('returns true if and only if x is the value true', function() {
+      throws('(true? nil false)');
+      truthy('(true? true)');
+      falsy('(true? "hello")');
+      return falsy('(true? (fn []))');
+    });
+  });
+  describe('(false? x)', function() {
+    return it('returns true if and only if x is the value false', function() {
+      throws('(false? nil false)');
+      truthy('(false? false)');
+      falsy('(false? nil)');
+      return falsy('(false? (fn []))');
+    });
+  });
+  describe('(nil? x)', function() {
+    return it('returns true if and only if x is the value nil', function() {
+      throws('(nil? nil false)');
+      truthy('(nil? nil)');
+      falsy('(nil? false)');
+      return falsy('(nil? (fn []))');
+    });
+  });
+  describe('(some? x)', function() {
+    return it('returns true if and only if x is NOT the value nil', function() {
+      throws('(some? nil false)');
+      falsy('(some? nil)');
+      truthy('(some? "hello")');
+      return truthy('(some? (fn []))');
+    });
+  });
+  describe('(number? x)', function() {
+    return it('returns true if and only if x is a number', function() {
+      truthy('(number? 0)');
+      truthy('(number? 0.0)');
+      falsy('(number? "0")');
+      falsy('(number? [])');
+      return falsy('(number? nil)');
+    });
+  });
+  describe('(integer? x)', function() {
+    return it('returns true if and only if x is an integer', function() {
+      truthy('(integer? 0)');
+      truthy('(integer? 0.0)');
+      falsy('(integer? 0.1)');
+      falsy('(integer? "0")');
+      falsy('(integer? [])');
+      return falsy('(integer? nil)');
+    });
+  });
+  describe('(float? x)', function() {
+    return it('returns true if and only if x is a floating-point number', function() {
+      falsy('(float? 0)');
+      falsy('(float? 0.0)');
+      truthy('(float? 0.1)');
+      falsy('(float? "0.0")');
+      falsy('(float? [])');
+      return falsy('(float? nil)');
+    });
+  });
+  describe('(zero? x)', function() {
+    return it('returns true if and only if x is numerically 0', function() {
+      truthy('(zero? 0)');
+      truthy('(zero? 0.0)');
+      throws('(zero? "0.0")');
+      throws('(zero? [])');
+      return throws('(zero? nil)');
+    });
+  });
+  describe('(pos? x)', function() {
+    return it('returns true if and only if x is a number > 0', function() {
+      truthy('(pos? 3)');
+      truthy('(pos? 3.54)');
+      falsy('(pos? 0)');
+      falsy('(pos? -4.5)');
+      throws('(pos? "0.0")');
+      throws('(pos? [])');
+      return throws('(pos? nil)');
+    });
+  });
+  describe('(neg? x)', function() {
+    return it('returns true if and only if x is a number < 0', function() {
+      truthy('(neg? -3)');
+      truthy('(neg? -3.54)');
+      falsy('(neg? 0)');
+      falsy('(neg? 4.5)');
+      throws('(neg? "0.0")');
+      throws('(neg? [])');
+      return throws('(neg? nil)');
+    });
+  });
+  describe('(even? x)', function() {
+    return it('returns true if and only if x is an even integer', function() {
+      truthy('(even? 0)');
+      truthy('(even? 68)');
+      falsy('(even? 69)');
+      truthy('(even? 0.0)');
+      return throws('(even? "0.0")');
+    });
+  });
+  describe('(odd? x)', function() {
+    return it('returns true if and only if x is an odd integer', function() {
+      falsy('(odd? 0)');
+      falsy('(odd? 68)');
+      truthy('(odd? 69)');
+      truthy('(odd? 1.0)');
+      return throws('(odd? "1.0")');
+    });
+  });
+  describe('(contains? coll key)', function() {
+    return it('returns true if the collection contains the given key', function() {
+      throws('(contains? #{nil 2} nil 2)');
+      throws('(contains? "string" "str")');
+      throws('(contains? \'(1 2) 2)');
+      truthy('(contains? #{nil 2} nil)');
+      falsy('(contains? #{1 2} 3)');
+      truthy('(contains? #{{1 2}} {1 2})');
+      falsy('(contains? #{{1 2}} {2 1})');
+      truthy('(contains? {#{1 2} true} #{2 1})');
+      truthy('(contains? #{[1 2]} \'(1 2))');
+      falsy('(contains? #{[1 2]} \'(2 1))');
+      truthy('(contains? [98 54] 0)');
+      truthy('(contains? [98 54] 1)');
+      falsy('(contains? [98 54] 2)');
+      return falsy('(contains? [98 54] 98)');
+    });
+  });
+  describe('(empty? coll)', function() {
+    return it('returns true if coll has no items - same as (not (seq coll))', function() {
+      throws('(empty? 3)');
+      throws('(empty? [] \'())');
+      truthy('(empty? nil)');
+      truthy('(empty? "")');
+      falsy('(empty? "string")');
+      falsy('(empty? [1 2 3])');
+      truthy('(empty? [])');
+      falsy('(empty? {:k1 "v1" :k2 "v2"})');
+      return truthy('(empty? #{})');
+    });
+  });
+  describe('(vector? coll)', function() {
+    return it('returns true if coll is a vector', function() {
+      falsy('(vector? 3)');
+      falsy('(vector? \'())');
+      truthy('(vector? [])');
+      throws('(vector? [] [])');
+      return truthy('(vector? (first (seq {1 2})))');
+    });
+  });
+  describe('(map? coll)', function() {
+    return it('returns true if coll is a map', function() {
+      falsy('(map? 3)');
+      falsy('(map? #{})');
+      truthy('(map? {})');
+      return throws('(map? {} {})');
+    });
+  });
+  describe('(boolean x)', function() {
+    return it('coerces x into a boolean value (false for nil and false, else true)', function() {
+      throws('(boolean nil false)');
+      falsy('(boolean nil)');
+      falsy('(boolean false)');
+      truthy('(boolean true)');
+      truthy('(boolean 34.75)');
+      truthy('(boolean "hello")');
+      truthy('(boolean :keyword)');
+      truthy('(boolean [1 2])');
+      return truthy('(boolean (fn [x y] (+ x y)))');
+    });
+  });
+  describe('(not x)', function() {
+    return it('returns the complement of (boolean x) (true for nil and false, else false)', function() {
+      throws('(not nil false)');
+      truthy('(not nil)');
+      truthy('(not false)');
+      falsy('(not true)');
+      falsy('(not 34.75)');
+      falsy('(not "hello")');
+      falsy('(not :keyword)');
+      falsy('(not [1 2])');
+      return falsy('(not (fn [x y] (+ x y)))');
+    });
+  });
+  describe('(str x & ys)', function() {
+    return it('concatenates the string values of each of its arguments', function() {
+      eq('(str)', '');
+      eq('(str nil)', '');
+      eq('(str 34)', '34');
+      eq('(str 34.45)', '34.45');
+      eq('(str 3e3)', '3000');
+      eq('(str 3e-4)', '0.0003');
+      eq('(str 1 true "hello" :keyword)', '1truehello:keyword');
+      eq('(str [1 2 :key])', '[1 2 :key]');
+      eq('(str (seq [1 2 :key]))', '(1 2 :key)');
+      eq('(str \'(1 2 3))', '(1 2 3)');
+      eq('(str #{1 2 3})', '#{1 2 3}');
+      eq('(str {1 2 3 4})', '{1 2, 3 4}');
+      eq('(str (seq {1 2 3 4}))', '([1 2] [3 4])');
+      return eq('(str [1 2 \'(3 4 5)])', '[1 2 (3 4 5)]');
+    });
+  });
+  describe('(count coll)', function() {
+    return it('returns the number of items the collection', function() {
+      throws('(count [1 2 3] "hello")');
+      throws('(count 1)');
+      throws('(count true)');
+      eq('(count nil)', 0);
+      eq('(count "hello")', 5);
+      eq('(count [1 2 3])', 3);
+      eq('(count [1 2 #{3 4 5}])', 3);
+      return eq('(count {:key1 "value1" :key2 "value2"})', 2);
+    });
+  });
+  describe('(empty coll)', function() {
+    return it('returns an empty collection of the same category as coll, or nil', function() {
+      throws('(empty)');
+      nil('(empty 1)');
+      nil('(empty "hello")');
+      eq('(empty [1 2 #{3 4}])', vec());
+      eq('(empty \'(1 2))', list());
+      eq('(empty #{1 2})', set());
+      eq('(empty {1 2})', map());
+      return eq('(empty (seq #{1 2}))', emptySeq());
+    });
+  });
+  describe('(not-empty coll)', function() {
+    return it('if coll is empty, returns nil, else coll', function() {
+      throws('(not-empty)');
+      throws('(not-empty 1)');
+      nil('(not-empty nil)');
+      nil('(not-empty #{})');
+      eq('(not-empty #{1})', set(1));
+      nil('(not-empty "")');
+      return eq('(not-empty "hello")', 'hello');
+    });
+  });
+  describe('(get coll key not-found)', function() {
+    return it('returns the value mapped to key if present, else not-found or nil', function() {
+      throws('(get [1 2 3])');
+      nil('(get nil 2)');
+      nil('(get 2 2)');
+      nil('(get {:k1 "v1" :k2 "v2"} :k3)');
+      eq('(get {:k1 "v1" :k2 "v2"} :k3 :not-found)', key('not-found'));
+      eq('(get {:k1 "v1" :k2 "v2"} :k2 :not-found)', 'v2');
+      eq('(get {#{35 49} true} #{49 35})', true);
+      nil('(get #{45 89 32} 1)');
+      eq('(get #{45 89 32} 89)', 89);
+      eq('(get [45 89 32] 1)', 89);
+      nil('(get [45 89 32] 89)');
+      nil('(get \'(45 89 32) 1)');
+      nil('(get \'(45 89 32) 89)');
+      nil('(get \'(45 89 32) 1)');
+      return eq('(get "qwerty" 2)', 'e');
+    });
+  });
+  describe('(seq coll)', function() {
+    return it('returns a seq on the collection, or nil if it is empty or nil', function() {
+      throws('(seq [1 2 3] [4 5 6])');
+      throws('(seq true)');
+      nil('(seq nil)');
+      nil('(seq "")');
+      nil('(seq {})');
+      eq('(seq "qwe")', seq('qwe'));
+      eq('(seq [1 2 3])', seq(vec(1, 2, 3)));
+      eq('(seq \'(1 2 3))', seq(list(1, 2, 3)));
+      eq('(seq #{1 2 3})', seq(set(1, 2, 3)));
+      return eq('(seq {1 2 3 4})', seq(map(1, 2, 3, 4)));
+    });
+  });
+  describe('(first coll)', function() {
+    return it('returns the first item in the collection, or nil if coll is nil', function() {
+      throws('(first [1 2 3] [4 5 6])');
+      throws('(first 3)');
+      nil('(first nil)');
+      nil('(first [])');
+      nil('(first "")');
+      eq('(first "string")', 's');
+      eq('(first \'(1 2 3))', 1);
+      eq('(first #{1 2 3})', 1);
+      return eq('(first {1 2 3 4})', vec(1, 2));
+    });
+  });
+  describe('(rest coll)', function() {
+    return it('returns all but the first item in the collection, or an empty seq if there are no more', function() {
+      throws('(rest [1 2 3] [4 5 6])');
+      throws('(rest 3)');
+      eq('(rest nil)', emptySeq());
+      eq('(rest [])', emptySeq());
+      eq('(rest "s")', emptySeq());
+      eq('(rest "string")', seq('tring'));
+      eq('(rest \'(1 2 3))', seq([2, 3]));
+      eq('(rest #{1 2 3})', seq([2, 3]));
+      return eq('(rest {1 2 3 4})', seq([vec(3, 4)]));
+    });
+  });
+  describe('(next coll)', function() {
+    return it('returns all but the first item in the collection, or nil if there are no more', function() {
+      throws('(next [1 2 3] [4 5 6])');
+      throws('(next 3)');
+      nil('(next nil)');
+      nil('(next [])');
+      nil('(next "s")');
+      eq('(next "string")', seq('tring'));
+      eq('(next \'(1 2 3))', seq([2, 3]));
+      eq('(next #{1 2 3})', seq([2, 3]));
+      return eq('(next {1 2 3 4})', seq([vec(3, 4)]));
+    });
+  });
+  describe('(last coll)', function() {
+    return it('returns the last item in coll, in linear time', function() {
+      throws('(last [1 2 3] [4 5 6])');
+      throws('(last 3)');
+      nil('(last nil)');
+      nil('(last [])');
+      nil('(last "")');
+      eq('(last "string")', 'g');
+      eq('(last \'(1 2 3))', 3);
+      eq('(last #{1 2 3})', 3);
+      return eq('(last {1 2 3 4})', vec(3, 4));
+    });
+  });
+  describe('(nth coll index not-found)', function() {
+    return it('returns the value at index in coll, takes O(n) time on lists and seqs', function() {
+      throws('(nth [1 2] 0 0 0)');
+      throws('(nth #{1 2} 0)');
+      throws('(nth {1 2} 0)');
+      nil('(nth nil 3)');
+      eq('(nth [1 2] 0)', 1);
+      eq('(nth [1 2] 0.45)', 1);
+      throws('(nth [1 2] nil)');
+      throws('(nth [1 2] nil "not-found")');
+      throws('(nth [1 2] 2)');
+      eq('(nth [1 2] 2 "not-found")', 'not-found');
+      eq('(nth "string" 0)', 's');
+      throws('(nth "string" 6)');
+      eq('(nth "string" 6 "not-found")', 'not-found');
+      eq('(nth \'(1 2 3 4) 3)', 4);
+      return eq('(nth (seq #{1 2 3 4}) 3)', 4);
+    });
+  });
+  describe('(peek coll)', function() {
+    return it('returns the first item of a list or the last item of a vector', function() {
+      throws('(peek [1 2] [3 4])');
+      throws('(peek #{1 2})');
+      throws('(peek {1 2})');
+      throws('(peek (seq #{1 2}))');
+      throws('(peek "string")');
+      nil('(peek nil)');
+      nil('(peek [])');
+      nil('(peek \'())');
+      eq('(peek \'(1 2 3))', 1);
+      return eq('(peek [1 2 3])', 3);
+    });
+  });
+  describe('(pop coll)', function() {
+    return it('returns coll with (peek coll) removed, throws if coll is empty', function() {
+      throws('(pop [1 2] [3 4])');
+      throws('(pop #{1 2})');
+      throws('(pop {1 2})');
+      throws('(pop (seq #{1 2}))');
+      throws('(pop "string")');
+      nil('(pop nil)');
+      throws('(pop [])');
+      throws('(pop \'())');
+      eq('(pop \'(1 2 3))', list(2, 3));
+      return eq('(pop [1 2 3])', vec(1, 2));
+    });
+  });
+  describe('(cons x seq)', function() {
+    return it('returns a new seq of the form (x seq)', function() {
+      throws('(cons 1 2 [3 4 5])');
+      eq('(cons 3 nil)', seq([3]));
+      eq('(cons nil nil)', seq([null]));
+      throws('(cons nil 3)');
+      eq('(cons true "string")', seq([true, 's', 't', 'r', 'i', 'n', 'g']));
+      return eq('(cons 1 {1 2 3 4})', seq([1, vec(1, 2), vec(3, 4)]));
+    });
+  });
+  describe('(conj coll & xs)', function() {
+    return it('adds xs to coll in the most efficient way possible', function() {
+      throws('(conj [1 2 3])');
+      throws('(conj "string" "s")');
+      eq('(conj #{1 2 3} 4 true)', set(1, 2, 3, 4, true));
+      eq('(conj nil 1)', seq([1]));
+      eq('(conj {1 2} [3 4])', map(1, 2, 3, 4));
+      throws('(conj {1 2} [3 4 5 6])');
+      eq('(conj {1 2} [3 4] [5 6])', map(1, 2, 3, 4, 5, 6));
+      eq('(conj {1 2} {3 4 5 6})', map(1, 2, 3, 4, 5, 6));
+      throws('(conj {1 2} \'(3 4))');
+      throws('(conj {1 2} #{3 4})');
+      eq('(conj [1] 2 3)', vec(1, 2, 3));
+      eq('(conj (seq [1]) 2 3)', seq([3, 2, 1]));
+      eq('(conj \'(1) 2 3)', list(3, 2, 1));
+      eq('(conj #{1 2} [3])', set(1, 2, vec(3)));
+      eq('(conj [1 2] [3])', vec(1, 2, vec(3)));
+      return eq('(conj \'(1 2) [3])', list(vec(3), 1, 2));
+    });
+  });
+  describe('(into to from)', function() {
+    return it('conjs all items from the second collection into the first', function() {
+      throws('(into [])');
+      nil('(into nil nil)');
+      eq('(into :key nil)', key('key'));
+      eq('(into :key [])', key('key'));
+      throws('(into :key [1])');
+      eq('(into [1 2] [3 4])', vec(1, 2, 3, 4));
+      eq('(into nil [3 4])', seq([4, 3]));
+      eq('(into \'(1 2) [3 4])', list(4, 3, 1, 2));
+      eq('(into [1 2] \'(3 4))', list(1, 2, 3, 4));
+      eq('(into #{1 2} [3 4])', set(1, 2, 3, 4));
+      eq('(into {1 2} {3 4})', map(1, 2, 3, 4));
+      throws('(into {1 2} [3 4])');
+      eq('(into {1 2} [[3 4]])', map(1, 2, 3, 4));
+      throws('(into {1 2} [[3]])');
+      throws('(into {1 2} [[3 4 5]])');
+      eq('(into {1 2} \'([3 4]))', map(1, 2, 3, 4));
+      eq('(into {1 2} #{[3 4]})', map(1, 2, 3, 4));
+      return throws('(into {1 2} [\'(3 4)])');
+    });
+  });
+  describe('(concat seqs)', function() {
+    return it('concatenates the given seqables into one sequence', function() {
+      eq('(concat)', emptySeq());
+      eq('(concat nil)', emptySeq());
+      eq('(concat #{1} [2] \'(3) {4 5} "67")', seq([1, 2, 3, vec(4, 5), '6', '7']));
+      throws('(concat #{1} [2] \'(3) {4 5} "67" 3)');
+      return throws('(concat #{1} [2] \'(3) {4 5} "67" true)');
+    });
+  });
+  describe('(flatten coll)', function() {
+    return it('converts an arbitrarily-nested collection into a flat sequence', function() {
+      throws('(flatten)');
+      eq('(flatten nil)', emptySeq());
+      eq('(flatten 3)', emptySeq());
+      eq('(flatten "string")', emptySeq());
+      eq('(flatten [1 \'(2 [3])])', seq([1, 2, 3]));
+      eq('(flatten #{1 2 #{3}})', emptySeq());
+      eq('(flatten {:a 1, :b 2})', emptySeq());
+      return eq('(flatten (seq {:a 1, :b 2}))', seq([key('a'), 1, key('b'), 2]));
+    });
+  });
+  describe('(reverse coll)', function() {
+    return it('reverses the collection', function() {
+      throws('(reverse)');
+      eq('(reverse nil)', emptySeq());
+      throws('(reverse 3)');
+      eq('(reverse "")', emptySeq());
+      eq('(reverse "string")', seq(['g', 'n', 'i', 'r', 't', 's']));
+      eq('(reverse [1 2 \'(3 4)])', seq([list(3, 4), 2, 1]));
+      eq('(reverse #{1 2 3})', seq([3, 2, 1]));
+      return eq('(reverse {:a 1 :b 2})', seq([vec(key('b'), 2), vec(key('a'), 1)]));
+    });
+  });
+  describe('(assoc map & kvs)', function() {
+    return it('adds / updates the given key-value pairs in the given map / vector', function() {
+      throws('(assoc #{1 2} 3 3)');
+      throws('(assoc \'(1 2) 3 3)');
+      throws('(assoc "string" 1 "h")');
+      eq('(assoc {1 2 3 4} 1 3 4 5)', map(1, 3, 3, 4, 4, 5));
+      throws('(assoc {1 2} 3 4 5)');
+      eq('(assoc [1 2 3] 3 4)', vec(1, 2, 3, 4));
+      throws('(assoc [1 2 3] 4 4)');
+      throws('(assoc [1 2 3] 3)');
+      eq('(assoc {1 2} nil 4)', map(1, 2, null, 4));
+      return throws('(assoc [1 2] nil 4)');
+    });
+  });
+  describe('(dissoc map & keys)', function() {
+    return it('removes entries corresponding to the given keys from map', function() {
+      throws('(dissoc #{1 2} 0)');
+      throws('(dissoc \'(1 2) 0)');
+      throws('(dissoc "string" 0)');
+      throws('(dissoc [1 2] 0)');
+      eq('(dissoc {1 2})', map(1, 2));
+      eq('(dissoc [1 2])', vec(1, 2));
+      eq('(dissoc {1 2, 3 4, 5 6} 3 5)', map(1, 2));
+      eq('(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map(1, 2));
+      return nil('(dissoc nil (fn []) true)');
+    });
+  });
+  describe('(find map key)', function() {
+    return it('returns the map entry for a given key', function() {
+      throws('(find {:a 1 :b 2} :a :b)');
+      nil('(find nil nil)');
+      nil('(find nil 3)');
+      eq('(find {:a 1 :b 2} :a)', vec(key('a'), 1));
+      eq('(find [1 2 3 4] 2)', vec(2, 3));
+      throws('(find \'(1 2 3 4) 2)');
+      throws('(find #{1 2 3 4} 2)');
+      return throws('(find "string" 2)');
+    });
+  });
+  describe('(range), (range end), (range start end), (range start end step)', function() {
+    return it('returns a seq of numbers in the range [start, end), where start defaults to 0, step to 1, and end to infinity', function() {
+      throws('(range 1 10 2 2)');
+      eq('(nth (range) 23)', 23);
+      eq('(range 5)', seq([0, 1, 2, 3, 4]));
+      eq('(range 2 5)', seq([2, 3, 4]));
+      eq('(range 1 10 2)', seq([1, 3, 5, 7, 9]));
+      eq('(range 10 2 2)', emptySeq());
+      eq('(range 10 2 -2)', seq([10, 8, 6, 4]));
+      eq('(range 1.2 6.9 1.6)', seq([1.2, 2.8, 4.4, 6.0]));
+      return throws('(range 1.2 6.9 "1.6")');
+    });
+  });
+  describe('(identity x)', function() {
+    return it('returns its argument', function() {
+      throws('(identity 34 45)');
+      nil('(identity nil)');
+      return eq('(identity {:k1 "v1" :k2 #{1 2}})', map(key('k1'), 'v1', key('k2'), set(1, 2)));
+    });
+  });
+  describe('(map f colls)', function() {
+    return it('applies f sequentially to every item in the given collections', function() {
+      throws('(map +)');
+      eq('(map inc [1 2 3])', seq([2, 3, 4]));
+      eq('(map + [1 2] \'(3 4) #{5 6})', seq([9, 12]));
+      return eq('(map first {:a 1, :b 2})', seq([key('a'), key('b')]));
+    });
+  });
+  describe('(mapcat f colls)', function() {
+    return it('applies concat to the result of applying map to f and colls', function() {
+      throws('(mapcat +)');
+      return eq('(mapcat reverse {2 1, 4 3, 6 5})', seq([1, 2, 3, 4, 5, 6]));
+    });
+  });
+  describe('(filter pred coll)', function() {
+    return it('returns a seq of the items in coll for which (pred item) is true', function() {
+      throws('(filter even?)');
+      throws('(filter true [1 2 3 4])');
+      eq('(filter even? nil)', emptySeq());
+      eq('(filter even? [1 2 3 4])', seq([2, 4]));
+      eq('(filter even? \'(1 2 3 4))', seq([2, 4]));
+      eq('(filter even? #{1 2 3 4})', seq([2, 4]));
+      eq('(filter (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(1, 2)]));
+      return eq('(filter (fn [s] (= s "s")) "strings")', seq(['s', 's']));
+    });
+  });
+  describe('(remove pred coll)', function() {
+    return it('returns a seq of the items in coll for which (pred item) is false', function() {
+      throws('(remove even?)');
+      throws('(remove true [1 2 3 4])');
+      eq('(remove even? nil)', emptySeq());
+      eq('(remove even? [1 2 3 4])', seq([1, 3]));
+      eq('(remove even? \'(1 2 3 4))', seq([1, 3]));
+      eq('(remove even? #{1 2 3 4})', seq([1, 3]));
+      eq('(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(4, 3)]));
+      return eq('(remove (fn [s] (= s "s")) "strings")', seq(['t', 'r', 'i', 'n', 'g']));
+    });
+  });
+  describe('(reduce f coll), (reduce f val coll)', function() {
+    return it('applies f to the first item in coll, then to that result and the second item, and so on', function() {
+      throws('(reduce +)');
+      throws('(reduce + 2)');
+      eq('(reduce + nil)', 0);
+      eq('(reduce + [1 2 3 4])', 10);
+      eq('(reduce + \'(1 2 3 4))', 10);
+      eq('(reduce + #{1 2 3 4})', 10);
+      eq('(reduce + 10 [1 2 3 4])', 20);
+      eq('(reduce concat {1 2 3 4})', seq([1, 2, 3, 4]));
+      return throws('(reduce nil [1 2 3 4])');
+    });
+  });
+  describe('(reduce-kv f init coll)', function() {
+    return it('works like reduce, but f is given 3 arguments: result, key, and value', function() {
+      throws('(reduce-kv +)');
+      throws('(reduce-kv + [1 2 3 4])');
+      eq('(reduce-kv + 0 [0 1 2 3])', 12);
+      eq('(reduce-kv + 0 {0 1 2 3})', 6);
+      eq('(reduce-kv + 4 {0 1 2 3})', 10);
+      throws('(reduce-kv + 0 #{0 1 2 3})');
+      return throws('(reduce-kv + 0 \'(0 1 2 3))');
+    });
+  });
+  describe('(take n coll)', function() {
+    return it('returns a seq of the first n items of coll, or all items if there are fewer than n', function() {
+      throws('(take 10)');
+      throws('(take 10 3)');
+      throws('(take "2" [1 2 3 4])');
+      eq('(take 3 (range))', seq([0, 1, 2]));
+      eq('(take 2 [1 2 3 4])', seq([1, 2]));
+      eq('(take 2 \'(1 2 3 4))', seq([1, 2]));
+      eq('(take 2 #{1 2 3 4})', seq([1, 2]));
+      eq('(take 2 {1 2 3 4 5 6})', seq([vec(1, 2), vec(3, 4)]));
+      return eq('(take 2.1 [1 2 3 4])', seq([1, 2, 3]));
+    });
+  });
+  return describe('(drop n coll)', function() {
+    return it('returns a seq of all but the first n items of coll, or an empty seq if there are fewer than n', function() {
+      throws('(drop 10)');
+      throws('(drop 10 3)');
+      throws('(drop "2" [1 2 3 4])');
+      eq('(drop 3 (take 6 (range)))', seq([3, 4, 5]));
+      eq('(drop 2 [1 2 3 4])', seq([3, 4]));
+      eq('(drop 2 \'(1 2 3 4))', seq([3, 4]));
+      eq('(drop 2 #{1 2 3 4})', seq([3, 4]));
+      eq('(drop 2 {1 2 3 4 5 6})', seq([vec(5, 6)]));
+      return eq('(drop 2.1 [1 2 3 4])', seq([4]));
+    });
+  });
+});
+
+
+},{"../lib/closer-core":2,"../lib/repl":6,"lodash-node":97,"mori":199}],201:[function(_dereq_,module,exports){
 
 },{}],202:[function(_dereq_,module,exports){
 // shim for using process in browser
@@ -18376,6 +18374,6 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":202}]},{},[7])
-(7)
+},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":202}]},{},[200])
+(200)
 });

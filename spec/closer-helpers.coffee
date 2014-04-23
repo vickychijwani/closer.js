@@ -1,12 +1,11 @@
 json_diff = require 'json-diff'
+closer = require '../lib/closer'
 
 # custom matcher to deep-compare objects
 exports.toDeepEqual = (expected) ->
   @message = ->
     'actual != expected, diff is:\n' + json_diff.diffString(@actual, expected)
   typeof json_diff.diff(@actual, expected) is 'undefined'
-
-closer = require '../closer'
 
 for type in ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq']
   exports[type] = ((type2) ->

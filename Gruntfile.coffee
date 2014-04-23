@@ -11,8 +11,8 @@ module.exports = (grunt) ->
       browserify:
         command: 'browserify -s <%= pkg.name %> lib/<%= pkg.name %>.js > dist/<%= pkg.name %>.js;
           browserify -s <%= pkg.name %>-core lib/<%= pkg.name %>-core.js > dist/<%= pkg.name %>-core.js;
-          browserify -s <%= pkg.name %>-spec lib/spec/<%= pkg.name %>-spec.js > demo/js/<%= pkg.name %>-spec.js;
-          browserify -s <%= pkg.name %>-core-spec lib/spec/<%= pkg.name %>-core-spec.js > demo/js/<%= pkg.name %>-core-spec.js;'
+          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
+          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core-spec spec/<%= pkg.name %>-core-spec.coffee > demo/js/<%= pkg.name %>-core-spec.js;'
         options:
           failOnError: true
 
@@ -27,11 +27,12 @@ module.exports = (grunt) ->
           failOnError: true
 
     jasmine_node:
-      all: ['lib/spec/']
+      all: ['spec/']
       options:
         showColors: true
         includeStackTrace: false
         forceExit: true
+        coffee: true
 
     watch:
       files: ['src/lexer.l', 'src/grammar.y', 'src/**/*.coffee', 'spec/**/*.coffee']
@@ -58,12 +59,6 @@ module.exports = (grunt) ->
           cwd: 'src/'          # Src matches are relative to this path.
           src: ['**/*.coffee'] # Actual pattern(s) to match.
           dest: 'lib/'         # Destination path prefix.
-          ext: '.js'           # Dest filepaths will have this extension.
-        ,
-          expand: true         # Enable dynamic expansion.
-          cwd: 'spec/'         # Src matches are relative to this path.
-          src: ['**/*.coffee'] # Actual pattern(s) to match.
-          dest: 'lib/spec/'    # Destination path prefix.
           ext: '.js'           # Dest filepaths will have this extension.
         ]
 

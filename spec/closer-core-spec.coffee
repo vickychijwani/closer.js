@@ -1,7 +1,7 @@
 _ = require 'lodash-node'
 mori = require 'mori'
-repl = require '../repl'
-core = require '../closer-core'
+repl = require '../lib/repl'
+core = require '../lib/closer-core'
 
 beforeEach ->
   @addMatchers

@@ -1207,307 +1207,6 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 }
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
 },{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25,"fs":20,"path":26}],4:[function(_dereq_,module,exports){
-(function() {
-  var closer, json_diff, type, _i, _len, _ref,
-    __slice = [].slice;
-
-  json_diff = _dereq_('json-diff');
-
-  exports.toDeepEqual = function(expected) {
-    this.message = function() {
-      return 'actual != expected, diff is:\n' + json_diff.diffString(this.actual, expected);
-    };
-    return typeof json_diff.diff(this.actual, expected) === 'undefined';
-  };
-
-  closer = _dereq_('../closer');
-
-  _ref = ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq'];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    type = _ref[_i];
-    exports[type] = (function(type2) {
-      return function() {
-        var args, items;
-        items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        items = type2 === 'keyword' ? [closer.node('Literal', items[0])] : items;
-        args = type2 === 'set' ? [closer.node('ArrayExpression', items)] : items;
-        return closer.node('CallExpression', closer.node('Identifier', type2), args);
-      };
-    })(type);
-  }
-
-  exports.Identifier = function(name) {
-    return {
-      type: 'Identifier',
-      name: name
-    };
-  };
-
-  exports.Literal = function(value) {
-    if (value == null) {
-      value = null;
-    }
-    return {
-      type: 'Literal',
-      value: value
-    };
-  };
-
-  exports.UnaryExpression = function(operator, argument) {
-    return {
-      type: 'UnaryExpression',
-      operator: operator,
-      argument: argument,
-      prefix: true
-    };
-  };
-
-  exports.CallExpression = function(callee, args) {
-    return {
-      type: 'CallExpression',
-      callee: callee,
-      "arguments": (typeof args !== 'undefined' ? args : [])
-    };
-  };
-
-  exports.FunctionExpression = function(id, params, rest, body) {
-    return {
-      type: 'FunctionExpression',
-      id: id,
-      params: params,
-      defaults: [],
-      rest: rest,
-      body: body,
-      generator: false,
-      expression: false
-    };
-  };
-
-  exports.EmptyStatement = function() {
-    return {
-      type: 'EmptyStatement'
-    };
-  };
-
-  exports.ExpressionStatement = function(expression) {
-    return {
-      type: 'ExpressionStatement',
-      expression: expression
-    };
-  };
-
-  exports.IfStatement = function(test, consequent, alternate) {
-    return {
-      type: 'IfStatement',
-      test: test,
-      consequent: consequent,
-      alternate: (typeof alternate !== 'undefined' ? alternate : null)
-    };
-  };
-
-  exports.ReturnStatement = function(argument) {
-    return {
-      type: 'ReturnStatement',
-      argument: argument
-    };
-  };
-
-  exports.VariableDeclaration = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return {
-      type: 'VariableDeclaration',
-      kind: 'var',
-      declarations: args
-    };
-  };
-
-  exports.VariableDeclarator = function(id, init) {
-    return {
-      type: 'VariableDeclarator',
-      id: id,
-      init: init
-    };
-  };
-
-  exports.FunctionDeclaration = function(id, params, rest, body) {
-    var node;
-    node = exports.FunctionExpression(id, params, rest, body);
-    node.type = 'FunctionDeclaration';
-    return node;
-  };
-
-  exports.BlockStatement = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return {
-      type: 'BlockStatement',
-      body: args
-    };
-  };
-
-  exports.Program = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return {
-      type: 'Program',
-      body: args
-    };
-  };
-
-}).call(this);
-
-},{"../closer":1,"json-diff":7}],5:[function(_dereq_,module,exports){
-(function() {
-  var BlockStatement, Boolean, CallExpression, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, Nil, Program, ReturnStatement, String, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, closer, helpers, json_diff;
-
-  closer = _dereq_('../closer');
-
-  json_diff = _dereq_('json-diff');
-
-  helpers = _dereq_('./closer-helpers');
-
-  Integer = helpers.Literal;
-
-  Float = helpers.Literal;
-
-  String = helpers.Literal;
-
-  Boolean = helpers.Literal;
-
-  Nil = helpers.Literal;
-
-  Keyword = helpers['keyword'];
-
-  Vector = helpers['vector'];
-
-  List = helpers['list'];
-
-  HashSet = helpers['set'];
-
-  HashMap = helpers['hash_map'];
-
-  Identifier = helpers.Identifier;
-
-  UnaryExpression = helpers.UnaryExpression;
-
-  CallExpression = helpers.CallExpression;
-
-  FunctionExpression = helpers.FunctionExpression;
-
-  EmptyStatement = helpers.EmptyStatement;
-
-  ExpressionStatement = helpers.ExpressionStatement;
-
-  IfStatement = helpers.IfStatement;
-
-  ReturnStatement = helpers.ReturnStatement;
-
-  VariableDeclaration = helpers.VariableDeclaration;
-
-  VariableDeclarator = helpers.VariableDeclarator;
-
-  FunctionDeclaration = helpers.FunctionDeclaration;
-
-  BlockStatement = helpers.BlockStatement;
-
-  Program = helpers.Program;
-
-  beforeEach(function() {
-    return this.addMatchers({
-      toDeepEqual: helpers.toDeepEqual
-    });
-  });
-
-  describe('Closer parser', function() {
-    it('parses an empty program', function() {
-      return expect(closer.parse('\n')).toDeepEqual(Program());
-    });
-    it('parses an empty s-expression', function() {
-      return expect(closer.parse('()\n')).toDeepEqual(Program(EmptyStatement()));
-    });
-    it('parses comments', function() {
-      return expect(closer.parse('; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r')).toDeepEqual(Program(EmptyStatement()));
-    });
-    it('parses an identifier', function() {
-      return expect(closer.parse('x\n')).toDeepEqual(Program(ExpressionStatement(Identifier('x'))));
-    });
-    it('parses integer, float, string, boolean, and nil literals', function() {
-      return expect(closer.parse('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual(Program(ExpressionStatement(UnaryExpression('-', Integer(24))), ExpressionStatement(UnaryExpression('-', Float(23.67))), ExpressionStatement(UnaryExpression('-', Float(22.45e-5))), ExpressionStatement(String('')), ExpressionStatement(String('string')), ExpressionStatement(Boolean(true)), ExpressionStatement(Boolean(false)), ExpressionStatement(Nil())));
-    });
-    it('parses keywords', function() {
-      return expect(closer.parse(':keyword')).toDeepEqual(Program(ExpressionStatement(Keyword('keyword'))));
-    });
-    it('parses vector and list literals', function() {
-      return expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual(Program(ExpressionStatement(Vector()), ExpressionStatement(Vector(String('string'), Boolean(true))), ExpressionStatement(List()), ExpressionStatement(List(String('string'), Boolean(true)))));
-    });
-    it('parses set and map literals', function() {
-      expect(closer.parse('#{} #{"string" true}')).toDeepEqual(Program(ExpressionStatement(HashSet()), ExpressionStatement(HashSet(String('string'), Boolean(true)))));
-      expect(closer.parse('{} {"string" true}')).toDeepEqual(Program(ExpressionStatement(HashMap()), ExpressionStatement(HashMap(String('string'), Boolean(true)))));
-      return expect(function() {
-        return closer.parse('{1 2 3}');
-      }).toThrow();
-    });
-    it('parses commas as whitespace', function() {
-      return expect(closer.parse(',,, ,,,  ,,\n')).toDeepEqual(Program());
-    });
-    it('parses a function call with 0 arguments', function() {
-      return expect(closer.parse('(fn-name)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('fn-name')))));
-    });
-    it('parses a function call with > 0 arguments', function() {
-      return expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('fn-name'), [Identifier('arg1'), Identifier('arg2')]))));
-    });
-    it('parses an anonymous function definition', function() {
-      return expect(closer.parse('(fn [x] x)\n')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))))));
-    });
-    it('parses an anonymous function call', function() {
-      return expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))), [Integer(2)]))));
-    });
-    it('parses a named function definition', function() {
-      return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('fn-name'), [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))));
-    });
-    it('parses rest arguments', function() {
-      return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('avg'), [], Identifier('rest'), BlockStatement(ReturnStatement(CallExpression(Identifier('/'), [CallExpression(Identifier('apply'), [Identifier('+'), Identifier('rest')]), CallExpression(Identifier('count'), [Identifier('rest')])]))))));
-    });
-    it('parses an if statement without else', function() {
-      return expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('>='), [Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), null)));
-    });
-    it('parses an if-else statement', function() {
-      return expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('>='), [Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), ExpressionStatement(CallExpression(Identifier('-'), [Identifier('x')])))));
-    });
-    it('parses a when form', function() {
-      return expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('condition?')), BlockStatement(ExpressionStatement(CallExpression(Identifier('println'), [String('hello')])), ExpressionStatement(Boolean(true))))));
-    });
-    it('parses an unbound var definition', function() {
-      return expect(closer.parse('(def var-name)')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('var-name'), null))));
-    });
-    it('parses a var bound to a literal', function() {
-      return expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('greeting'), String('Hello')))));
-    });
-    it('parses a var bound to the result of an expression', function() {
-      return expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('sum'), CallExpression(Identifier('+'), [Integer(3), Integer(5)])))));
-    });
-    it('parses a var bound to an fn form', function() {
-      return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], Identifier('numbers'), BlockStatement(ReturnStatement(CallExpression(Identifier('apply'), [Identifier('+'), Identifier('numbers')]))))))));
-    });
-    it('parses a let form with no bindings and no body', function() {
-      return expect(closer.parse('(let [])')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
-    });
-    it('parses a let form with non-empty bindings and a non-empty body', function() {
-      return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ExpressionStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))));
-    });
-    it('parses an empty do form', function() {
-      return expect(closer.parse('(do)')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
-    });
-    it('parses a non-empty do form', function() {
-      return expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual(Program(BlockStatement(ExpressionStatement(CallExpression(Identifier('+'), [Integer(1), Integer(2)])), ExpressionStatement(CallExpression(Identifier('+'), [Integer(3), Integer(4)])))));
-    });
-    return xit('parses source locations');
-  });
-
-}).call(this);
-
-},{"../closer":1,"./closer-helpers":4,"json-diff":7}],6:[function(_dereq_,module,exports){
 // Generated by IcedCoffeeScript 1.3.3f
 (function() {
   var Theme, color, colorize, colorizeToArray, colorizeToCallback, extendedTypeOf, subcolorizeToCallback,
@@ -1620,7 +1319,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{"./util":8,"cli-color":9}],7:[function(_dereq_,module,exports){
+},{"./util":6,"cli-color":7}],5:[function(_dereq_,module,exports){
 // Generated by IcedCoffeeScript 1.3.3f
 (function() {
   var SequenceMatcher, arrayDiff, colorize, descalarize, diff, diffScore, diffString, diffWithScore, extendedTypeOf, findMatchingObject, isScalar, isScalarized, objectDiff, scalarize,
@@ -1845,7 +1544,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{"./colorize":6,"./util":8,"difflib":16}],8:[function(_dereq_,module,exports){
+},{"./colorize":4,"./util":6,"difflib":14}],6:[function(_dereq_,module,exports){
 // Generated by IcedCoffeeScript 1.3.3f
 (function() {
   var extendedTypeOf;
@@ -1868,7 +1567,7 @@ if (typeof module !== 'undefined' && _dereq_.main === module) {
 
 }).call(this);
 
-},{}],9:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var defineProperties = Object.defineProperties
@@ -1946,7 +1645,7 @@ module.exports = defineProperties(function (msg) {
 	};
 }));
 
-},{"es5-ext/lib/Object/map":13}],10:[function(_dereq_,module,exports){
+},{"es5-ext/lib/Object/map":11}],8:[function(_dereq_,module,exports){
 // Internal method, used by iteration functions.
 // Calls a function for each key-value pair found in object
 // Optionally takes compareFn to iterate object in specific order
@@ -1975,12 +1674,12 @@ module.exports = function (method) {
 	};
 };
 
-},{"./is-callable":12,"./valid-callable":14,"./valid-value":15}],11:[function(_dereq_,module,exports){
+},{"./is-callable":10,"./valid-callable":12,"./valid-value":13}],9:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('./_iterate')('forEach');
 
-},{"./_iterate":10}],12:[function(_dereq_,module,exports){
+},{"./_iterate":8}],10:[function(_dereq_,module,exports){
 // Inspired by: http://www.davidflanagan.com/2009/08/typeof-isfuncti.html
 
 'use strict';
@@ -2011,7 +1710,7 @@ module.exports = function (obj) {
 	}
 };
 
-},{}],13:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 'use strict';
 
 var forEach = _dereq_('./for-each');
@@ -2024,7 +1723,7 @@ module.exports = function (obj, cb) {
 	return o;
 };
 
-},{"./for-each":11}],14:[function(_dereq_,module,exports){
+},{"./for-each":9}],12:[function(_dereq_,module,exports){
 'use strict';
 
 var isCallable = _dereq_('./is-callable');
@@ -2036,7 +1735,7 @@ module.exports = function (fn) {
 	return fn;
 };
 
-},{"./is-callable":12}],15:[function(_dereq_,module,exports){
+},{"./is-callable":10}],13:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function (value) {
@@ -2046,10 +1745,10 @@ module.exports = function (value) {
 	return value;
 };
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 module.exports = _dereq_('./lib/difflib');
 
-},{"./lib/difflib":17}],17:[function(_dereq_,module,exports){
+},{"./lib/difflib":15}],15:[function(_dereq_,module,exports){
 // Generated by CoffeeScript 1.3.1
 
 /*
@@ -3537,10 +3236,10 @@ Class Differ:
 
 }).call(this);
 
-},{"assert":21,"heap":18}],18:[function(_dereq_,module,exports){
+},{"assert":21,"heap":16}],16:[function(_dereq_,module,exports){
 module.exports = _dereq_('./lib/heap');
 
-},{"./lib/heap":19}],19:[function(_dereq_,module,exports){
+},{"./lib/heap":17}],17:[function(_dereq_,module,exports){
 // Generated by CoffeeScript 1.6.3
 (function() {
   var Heap, defaultCmp, floor, heapify, heappop, heappush, heappushpop, heapreplace, insort, min, nlargest, nsmallest, updateItem, _siftdown, _siftup;
@@ -3909,7 +3608,304 @@ module.exports = _dereq_('./lib/heap');
 
 }).call(this);
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
+var closer, json_diff, type, _i, _len, _ref,
+  __slice = [].slice;
+
+json_diff = _dereq_('json-diff');
+
+closer = _dereq_('../lib/closer');
+
+exports.toDeepEqual = function(expected) {
+  this.message = function() {
+    return 'actual != expected, diff is:\n' + json_diff.diffString(this.actual, expected);
+  };
+  return typeof json_diff.diff(this.actual, expected) === 'undefined';
+};
+
+_ref = ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq'];
+for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+  type = _ref[_i];
+  exports[type] = (function(type2) {
+    return function() {
+      var args, items;
+      items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      items = type2 === 'keyword' ? [closer.node('Literal', items[0])] : items;
+      args = type2 === 'set' ? [closer.node('ArrayExpression', items)] : items;
+      return closer.node('CallExpression', closer.node('Identifier', type2), args);
+    };
+  })(type);
+}
+
+exports.Identifier = function(name) {
+  return {
+    type: 'Identifier',
+    name: name
+  };
+};
+
+exports.Literal = function(value) {
+  if (value == null) {
+    value = null;
+  }
+  return {
+    type: 'Literal',
+    value: value
+  };
+};
+
+exports.UnaryExpression = function(operator, argument) {
+  return {
+    type: 'UnaryExpression',
+    operator: operator,
+    argument: argument,
+    prefix: true
+  };
+};
+
+exports.CallExpression = function(callee, args) {
+  return {
+    type: 'CallExpression',
+    callee: callee,
+    "arguments": (typeof args !== 'undefined' ? args : [])
+  };
+};
+
+exports.FunctionExpression = function(id, params, rest, body) {
+  return {
+    type: 'FunctionExpression',
+    id: id,
+    params: params,
+    defaults: [],
+    rest: rest,
+    body: body,
+    generator: false,
+    expression: false
+  };
+};
+
+exports.EmptyStatement = function() {
+  return {
+    type: 'EmptyStatement'
+  };
+};
+
+exports.ExpressionStatement = function(expression) {
+  return {
+    type: 'ExpressionStatement',
+    expression: expression
+  };
+};
+
+exports.IfStatement = function(test, consequent, alternate) {
+  return {
+    type: 'IfStatement',
+    test: test,
+    consequent: consequent,
+    alternate: (typeof alternate !== 'undefined' ? alternate : null)
+  };
+};
+
+exports.ReturnStatement = function(argument) {
+  return {
+    type: 'ReturnStatement',
+    argument: argument
+  };
+};
+
+exports.VariableDeclaration = function() {
+  var args;
+  args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return {
+    type: 'VariableDeclaration',
+    kind: 'var',
+    declarations: args
+  };
+};
+
+exports.VariableDeclarator = function(id, init) {
+  return {
+    type: 'VariableDeclarator',
+    id: id,
+    init: init
+  };
+};
+
+exports.FunctionDeclaration = function(id, params, rest, body) {
+  var node;
+  node = exports.FunctionExpression(id, params, rest, body);
+  node.type = 'FunctionDeclaration';
+  return node;
+};
+
+exports.BlockStatement = function() {
+  var args;
+  args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return {
+    type: 'BlockStatement',
+    body: args
+  };
+};
+
+exports.Program = function() {
+  var args;
+  args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  return {
+    type: 'Program',
+    body: args
+  };
+};
+
+
+},{"../lib/closer":1,"json-diff":5}],19:[function(_dereq_,module,exports){
+var BlockStatement, Boolean, CallExpression, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, Nil, Program, ReturnStatement, String, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, closer, helpers, json_diff;
+
+closer = _dereq_('../lib/closer');
+
+json_diff = _dereq_('json-diff');
+
+helpers = _dereq_('./closer-helpers');
+
+Integer = helpers.Literal;
+
+Float = helpers.Literal;
+
+String = helpers.Literal;
+
+Boolean = helpers.Literal;
+
+Nil = helpers.Literal;
+
+Keyword = helpers['keyword'];
+
+Vector = helpers['vector'];
+
+List = helpers['list'];
+
+HashSet = helpers['set'];
+
+HashMap = helpers['hash_map'];
+
+Identifier = helpers.Identifier;
+
+UnaryExpression = helpers.UnaryExpression;
+
+CallExpression = helpers.CallExpression;
+
+FunctionExpression = helpers.FunctionExpression;
+
+EmptyStatement = helpers.EmptyStatement;
+
+ExpressionStatement = helpers.ExpressionStatement;
+
+IfStatement = helpers.IfStatement;
+
+ReturnStatement = helpers.ReturnStatement;
+
+VariableDeclaration = helpers.VariableDeclaration;
+
+VariableDeclarator = helpers.VariableDeclarator;
+
+FunctionDeclaration = helpers.FunctionDeclaration;
+
+BlockStatement = helpers.BlockStatement;
+
+Program = helpers.Program;
+
+beforeEach(function() {
+  return this.addMatchers({
+    toDeepEqual: helpers.toDeepEqual
+  });
+});
+
+describe('Closer parser', function() {
+  it('parses an empty program', function() {
+    return expect(closer.parse('\n')).toDeepEqual(Program());
+  });
+  it('parses an empty s-expression', function() {
+    return expect(closer.parse('()\n')).toDeepEqual(Program(EmptyStatement()));
+  });
+  it('parses comments', function() {
+    return expect(closer.parse('; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r')).toDeepEqual(Program(EmptyStatement()));
+  });
+  it('parses an identifier', function() {
+    return expect(closer.parse('x\n')).toDeepEqual(Program(ExpressionStatement(Identifier('x'))));
+  });
+  it('parses integer, float, string, boolean, and nil literals', function() {
+    return expect(closer.parse('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual(Program(ExpressionStatement(UnaryExpression('-', Integer(24))), ExpressionStatement(UnaryExpression('-', Float(23.67))), ExpressionStatement(UnaryExpression('-', Float(22.45e-5))), ExpressionStatement(String('')), ExpressionStatement(String('string')), ExpressionStatement(Boolean(true)), ExpressionStatement(Boolean(false)), ExpressionStatement(Nil())));
+  });
+  it('parses keywords', function() {
+    return expect(closer.parse(':keyword')).toDeepEqual(Program(ExpressionStatement(Keyword('keyword'))));
+  });
+  it('parses vector and list literals', function() {
+    return expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual(Program(ExpressionStatement(Vector()), ExpressionStatement(Vector(String('string'), Boolean(true))), ExpressionStatement(List()), ExpressionStatement(List(String('string'), Boolean(true)))));
+  });
+  it('parses set and map literals', function() {
+    expect(closer.parse('#{} #{"string" true}')).toDeepEqual(Program(ExpressionStatement(HashSet()), ExpressionStatement(HashSet(String('string'), Boolean(true)))));
+    expect(closer.parse('{} {"string" true}')).toDeepEqual(Program(ExpressionStatement(HashMap()), ExpressionStatement(HashMap(String('string'), Boolean(true)))));
+    return expect(function() {
+      return closer.parse('{1 2 3}');
+    }).toThrow();
+  });
+  it('parses commas as whitespace', function() {
+    return expect(closer.parse(',,, ,,,  ,,\n')).toDeepEqual(Program());
+  });
+  it('parses a function call with 0 arguments', function() {
+    return expect(closer.parse('(fn-name)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('fn-name')))));
+  });
+  it('parses a function call with > 0 arguments', function() {
+    return expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('fn-name'), [Identifier('arg1'), Identifier('arg2')]))));
+  });
+  it('parses an anonymous function definition', function() {
+    return expect(closer.parse('(fn [x] x)\n')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))))));
+  });
+  it('parses an anonymous function call', function() {
+    return expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))), [Integer(2)]))));
+  });
+  it('parses a named function definition', function() {
+    return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('fn-name'), [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))));
+  });
+  it('parses rest arguments', function() {
+    return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('avg'), [], Identifier('rest'), BlockStatement(ReturnStatement(CallExpression(Identifier('/'), [CallExpression(Identifier('apply'), [Identifier('+'), Identifier('rest')]), CallExpression(Identifier('count'), [Identifier('rest')])]))))));
+  });
+  it('parses an if statement without else', function() {
+    return expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('>='), [Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), null)));
+  });
+  it('parses an if-else statement', function() {
+    return expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('>='), [Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), ExpressionStatement(CallExpression(Identifier('-'), [Identifier('x')])))));
+  });
+  it('parses a when form', function() {
+    return expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual(Program(IfStatement(CallExpression(Identifier('condition?')), BlockStatement(ExpressionStatement(CallExpression(Identifier('println'), [String('hello')])), ExpressionStatement(Boolean(true))))));
+  });
+  it('parses an unbound var definition', function() {
+    return expect(closer.parse('(def var-name)')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('var-name'), null))));
+  });
+  it('parses a var bound to a literal', function() {
+    return expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('greeting'), String('Hello')))));
+  });
+  it('parses a var bound to the result of an expression', function() {
+    return expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('sum'), CallExpression(Identifier('+'), [Integer(3), Integer(5)])))));
+  });
+  it('parses a var bound to an fn form', function() {
+    return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], Identifier('numbers'), BlockStatement(ReturnStatement(CallExpression(Identifier('apply'), [Identifier('+'), Identifier('numbers')]))))))));
+  });
+  it('parses a let form with no bindings and no body', function() {
+    return expect(closer.parse('(let [])')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
+  });
+  it('parses a let form with non-empty bindings and a non-empty body', function() {
+    return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ExpressionStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))));
+  });
+  it('parses an empty do form', function() {
+    return expect(closer.parse('(do)')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
+  });
+  it('parses a non-empty do form', function() {
+    return expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual(Program(BlockStatement(ExpressionStatement(CallExpression(Identifier('+'), [Integer(1), Integer(2)])), ExpressionStatement(CallExpression(Identifier('+'), [Integer(3), Integer(4)])))));
+  });
+  return xit('parses source locations');
+});
+
+
+},{"../lib/closer":1,"./closer-helpers":18,"json-diff":5}],20:[function(_dereq_,module,exports){
 
 },{}],21:[function(_dereq_,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -5185,6 +5181,6 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,_dereq_("/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25}]},{},[5])
-(5)
+},{"/usr/local/lib/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":25}]},{},[19])
+(19)
 });
