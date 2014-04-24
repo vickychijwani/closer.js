@@ -4,6 +4,7 @@ FLOAT           [-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])*\"
 IDENTIFIER      [a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.]*
 COMMENT         \;[^\r\n]*
+ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 
 %s regex
 
@@ -26,6 +27,10 @@ COMMENT         \;[^\r\n]*
 {STRING} %{
     yytext = yytext.substr(1, yyleng-2);
     return 'STRING';
+%}
+
+{ANON_ARG} %{
+    return 'ANON_ARG';
 %}
 
 {COMMENT} %{ /* ignore */ %};

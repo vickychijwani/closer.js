@@ -25,6 +25,16 @@ Atom
   | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
   | COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
   | Identifier
+  | ANON_ARG {
+        var name = String($1).slice(1);
+        if (name === '') name = '1';
+        if (name === '&') name = 'rest';
+        var anonArgNum = (name === 'rest') ? 0 : Number(name);
+        name = 'arg_' + name;
+        $$ = yy.Node('Identifier', name, yy.loc(@1));
+        $$.anonArg = true;
+        $$.anonArgNum = anonArgNum;
+    }
   ;
 
 CollectionLiteral
@@ -42,6 +52,7 @@ RestArgs
 Fn
   : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
   | '(' List ')' { $$ = $List; }
+  | AnonFnLiteral
   ;
 
 FnParamsAndBody
@@ -57,6 +68,37 @@ FnDefinition
         $FnParamsAndBody.type = 'FunctionDeclaration';
         $FnParamsAndBody.id = $Identifier;
         $$ = $FnParamsAndBody;
+    }
+  ;
+
+AnonFnLiteral
+  : SHARP '(' List ')' {
+        var body = $3, bodyLoc = @3;
+        var maxArgNum = 0;
+        var hasRestArg = false;
+        estraverse.replace(body, {
+            enter: function (node) {
+                if (node.type === 'Identifier' && node.anonArg) {
+                    if (node.anonArgNum === 0)   // 0 denotes rest arg
+                        hasRestArg = true;
+                    else if (node.anonArgNum > maxArgNum)
+                        maxArgNum = node.anonArgNum;
+                    delete node.anonArg;
+                    delete node.anonArgNum;
+                }
+            }
+        });
+        var args = [];
+        for (var i = 1; i <= maxArgNum; ++i) {
+            args.push(yy.Node('Identifier', 'arg_' + i, yy.loc(@3)));
+        }
+        var restArg = (hasRestArg) ? yy.Node('Identifier', 'arg_rest', yy.loc(bodyLoc)) : null;
+        if (expressionTypes.indexOf(body.type) !== -1) {
+            body = yy.Node('ReturnStatement', body, yy.loc(bodyLoc));
+        }
+        body = yy.Node('BlockStatement', [body], yy.loc(bodyLoc));
+        $$ = yy.Node('FunctionExpression', null, args, restArg, body,
+            false, false, yy.loc(@1));
     }
   ;
 
@@ -113,6 +155,7 @@ SExpr
   : Atom { $$ = $Atom; }
   | CollectionLiteral { $$ = $CollectionLiteral; }
   | '(' List ')' { $$ = $List; }
+  | AnonFnLiteral
   ;
 
 SExprStmt
@@ -195,6 +238,8 @@ Program
   ;
 
 %%
+
+var estraverse = require('estraverse');
 
 var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
     'ObjectExpression', 'NewExpression'];

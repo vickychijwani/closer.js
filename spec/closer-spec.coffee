@@ -126,6 +126,33 @@ describe 'Closer parser', ->
               ReturnStatement(Identifier('x')))),
           [Integer(2)])))
 
+  it 'parses anonymous function literals', ->
+    expect(closer.parse('(#(+ % 2) 3)')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null,
+          [Identifier('arg_1')],
+          null,
+          BlockStatement(
+            ReturnStatement(CallExpression(
+              Identifier('+'),
+              [Identifier('arg_1'), Integer(2)])))),
+        [Integer(3)])))
+    expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        Identifier('map'),
+        [FunctionExpression(
+          null,
+          [Identifier('arg_1')],
+          null,
+          BlockStatement(
+            ReturnStatement(CallExpression(
+              Identifier('+'),
+              [Identifier('arg_1'), Integer(1)])))),
+        CallExpression(
+          Identifier('vector'),
+          [Integer(1), Integer(2), Integer(3)])])))
+
   it 'parses a named function definition', ->
     expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
       FunctionDeclaration(
