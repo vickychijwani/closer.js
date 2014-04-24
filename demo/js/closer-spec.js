@@ -211,7 +211,7 @@ case 33: this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0]));
 break;
 case 38: this.$ = yy.Node('CallExpression', $$[$0-1], getValueIfUndefined($$[$0], []), yy.loc(_$[$0-1])); 
 break;
-case 39: this.$ = yy.Node('BlockStatement', $$[$0], yy.loc(_$[$0-1])); 
+case 39: this.$ = wrapInIIFE($$[$0], _$[$0-1], yy); 
 break;
 case 40: this.$ = $$[$0]; 
 break;
@@ -4322,10 +4322,10 @@ describe('Closer parser', function() {
     return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ReturnStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))), []))));
   });
   it('parses an empty do form', function() {
-    return expect(closer.parse('(do)')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
+    return expect(closer.parse('(do)')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil()))), []))));
   });
   it('parses a non-empty do form', function() {
-    return expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual(Program(BlockStatement(ExpressionStatement(CallExpression(Identifier('+'), [Integer(1), Integer(2)])), ExpressionStatement(CallExpression(Identifier('+'), [Integer(3), Integer(4)])))));
+    return expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ExpressionStatement(CallExpression(Identifier('+'), [Integer(1), Integer(2)])), ReturnStatement(CallExpression(Identifier('+'), [Integer(3), Integer(4)])))), []))));
   });
   return xit('parses source locations');
 });

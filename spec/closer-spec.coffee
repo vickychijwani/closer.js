@@ -282,17 +282,25 @@ describe 'Closer parser', ->
   # other special forms
   it 'parses an empty do form', ->
     expect(closer.parse('(do)')).toDeepEqual Program(
-      BlockStatement(ExpressionStatement(Nil())))
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null, [], null,
+          BlockStatement(ReturnStatement(Nil()))),
+      [])))
 
   it 'parses a non-empty do form', ->
     expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual Program(
-      BlockStatement(
-        ExpressionStatement(CallExpression(
-          Identifier('+'),
-          [Integer(1), Integer(2)])),
-        ExpressionStatement(CallExpression(
-          Identifier('+'),
-          [Integer(3), Integer(4)]))))
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null, [], null,
+          BlockStatement(
+            ExpressionStatement(CallExpression(
+              Identifier('+'),
+              [Integer(1), Integer(2)])),
+            ReturnStatement(CallExpression(
+              Identifier('+'),
+              [Integer(3), Integer(4)])))),
+      [])))
 
 
   # pending

@@ -147,7 +147,7 @@ List
   | VarDeclaration
   | LetForm
   | Fn SExprs?[args] { $$ = yy.Node('CallExpression', $Fn, getValueIfUndefined($args, []), yy.loc(@Fn)); }
-  | DO DoForm { $$ = yy.Node('BlockStatement', $DoForm, yy.loc(@1)); }
+  | DO DoForm { $$ = wrapInIIFE($DoForm, @1, yy); }
   ;
 
 SExpr
