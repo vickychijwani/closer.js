@@ -131,24 +131,24 @@ describe 'Closer parser', ->
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null,
-          [Identifier('arg_1')],
+          [Identifier('__$1')],
           null,
           BlockStatement(
             ReturnStatement(CallExpression(
               Identifier('+'),
-              [Identifier('arg_1'), Integer(2)])))),
+              [Identifier('__$1'), Integer(2)])))),
         [Integer(3)])))
     expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         Identifier('map'),
         [FunctionExpression(
           null,
-          [Identifier('arg_1')],
+          [Identifier('__$1')],
           null,
           BlockStatement(
             ReturnStatement(CallExpression(
               Identifier('+'),
-              [Identifier('arg_1'), Integer(1)])))),
+              [Identifier('__$1'), Integer(1)])))),
         CallExpression(
           Identifier('vector'),
           [Integer(1), Integer(2), Integer(3)])])))

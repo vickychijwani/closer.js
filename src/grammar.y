@@ -30,7 +30,7 @@ Atom
         if (name === '') name = '1';
         if (name === '&') name = 'rest';
         var anonArgNum = (name === 'rest') ? 0 : Number(name);
-        name = 'arg_' + name;
+        name = '__$' + name;
         $$ = yy.Node('Identifier', name, yy.loc(@1));
         $$.anonArg = true;
         $$.anonArgNum = anonArgNum;
@@ -90,9 +90,9 @@ AnonFnLiteral
         });
         var args = [];
         for (var i = 1; i <= maxArgNum; ++i) {
-            args.push(yy.Node('Identifier', 'arg_' + i, yy.loc(@3)));
+            args.push(yy.Node('Identifier', '__$' + i, yy.loc(@3)));
         }
-        var restArg = (hasRestArg) ? yy.Node('Identifier', 'arg_rest', yy.loc(bodyLoc)) : null;
+        var restArg = (hasRestArg) ? yy.Node('Identifier', '__$rest', yy.loc(bodyLoc)) : null;
         if (expressionTypes.indexOf(body.type) !== -1) {
             body = yy.Node('ReturnStatement', body, yy.loc(bodyLoc));
         }
