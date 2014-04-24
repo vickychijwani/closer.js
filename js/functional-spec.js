@@ -113,7 +113,7 @@ case 12:
         if (name === '') name = '1';
         if (name === '&') name = 'rest';
         var anonArgNum = (name === 'rest') ? 0 : Number(name);
-        name = 'arg_' + name;
+        name = '__$' + name;
         this.$ = yy.Node('Identifier', name, yy.loc(_$[$0]));
         this.$.anonArg = true;
         this.$.anonArgNum = anonArgNum;
@@ -166,9 +166,9 @@ case 25:
         });
         var args = [];
         for (var i = 1; i <= maxArgNum; ++i) {
-            args.push(yy.Node('Identifier', 'arg_' + i, yy.loc(_$[$0-1])));
+            args.push(yy.Node('Identifier', '__$' + i, yy.loc(_$[$0-1])));
         }
-        var restArg = (hasRestArg) ? yy.Node('Identifier', 'arg_rest', yy.loc(bodyLoc)) : null;
+        var restArg = (hasRestArg) ? yy.Node('Identifier', '__$rest', yy.loc(bodyLoc)) : null;
         if (expressionTypes.indexOf(body.type) !== -1) {
             body = yy.Node('ReturnStatement', body, yy.loc(bodyLoc));
         }

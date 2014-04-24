@@ -113,7 +113,7 @@ case 12:
         if (name === '') name = '1';
         if (name === '&') name = 'rest';
         var anonArgNum = (name === 'rest') ? 0 : Number(name);
-        name = 'arg_' + name;
+        name = '__$' + name;
         this.$ = yy.Node('Identifier', name, yy.loc(_$[$0]));
         this.$.anonArg = true;
         this.$.anonArgNum = anonArgNum;
@@ -166,9 +166,9 @@ case 25:
         });
         var args = [];
         for (var i = 1; i <= maxArgNum; ++i) {
-            args.push(yy.Node('Identifier', 'arg_' + i, yy.loc(_$[$0-1])));
+            args.push(yy.Node('Identifier', '__$' + i, yy.loc(_$[$0-1])));
         }
-        var restArg = (hasRestArg) ? yy.Node('Identifier', 'arg_rest', yy.loc(bodyLoc)) : null;
+        var restArg = (hasRestArg) ? yy.Node('Identifier', '__$rest', yy.loc(bodyLoc)) : null;
         if (expressionTypes.indexOf(body.type) !== -1) {
             body = yy.Node('ReturnStatement', body, yy.loc(bodyLoc));
         }
@@ -4285,8 +4285,8 @@ describe('Closer parser', function() {
     return expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))), [Integer(2)]))));
   });
   it('parses anonymous function literals', function() {
-    expect(closer.parse('(#(+ % 2) 3)')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [Identifier('arg_1')], null, BlockStatement(ReturnStatement(CallExpression(Identifier('+'), [Identifier('arg_1'), Integer(2)])))), [Integer(3)]))));
-    return expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('map'), [FunctionExpression(null, [Identifier('arg_1')], null, BlockStatement(ReturnStatement(CallExpression(Identifier('+'), [Identifier('arg_1'), Integer(1)])))), CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3)])]))));
+    expect(closer.parse('(#(+ % 2) 3)')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(ReturnStatement(CallExpression(Identifier('+'), [Identifier('__$1'), Integer(2)])))), [Integer(3)]))));
+    return expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(Identifier('map'), [FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(ReturnStatement(CallExpression(Identifier('+'), [Identifier('__$1'), Integer(1)])))), CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3)])]))));
   });
   it('parses a named function definition', function() {
     return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('fn-name'), [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))));
