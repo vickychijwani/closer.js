@@ -127,7 +127,6 @@ LetBinding
 LetBindings
   : LetBindings LetBinding {
         $$ = $LetBindings;
-        // TODO let bindings are supposed to be local!
         var binding = yy.Node('VariableDeclaration', 'var', [$LetBinding], yy.loc(@LetBinding));
         $LetBindings.push(binding);
     }
@@ -137,7 +136,7 @@ LetBindings
 LetForm
   : LET '[' LetBindings ']' DoForm {
         var body = [].concat($LetBindings).concat($DoForm);
-        $$ = yy.Node('BlockStatement', body, yy.loc(@1));
+        $$ = wrapInIIFE(body, @1, yy);
     }
   ;
 
@@ -210,11 +209,7 @@ BlockStatement
 
 BlockStatementWithReturn
   : BlockStatement {
-        var lastSExpr = $BlockStatement.body[$BlockStatement.body.length-1];
-        lastSExpr.type = 'ReturnStatement';
-        lastSExpr.argument = lastSExpr.expression;
-        delete lastSExpr.expression;
-        $$ = $BlockStatement;
+        $$ = createReturnStatementIfPossible($BlockStatement);
     }
   ;
 
@@ -243,6 +238,43 @@ var estraverse = require('estraverse');
 
 var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
     'ObjectExpression', 'NewExpression'];
+
+// wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
+function wrapInIIFE(body, loc, yy) {
+    yyloc = yy.loc(loc);
+    return yy.Node('CallExpression',
+        yy.Node('FunctionExpression',
+            null, [], null,
+            createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc)),
+            false, false, yyloc
+        ), [], yyloc);
+}
+
+function createReturnStatementIfPossible(stmt) {
+    if (stmt === undefined || stmt === null || ! stmt.type)
+        return stmt;
+    var lastStmts = [], lastStmt;
+    if (stmt.type === 'BlockStatement') {
+        lastStmts.push(stmt.body[stmt.body.length - 1]);
+    } else if (stmt.type === 'IfStatement') {
+        lastStmts.push(stmt.consequent);
+        lastStmts.push(stmt.alternate);
+    } else {
+        return stmt;
+    }
+    for (var i = 0; i < lastStmts.length; ++i) {
+        lastStmt = lastStmts[i];
+        if (lastStmt === null) continue;
+        if (lastStmt.type === 'ExpressionStatement') {
+            lastStmt.type = 'ReturnStatement';
+            lastStmt.argument = lastStmt.expression;
+            delete lastStmt.expression;
+        } else {
+            createReturnStatementIfPossible(lastStmt);
+        }
+    }
+    return stmt;
+}
 
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;

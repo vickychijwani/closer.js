@@ -251,24 +251,32 @@ describe 'Closer parser', ->
 
   it 'parses a let form with no bindings and no body', ->
     expect(closer.parse('(let [])')).toDeepEqual Program(
-      BlockStatement(ExpressionStatement(Nil())))
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null, [], null,
+          BlockStatement(
+            ReturnStatement(Nil()))),
+        [])))
 
   it 'parses a let form with non-empty bindings and a non-empty body', ->
     expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual Program(
-      BlockStatement(
-        VariableDeclaration(
-          VariableDeclarator(
-            Identifier('x'),
-            Integer(3))),
-        VariableDeclaration(
-          VariableDeclarator(
-            Identifier('y'),
-            CallExpression(
-              Identifier('-'),
-              [Identifier('x')]))),
-        ExpressionStatement(CallExpression(
-          Identifier('+'),
-          [Identifier('x'), Identifier('y')]))))
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null, [], null,
+          BlockStatement(VariableDeclaration(
+            VariableDeclarator(
+              Identifier('x'),
+              Integer(3))),
+            VariableDeclaration(
+              VariableDeclarator(
+                Identifier('y'),
+                CallExpression(
+                  Identifier('-'),
+                  [Identifier('x')]))),
+            ReturnStatement(CallExpression(
+              Identifier('+'),
+              [Identifier('x'), Identifier('y')])))),
+        [])))
 
 
   # other special forms

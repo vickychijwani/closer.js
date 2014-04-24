@@ -16,7 +16,8 @@ module.exports = (grunt) ->
 
       browserify_spec:
         command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
-          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core-spec spec/<%= pkg.name %>-core-spec.coffee > demo/js/<%= pkg.name %>-core-spec.js;'
+          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core-spec spec/<%= pkg.name %>-core-spec.coffee > demo/js/<%= pkg.name %>-core-spec.js;
+          browserify -t coffeeify --extension=".coffee" -s functional-spec spec/functional-spec.coffee > demo/js/functional-spec.js;'
         options:
           failOnError: true
 
