@@ -4,7 +4,7 @@ module.exports = (grunt) ->
 
     shell:
       jison:
-        command: 'jison src/grammar.y src/lexer.l -o lib/parser.js'
+        command: 'mkdir -p lib/; jison src/grammar.y src/lexer.l -o lib/parser.js'
         options:
           failOnError: true
 
