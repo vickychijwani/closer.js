@@ -196,7 +196,6 @@ case 29:
 break;
 case 30:
         this.$ = $$[$0-1];
-        // TODO let bindings are supposed to be local!
         var binding = yy.Node('VariableDeclaration', 'var', [$$[$0]], yy.loc(_$[$0]));
         $$[$0-1].push(binding);
     
@@ -205,7 +204,7 @@ case 31: this.$ = [];
 break;
 case 32:
         var body = [].concat($$[$0-2]).concat($$[$0]);
-        this.$ = yy.Node('BlockStatement', body, yy.loc(_$[$0-4]));
+        this.$ = wrapInIIFE(body, _$[$0-4], yy);
     
 break;
 case 33: this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0])); 
@@ -260,11 +259,7 @@ case 52:
     
 break;
 case 53:
-        var lastSExpr = $$[$0].body[$$[$0].body.length-1];
-        lastSExpr.type = 'ReturnStatement';
-        lastSExpr.argument = lastSExpr.expression;
-        delete lastSExpr.expression;
-        this.$ = $$[$0];
+        this.$ = createReturnStatementIfPossible($$[$0]);
     
 break;
 case 54:
@@ -432,6 +427,43 @@ var estraverse = _dereq_('estraverse');
 
 var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
     'ObjectExpression', 'NewExpression'];
+
+// wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
+function wrapInIIFE(body, loc, yy) {
+    yyloc = yy.loc(loc);
+    return yy.Node('CallExpression',
+        yy.Node('FunctionExpression',
+            null, [], null,
+            createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc)),
+            false, false, yyloc
+        ), [], yyloc);
+}
+
+function createReturnStatementIfPossible(stmt) {
+    if (stmt === undefined || stmt === null || ! stmt.type)
+        return stmt;
+    var lastStmts = [], lastStmt;
+    if (stmt.type === 'BlockStatement') {
+        lastStmts.push(stmt.body[stmt.body.length - 1]);
+    } else if (stmt.type === 'IfStatement') {
+        lastStmts.push(stmt.consequent);
+        lastStmts.push(stmt.alternate);
+    } else {
+        return stmt;
+    }
+    for (var i = 0; i < lastStmts.length; ++i) {
+        lastStmt = lastStmts[i];
+        if (lastStmt === null) continue;
+        if (lastStmt.type === 'ExpressionStatement') {
+            lastStmt.type = 'ReturnStatement';
+            lastStmt.argument = lastStmt.expression;
+            delete lastStmt.expression;
+        } else {
+            createReturnStatementIfPossible(lastStmt);
+        }
+    }
+    return stmt;
+}
 
 function parseNumLiteral(type, token, loc, yy, yytext) {
     var node;
@@ -4284,10 +4316,10 @@ describe('Closer parser', function() {
     return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], Identifier('numbers'), BlockStatement(ReturnStatement(CallExpression(Identifier('apply'), [Identifier('+'), Identifier('numbers')]))))))));
   });
   it('parses a let form with no bindings and no body', function() {
-    return expect(closer.parse('(let [])')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
+    return expect(closer.parse('(let [])')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil()))), []))));
   });
   it('parses a let form with non-empty bindings and a non-empty body', function() {
-    return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ExpressionStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))));
+    return expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(Identifier('-'), [Identifier('x')]))), ReturnStatement(CallExpression(Identifier('+'), [Identifier('x'), Identifier('y')])))), []))));
   });
   it('parses an empty do form', function() {
     return expect(closer.parse('(do)')).toDeepEqual(Program(BlockStatement(ExpressionStatement(Nil()))));
