@@ -10,8 +10,12 @@ module.exports = (grunt) ->
 
       browserify:
         command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %> src/<%= pkg.name %>.coffee > dist/<%= pkg.name %>.js;
-          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core src/<%= pkg.name %>-core.coffee > dist/<%= pkg.name %>-core.js;
-          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
+          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core src/<%= pkg.name %>-core.coffee > dist/<%= pkg.name %>-core.js;'
+        options:
+          failOnError: true
+
+      browserify_spec:
+        command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
           browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core-spec spec/<%= pkg.name %>-core-spec.coffee > demo/js/<%= pkg.name %>-core-spec.js;'
         options:
           failOnError: true
@@ -77,7 +81,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
 
-  grunt.registerTask 'default', ['coffeelint', 'shell:jison', 'jasmine_node', 'shell:browserify', 'uglify', 'shell:copy_uglified']
+  grunt.registerTask 'default', ['coffeelint', 'shell:jison', 'jasmine_node', 'shell:browserify', 'shell:browserify_spec', 'uglify', 'shell:copy_uglified']
   grunt.registerTask 'test', ['coffeelint', 'shell:jison', 'jasmine_node']
   grunt.registerTask 'build', ['coffeelint', 'shell:jison']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']

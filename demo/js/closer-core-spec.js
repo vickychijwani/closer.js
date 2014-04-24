@@ -16405,7 +16405,7 @@ describe('Closer core library', function() {
       throws('(=)');
       truthy('(= nil nil)');
       truthy('(= 1)');
-      truthy('(= (fn [x y] (+ x y)))');
+      truthy('(= #(+ x y))');
       truthy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))');
       falsy('(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))');
       truthy('(= 1 1.0)');
@@ -16431,7 +16431,7 @@ describe('Closer core library', function() {
       throws('(not=)');
       falsy('(not= nil nil)');
       falsy('(not= 1)');
-      falsy('(not= (fn [x y] (+ x y)))');
+      falsy('(not= #(+ x y))');
       falsy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))');
       truthy('(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))');
       falsy('(not= 1 1.0)');
@@ -16522,7 +16522,7 @@ describe('Closer core library', function() {
       throws('(true? nil false)');
       truthy('(true? true)');
       falsy('(true? "hello")');
-      return falsy('(true? (fn []))');
+      return falsy('(true? #())');
     });
   });
   describe('(false? x)', function() {
@@ -16530,7 +16530,7 @@ describe('Closer core library', function() {
       throws('(false? nil false)');
       truthy('(false? false)');
       falsy('(false? nil)');
-      return falsy('(false? (fn []))');
+      return falsy('(false? #())');
     });
   });
   describe('(nil? x)', function() {
@@ -16538,7 +16538,7 @@ describe('Closer core library', function() {
       throws('(nil? nil false)');
       truthy('(nil? nil)');
       falsy('(nil? false)');
-      return falsy('(nil? (fn []))');
+      return falsy('(nil? #())');
     });
   });
   describe('(some? x)', function() {
@@ -16546,7 +16546,7 @@ describe('Closer core library', function() {
       throws('(some? nil false)');
       falsy('(some? nil)');
       truthy('(some? "hello")');
-      return truthy('(some? (fn []))');
+      return truthy('(some? #())');
     });
   });
   describe('(number? x)', function() {
@@ -16685,7 +16685,7 @@ describe('Closer core library', function() {
       truthy('(boolean "hello")');
       truthy('(boolean :keyword)');
       truthy('(boolean [1 2])');
-      return truthy('(boolean (fn [x y] (+ x y)))');
+      return truthy('(boolean #(+ x y))');
     });
   });
   describe('(not x)', function() {
@@ -16698,7 +16698,7 @@ describe('Closer core library', function() {
       falsy('(not "hello")');
       falsy('(not :keyword)');
       falsy('(not [1 2])');
-      return falsy('(not (fn [x y] (+ x y)))');
+      return falsy('(not #(+ x y))');
     });
   });
   describe('(str x & ys)', function() {
@@ -16995,7 +16995,7 @@ describe('Closer core library', function() {
       eq('(dissoc [1 2])', vec(1, 2));
       eq('(dissoc {1 2, 3 4, 5 6} 3 5)', map(1, 2));
       eq('(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map(1, 2));
-      return nil('(dissoc nil (fn []) true)');
+      return nil('(dissoc nil #() true)');
     });
   });
   describe('(find map key)', function() {
@@ -17052,8 +17052,8 @@ describe('Closer core library', function() {
       eq('(filter even? [1 2 3 4])', seq([2, 4]));
       eq('(filter even? \'(1 2 3 4))', seq([2, 4]));
       eq('(filter even? #{1 2 3 4})', seq([2, 4]));
-      eq('(filter (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(1, 2)]));
-      return eq('(filter (fn [s] (= s "s")) "strings")', seq(['s', 's']));
+      eq('(filter #(< (nth % 0) (nth % 1)) {1 2 4 3})', seq([vec(1, 2)]));
+      return eq('(filter #(= % "s") "strings")', seq(['s', 's']));
     });
   });
   describe('(remove pred coll)', function() {
@@ -17064,8 +17064,8 @@ describe('Closer core library', function() {
       eq('(remove even? [1 2 3 4])', seq([1, 3]));
       eq('(remove even? \'(1 2 3 4))', seq([1, 3]));
       eq('(remove even? #{1 2 3 4})', seq([1, 3]));
-      eq('(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq([vec(4, 3)]));
-      return eq('(remove (fn [s] (= s "s")) "strings")', seq(['t', 'r', 'i', 'n', 'g']));
+      eq('(remove #(< (nth % 0) (nth % 1)) {1 2 4 3})', seq([vec(4, 3)]));
+      return eq('(remove #(= % "s") "strings")', seq(['t', 'r', 'i', 'n', 'g']));
     });
   });
   describe('(reduce f coll), (reduce f val coll)', function() {

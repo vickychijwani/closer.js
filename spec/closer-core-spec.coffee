@@ -117,7 +117,7 @@ describe 'Closer core library', ->
       throws '(=)'
       truthy '(= nil nil)'
       truthy '(= 1)'
-      truthy '(= (fn [x y] (+ x y)))'   # always returns true for 1 arg
+      truthy '(= #(+ x y))'   # always returns true for 1 arg
       truthy '(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 4)))'
       falsy '(let [a 1] (= a a (/ 4 (+ 2 2)) (mod 5 3)))'
       truthy '(= 1 1.0)'   # different from standard Clojure
@@ -142,7 +142,7 @@ describe 'Closer core library', ->
       throws '(not=)'
       falsy '(not= nil nil)'
       falsy '(not= 1)'
-      falsy '(not= (fn [x y] (+ x y)))'   # always falsy for 1 arg
+      falsy '(not= #(+ x y))'   # always falsy for 1 arg
       falsy '(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 4)))'
       truthy '(let [a 1] (not= a a (/ 4 (+ 2 2)) (mod 5 3)))'
       falsy '(not= 1 1.0)'   # different from standard Clojure
@@ -226,28 +226,28 @@ describe 'Closer core library', ->
       throws '(true? nil false)'
       truthy '(true? true)'
       falsy '(true? "hello")'
-      falsy '(true? (fn []))'
+      falsy '(true? #())'
 
   describe '(false? x)', ->
     it 'returns true if and only if x is the value false', ->
       throws '(false? nil false)'
       truthy '(false? false)'
       falsy '(false? nil)'
-      falsy '(false? (fn []))'
+      falsy '(false? #())'
 
   describe '(nil? x)', ->
     it 'returns true if and only if x is the value nil', ->
       throws '(nil? nil false)'
       truthy '(nil? nil)'
       falsy '(nil? false)'
-      falsy '(nil? (fn []))'
+      falsy '(nil? #())'
 
   describe '(some? x)', ->
     it 'returns true if and only if x is NOT the value nil', ->
       throws '(some? nil false)'
       falsy '(some? nil)'
       truthy '(some? "hello")'
-      truthy '(some? (fn []))'
+      truthy '(some? #())'
 
   describe '(number? x)', ->
     it 'returns true if and only if x is a number', ->
@@ -376,7 +376,7 @@ describe 'Closer core library', ->
       truthy '(boolean "hello")'
       truthy '(boolean :keyword)'
       truthy '(boolean [1 2])'
-      truthy '(boolean (fn [x y] (+ x y)))'
+      truthy '(boolean #(+ x y))'
 
   describe '(not x)', ->
     it 'returns the complement of (boolean x) (true for nil and false, else false)', ->
@@ -388,7 +388,7 @@ describe 'Closer core library', ->
       falsy '(not "hello")'
       falsy '(not :keyword)'
       falsy '(not [1 2])'
-      falsy '(not (fn [x y] (+ x y)))'
+      falsy '(not #(+ x y))'
 
 
   # string
@@ -668,7 +668,7 @@ describe 'Closer core library', ->
       eq '(dissoc [1 2])', vec 1, 2   # works with 1 arg irrespective of type
       eq '(dissoc {1 2, 3 4, 5 6} 3 5)', map 1, 2
       eq '(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map 1, 2
-      nil '(dissoc nil (fn []) true)'   # works with nil irrespective of rest args
+      nil '(dissoc nil #() true)'   # works with nil irrespective of rest args
 
   describe '(find map key)', ->
     it 'returns the map entry for a given key', ->
@@ -721,8 +721,8 @@ describe 'Closer core library', ->
       eq '(filter even? [1 2 3 4])', seq [2, 4]
       eq '(filter even? \'(1 2 3 4))', seq [2, 4]
       eq '(filter even? #{1 2 3 4})', seq [2, 4]
-      eq '(filter (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq [vec(1, 2)]
-      eq '(filter (fn [s] (= s "s")) "strings")', seq ['s', 's']
+      eq '(filter #(< (nth % 0) (nth % 1)) {1 2 4 3})', seq [vec(1, 2)]
+      eq '(filter #(= % "s") "strings")', seq ['s', 's']
 
   describe '(remove pred coll)', ->
     it 'returns a seq of the items in coll for which (pred item) is false', ->
@@ -732,8 +732,8 @@ describe 'Closer core library', ->
       eq '(remove even? [1 2 3 4])', seq [1, 3]
       eq '(remove even? \'(1 2 3 4))', seq [1, 3]
       eq '(remove even? #{1 2 3 4})', seq [1, 3]
-      eq '(remove (fn [pair] (< (nth pair 0) (nth pair 1))) {1 2 4 3})', seq [vec(4, 3)]
-      eq '(remove (fn [s] (= s "s")) "strings")', seq ['t', 'r', 'i', 'n', 'g']
+      eq '(remove #(< (nth % 0) (nth % 1)) {1 2 4 3})', seq [vec(4, 3)]
+      eq '(remove #(= % "s") "strings")', seq ['t', 'r', 'i', 'n', 'g']
 
   describe '(reduce f coll), (reduce f val coll)', ->
     it 'applies f to the first item in coll, then to that result and the second item, and so on', ->
