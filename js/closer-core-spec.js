@@ -211,7 +211,7 @@ case 33: this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0]));
 break;
 case 38: this.$ = yy.Node('CallExpression', $$[$0-1], getValueIfUndefined($$[$0], []), yy.loc(_$[$0-1])); 
 break;
-case 39: this.$ = yy.Node('BlockStatement', $$[$0], yy.loc(_$[$0-1])); 
+case 39: this.$ = wrapInIIFE($$[$0], _$[$0-1], yy); 
 break;
 case 40: this.$ = $$[$0]; 
 break;
