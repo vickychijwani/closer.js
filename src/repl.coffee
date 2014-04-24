@@ -28,8 +28,8 @@ wireCallsToCore = (ast) ->
       node
   ast
 
-parse = (src, options) ->
+exports.parse = (src, options) ->
   wireCallsToCore closer.parse src, options
 
 exports.generateJS = (src, options) ->
-  escodegen.generate parse src, options
+  escodegen.generate exports.parse src, options

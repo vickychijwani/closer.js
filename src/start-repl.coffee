@@ -19,6 +19,8 @@ defaults =
 
     try
       js = repl.generateJS input
+      console.log '\nAST: ' + JSON.stringify repl.parse(input), null, 4
+      console.log '\nGenerated JS:\n' + js + '\n'
       result = vm.runInNewContext js, sandbox
     catch e
     callback e, result
