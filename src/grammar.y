@@ -11,6 +11,19 @@ Keyword
   : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
   ;
 
+AnonArg
+  : ANON_ARG {
+        var name = String($1).slice(1);
+        if (name === '') name = '1';
+        if (name === '&') name = 'rest';
+        var anonArgNum = (name === 'rest') ? 0 : Number(name);
+        name = '__$' + name;
+        $$ = yy.Node('Identifier', name, yy.loc(@1));
+        $$.anonArg = true;
+        $$.anonArgNum = anonArgNum;
+    }
+  ;
+
 IdentifierList
   : { $$ = []; }
   | IdentifierList Identifier {
@@ -29,16 +42,7 @@ Atom
   | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
   | Keyword
   | Identifier
-  | ANON_ARG {
-        var name = String($1).slice(1);
-        if (name === '') name = '1';
-        if (name === '&') name = 'rest';
-        var anonArgNum = (name === 'rest') ? 0 : Number(name);
-        name = '__$' + name;
-        $$ = yy.Node('Identifier', name, yy.loc(@1));
-        $$.anonArg = true;
-        $$.anonArgNum = anonArgNum;
-    }
+  | AnonArg
   ;
 
 CollectionLiteral
@@ -59,6 +63,7 @@ Fn
   | Keyword
   | '(' List ')' { $$ = $List; }
   | AnonFnLiteral
+  | AnonArg
   ;
 
 FnParamsAndBody

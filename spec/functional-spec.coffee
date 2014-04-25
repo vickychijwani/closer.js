@@ -36,7 +36,7 @@ describe 'Functional tests', ->
           (let [pivot (first coll)]
             (when pivot
               (concat (qsort (filter #(< % pivot) coll))
-                      (filter #(= % pivot) coll)
+                      (filter #{pivot} coll)
                       (qsort (filter #(> % pivot) coll))))))
 
         (qsort [8 3 7 3 2 10 1])',

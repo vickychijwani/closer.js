@@ -705,6 +705,9 @@ describe 'Closer core library', ->
       eq '(map inc [1 2 3])', seq [2, 3, 4]
       eq '(map + [1 2] \'(3 4) #{5 6})', seq [9, 12]
       eq '(map first {:a 1, :b 2})', seq [key('a'), key('b')]
+      eq '(map #{1} [1 2 4 1])', seq [1, null, null, 1]
+      eq '(map {1 2, 3 4, 5 6, 7 8} #{3 7})', seq [4, 8]
+      eq '(map :name [{:name "name1"} {:name "name2"}])', seq ['name1', 'name2']
 
   describe '(mapcat f colls)', ->
     it 'applies concat to the result of applying map to f and colls', ->
@@ -721,8 +724,8 @@ describe 'Closer core library', ->
       eq '(filter even? [1 2 3 4])', seq [2, 4]
       eq '(filter even? \'(1 2 3 4))', seq [2, 4]
       eq '(filter even? #{1 2 3 4})', seq [2, 4]
-      eq '(filter #(< (nth % 0) (nth % 1)) {1 2 4 3})', seq [vec(1, 2)]
-      eq '(filter #(= % "s") "strings")', seq ['s', 's']
+      eq '(filter #(< (% 0) (% 1)) {1 2 4 3})', seq [vec(1, 2)]
+      eq '(filter #{"s"} "strings")', seq ['s', 's']
 
   describe '(remove pred coll)', ->
     it 'returns a seq of the items in coll for which (pred item) is false', ->
@@ -732,8 +735,9 @@ describe 'Closer core library', ->
       eq '(remove even? [1 2 3 4])', seq [1, 3]
       eq '(remove even? \'(1 2 3 4))', seq [1, 3]
       eq '(remove even? #{1 2 3 4})', seq [1, 3]
-      eq '(remove #(< (nth % 0) (nth % 1)) {1 2 4 3})', seq [vec(4, 3)]
-      eq '(remove #(= % "s") "strings")', seq ['t', 'r', 'i', 'n', 'g']
+      eq '(remove #{2 4} (range 1 5))', seq [1, 3]
+      eq '(remove #(< (% 0) (% 1)) {1 2 4 3})', seq [vec(4, 3)]
+      eq '(remove #{"s"} "strings")', seq ['t', 'r', 'i', 'n', 'g']
 
   describe '(reduce f coll), (reduce f val coll)', ->
     it 'applies f to the first item in coll, then to that result and the second item, and so on', ->

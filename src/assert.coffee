@@ -51,7 +51,9 @@ assert =
       throw new ArgTypeError "#{unexpectedArg} does not support stack operations"
 
   function: (args...) ->
-    unexpectedArg = firstFailure args, (arg) -> typeof arg is 'function'
+    unexpectedArg = firstFailure args, (arg) ->
+      typeof arg is 'function' or mori.is_vector(arg) or mori.is_map(arg) or
+      mori.is_set(arg) or mori.is_keyword(arg)
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not a function"
 
