@@ -7,6 +7,10 @@ Identifier
   : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
   ;
 
+Keyword
+  : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
+  ;
+
 IdentifierList
   : { $$ = []; }
   | IdentifierList Identifier {
@@ -23,7 +27,7 @@ Atom
   | 'true' { $$ = parseLiteral('Boolean', true, @1, yytext, yy); }
   | 'false' { $$ = parseLiteral('Boolean', false, @1, yytext, yy); }
   | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
-  | COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
+  | Keyword
   | Identifier
   | ANON_ARG {
         var name = String($1).slice(1);
@@ -51,6 +55,8 @@ RestArgs
 
 Fn
   : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  | CollectionLiteral
+  | Keyword
   | '(' List ')' { $$ = $List; }
   | AnonFnLiteral
   ;
@@ -146,7 +152,14 @@ List
   | ConditionalExpr
   | VarDeclaration
   | LetForm
-  | Fn SExprs?[args] { $$ = yy.Node('CallExpression', $Fn, getValueIfUndefined($args, []), yy.loc(@Fn)); }
+  | Fn SExprs?[args] {
+        var callee = yy.Node('MemberExpression', $Fn,
+            yy.Node('Identifier', 'call', yy.loc(@Fn)),
+            false, yy.loc(@Fn));
+        var args = getValueIfUndefined($args, []);
+        args.unshift(yy.Node('Literal', null, yy.loc(@2)));   // value for "this"
+        $$ = yy.Node('CallExpression', callee, args, yy.loc(@Fn));
+    }
   | DO DoForm { $$ = wrapInIIFE($DoForm, @1, yy); }
   ;
 

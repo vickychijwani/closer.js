@@ -1,13 +1,13 @@
 nodeRepl = require 'repl'
 vm = require 'vm'
+closer = require './closer'
 
 core = require './closer-core'
 mori = require 'mori'
 repl = require './repl'
 
-sandbox = vm.createContext
-  core: core
-  mori: mori
+global.mori = mori
+global.core = core
 
 defaults =
   prompt: 'closer> '
@@ -21,7 +21,7 @@ defaults =
       js = repl.generateJS input
       console.log '\nAST: ' + JSON.stringify repl.parse(input), null, 4
       console.log '\nGenerated JS:\n' + js + '\n'
-      result = vm.runInNewContext js, sandbox
+      result = vm.runInThisContext js
     catch e
     callback e, result
   useGlobal: true

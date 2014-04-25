@@ -14,7 +14,9 @@ HashSet = helpers['set']
 HashMap = helpers['hash_map']
 Identifier = helpers.Identifier
 UnaryExpression = helpers.UnaryExpression
+ArrayExpression = helpers.ArrayExpression
 CallExpression = helpers.CallExpression
+MemberExpression = helpers.MemberExpression
 FunctionExpression = helpers.FunctionExpression
 EmptyStatement = helpers.EmptyStatement
 ExpressionStatement = helpers.ExpressionStatement
@@ -94,15 +96,15 @@ describe 'Closer parser', ->
   # functions
   it 'parses a function call with 0 arguments', ->
     expect(closer.parse('(fn-name)\n')).toDeepEqual Program(
-      ExpressionStatement(
-        CallExpression(Identifier('fn-name'))))
+      ExpressionStatement(CallExpression(
+        MemberExpression(Identifier('fn-name'), Identifier('call')),
+        [Nil()])))
 
   it 'parses a function call with > 0 arguments', ->
     expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual Program(
-      ExpressionStatement(
-        CallExpression(
-          Identifier('fn-name'),
-          [Identifier('arg1'), Identifier('arg2')])))
+      ExpressionStatement(CallExpression(
+        MemberExpression(Identifier('fn-name'), Identifier('call')),
+        [Nil(), Identifier('arg1'), Identifier('arg2')])))
 
   it 'parses an anonymous function definition', ->
     expect(closer.parse('(fn [x] x)\n')).toDeepEqual Program(
@@ -116,39 +118,43 @@ describe 'Closer parser', ->
 
   it 'parses an anonymous function call', ->
     expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual Program(
-      ExpressionStatement(
-        CallExpression(
+      ExpressionStatement(CallExpression(
+        MemberExpression(
           FunctionExpression(
             null,
             [Identifier('x')],
             null,
             BlockStatement(
               ReturnStatement(Identifier('x')))),
-          [Integer(2)])))
+          Identifier('call')),
+        [Nil(), Integer(2)])))
 
   it 'parses anonymous function literals', ->
     expect(closer.parse('(#(+ % 2) 3)')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
+        MemberExpression(
+          FunctionExpression(
+            null,
+            [Identifier('__$1')],
+            null,
+            BlockStatement(
+              ReturnStatement(CallExpression(
+                MemberExpression(Identifier('+'), Identifier('call')),
+                [Nil(), Identifier('__$1'), Integer(2)])))),
+          Identifier('call')),
+        [Nil(), Integer(3)])))
+    expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(Identifier('map'), Identifier('call')),
+        [Nil(),
         FunctionExpression(
           null,
           [Identifier('__$1')],
           null,
           BlockStatement(
             ReturnStatement(CallExpression(
-              Identifier('+'),
-              [Identifier('__$1'), Integer(2)])))),
-        [Integer(3)])))
-    expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual Program(
-      ExpressionStatement(CallExpression(
-        Identifier('map'),
-        [FunctionExpression(
-          null,
-          [Identifier('__$1')],
-          null,
-          BlockStatement(
-            ReturnStatement(CallExpression(
-              Identifier('+'),
-              [Identifier('__$1'), Integer(1)])))),
+              MemberExpression(Identifier('+'), Identifier('call')),
+              [Nil(), Identifier('__$1'), Integer(1)])))),
         CallExpression(
           Identifier('vector'),
           [Integer(1), Integer(2), Integer(3)])])))
@@ -169,13 +175,48 @@ describe 'Closer parser', ->
         [], Identifier('rest'),
         BlockStatement(ReturnStatement(
           CallExpression(
-            Identifier('/'), [
-              CallExpression(
-                Identifier('apply'),
-                [Identifier('+'), Identifier('rest')])
-              CallExpression(
-                Identifier('count'),
-                [Identifier('rest')])])))))
+            MemberExpression(Identifier('/'), Identifier('call')),
+            [Nil(),
+            CallExpression(
+              MemberExpression(Identifier('apply'), Identifier('call')),
+              [Nil(), Identifier('+'), Identifier('rest')]),
+            CallExpression(
+              MemberExpression(Identifier('count'), Identifier('call')),
+              [Nil(), Identifier('rest')])])))))
+
+  it 'parses collections and keywords in function position', ->
+    expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(
+          CallExpression(
+            Identifier('vector'),
+            [Integer(1), Integer(2), Integer(3), Integer(4)]),
+          Identifier('call')),
+        [Nil(), Integer(1)])))
+    expect(closer.parse('({1 2 3 4} 1)')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(
+          CallExpression(
+            Identifier('hash_map'),
+            [Integer(1), Integer(2), Integer(3), Integer(4)]),
+          Identifier('call')),
+        [Nil(), Integer(1)])))
+    expect(closer.parse('(#{1 2 3 4} 1)')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(
+          CallExpression(
+            Identifier('set'),
+            [ArrayExpression(
+              [Integer(1), Integer(2), Integer(3), Integer(4)])]),
+          Identifier('call')),
+        [Nil(), Integer(1)])))
+    expect(closer.parse('(:key {:key :val})')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(Keyword('key'), Identifier('call')),
+        [Nil(),
+        CallExpression(
+          Identifier('hash_map'),
+          [Keyword('key'), Keyword('val')])])))
 
 
   # conditional statements
@@ -183,8 +224,8 @@ describe 'Closer parser', ->
     expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
-          Identifier('>='),
-          [Identifier('x'), Integer(0)]),
+          MemberExpression(Identifier('>='), Identifier('call')),
+          [Nil(), Identifier('x'), Integer(0)]),
         ExpressionStatement(Identifier('x')),
         null))
 
@@ -192,22 +233,24 @@ describe 'Closer parser', ->
     expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
-          Identifier('>='),
-          [Identifier('x'), Integer(0)]),
+          MemberExpression(Identifier('>='), Identifier('call')),
+          [Nil(), Identifier('x'), Integer(0)]),
         ExpressionStatement(Identifier('x')),
         ExpressionStatement(
           CallExpression(
-            Identifier('-'),
-            [Identifier('x')]))))
+            MemberExpression(Identifier('-'), Identifier('call')),
+            [Nil(), Identifier('x')]))))
 
   it 'parses a when form', ->
     expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual Program(
       IfStatement(
-        CallExpression(Identifier('condition?')),
+        CallExpression(
+          MemberExpression(Identifier('condition?'), Identifier('call')),
+          [Nil()]),
         BlockStatement(
           ExpressionStatement(CallExpression(
-            Identifier('println'),
-            [String('hello')])),
+            MemberExpression(Identifier('println'), Identifier('call')),
+            [Nil(), String('hello')])),
           ExpressionStatement(Boolean(true)))))
 
 
@@ -232,8 +275,8 @@ describe 'Closer parser', ->
         VariableDeclarator(
           Identifier('sum'),
           CallExpression(
-            Identifier('+'),
-            [Integer(3), Integer(5)]))))
+            MemberExpression(Identifier('+'), Identifier('call')),
+            [Nil(), Integer(3), Integer(5)]))))
 
   it 'parses a var bound to an fn form', ->
     expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual Program(
@@ -246,8 +289,8 @@ describe 'Closer parser', ->
             Identifier('numbers'),
             BlockStatement(
               ReturnStatement(CallExpression(
-                Identifier('apply'),
-                [Identifier('+'), Identifier('numbers')])))))))
+                MemberExpression(Identifier('apply'), Identifier('call')),
+                [Nil(), Identifier('+'), Identifier('numbers')])))))))
 
   it 'parses a let form with no bindings and no body', ->
     expect(closer.parse('(let [])')).toDeepEqual Program(
@@ -255,8 +298,7 @@ describe 'Closer parser', ->
         FunctionExpression(
           null, [], null,
           BlockStatement(
-            ReturnStatement(Nil()))),
-        [])))
+            ReturnStatement(Nil()))))))
 
   it 'parses a let form with non-empty bindings and a non-empty body', ->
     expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual Program(
@@ -271,12 +313,11 @@ describe 'Closer parser', ->
               VariableDeclarator(
                 Identifier('y'),
                 CallExpression(
-                  Identifier('-'),
-                  [Identifier('x')]))),
+                  MemberExpression(Identifier('-'), Identifier('call')),
+                  [Nil(), Identifier('x')]))),
             ReturnStatement(CallExpression(
-              Identifier('+'),
-              [Identifier('x'), Identifier('y')])))),
-        [])))
+              MemberExpression(Identifier('+'), Identifier('call')),
+              [Nil(), Identifier('x'), Identifier('y')])))))))
 
 
   # other special forms
@@ -285,8 +326,7 @@ describe 'Closer parser', ->
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
-          BlockStatement(ReturnStatement(Nil()))),
-      [])))
+          BlockStatement(ReturnStatement(Nil()))))))
 
   it 'parses a non-empty do form', ->
     expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual Program(
@@ -295,12 +335,11 @@ describe 'Closer parser', ->
           null, [], null,
           BlockStatement(
             ExpressionStatement(CallExpression(
-              Identifier('+'),
-              [Integer(1), Integer(2)])),
+              MemberExpression(Identifier('+'), Identifier('call')),
+              [Nil(), Integer(1), Integer(2)])),
             ReturnStatement(CallExpression(
-              Identifier('+'),
-              [Integer(3), Integer(4)])))),
-      [])))
+              MemberExpression(Identifier('+'), Identifier('call')),
+              [Nil(), Integer(3), Integer(4)])))))))
 
 
   # pending

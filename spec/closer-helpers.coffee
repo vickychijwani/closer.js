@@ -29,10 +29,20 @@ exports.UnaryExpression = (operator, argument) ->
   argument: argument
   prefix: true
 
+exports.ArrayExpression = (elements) ->
+  type: 'ArrayExpression'
+  elements: elements
+
 exports.CallExpression = (callee, args) ->
   type: 'CallExpression'
   callee: callee
   arguments: (if (typeof args isnt 'undefined') then args else [])
+
+exports.MemberExpression = (obj, prop, computed = false) ->
+  type: 'MemberExpression'
+  object: obj
+  property: prop
+  computed: computed
 
 exports.FunctionExpression = (id, params, rest, body) ->
   type: 'FunctionExpression'
