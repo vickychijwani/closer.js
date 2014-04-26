@@ -16950,6 +16950,18 @@ core = {
     assert.numbers(n);
     assert.seqable(coll);
     return m.drop(n, coll);
+  },
+  'some': function(pred, coll) {
+    assert.arity(2, 2, arguments);
+    assert["function"](pred);
+    assert.seqable(coll);
+    return m.some(pred, coll);
+  },
+  'every?': function(pred, coll) {
+    assert.arity(2, 2, arguments);
+    assert["function"](pred);
+    assert.seqable(coll);
+    return m.every(pred, coll);
   }
 };
 
