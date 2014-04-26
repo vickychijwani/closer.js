@@ -357,6 +357,18 @@ core =
     assert.seqable coll
     m.drop n, coll
 
+  'some': (pred, coll) ->
+    assert.arity 2, 2, arguments
+    assert.function pred
+    assert.seqable coll
+    m.some pred, coll
+
+  'every?': (pred, coll) ->
+    assert.arity 2, 2, arguments
+    assert.function pred
+    assert.seqable coll
+    m.every pred, coll
+
 
 module.exports = core
 

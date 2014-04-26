@@ -785,3 +785,27 @@ describe 'Closer core library', ->
       eq '(drop 2 #{1 2 3 4})', seq [3, 4]
       eq '(drop 2 {1 2 3 4 5 6})', seq [vec(5, 6)]
       eq '(drop 2.1 [1 2 3 4])', seq [4]    # n is rounded up
+
+  describe '(some pred coll)', ->
+    it 'returns the first logically true value of (pred x) for any x in coll, else nil', ->
+      throws '(some even?)'
+      throws '(some true [1 2 3])'
+      throws '(some even? 1)'
+      truthy '(some even? \'(1 2 3 4))'
+      nil '(some even? \'(1 3 5 7))'
+      eq '(some {2 "two" 3 "three"} [nil 4 3])', 'three'
+      eq '(some #(if (even? %) %) [1 2 3 4])', 2    # substitute for (first (filter pred coll))
+      eq '(some #{2} (range 10))', 2
+
+  describe '(every? pred coll)', ->
+    it 'returns true if (pred x) is true for every x in coll, else false', ->
+      throws '(every? even?)'
+      throws '(every? true [1 2 3])'
+      throws '(every? even? 1)'
+      truthy '(every? even? [2 4 6])'
+      falsy '(every? even? [1 3 5])'
+      falsy '(every? #{1 2} [1 2 3])'
+      truthy '(every? #{1 2} [1 2 2 1])'
+      # weird, but that's how Clojure behaves
+      truthy '(every? true? [])'
+      truthy '(every? false? [])'

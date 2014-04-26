@@ -17146,7 +17146,7 @@ describe('Closer core library', function() {
       return eq('(take 2.1 [1 2 3 4])', seq([1, 2, 3]));
     });
   });
-  return describe('(drop n coll)', function() {
+  describe('(drop n coll)', function() {
     return it('returns a seq of all but the first n items of coll, or an empty seq if there are fewer than n', function() {
       throws('(drop 10)');
       throws('(drop 10 3)');
@@ -17157,6 +17157,31 @@ describe('Closer core library', function() {
       eq('(drop 2 #{1 2 3 4})', seq([3, 4]));
       eq('(drop 2 {1 2 3 4 5 6})', seq([vec(5, 6)]));
       return eq('(drop 2.1 [1 2 3 4])', seq([4]));
+    });
+  });
+  describe('(some pred coll)', function() {
+    return it('returns the first logically true value of (pred x) for any x in coll, else nil', function() {
+      throws('(some even?)');
+      throws('(some true [1 2 3])');
+      throws('(some even? 1)');
+      truthy('(some even? \'(1 2 3 4))');
+      nil('(some even? \'(1 3 5 7))');
+      eq('(some {2 "two" 3 "three"} [nil 4 3])', 'three');
+      eq('(some #(if (even? %) %) [1 2 3 4])', 2);
+      return eq('(some #{2} (range 10))', 2);
+    });
+  });
+  return describe('(every? pred coll)', function() {
+    return it('returns true if (pred x) is true for every x in coll, else false', function() {
+      throws('(every? even?)');
+      throws('(every? true [1 2 3])');
+      throws('(every? even? 1)');
+      truthy('(every? even? [2 4 6])');
+      falsy('(every? even? [1 3 5])');
+      falsy('(every? #{1 2} [1 2 3])');
+      truthy('(every? #{1 2} [1 2 2 1])');
+      truthy('(every? true? [])');
+      return truthy('(every? false? [])');
     });
   });
 });
@@ -17760,6 +17785,18 @@ core = {
     assert.numbers(n);
     assert.seqable(coll);
     return m.drop(n, coll);
+  },
+  'some': function(pred, coll) {
+    assert.arity(2, 2, arguments);
+    assert["function"](pred);
+    assert.seqable(coll);
+    return m.some(pred, coll);
+  },
+  'every?': function(pred, coll) {
+    assert.arity(2, 2, arguments);
+    assert["function"](pred);
+    assert.seqable(coll);
+    return m.every(pred, coll);
   }
 };
 
