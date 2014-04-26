@@ -169,10 +169,9 @@ case 30:
             args.push(yy.Node('Identifier', '__$' + i, yy.loc(_$[$0-1])));
         }
         var restArg = (hasRestArg) ? yy.Node('Identifier', '__$rest', yy.loc(bodyLoc)) : null;
-        if (expressionTypes.indexOf(body.type) !== -1) {
-            body = yy.Node('ReturnStatement', body, yy.loc(bodyLoc));
-        }
+        body = wrapInExpressionStatement(body, yy);
         body = yy.Node('BlockStatement', [body], yy.loc(bodyLoc));
+        createReturnStatementIfPossible(body);
         this.$ = yy.Node('FunctionExpression', null, args, restArg, body,
             false, false, yy.loc(_$[$0-3]));
     
@@ -226,13 +225,7 @@ case 46: this.$ = $$[$0];
 break;
 case 47: this.$ = $$[$0-1]; 
 break;
-case 49:
-        if (expressionTypes.indexOf($$[$0].type) !== -1) {
-            this.$ = yy.Node('ExpressionStatement', $$[$0], $$[$0].loc);
-        } else {
-            this.$ = $$[$0];
-        }
-    
+case 49: this.$ = wrapInExpressionStatement($$[$0], yy); 
 break;
 case 50: this.$ = []; 
 break;
@@ -247,11 +240,8 @@ case 53:
     
 break;
 case 54:
-        for (var i = 0; i < $$[$0].length; ++i) {
-            var SExpr = $$[$0][i];
-            if (expressionTypes.indexOf(SExpr.type) !== -1) {
-                $$[$0][i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
-            }
+        for (var i = 0, len = $$[$0].length; i < len; ++i) {
+            $$[$0][i] = wrapInExpressionStatement($$[$0][i], yy);
         }
     
 break;
@@ -444,6 +434,13 @@ function wrapInIIFE(body, loc, yy) {
             createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc)),
             false, false, yyloc
         ), [], yyloc);
+}
+
+function wrapInExpressionStatement(expr, yy) {
+    if (expressionTypes.indexOf(expr.type) !== -1) {
+        return yy.Node('ExpressionStatement', expr, expr.loc);
+    }
+    return expr;
 }
 
 function createReturnStatementIfPossible(stmt) {
@@ -17075,6 +17072,7 @@ describe('Closer core library', function() {
       eq('(map inc [1 2 3])', seq([2, 3, 4]));
       eq('(map + [1 2] \'(3 4) #{5 6})', seq([9, 12]));
       eq('(map first {:a 1, :b 2})', seq([key('a'), key('b')]));
+      eq('(map #(if (even? %) (- %) %) [1 2 3 4])', vec(1, -2, 3, -4));
       eq('(map #{1} [1 2 4 1])', seq([1, null, null, 1]));
       eq('(map {1 2, 3 4, 5 6, 7 8} #{3 7})', seq([4, 8]));
       return eq('(map :name [{:name "name1"} {:name "name2"}])', seq(['name1', 'name2']));

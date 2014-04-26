@@ -104,10 +104,9 @@ AnonFnLiteral
             args.push(yy.Node('Identifier', '__$' + i, yy.loc(@3)));
         }
         var restArg = (hasRestArg) ? yy.Node('Identifier', '__$rest', yy.loc(bodyLoc)) : null;
-        if (expressionTypes.indexOf(body.type) !== -1) {
-            body = yy.Node('ReturnStatement', body, yy.loc(bodyLoc));
-        }
+        body = wrapInExpressionStatement(body, yy);
         body = yy.Node('BlockStatement', [body], yy.loc(bodyLoc));
+        createReturnStatementIfPossible(body);
         $$ = yy.Node('FunctionExpression', null, args, restArg, body,
             false, false, yy.loc(@1));
     }
@@ -176,13 +175,7 @@ SExpr
   ;
 
 SExprStmt
-  : SExpr {
-        if (expressionTypes.indexOf($SExpr.type) !== -1) {
-            $$ = yy.Node('ExpressionStatement', $SExpr, $SExpr.loc);
-        } else {
-            $$ = $SExpr;
-        }
-    }
+  : SExpr { $$ = wrapInExpressionStatement($SExpr, yy); }
   ;
 
 SExprPairs
@@ -201,11 +194,8 @@ SExprs
 
 NonEmptyDoForm
     : SExprs {
-        for (var i = 0; i < $SExprs.length; ++i) {
-            var SExpr = $SExprs[i];
-            if (expressionTypes.indexOf(SExpr.type) !== -1) {
-                $SExprs[i] = yy.Node('ExpressionStatement', SExpr, SExpr.loc);
-            }
+        for (var i = 0, len = $SExprs.length; i < len; ++i) {
+            $SExprs[i] = wrapInExpressionStatement($SExprs[i], yy);
         }
     }
   ;
@@ -266,6 +256,13 @@ function wrapInIIFE(body, loc, yy) {
             createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc)),
             false, false, yyloc
         ), [], yyloc);
+}
+
+function wrapInExpressionStatement(expr, yy) {
+    if (expressionTypes.indexOf(expr.type) !== -1) {
+        return yy.Node('ExpressionStatement', expr, expr.loc);
+    }
+    return expr;
 }
 
 function createReturnStatementIfPossible(stmt) {

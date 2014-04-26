@@ -705,6 +705,7 @@ describe 'Closer core library', ->
       eq '(map inc [1 2 3])', seq [2, 3, 4]
       eq '(map + [1 2] \'(3 4) #{5 6})', seq [9, 12]
       eq '(map first {:a 1, :b 2})', seq [key('a'), key('b')]
+      eq '(map #(if (even? %) (- %) %) [1 2 3 4])', vec 1, -2, 3, -4
       eq '(map #{1} [1 2 4 1])', seq [1, null, null, 1]
       eq '(map {1 2, 3 4, 5 6, 7 8} #{3 7})', seq [4, 8]
       eq '(map :name [{:name "name1"} {:name "name2"}])', seq ['name1', 'name2']

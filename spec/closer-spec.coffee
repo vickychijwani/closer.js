@@ -143,7 +143,7 @@ describe 'Closer parser', ->
                 [Nil(), Identifier('__$1'), Integer(2)])))),
           Identifier('call')),
         [Nil(), Integer(3)])))
-    expect(closer.parse('(map #(+ % 1) [1 2 3])')).toDeepEqual Program(
+    expect(closer.parse('(map #(if (even? %) (- %) %) [1 2 3])')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('map'), Identifier('call')),
         [Nil(),
@@ -152,9 +152,14 @@ describe 'Closer parser', ->
           [Identifier('__$1')],
           null,
           BlockStatement(
-            ReturnStatement(CallExpression(
-              MemberExpression(Identifier('+'), Identifier('call')),
-              [Nil(), Identifier('__$1'), Integer(1)])))),
+            IfStatement(
+              CallExpression(
+                MemberExpression(Identifier('even?'), Identifier('call')),
+                [Nil(), Identifier('__$1')]),
+              ReturnStatement(CallExpression(
+                MemberExpression(Identifier('-'), Identifier('call')),
+                [Nil(), Identifier('__$1')])),
+              ReturnStatement(Identifier('__$1'))))),
         CallExpression(
           Identifier('vector'),
           [Integer(1), Integer(2), Integer(3)])])))
