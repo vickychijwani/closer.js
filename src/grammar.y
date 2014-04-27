@@ -80,9 +80,8 @@ FnParamsAndBody
 FnDefinition
   : FN FnParamsAndBody { $$ = $FnParamsAndBody; }
   | DEFN Identifier FnParamsAndBody {
-        $FnParamsAndBody.type = 'FunctionDeclaration';
-        $FnParamsAndBody.id = $Identifier;
-        $$ = $FnParamsAndBody;
+        var decl = yy.Node('VariableDeclarator', $Identifier, $FnParamsAndBody, yy.loc(@1));
+        $$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(@1));
     }
   ;
 

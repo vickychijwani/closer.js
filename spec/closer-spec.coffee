@@ -169,28 +169,31 @@ describe 'Closer parser', ->
 
   it 'parses a named function definition', ->
     expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
-      FunctionDeclaration(
-        Identifier('fn-name'),
-        [Identifier('x')],
-        null,
-        BlockStatement(
-          ReturnStatement(Identifier('x')))))
+      VariableDeclaration(
+        VariableDeclarator(
+          Identifier('fn-name'),
+          FunctionExpression(
+            null, [Identifier('x')], null,
+            BlockStatement(ReturnStatement(
+              Identifier('x')))))))
 
   it 'parses rest arguments', ->
     expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual Program(
-      FunctionDeclaration(
-        Identifier('avg'),
-        [], Identifier('rest'),
-        BlockStatement(ReturnStatement(
-          CallExpression(
-            MemberExpression(Identifier('/'), Identifier('call')),
-            [Nil(),
-            CallExpression(
-              MemberExpression(Identifier('apply'), Identifier('call')),
-              [Nil(), Identifier('+'), Identifier('rest')]),
-            CallExpression(
-              MemberExpression(Identifier('count'), Identifier('call')),
-              [Nil(), Identifier('rest')])])))))
+      VariableDeclaration(
+        VariableDeclarator(
+          Identifier('avg'),
+          FunctionExpression(
+            null, [], Identifier('rest'),
+            BlockStatement(ReturnStatement(
+              CallExpression(
+                MemberExpression(Identifier('/'), Identifier('call')),
+                [Nil(),
+                CallExpression(
+                  MemberExpression(Identifier('apply'), Identifier('call')),
+                  [Nil(), Identifier('+'), Identifier('rest')]),
+                CallExpression(
+                  MemberExpression(Identifier('count'), Identifier('call')),
+                  [Nil(), Identifier('rest')])])))))))
 
   it 'parses collections and keywords in function position', ->
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(

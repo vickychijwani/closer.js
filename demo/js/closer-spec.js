@@ -145,9 +145,8 @@ break;
 case 28: this.$ = $$[$0]; 
 break;
 case 29:
-        $$[$0].type = 'FunctionDeclaration';
-        $$[$0].id = $$[$0-1];
-        this.$ = $$[$0];
+        var decl = yy.Node('VariableDeclarator', $$[$0-1], $$[$0], yy.loc(_$[$0-2]));
+        this.$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(_$[$0-2]));
     
 break;
 case 30:
@@ -4372,10 +4371,10 @@ describe('Closer parser', function() {
     return expect(closer.parse('(map #(if (even? %) (- %) %) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('even?'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('-'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3)])]))));
   });
   it('parses a named function definition', function() {
-    return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('fn-name'), [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))));
+    return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn-name'), FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))))));
   });
   it('parses rest arguments', function() {
-    return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(FunctionDeclaration(Identifier('avg'), [], Identifier('rest'), BlockStatement(ReturnStatement(CallExpression(MemberExpression(Identifier('/'), Identifier('call')), [Nil(), CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('+'), Identifier('rest')]), CallExpression(MemberExpression(Identifier('count'), Identifier('call')), [Nil(), Identifier('rest')])]))))));
+    return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('avg'), FunctionExpression(null, [], Identifier('rest'), BlockStatement(ReturnStatement(CallExpression(MemberExpression(Identifier('/'), Identifier('call')), [Nil(), CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('+'), Identifier('rest')]), CallExpression(MemberExpression(Identifier('count'), Identifier('call')), [Nil(), Identifier('rest')])]))))))));
   });
   it('parses collections and keywords in function position', function() {
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3), Integer(4)]), Identifier('call')), [Nil(), Integer(1)]))));
