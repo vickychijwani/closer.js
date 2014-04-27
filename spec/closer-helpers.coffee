@@ -23,11 +23,20 @@ exports.Literal = (value = null) ->
   type: 'Literal'
   value: value
 
+exports.ThisExpression = ->
+  type: 'ThisExpression'
+
 exports.UnaryExpression = (operator, argument) ->
   type: 'UnaryExpression'
   operator: operator
   argument: argument
   prefix: true
+
+exports.BinaryExpression = (operator, left, right) ->
+  type: 'BinaryExpression'
+  operator: operator
+  left: left
+  right: right
 
 exports.ArrayExpression = (elements) ->
   type: 'ArrayExpression'
@@ -43,6 +52,12 @@ exports.MemberExpression = (obj, prop, computed = false) ->
   object: obj
   property: prop
   computed: computed
+
+exports.ConditionalExpression = (test, consequent, alternate) ->
+  type: 'ConditionalExpression'
+  test: test
+  consequent: consequent
+  alternate: alternate
 
 exports.FunctionExpression = (id, params, rest, body) ->
   type: 'FunctionExpression'

@@ -4,7 +4,11 @@
 %%
 
 Identifier
-  : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  : IDENTIFIER {
+        $$ = (String($1) === 'this')
+            ? yy.Node('ThisExpression', yy.loc(@1))
+            : yy.Node('Identifier', String($1), yy.loc(@1));
+    }
   ;
 
 Keyword
@@ -58,7 +62,7 @@ RestArgs
   ;
 
 Fn
-  : IDENTIFIER { $$ = yy.Node('Identifier', String($1), yy.loc(@1)); }
+  : Identifier
   | CollectionLiteral
   | Keyword
   | '(' List ')' { $$ = $List; }
@@ -150,19 +154,41 @@ LetForm
     }
   ;
 
+DotForm
+  : DOT IDENTIFIER[prop] SExpr[obj] SExprs?[args] {
+        $args = getValueIfUndefined($args, []);
+        var callee = yy.Node('MemberExpression', $obj,
+            yy.Node('Literal', $prop, yy.loc(@prop)),
+            true, yy.loc(@1));
+        var fnCall = yy.Node('CallExpression', callee, $args, yy.loc(@1));
+        if ($args.length > 0) {
+            $$ = fnCall;
+        } else {
+            // (.prop obj) can either be a call to a 0-argument fn, or a property access
+            // if both are possible, the function call is chosen
+            $$ = yy.Node('ConditionalExpression',
+                yy.Node('BinaryExpression', '===',
+                    yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(@1)),
+                    yy.Node('Literal', 'function', yy.loc(@1)), yy.loc(@1)),
+                fnCall, callee, yy.loc(@1));
+        }
+    }
+  ;
+
 List
   : { $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
   | ConditionalExpr
   | VarDeclaration
   | LetForm
+  | DotForm
   | Fn SExprs?[args] {
         var callee = yy.Node('MemberExpression', $Fn,
             yy.Node('Identifier', 'call', yy.loc(@Fn)),
             false, yy.loc(@Fn));
-        var args = getValueIfUndefined($args, []);
-        args.unshift(yy.Node('Literal', null, yy.loc(@2)));   // value for "this"
-        $$ = yy.Node('CallExpression', callee, args, yy.loc(@Fn));
+        $args = getValueIfUndefined($args, []);
+        $args.unshift(yy.Node('Literal', null, yy.loc(@2)));   // value for "this"
+        $$ = yy.Node('CallExpression', callee, $args, yy.loc(@Fn));
     }
   | DO DoForm { $$ = wrapInIIFE($DoForm, @1, yy); }
   ;
@@ -245,7 +271,7 @@ Program
 var estraverse = require('estraverse');
 
 var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
-    'ObjectExpression', 'NewExpression'];
+    'ObjectExpression', 'NewExpression', 'ConditionalExpression', 'BinaryExpression'];
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, loc, yy) {

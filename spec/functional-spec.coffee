@@ -28,8 +28,31 @@ list = (xs...) -> mori.list.apply @, _.flatten xs
 set = (xs...) -> mori.set _.flatten xs
 map = (xs...) -> mori.hash_map.apply @, _.flatten xs
 
+__$this = (() ->
+  class Soldier
+    constructor: (enemy = null) ->
+      @pos =
+        x: 0
+        y: 0
+      @enemy = enemy
+    'move-x-y': (x, y) ->
+      @pos.x = x
+      @pos.y = y
+
+  new Soldier(new Soldier())
+)()
+
 
 describe 'Functional tests', ->
+
+  it 'js interop - \'this\' access', ->
+    __$this['move-x-y'](0, 0)
+    __$this.enemy['move-x-y'](10, 20)
+    eq '(let [epos (.pos (.enemy this))]
+          (.move-x-y this (.x epos) (.y epos)))
+
+        [(.x (.pos this)) (.y (.pos this))]',
+      vec 10, 20
 
   it 'quick sort', ->
     eq '(defn qsort [coll]

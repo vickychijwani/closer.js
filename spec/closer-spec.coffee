@@ -13,10 +13,13 @@ List = helpers['list']
 HashSet = helpers['set']
 HashMap = helpers['hash_map']
 Identifier = helpers.Identifier
+ThisExpression = helpers.ThisExpression
 UnaryExpression = helpers.UnaryExpression
+BinaryExpression = helpers.BinaryExpression
 ArrayExpression = helpers.ArrayExpression
 CallExpression = helpers.CallExpression
 MemberExpression = helpers.MemberExpression
+ConditionalExpression = helpers.ConditionalExpression
 FunctionExpression = helpers.FunctionExpression
 EmptyStatement = helpers.EmptyStatement
 ExpressionStatement = helpers.ExpressionStatement
@@ -345,6 +348,21 @@ describe 'Closer parser', ->
             ReturnStatement(CallExpression(
               MemberExpression(Identifier('+'), Identifier('call')),
               [Nil(), Integer(3), Integer(4)])))))))
+
+  it 'parses dot special forms', ->
+    expect(closer.parse('(.move-x-y this 10 20)')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(ThisExpression(), String('move-x-y'), true),
+        [Integer(10), Integer(20)])))
+    expect(closer.parse('(.pos this)')).toDeepEqual Program(
+      ExpressionStatement(
+        ConditionalExpression(
+          BinaryExpression('===',
+            UnaryExpression('typeof',
+              MemberExpression(ThisExpression(), String('pos'), true)),
+            String('function')),
+          CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []),
+          MemberExpression(ThisExpression(), String('pos'), true))))
 
 
   # pending

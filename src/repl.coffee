@@ -28,8 +28,17 @@ wireCallsToCore = (ast) ->
       node
   ast
 
+wireThisAccess = (ast) ->
+  estraverse.replace ast,
+    enter: (node) ->
+      if node.type is 'ThisExpression'
+        node.type = 'Identifier'
+        node.name = '__$this'
+      node
+  ast
+
 exports.parse = (src, options) ->
-  wireCallsToCore closer.parse src, options
+  wireThisAccess wireCallsToCore closer.parse src, options
 
 exports.generateJS = (src, options) ->
   escodegen.generate exports.parse src, options

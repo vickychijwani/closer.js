@@ -2,7 +2,7 @@ WHITESPACE      [\s,]+
 INTEGER         [-+]?([1-9][0-9]+|[0-9])
 FLOAT           [-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))
 STRING          \"([^\"\\]|\\[\'\"\\bfnrt])*\"
-IDENTIFIER      [a-zA-Z*+!\-_=<>?/.][0-9a-zA-Z*+!\-_=<>?/.]*
+IDENTIFIER      [a-zA-Z*+!\-_=<>?/][0-9a-zA-Z*+!\-_=<>?/]*
 COMMENT         \;[^\r\n]*
 ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 
@@ -44,6 +44,7 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 '#' return 'SHARP';
 '\'' return 'QUOTE';
 ':' return 'COLON';
+'.' return 'DOT';
 
 'def'   return 'DEF';
 'fn'    return 'FN';
