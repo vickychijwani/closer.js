@@ -145,9 +145,8 @@ break;
 case 28: this.$ = $$[$0]; 
 break;
 case 29:
-        $$[$0].type = 'FunctionDeclaration';
-        $$[$0].id = $$[$0-1];
-        this.$ = $$[$0];
+        var decl = yy.Node('VariableDeclarator', $$[$0-1], $$[$0], yy.loc(_$[$0-2]));
+        this.$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(_$[$0-2]));
     
 break;
 case 30:
