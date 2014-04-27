@@ -270,8 +270,11 @@ Program
 
 var estraverse = require('estraverse');
 
-var expressionTypes = ['Literal', 'Identifier', 'UnaryExpression', 'CallExpression', 'FunctionExpression',
-    'ObjectExpression', 'NewExpression', 'ConditionalExpression', 'BinaryExpression'];
+var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
+    'FunctionExpression', 'ArrowExpression', 'SequenceExpression', 'Identifier',
+    'UnaryExpression', 'BinaryExpression', 'AssignmentExpression', 'Literal',
+    'UpdateExpression', 'LogicalExpression', 'ConditionalExpression',
+    'NewExpression', 'CallExpression', 'MemberExpression'];
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, loc, yy) {
