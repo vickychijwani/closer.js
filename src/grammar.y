@@ -56,11 +56,6 @@ CollectionLiteral
   | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('set', getValueIfUndefined($items, []), @items, yy); }
   ;
 
-RestArgs
-  : '&' Identifier { $$ = $Identifier; }
-  | { $$ = null; }
-  ;
-
 Fn
   : Identifier
   | CollectionLiteral
@@ -71,18 +66,20 @@ Fn
   ;
 
 FnParamsAndBody
-  : '[' IdentifierList RestArgs ']' BlockStatementWithReturn {
-        $$ = yy.Node('FunctionExpression', null, $IdentifierList, $RestArgs,
+  : '[' IdentifierList '&'? Identifier?[rest] ']' BlockStatementWithReturn {
+        $rest = getValueIfUndefined($rest, null);
+        if ($rest) {
+            var restDecl = createRestArgsDecl($rest, $IdentifierList.length, @rest, yy);
+            $BlockStatementWithReturn.body.unshift(restDecl);
+        }
+        $$ = yy.Node('FunctionExpression', null, $IdentifierList, null,
             $BlockStatementWithReturn, false, false, yy.loc(@BlockStatementWithReturn));
     }
   ;
 
 FnDefinition
   : FN FnParamsAndBody { $$ = $FnParamsAndBody; }
-  | DEFN Identifier FnParamsAndBody {
-        var decl = yy.Node('VariableDeclarator', $Identifier, $FnParamsAndBody, yy.loc(@1));
-        $$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(@1));
-    }
+  | DEFN Identifier FnParamsAndBody { $$ = parseVarDecl($Identifier, $FnParamsAndBody, @1, yy); }
   ;
 
 AnonFnLiteral
@@ -106,11 +103,15 @@ AnonFnLiteral
         for (var i = 1; i <= maxArgNum; ++i) {
             args.push(yy.Node('Identifier', '__$' + i, yy.loc(@3)));
         }
-        var restArg = (hasRestArg) ? yy.Node('Identifier', '__$rest', yy.loc(bodyLoc)) : null;
         body = wrapInExpressionStatement(body, yy);
         body = yy.Node('BlockStatement', [body], yy.loc(bodyLoc));
         createReturnStatementIfPossible(body);
-        $$ = yy.Node('FunctionExpression', null, args, restArg, body,
+        if (hasRestArg) {
+            var restId = yy.Node('Identifier', '__$rest', yy.loc(bodyLoc));
+            var restDecl = createRestArgsDecl(restId, maxArgNum, bodyLoc, yy);
+            body.body.unshift(restDecl);
+        }
+        $$ = yy.Node('FunctionExpression', null, args, null, body,
             false, false, yy.loc(@1));
     }
   ;
@@ -125,10 +126,7 @@ ConditionalExpr
   ;
 
 VarDeclaration
-  : DEF Identifier SExpr?[init] {
-        var decl = yy.Node('VariableDeclarator', $Identifier, getValueIfUndefined($init, null), yy.loc(@DEF));
-        $$ = yy.Node('VariableDeclaration', 'var', [decl], yy.loc(@DEF));
-    }
+  : DEF Identifier SExpr?[init] { $$ = parseVarDecl($Identifier, $init, @1, yy); }
   ;
 
 LetBinding
@@ -317,6 +315,29 @@ function createReturnStatementIfPossible(stmt) {
         }
     }
     return stmt;
+}
+
+function createRestArgsDecl(id, offset, loc, yy) {
+    yyloc = yy.loc(loc);
+    var restInit = yy.Node('CallExpression', yy.Node('Identifier', 'seq', yyloc),
+        [yy.Node('CallExpression',
+            yy.Node('MemberExpression',
+                yy.Node('MemberExpression',
+                    yy.Node('MemberExpression',
+                        yy.Node('Identifier', 'Array', yyloc),
+                        yy.Node('Identifier', 'prototype', yyloc), false, yyloc),
+                    yy.Node('Identifier', 'slice', yyloc), false, yyloc),
+                yy.Node('Identifier', 'call', yyloc), false, yyloc),
+            [yy.Node('Identifier', 'arguments', yyloc),
+             yy.Node('Literal', offset, yyloc)])],
+        yyloc);
+    return parseVarDecl(id, restInit, yyloc, yy);
+}
+
+function parseVarDecl(id, init, loc, yy) {
+    var yyloc = yy.loc(loc);
+    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yyloc);
+    return yy.Node('VariableDeclaration', 'var', [decl], yyloc);
 }
 
 function parseNumLiteral(type, token, loc, yy, yytext) {

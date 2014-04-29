@@ -13,7 +13,7 @@ class ArgTypeError extends Error
     @message = message
 
 firstFailure = (args, testFn) ->
-  _.find _.flatten(args), (arg) -> not testFn(arg)
+  _.find args, (arg) -> not testFn(arg)
 
 assert =
 
@@ -36,7 +36,7 @@ assert =
       throw new ArgTypeError "#{unexpectedArg} is not an associative collection"
 
   seqable: (args...) ->
-    unexpectedArg = firstFailure args, (arg) -> mori.is_seqable(arg) or _.isString(arg)
+    unexpectedArg = firstFailure args, (arg) -> mori.is_seqable(arg) or _.isString(arg) or _.isArray(arg)
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not seqable"
 

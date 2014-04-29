@@ -133,27 +133,35 @@ describe 'Closer parser', ->
         [Nil(), Integer(2)])))
 
   it 'parses anonymous function literals', ->
-    expect(closer.parse('(#(+ % 2) 3)')).toDeepEqual Program(
+    expect(closer.parse('(#(apply + % %2 %&) 1 2 3 4)')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           FunctionExpression(
-            null,
-            [Identifier('__$1')],
-            null,
+            null, [Identifier('__$1'), Identifier('__$2')], null,
             BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('__$rest'),
+                CallExpression(
+                  Identifier('seq'),
+                  [CallExpression(
+                    MemberExpression(
+                      MemberExpression(
+                        MemberExpression(Identifier('Array'), Identifier('prototype')),
+                        Identifier('slice')),
+                      Identifier('call')),
+                    [Identifier('arguments'), Integer(2)])]))),
               ReturnStatement(CallExpression(
-                MemberExpression(Identifier('+'), Identifier('call')),
-                [Nil(), Identifier('__$1'), Integer(2)])))),
+                MemberExpression(Identifier('apply'), Identifier('call')),
+                [Nil(), Identifier('+'), Identifier('__$1'),
+                 Identifier('__$2'), Identifier('__$rest')])))),
           Identifier('call')),
-        [Nil(), Integer(3)])))
-    expect(closer.parse('(map #(if (even? %) (- %) %) [1 2 3])')).toDeepEqual Program(
+        [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)])))
+    expect(closer.parse('(map #(if (even? %1) (- %) %) [1 2 3])')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('map'), Identifier('call')),
         [Nil(),
         FunctionExpression(
-          null,
-          [Identifier('__$1')],
-          null,
+          null, [Identifier('__$1')], null,
           BlockStatement(
             IfStatement(
               CallExpression(
@@ -183,9 +191,20 @@ describe 'Closer parser', ->
         VariableDeclarator(
           Identifier('avg'),
           FunctionExpression(
-            null, [], Identifier('rest'),
-            BlockStatement(ReturnStatement(
-              CallExpression(
+            null, [], null,
+            BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('rest'),
+                CallExpression(
+                  Identifier('seq'),
+                  [CallExpression(
+                    MemberExpression(
+                      MemberExpression(
+                        MemberExpression(Identifier('Array'), Identifier('prototype')),
+                        Identifier('slice')),
+                      Identifier('call')),
+                    [Identifier('arguments'), Integer(0)])]))),
+              ReturnStatement(CallExpression(
                 MemberExpression(Identifier('/'), Identifier('call')),
                 [Nil(),
                 CallExpression(
@@ -295,10 +314,19 @@ describe 'Closer parser', ->
         VariableDeclarator(
           Identifier('add'),
           FunctionExpression(
-            null,
-            [],
-            Identifier('numbers'),
+            null, [], null,
             BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('numbers'),
+                CallExpression(
+                  Identifier('seq'),
+                  [CallExpression(
+                    MemberExpression(
+                      MemberExpression(
+                        MemberExpression(Identifier('Array'), Identifier('prototype')),
+                        Identifier('slice')),
+                      Identifier('call')),
+                    [Identifier('arguments'), Integer(0)])]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('apply'), Identifier('call')),
                 [Nil(), Identifier('+'), Identifier('numbers')])))))))

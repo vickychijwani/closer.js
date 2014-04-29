@@ -54,6 +54,14 @@ describe 'Functional tests', ->
         [(.x (.pos this)) (.y (.pos this))]',
       vec 10, 20
 
+  it 'averaging numbers', ->
+    eq '(defn avg [& xs]
+          (/ (reduce + xs) (count xs)))
+
+        (avg 1 2 3 4)',
+      2.5
+    eq '(#(/ (reduce + %&) (count %&)) 1 2 3 4)', 2.5
+
   it 'quick sort', ->
     eq '(defn qsort [coll]
           (let [pivot (first coll)]

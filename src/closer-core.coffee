@@ -276,7 +276,7 @@ core =
 
   'concat': (seqs...) ->
     assert.arity 0, Infinity, arguments
-    assert.seqable seqs
+    assert.seqable.apply null, seqs
     m.concat.apply @, seqs
 
   'flatten': (coll) ->
