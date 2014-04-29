@@ -67,17 +67,17 @@ core =
     assert.arity 1, Infinity, arguments
     args = _.uniq args   # remove duplicates
     return true if args.length is 1
-    m.equals.apply @, args
+    m.equals.apply null, args
 
   'not=': (args...) ->
     assert.arity 1, Infinity, arguments
-    core.not core['='].apply @, args
+    core.not core['='].apply null, args
 
   '==': (args...) ->
     assert.arity 1, Infinity, arguments
     return true if args.length is 1
     assert.numbers args
-    core['='].apply @, args
+    core['='].apply null, args
 
   '<': (args...) ->
     assert.arity 1, Infinity, arguments
@@ -267,7 +267,7 @@ core =
     assert.arity 2, Infinity, arguments
     if core['map?'](coll) and _.any(xs, (x) -> core['vector?'](x) and core.count(x) isnt 2)
       throw new TypeError 'vector args to conjoin to a map must be pairs'
-    m.conj.apply @, _.flatten [coll, xs]
+    m.conj.apply null, _.flatten [coll, xs]
 
   'into': (to, from) ->
     assert.arity 2, 2, arguments
@@ -277,7 +277,7 @@ core =
   'concat': (seqs...) ->
     assert.arity 0, Infinity, arguments
     assert.seqable.apply null, seqs
-    m.concat.apply @, seqs
+    m.concat.apply null, seqs
 
   'flatten': (coll) ->
     assert.arity 1, 1, arguments
@@ -292,12 +292,12 @@ core =
     assert.arity_custom arguments, (args) ->
       if args.length < 3 or args.length % 2 is 0
         "Expected odd number of args (at least 3), got #{args.length}"
-    m.assoc.apply @, _.flatten [map, kvs]
+    m.assoc.apply null, _.flatten [map, kvs]
 
   'dissoc': (map, keys...) ->
     assert.arity 1, Infinity, arguments
     return map if keys.length is 0
-    m.dissoc.apply @, _.flatten [map, keys]
+    m.dissoc.apply null, _.flatten [map, keys]
 
   'find': (map, key) ->
     assert.arity 2, 2, arguments
@@ -308,21 +308,30 @@ core =
     # args: [] or [end] or [start end] or [start end step]
     assert.arity 0, 3, arguments
     assert.numbers args
-    m.range.apply @, args
+    m.range.apply null, args
 
   'identity': (x) ->
     assert.arity 1, 1, arguments
     x
 
+  'apply': (f, args...) ->
+    last = args[args.length-1]
+    rest = args.slice 0, args.length-1
+    assert.function f
+    assert.seqable last
+    lastSeq = core.seq(last)
+    rest.push(core.nth(lastSeq, i)) for i in [0...core.count(lastSeq)]
+    f.apply null, rest
+
   'map': (f, colls...) ->
     assert.arity 2, Infinity, arguments
     assert.function f
-    m.map.apply @, arguments
+    m.map.apply null, arguments
 
   'mapcat': (f, colls...) ->
     assert.arity 2, Infinity, arguments
     assert.function f
-    m.mapcat.apply @, arguments
+    m.mapcat.apply null, arguments
 
   'filter': (pred, coll) ->
     assert.arity 2, 2, arguments
@@ -338,7 +347,7 @@ core =
     # args: f, [initial], coll
     assert.arity 2, 3, arguments
     assert.function args[0]
-    m.reduce.apply @, args
+    m.reduce.apply null, args
 
   'reduce-kv': (f, init, coll) ->
     assert.arity 3, 3, arguments

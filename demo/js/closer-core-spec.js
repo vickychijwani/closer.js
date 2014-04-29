@@ -17113,6 +17113,15 @@ describe('Closer core library', function() {
       return eq('(identity {:k1 "v1" :k2 #{1 2}})', map(key('k1'), 'v1', key('k2'), set(1, 2)));
     });
   });
+  describe('(apply f x y z seq)', function() {
+    return it('applies the given function with arguments x, y, z and the elements of seq', function() {
+      eq('(apply + [1 2 3 4])', 10);
+      eq('(apply + 1 2 [3 4])', 10);
+      throws('(apply + 1 [2 3] 4)');
+      throws('(apply true 1 2 [3 4])');
+      return eq('(apply concat {1 2, 3 4, 5 6})', seq([1, 2, 3, 4, 5, 6]));
+    });
+  });
   describe('(map f colls)', function() {
     return it('applies f sequentially to every item in the given collections', function() {
       throws('(map +)');
@@ -17327,7 +17336,7 @@ assert = {
     var args, unexpectedArg;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     unexpectedArg = firstFailure(args, function(arg) {
-      return mori.is_sequential(arg) || _.isString(arg);
+      return mori.is_sequential(arg) || _.isString(arg) || _.isArray(arg);
     });
     if (unexpectedArg) {
       throw new ArgTypeError("" + unexpectedArg + " is not sequential");
@@ -17478,13 +17487,13 @@ core = {
     if (args.length === 1) {
       return true;
     }
-    return m.equals.apply(this, args);
+    return m.equals.apply(null, args);
   },
   'not=': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
-    return core.not(core['='].apply(this, args));
+    return core.not(core['='].apply(null, args));
   },
   '==': function() {
     var args;
@@ -17494,7 +17503,7 @@ core = {
       return true;
     }
     assert.numbers(args);
-    return core['='].apply(this, args);
+    return core['='].apply(null, args);
   },
   '<': function() {
     var args;
@@ -17725,7 +17734,7 @@ core = {
     })) {
       throw new TypeError('vector args to conjoin to a map must be pairs');
     }
-    return m.conj.apply(this, _.flatten([coll, xs]));
+    return m.conj.apply(null, _.flatten([coll, xs]));
   },
   'into': function(to, from) {
     assert.arity(2, 2, arguments);
@@ -17739,7 +17748,7 @@ core = {
     seqs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(0, Infinity, arguments);
     assert.seqable.apply(null, seqs);
-    return m.concat.apply(this, seqs);
+    return m.concat.apply(null, seqs);
   },
   'flatten': function(coll) {
     assert.arity(1, 1, arguments);
@@ -17758,7 +17767,7 @@ core = {
         return "Expected odd number of args (at least 3), got " + args.length;
       }
     });
-    return m.assoc.apply(this, _.flatten([map, kvs]));
+    return m.assoc.apply(null, _.flatten([map, kvs]));
   },
   'dissoc': function() {
     var keys, map;
@@ -17767,7 +17776,7 @@ core = {
     if (keys.length === 0) {
       return map;
     }
-    return m.dissoc.apply(this, _.flatten([map, keys]));
+    return m.dissoc.apply(null, _.flatten([map, keys]));
   },
   'find': function(map, key) {
     assert.arity(2, 2, arguments);
@@ -17779,25 +17788,38 @@ core = {
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(0, 3, arguments);
     assert.numbers(args);
-    return m.range.apply(this, args);
+    return m.range.apply(null, args);
   },
   'identity': function(x) {
     assert.arity(1, 1, arguments);
     return x;
+  },
+  'apply': function() {
+    var args, f, i, last, lastSeq, rest, _i, _ref;
+    f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    last = args[args.length - 1];
+    rest = args.slice(0, args.length - 1);
+    assert["function"](f);
+    assert.seqable(last);
+    lastSeq = core.seq(last);
+    for (i = _i = 0, _ref = core.count(lastSeq); 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      rest.push(core.nth(lastSeq, i));
+    }
+    return f.apply(null, rest);
   },
   'map': function() {
     var colls, f;
     f = arguments[0], colls = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     assert.arity(2, Infinity, arguments);
     assert["function"](f);
-    return m.map.apply(this, arguments);
+    return m.map.apply(null, arguments);
   },
   'mapcat': function() {
     var colls, f;
     f = arguments[0], colls = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     assert.arity(2, Infinity, arguments);
     assert["function"](f);
-    return m.mapcat.apply(this, arguments);
+    return m.mapcat.apply(null, arguments);
   },
   'filter': function(pred, coll) {
     assert.arity(2, 2, arguments);
@@ -17814,7 +17836,7 @@ core = {
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(2, 3, arguments);
     assert["function"](args[0]);
-    return m.reduce.apply(this, args);
+    return m.reduce.apply(null, args);
   },
   'reduce-kv': function(f, init, coll) {
     assert.arity(3, 3, arguments);

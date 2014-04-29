@@ -699,6 +699,14 @@ describe 'Closer core library', ->
       nil '(identity nil)'
       eq '(identity {:k1 "v1" :k2 #{1 2}})', map key('k1'), 'v1', key('k2'), set(1, 2)
 
+  describe '(apply f x y z seq)', ->
+    it 'applies the given function with arguments x, y, z and the elements of seq', ->
+      eq '(apply + [1 2 3 4])', 10
+      eq '(apply + 1 2 [3 4])', 10
+      throws '(apply + 1 [2 3] 4)'   # last arg must be seqable
+      throws '(apply true 1 2 [3 4])'   # f must be a function
+      eq '(apply concat {1 2, 3 4, 5 6})', seq [1, 2, 3, 4, 5, 6]
+
   describe '(map f colls)', ->
     it 'applies f sequentially to every item in the given collections', ->
       throws '(map +)'

@@ -41,7 +41,7 @@ assert =
       throw new ArgTypeError "#{unexpectedArg} is not seqable"
 
   sequential: (args...) ->
-    unexpectedArg = firstFailure args, (arg) -> mori.is_sequential(arg) or _.isString(arg)
+    unexpectedArg = firstFailure args, (arg) -> mori.is_sequential(arg) or _.isString(arg) or _.isArray(arg)
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not sequential"
 
