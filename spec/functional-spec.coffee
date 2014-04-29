@@ -56,11 +56,11 @@ describe 'Functional tests', ->
 
   it 'averaging numbers', ->
     eq '(defn avg [& xs]
-          (/ (reduce + xs) (count xs)))
+          (/ (apply + xs) (count xs)))
 
         (avg 1 2 3 4)',
       2.5
-    eq '(#(/ (reduce + %&) (count %&)) 1 2 3 4)', 2.5
+    eq '(#(/ (apply + %&) (count %&)) 1 2 3 4)', 2.5
 
   it 'quick sort', ->
     eq '(defn qsort [coll]

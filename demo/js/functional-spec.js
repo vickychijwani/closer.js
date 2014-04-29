@@ -16424,8 +16424,8 @@ describe('Functional tests', function() {
     return eq('(let [epos (.pos (.enemy this))] (.move-x-y this (.x epos) (.y epos))) [(.x (.pos this)) (.y (.pos this))]', vec(10, 20));
   });
   it('averaging numbers', function() {
-    eq('(defn avg [& xs] (/ (reduce + xs) (count xs))) (avg 1 2 3 4)', 2.5);
-    return eq('(#(/ (reduce + %&) (count %&)) 1 2 3 4)', 2.5);
+    eq('(defn avg [& xs] (/ (apply + xs) (count xs))) (avg 1 2 3 4)', 2.5);
+    return eq('(#(/ (apply + %&) (count %&)) 1 2 3 4)', 2.5);
   });
   return it('quick sort', function() {
     return eq('(defn qsort [coll] (let [pivot (first coll)] (when pivot (concat (qsort (filter #(< % pivot) coll)) (filter #{pivot} coll) (qsort (filter #(> % pivot) coll)))))) (qsort [8 3 7 3 2 10 1])', seq([1, 2, 3, 3, 7, 8, 10]));
