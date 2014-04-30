@@ -315,6 +315,7 @@ core =
     x
 
   'apply': (f, args...) ->
+    assert.arity 2, Infinity, arguments
     last = args[args.length-1]
     rest = args.slice 0, args.length-1
     assert.function f

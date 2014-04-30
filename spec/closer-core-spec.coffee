@@ -701,6 +701,7 @@ describe 'Closer core library', ->
 
   describe '(apply f x y z seq)', ->
     it 'applies the given function with arguments x, y, z and the elements of seq', ->
+      throws '(apply +)'
       eq '(apply + [1 2 3 4])', 10
       eq '(apply + 1 2 [3 4])', 10
       throws '(apply + 1 [2 3] 4)'   # last arg must be seqable
