@@ -17244,17 +17244,37 @@ describe('Closer core library', function() {
       return truthy('(every? false? [])');
     });
   });
-  return describe('(sort coll), (sort cmp coll)', function() {
+  describe('(sort coll), (sort cmp coll)', function() {
     return it('sorts the given collection, optionally using the given comparison function', function() {
       throws('(sort > [3 1 2 4] [7 5 6 8])');
-      throws('(sort 3 [7 5 6 8])');
       throws('(sort 3)');
+      throws('(sort 3 [7 5 6 8])');
+      throws('(sort > 3)');
       eq('(sort [3 1 2 4])', seq([1, 2, 3, 4]));
       eq('(sort \'(3 1 2 4))', seq([1, 2, 3, 4]));
       eq('(sort #{3 1 2 4})', seq([1, 2, 3, 4]));
       eq('(sort {3 1, 2 4})', seq([vec(2, 4), vec(3, 1)]));
       eq('(sort "string")', seq(["g", "i", "n", "r", "s", "t"]));
-      return eq('(sort > [3 1 2 4])', seq([4, 3, 2, 1]));
+      eq('(sort > [3 1 2 4])', seq([4, 3, 2, 1]));
+      throws('(sort > "string")');
+      return throws('(sort > {3 1, 2 4})');
+    });
+  });
+  return describe('(sort-by keyfn coll), (sort-by keyfn cmp coll)', function() {
+    return it('sorts the given collection, optionally using the given comparison function', function() {
+      throws('(sort-by [3 1 2 4])');
+      throws('(sort-by true [3 1 2 4])');
+      throws('(sort-by - 3)');
+      throws('(sort-by true > [3 1 2 4])');
+      throws('(sort-by - true [3 1 2 4])');
+      throws('(sort-by - > 3)');
+      eq('(sort-by - [3 1 2 4])', seq([4, 3, 2, 1]));
+      eq('(sort-by - \'(3 1 2 4))', seq([4, 3, 2, 1]));
+      eq('(sort-by - #{3 1 2 4})', seq([4, 3, 2, 1]));
+      eq('(sort-by #(apply + %) {3 1, 2 4, 6 5})', seq([vec(3, 1), vec(2, 4), vec(6, 5)]));
+      eq('(sort-by count ["aa" "a" "aaa"])', seq(["a", "aa", "aaa"]));
+      eq('(sort-by :age [{:age 29} {:age 16} {:age 32}])', seq([map(key('age'), 16), map(key('age'), 29), map(key('age'), 32)]));
+      return eq('(sort-by - > [3 1 2 4])', seq([1, 2, 3, 4]));
     });
   });
 });
@@ -17894,6 +17914,17 @@ core = {
       assert.seqable(arguments[1]);
     }
     return m.sort.apply(null, arguments);
+  },
+  'sort-by': function() {
+    assert.arity(2, 3, arguments);
+    if (arguments.length === 2) {
+      assert["function"](arguments[0]);
+      assert.seqable(arguments[1]);
+    } else {
+      assert["function"](arguments[0], arguments[1]);
+      assert.seqable(arguments[2]);
+    }
+    return m.sort_by.apply(null, arguments);
   }
 };
 

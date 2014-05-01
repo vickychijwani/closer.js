@@ -17070,6 +17070,17 @@ core = {
       assert.seqable(arguments[1]);
     }
     return m.sort.apply(null, arguments);
+  },
+  'sort-by': function() {
+    assert.arity(2, 3, arguments);
+    if (arguments.length === 2) {
+      assert["function"](arguments[0]);
+      assert.seqable(arguments[1]);
+    } else {
+      assert["function"](arguments[0], arguments[1]);
+      assert.seqable(arguments[2]);
+    }
+    return m.sort_by.apply(null, arguments);
   }
 };
 
