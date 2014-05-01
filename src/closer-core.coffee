@@ -379,6 +379,16 @@ core =
     assert.seqable coll
     m.every pred, coll
 
+  'sort': () ->
+    # arguments: [cmp], coll
+    assert.arity 1, 2, arguments
+    if arguments.length is 1
+      assert.seqable arguments[0]
+    else
+      assert.function arguments[0]
+      assert.seqable arguments[1]
+    m.sort.apply null, arguments
+
 
 module.exports = core
 

@@ -17231,7 +17231,7 @@ describe('Closer core library', function() {
       return eq('(some #{2} (range 10))', 2);
     });
   });
-  return describe('(every? pred coll)', function() {
+  describe('(every? pred coll)', function() {
     return it('returns true if (pred x) is true for every x in coll, else false', function() {
       throws('(every? even?)');
       throws('(every? true [1 2 3])');
@@ -17242,6 +17242,19 @@ describe('Closer core library', function() {
       truthy('(every? #{1 2} [1 2 2 1])');
       truthy('(every? true? [])');
       return truthy('(every? false? [])');
+    });
+  });
+  return describe('(sort coll), (sort cmp coll)', function() {
+    return it('sorts the given collection, optionally using the given comparison function', function() {
+      throws('(sort > [3 1 2 4] [7 5 6 8])');
+      throws('(sort 3 [7 5 6 8])');
+      throws('(sort 3)');
+      eq('(sort [3 1 2 4])', seq([1, 2, 3, 4]));
+      eq('(sort \'(3 1 2 4))', seq([1, 2, 3, 4]));
+      eq('(sort #{3 1 2 4})', seq([1, 2, 3, 4]));
+      eq('(sort {3 1, 2 4})', seq([vec(2, 4), vec(3, 1)]));
+      eq('(sort "string")', seq(["g", "i", "n", "r", "s", "t"]));
+      return eq('(sort > [3 1 2 4])', seq([4, 3, 2, 1]));
     });
   });
 });
@@ -17871,6 +17884,16 @@ core = {
     assert["function"](pred);
     assert.seqable(coll);
     return m.every(pred, coll);
+  },
+  'sort': function() {
+    assert.arity(1, 2, arguments);
+    if (arguments.length === 1) {
+      assert.seqable(arguments[0]);
+    } else {
+      assert["function"](arguments[0]);
+      assert.seqable(arguments[1]);
+    }
+    return m.sort.apply(null, arguments);
   }
 };
 

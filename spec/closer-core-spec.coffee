@@ -818,3 +818,18 @@ describe 'Closer core library', ->
       # weird, but that's how Clojure behaves
       truthy '(every? true? [])'
       truthy '(every? false? [])'
+
+  describe '(sort coll), (sort cmp coll)', ->
+    it 'sorts the given collection, optionally using the given comparison function', ->
+      throws '(sort > [3 1 2 4] [7 5 6 8])'
+      throws '(sort 3 [7 5 6 8])'
+      throws '(sort 3)'
+      eq '(sort [3 1 2 4])', seq [1, 2, 3, 4]
+      eq '(sort \'(3 1 2 4))', seq [1, 2, 3, 4]
+      eq '(sort #{3 1 2 4})', seq [1, 2, 3, 4]
+      eq '(sort {3 1, 2 4})', seq [vec(2, 4), vec(3, 1)]
+      eq '(sort "string")', seq ["g", "i", "n", "r", "s", "t"]
+      eq '(sort > [3 1 2 4])', seq [4, 3, 2, 1]
+      # FIXME these are supposed to work
+      # eq '(sort > "string")', seq ["t", "s", "r", "n", "i", "g"]
+      # eq '(sort > {3 1, 2 4})', seq [vec(3, 1), vec(2, 4)]
