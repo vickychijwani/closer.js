@@ -17260,7 +17260,7 @@ describe('Closer core library', function() {
       return throws('(sort > {3 1, 2 4})');
     });
   });
-  return describe('(sort-by keyfn coll), (sort-by keyfn cmp coll)', function() {
+  describe('(sort-by keyfn coll), (sort-by keyfn cmp coll)', function() {
     return it('sorts the given collection, optionally using the given comparison function', function() {
       throws('(sort-by [3 1 2 4])');
       throws('(sort-by true [3 1 2 4])');
@@ -17275,6 +17275,14 @@ describe('Closer core library', function() {
       eq('(sort-by count ["aa" "a" "aaa"])', seq(["a", "aa", "aaa"]));
       eq('(sort-by :age [{:age 29} {:age 16} {:age 32}])', seq([map(key('age'), 16), map(key('age'), 29), map(key('age'), 32)]));
       return eq('(sort-by - > [3 1 2 4])', seq([1, 2, 3, 4]));
+    });
+  });
+  return describe('(iterate f x)', function() {
+    return it('creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', function() {
+      throws('(iterate inc)');
+      throws('(iterate true 1)');
+      eq('(take 5 (iterate inc 5))', seq([5, 6, 7, 8, 9]));
+      return eq('(nth (iterate #(* % 2) 1) 10)', 1024);
     });
   });
 });
@@ -17925,6 +17933,11 @@ core = {
       assert.seqable(arguments[2]);
     }
     return m.sort_by.apply(null, arguments);
+  },
+  'iterate': function(f, x) {
+    assert.arity(2, 2, arguments);
+    assert["function"](f);
+    return m.iterate(f, x);
   }
 };
 
