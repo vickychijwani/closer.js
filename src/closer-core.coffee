@@ -400,6 +400,11 @@ core =
       assert.seqable arguments[2]
     m.sort_by.apply null, arguments
 
+  'iterate': (f, x) ->
+    assert.arity 2, 2, arguments
+    assert.function f
+    m.iterate f, x
+
 
 module.exports = core
 

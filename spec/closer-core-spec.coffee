@@ -850,3 +850,10 @@ describe 'Closer core library', ->
       eq '(sort-by :age [{:age 29} {:age 16} {:age 32}])',
         seq [map(key('age'), 16), map(key('age'), 29), map(key('age'), 32)]
       eq '(sort-by - > [3 1 2 4])', seq [1, 2, 3, 4]
+
+  describe '(iterate f x)', ->
+    it 'creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', ->
+      throws '(iterate inc)'
+      throws '(iterate true 1)'
+      eq '(take 5 (iterate inc 5))', seq [5...10]
+      eq '(nth (iterate #(* % 2) 1) 10)', 1024

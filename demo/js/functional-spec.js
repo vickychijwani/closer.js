@@ -17081,6 +17081,11 @@ core = {
       assert.seqable(arguments[2]);
     }
     return m.sort_by.apply(null, arguments);
+  },
+  'iterate': function(f, x) {
+    assert.arity(2, 2, arguments);
+    assert["function"](f);
+    return m.iterate(f, x);
   }
 };
 
