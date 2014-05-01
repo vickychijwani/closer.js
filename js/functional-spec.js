@@ -17060,6 +17060,16 @@ core = {
     assert["function"](pred);
     assert.seqable(coll);
     return m.every(pred, coll);
+  },
+  'sort': function() {
+    assert.arity(1, 2, arguments);
+    if (arguments.length === 1) {
+      assert.seqable(arguments[0]);
+    } else {
+      assert["function"](arguments[0]);
+      assert.seqable(arguments[1]);
+    }
+    return m.sort.apply(null, arguments);
   }
 };
 
