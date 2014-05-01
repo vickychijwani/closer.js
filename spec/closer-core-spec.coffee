@@ -821,15 +821,32 @@ describe 'Closer core library', ->
 
   describe '(sort coll), (sort cmp coll)', ->
     it 'sorts the given collection, optionally using the given comparison function', ->
-      throws '(sort > [3 1 2 4] [7 5 6 8])'
-      throws '(sort 3 [7 5 6 8])'
-      throws '(sort 3)'
+      throws '(sort > [3 1 2 4] [7 5 6 8])'   # wrong arity
+      throws '(sort 3)'   # if given 1 arg, it must be seqable
+      throws '(sort 3 [7 5 6 8])'   # if given 2 args, 1st must be a function
+      throws '(sort > 3)'   # if given 2 args, 2nd must be seqable
       eq '(sort [3 1 2 4])', seq [1, 2, 3, 4]
       eq '(sort \'(3 1 2 4))', seq [1, 2, 3, 4]
       eq '(sort #{3 1 2 4})', seq [1, 2, 3, 4]
       eq '(sort {3 1, 2 4})', seq [vec(2, 4), vec(3, 1)]
       eq '(sort "string")', seq ["g", "i", "n", "r", "s", "t"]
       eq '(sort > [3 1 2 4])', seq [4, 3, 2, 1]
-      # FIXME these are supposed to work
-      # eq '(sort > "string")', seq ["t", "s", "r", "n", "i", "g"]
-      # eq '(sort > {3 1, 2 4})', seq [vec(3, 1), vec(2, 4)]
+      throws '(sort > "string")'   # works in ClojureScript, but not in Clojure
+      throws '(sort > {3 1, 2 4})'   # works in ClojureScript, but not in Clojure
+
+  describe '(sort-by keyfn coll), (sort-by keyfn cmp coll)', ->
+    it 'sorts the given collection, optionally using the given comparison function', ->
+      throws '(sort-by [3 1 2 4])'   # wrong arity
+      throws '(sort-by true [3 1 2 4])'   # if given 2 args, 1st must be a function
+      throws '(sort-by - 3)'   # if given 2 args, 2nd must be seqable
+      throws '(sort-by true > [3 1 2 4])'   # if given 3 args, 1st must be a function
+      throws '(sort-by - true [3 1 2 4])'   # if given 3 args, 2nd must be a function
+      throws '(sort-by - > 3)'   # if given 3 args, 3rd must be seqable
+      eq '(sort-by - [3 1 2 4])', seq [4, 3, 2, 1]
+      eq '(sort-by - \'(3 1 2 4))', seq [4, 3, 2, 1]
+      eq '(sort-by - #{3 1 2 4})', seq [4, 3, 2, 1]
+      eq '(sort-by #(apply + %) {3 1, 2 4, 6 5})', seq [vec(3, 1), vec(2, 4), vec(6, 5)]
+      eq '(sort-by count ["aa" "a" "aaa"])', seq ["a", "aa", "aaa"]
+      eq '(sort-by :age [{:age 29} {:age 16} {:age 32}])',
+        seq [map(key('age'), 16), map(key('age'), 29), map(key('age'), 32)]
+      eq '(sort-by - > [3 1 2 4])', seq [1, 2, 3, 4]

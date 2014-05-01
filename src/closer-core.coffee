@@ -389,6 +389,17 @@ core =
       assert.seqable arguments[1]
     m.sort.apply null, arguments
 
+  'sort-by': () ->
+    # arguments: keyfn, [cmp], coll
+    assert.arity 2, 3, arguments
+    if arguments.length is 2
+      assert.function arguments[0]
+      assert.seqable arguments[1]
+    else
+      assert.function arguments[0], arguments[1]
+      assert.seqable arguments[2]
+    m.sort_by.apply null, arguments
+
 
 module.exports = core
 
