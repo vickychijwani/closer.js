@@ -110,6 +110,19 @@ describe 'Closer core library', ->
       eq '(mod -10.1 -3)', -10.1 % 3
       eq '(mod 10.1 -3)', 10.1 % 3 - 3
 
+  describe '(rand), (rand n)', ->
+    it 'returns a random floating-point number between 0 (inclusive) and n (default 1) (exclusive)', ->
+      throws '(rand 3.4 7.9)'
+      truthy '(every? #(if (>= % 0) (< % 1) false) (repeatedly 50 rand))'
+      truthy '(every? #(if (>= % 0) (< % 3) false) (repeatedly 50 #(rand 3)))'
+
+  describe '(rand-int n)', ->
+    it 'returns a random integer between 0 (inclusive) and n (exclusive)', ->
+      throws '(rand-int 3 8)'
+      truthy '(every? #{0 1} (repeatedly 50 #(rand-int 2)))'
+      truthy '(every? #{0 1} (repeatedly 50 #(rand-int 1.1)))'   # probability of 1 is very low
+      truthy '(every? #{0 -1} (repeatedly 50 #(rand-int -1.1)))'   # probability of -1 is very low
+
 
   # comparison
   describe '(= x y & more)', ->
@@ -857,3 +870,24 @@ describe 'Closer core library', ->
       throws '(iterate true 1)'
       eq '(take 5 (iterate inc 5))', seq [5...10]
       eq '(nth (iterate #(* % 2) 1) 10)', 1024
+
+  describe '(constantly x)', ->
+    it 'returns a function which takes any number of arguments and returns x', ->
+      throws '(constantly 2 3)'
+      eq '(map (constantly 0) [1 2 3])', seq [0, 0, 0]
+
+  describe '(repeat x), (repeat n x)', ->
+    it 'returns a lazy sequence of (infinite, or n if given) xs', ->
+      throws '(repeat 3 5 6)'
+      throws '(repeat true? 3)'   # if given 2 args, 1st arg must be a number
+      eq '(take 5 (repeat 3))', seq [3, 3, 3, 3, 3]
+      eq '(repeat 5 3)', seq [3, 3, 3, 3, 3]
+
+  describe '(repeatedly f), (repeatedly n f)', ->
+    it 'returns a lazy sequence of (infinite, or n if given) calls to the zero-arg function f', ->
+      throws '(repeatedly 3 rand rand)'
+      throws '(repeat true? rand)'   # if given 2 args, 1st arg must be a number
+      throws '(repeatedly 3 3)'   # if given 2 args, 2nd arg must be a function
+      throws '(repeatedly 3)'   # if given 1 arg, it must be a function
+      truthy '(every? #{0 1} (take 50 (repeatedly #(rand-int 2))))'
+      truthy '(every? #{0 1} (repeatedly 50 #(rand-int 2)))'

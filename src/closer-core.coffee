@@ -61,6 +61,20 @@ core =
     if rem is 0 or (num > 0 and div > 0 or num < 0 and div < 0)
     then rem else rem + div
 
+  'rand': () ->
+    # arguments: [n]
+    assert.arity 0, 1, arguments
+    n = 1
+    if arguments.length is 1
+      assert.numbers arguments[0]
+      n = arguments[0]
+    Math.random() * n
+
+  'rand-int': (n) ->
+    assert.arity 1, 1, arguments
+    r = core.rand n
+    if r >= 0 then Math.floor(r) else Math.ceil(r)
+
 
   # comparison / test
   '=': (args...) ->
@@ -404,6 +418,24 @@ core =
     assert.arity 2, 2, arguments
     assert.function f
     m.iterate f, x
+
+  'constantly': (x) ->
+    assert.arity 1, 1, arguments
+    m.constantly x
+
+  'repeat': () ->
+    # arguments: [n], x
+    assert.arity 1, 2, arguments
+    assert.numbers arguments[0] if arguments.length is 2
+    m.repeat.apply null, arguments
+
+  'repeatedly': () ->
+    # arguments: [n], f
+    assert.arity 1, 2, arguments
+    if arguments.length is 1 then [f] = arguments else [n, f] = arguments
+    assert.numbers n if typeof n isnt 'undefined'
+    assert.function f
+    m.repeatedly.apply null, arguments
 
 
 module.exports = core
