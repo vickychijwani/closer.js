@@ -17314,7 +17314,7 @@ describe('Closer core library', function() {
       return eq('(repeat 5 3)', seq([3, 3, 3, 3, 3]));
     });
   });
-  return describe('(repeatedly f), (repeatedly n f)', function() {
+  describe('(repeatedly f), (repeatedly n f)', function() {
     return it('returns a lazy sequence of (infinite, or n if given) calls to the zero-arg function f', function() {
       throws('(repeatedly 3 rand rand)');
       throws('(repeat true? rand)');
@@ -17322,6 +17322,25 @@ describe('Closer core library', function() {
       throws('(repeatedly 3)');
       truthy('(every? #{0 1} (take 50 (repeatedly #(rand-int 2))))');
       return truthy('(every? #{0 1} (repeatedly 50 #(rand-int 2)))');
+    });
+  });
+  describe('(comp fs)', function() {
+    return it('returns the composition of the given functions (the returned function takes a variable number of arguments)', function() {
+      throws('(comp - 3)');
+      eq('((comp) [1 2 3])', vec([1, 2, 3]));
+      eq('((comp - /) 8 3)', -8 / 3);
+      eq('((comp str +) 8 4 5)', '17');
+      return eq('(def countif (comp count filter)) (countif even? [2 3 1 5 4])', 2);
+    });
+  });
+  return describe('(partial f args)', function() {
+    return it('partially applies f to the given args, returning a function that can be invoked with more args to f', function() {
+      throws('(partial)');
+      throws('(partial true)');
+      throws('((partial identity))');
+      eq('((partial identity) 3)', 3);
+      eq('((partial identity 3))', 3);
+      return eq('(def times100 (partial * 100)) (times100 5)', 500);
     });
   });
 });
@@ -18022,6 +18041,20 @@ core = {
     }
     assert["function"](f);
     return m.repeatedly.apply(null, arguments);
+  },
+  'comp': function() {
+    var fs;
+    fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    assert["function"].apply(null, fs);
+    return m.comp.apply(null, fs);
+  },
+  'partial': function() {
+    var args, f;
+    f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    assert.arity(1, Infinity, arguments);
+    assert["function"](f);
+    return m.partial.apply(null, arguments);
   }
 };
 

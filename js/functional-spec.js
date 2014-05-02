@@ -17131,6 +17131,20 @@ core = {
     }
     assert["function"](f);
     return m.repeatedly.apply(null, arguments);
+  },
+  'comp': function() {
+    var fs;
+    fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    assert["function"].apply(null, fs);
+    return m.comp.apply(null, fs);
+  },
+  'partial': function() {
+    var args, f;
+    f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    assert.arity(1, Infinity, arguments);
+    assert["function"](f);
+    return m.partial.apply(null, arguments);
   }
 };
 
