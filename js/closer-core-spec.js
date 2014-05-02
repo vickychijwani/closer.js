@@ -16486,6 +16486,21 @@ describe('Closer core library', function() {
       return eq('(mod 10.1 -3)', 10.1 % 3 - 3);
     });
   });
+  describe('(rand), (rand n)', function() {
+    return it('returns a random floating-point number between 0 (inclusive) and n (default 1) (exclusive)', function() {
+      throws('(rand 3.4 7.9)');
+      truthy('(every? #(if (>= % 0) (< % 1) false) (repeatedly 50 rand))');
+      return truthy('(every? #(if (>= % 0) (< % 3) false) (repeatedly 50 #(rand 3)))');
+    });
+  });
+  describe('(rand-int n)', function() {
+    return it('returns a random integer between 0 (inclusive) and n (exclusive)', function() {
+      throws('(rand-int 3 8)');
+      truthy('(every? #{0 1} (repeatedly 50 #(rand-int 2)))');
+      truthy('(every? #{0 1} (repeatedly 50 #(rand-int 1.1)))');
+      return truthy('(every? #{0 -1} (repeatedly 50 #(rand-int -1.1)))');
+    });
+  });
   describe('(= x y & more)', function() {
     return it('returns true if all its arguments are equal (by value, not identity)', function() {
       throws('(=)');
@@ -17277,12 +17292,36 @@ describe('Closer core library', function() {
       return eq('(sort-by - > [3 1 2 4])', seq([1, 2, 3, 4]));
     });
   });
-  return describe('(iterate f x)', function() {
+  describe('(iterate f x)', function() {
     return it('creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', function() {
       throws('(iterate inc)');
       throws('(iterate true 1)');
       eq('(take 5 (iterate inc 5))', seq([5, 6, 7, 8, 9]));
       return eq('(nth (iterate #(* % 2) 1) 10)', 1024);
+    });
+  });
+  describe('(constantly x)', function() {
+    return it('returns a function which takes any number of arguments and returns x', function() {
+      throws('(constantly 2 3)');
+      return eq('(map (constantly 0) [1 2 3])', seq([0, 0, 0]));
+    });
+  });
+  describe('(repeat x), (repeat n x)', function() {
+    return it('returns a lazy sequence of (infinite, or n if given) xs', function() {
+      throws('(repeat 3 5 6)');
+      throws('(repeat true? 3)');
+      eq('(take 5 (repeat 3))', seq([3, 3, 3, 3, 3]));
+      return eq('(repeat 5 3)', seq([3, 3, 3, 3, 3]));
+    });
+  });
+  return describe('(repeatedly f), (repeatedly n f)', function() {
+    return it('returns a lazy sequence of (infinite, or n if given) calls to the zero-arg function f', function() {
+      throws('(repeatedly 3 rand rand)');
+      throws('(repeat true? rand)');
+      throws('(repeatedly 3 3)');
+      throws('(repeatedly 3)');
+      truthy('(every? #{0 1} (take 50 (repeatedly #(rand-int 2))))');
+      return truthy('(every? #{0 1} (repeatedly 50 #(rand-int 2)))');
     });
   });
 });
@@ -17522,6 +17561,26 @@ core = {
       return rem;
     } else {
       return rem + div;
+    }
+  },
+  'rand': function() {
+    var n;
+    assert.arity(0, 1, arguments);
+    n = 1;
+    if (arguments.length === 1) {
+      assert.numbers(arguments[0]);
+      n = arguments[0];
+    }
+    return Math.random() * n;
+  },
+  'rand-int': function(n) {
+    var r;
+    assert.arity(1, 1, arguments);
+    r = core.rand(n);
+    if (r >= 0) {
+      return Math.floor(r);
+    } else {
+      return Math.ceil(r);
     }
   },
   '=': function() {
@@ -17938,6 +17997,31 @@ core = {
     assert.arity(2, 2, arguments);
     assert["function"](f);
     return m.iterate(f, x);
+  },
+  'constantly': function(x) {
+    assert.arity(1, 1, arguments);
+    return m.constantly(x);
+  },
+  'repeat': function() {
+    assert.arity(1, 2, arguments);
+    if (arguments.length === 2) {
+      assert.numbers(arguments[0]);
+    }
+    return m.repeat.apply(null, arguments);
+  },
+  'repeatedly': function() {
+    var f, n;
+    assert.arity(1, 2, arguments);
+    if (arguments.length === 1) {
+      f = arguments[0];
+    } else {
+      n = arguments[0], f = arguments[1];
+    }
+    if (typeof n !== 'undefined') {
+      assert.numbers(n);
+    }
+    assert["function"](f);
+    return m.repeatedly.apply(null, arguments);
   }
 };
 

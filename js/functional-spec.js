@@ -16672,6 +16672,26 @@ core = {
       return rem + div;
     }
   },
+  'rand': function() {
+    var n;
+    assert.arity(0, 1, arguments);
+    n = 1;
+    if (arguments.length === 1) {
+      assert.numbers(arguments[0]);
+      n = arguments[0];
+    }
+    return Math.random() * n;
+  },
+  'rand-int': function(n) {
+    var r;
+    assert.arity(1, 1, arguments);
+    r = core.rand(n);
+    if (r >= 0) {
+      return Math.floor(r);
+    } else {
+      return Math.ceil(r);
+    }
+  },
   '=': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -17086,6 +17106,31 @@ core = {
     assert.arity(2, 2, arguments);
     assert["function"](f);
     return m.iterate(f, x);
+  },
+  'constantly': function(x) {
+    assert.arity(1, 1, arguments);
+    return m.constantly(x);
+  },
+  'repeat': function() {
+    assert.arity(1, 2, arguments);
+    if (arguments.length === 2) {
+      assert.numbers(arguments[0]);
+    }
+    return m.repeat.apply(null, arguments);
+  },
+  'repeatedly': function() {
+    var f, n;
+    assert.arity(1, 2, arguments);
+    if (arguments.length === 1) {
+      f = arguments[0];
+    } else {
+      n = arguments[0], f = arguments[1];
+    }
+    if (typeof n !== 'undefined') {
+      assert.numbers(n);
+    }
+    assert["function"](f);
+    return m.repeatedly.apply(null, arguments);
   }
 };
 
