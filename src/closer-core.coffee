@@ -437,6 +437,16 @@ core =
     assert.function f
     m.repeatedly.apply null, arguments
 
+  'comp': (fs...) ->
+    assert.arity 0, Infinity, arguments
+    assert.function.apply null, fs
+    m.comp.apply null, fs
+
+  'partial': (f, args...) ->
+    assert.arity 1, Infinity, arguments
+    assert.function f
+    m.partial.apply null, arguments
+
 
 module.exports = core
 

@@ -891,3 +891,20 @@ describe 'Closer core library', ->
       throws '(repeatedly 3)'   # if given 1 arg, it must be a function
       truthy '(every? #{0 1} (take 50 (repeatedly #(rand-int 2))))'
       truthy '(every? #{0 1} (repeatedly 50 #(rand-int 2)))'
+
+  describe '(comp fs)', ->
+    it 'returns the composition of the given functions (the returned function takes a variable number of arguments)', ->
+      throws '(comp - 3)'   # all args must be functions
+      eq '((comp) [1 2 3])', vec [1..3]
+      eq '((comp - /) 8 3)', -8/3
+      eq '((comp str +) 8 4 5)', '17'
+      eq '(def countif (comp count filter)) (countif even? [2 3 1 5 4])', 2
+
+  describe '(partial f args)', ->
+    it 'partially applies f to the given args, returning a function that can be invoked with more args to f', ->
+      throws '(partial)'
+      throws '(partial true)'   # 1st arg must be a function
+      throws '((partial identity))'   # wrong number of args passed to identity
+      eq '((partial identity) 3)', 3
+      eq '((partial identity 3))', 3
+      eq '(def times100 (partial * 100)) (times100 5)', 500
