@@ -3,33 +3,27 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON 'package.json'
 
     shell:
+      options:
+        failOnError: true
+
       jison:
         command: 'mkdir -p lib/; jison src/grammar.y src/lexer.l -o lib/parser.js'
-        options:
-          failOnError: true
 
       browserify:
         command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %> src/<%= pkg.name %>.coffee > dist/<%= pkg.name %>.js;
           browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core src/<%= pkg.name %>-core.coffee > dist/<%= pkg.name %>-core.js;'
-        options:
-          failOnError: true
 
       browserify_spec:
         command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
           browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core-spec spec/<%= pkg.name %>-core-spec.coffee > demo/js/<%= pkg.name %>-core-spec.js;
           browserify -t coffeeify --extension=".coffee" -s functional-spec spec/functional-spec.coffee > demo/js/functional-spec.js;'
-        options:
-          failOnError: true
 
       copy_uglified:
         command: 'cp dist/<%= pkg.name %>-core.js demo/js/<%= pkg.name %>-core.js;
                   cp dist/<%= pkg.name %>.js demo/js/<%= pkg.name %>.js;'
-        failOnError: true
 
       push_ghpages:
         command: 'git subtree push --prefix demo origin gh-pages'
-        options:
-          failOnError: true
 
     jasmine_node:
       all: ['spec/']
