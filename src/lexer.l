@@ -53,6 +53,8 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 'when'  return 'WHEN';
 'do'    return 'DO';
 'let'   return 'LET';
+'loop'  return 'LOOP';
+'recur' return 'RECUR';
 
 'true'  return 'true';
 'false' return 'false';

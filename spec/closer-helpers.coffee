@@ -42,6 +42,12 @@ exports.ArrayExpression = (elements) ->
   type: 'ArrayExpression'
   elements: elements
 
+exports.AssignmentExpression = (left, right) ->
+  type: 'AssignmentExpression'
+  operator: '='
+  left: left
+  right: right
+
 exports.CallExpression = (callee, args) ->
   type: 'CallExpression'
   callee: callee
@@ -76,11 +82,24 @@ exports.ExpressionStatement = (expression) ->
   type: 'ExpressionStatement'
   expression: expression
 
+exports.WhileStatement = (test, body) ->
+  type: 'WhileStatement'
+  test: test
+  body: body
+
 exports.IfStatement = (test, consequent, alternate) ->
   type: 'IfStatement'
   test: test
   consequent: consequent
   alternate: (if (typeof alternate isnt 'undefined') then alternate else null)
+
+exports.BreakStatement = (label = null) ->
+  type: 'BreakStatement'
+  label: label
+
+exports.ContinueStatement = (label = null) ->
+  type: 'ContinueStatement'
+  label: label
 
 exports.ReturnStatement = (argument) ->
   type: 'ReturnStatement'

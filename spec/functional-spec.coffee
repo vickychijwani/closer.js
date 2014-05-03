@@ -54,6 +54,23 @@ describe 'Functional tests', ->
         [(.x (.pos this)) (.y (.pos this))]',
       vec 10, 20
 
+  it 'loop + recur', ->
+    eq '(loop [x 5 coll []]
+          (if (zero? x)
+              coll
+              (recur (dec x) (conj coll x))))',
+      vec [5..1]
+
+  it 'defn / fn + recur', ->
+    eq '(defn factorial [n]
+          ((fn [n acc]
+              (if (zero? n)
+                  acc
+                  (recur (dec n) (* acc n)))) n 1))
+
+        (map factorial (range 1 6))',
+      seq [1, 2, 6, 24, 120]
+
   it 'averaging numbers', ->
     eq '(defn avg [& xs]
           (/ (apply + xs) (count xs)))

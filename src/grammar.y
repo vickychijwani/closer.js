@@ -65,12 +65,23 @@ Fn
   | AnonArg
   ;
 
+RestArgs
+  : '&' Identifier { $$ = $Identifier; }
+  ;
+
 FnParamsAndBody
-  : '[' IdentifierList '&'? Identifier?[rest] ']' BlockStatementWithReturn {
-        $rest = getValueIfUndefined($rest, null);
+  : '[' IdentifierList RestArgs?[rest] ']' BlockStatementWithReturn {
         if ($rest) {
             var restDecl = createRestArgsDecl($rest, $IdentifierList.length, @rest, yy);
             $BlockStatementWithReturn.body.unshift(restDecl);
+        }
+
+        var hasRecurForm = processRecurFormIfAny($BlockStatementWithReturn, $IdentifierList, yy);
+        if (hasRecurForm) {
+            var blockLoc = $BlockStatementWithReturn.loc;
+            $BlockStatementWithReturn = yy.Node('BlockStatement', [
+                yy.Node('WhileStatement', yy.Node('Literal', true, blockLoc),
+                    $BlockStatementWithReturn, blockLoc)], blockLoc);
         }
         $$ = yy.Node('FunctionExpression', null, $IdentifierList, null,
             $BlockStatementWithReturn, false, false, yy.loc(@BlockStatementWithReturn));
@@ -87,7 +98,7 @@ AnonFnLiteral
         var body = $3, bodyLoc = @3;
         var maxArgNum = 0;
         var hasRestArg = false;
-        estraverse.replace(body, {
+        estraverse.traverse(body, {
             enter: function (node) {
                 if (node.type === 'Identifier' && node.anonArg) {
                     if (node.anonArgNum === 0)   // 0 denotes rest arg
@@ -105,7 +116,7 @@ AnonFnLiteral
         }
         body = wrapInExpressionStatement(body, yy);
         body = yy.Node('BlockStatement', [body], yy.loc(bodyLoc));
-        createReturnStatementIfPossible(body);
+        createReturnStatementIfPossible(body, yy);
         if (hasRestArg) {
             var restId = yy.Node('Identifier', '__$rest', yy.loc(bodyLoc));
             var restDecl = createRestArgsDecl(restId, maxArgNum, bodyLoc, yy);
@@ -151,6 +162,53 @@ LetForm
     }
   ;
 
+LoopForm
+  : LOOP '[' LetBindings ']' BlockStatement {
+        var body = [].concat($LetBindings);
+        body.push($BlockStatement);
+        $$ = wrapInIIFE(body, @1, yy);
+
+        var blockBody = $$.callee.body.body, whileBlock, whileBlockIdx, stmt;
+        for (var i = 0, len = blockBody.length; i < len; ++i) {
+            stmt = blockBody[i];
+            if (stmt.type === 'BlockStatement') {
+                whileBlockIdx = i;
+                whileBlock = stmt;
+            }
+        }
+
+        var actualArgs = [];
+        for (var i = 0, len = $LetBindings.length; i < len; ++i) {
+            actualArgs.push($LetBindings[i].declarations[0].id);
+        }
+
+        processRecurFormIfAny(whileBlock, actualArgs, yy);
+
+        var whileBody = whileBlock.body;
+        var lastLoc = (whileBody.length > 0) ? (whileBody[whileBody.length-1].loc) : whileBlock.loc;
+        whileBody.push(yy.Node('BreakStatement', null, lastLoc));
+        blockBody[whileBlockIdx] = yy.Node('WhileStatement', yy.Node('Literal', true, @BlockStatement),
+            whileBlock, @BlockStatement);
+    }
+  ;
+
+RecurForm
+  : RECUR SExprs?[args] {
+        $args = getValueIfUndefined($args, []);
+        var body = [], id, assignment, arg;
+        for (var i = 0; i < $args.length; ++i) {
+            arg = $args[i];
+            id = yy.Node('Identifier', '__$recur' + i, arg.loc);
+            id.recurArg = true;
+            id.recurArgIdx = i;
+            assignment = yy.Node('AssignmentExpression', '=', id, arg, arg.loc);
+            body.push(wrapInExpressionStatement(assignment, yy));
+        }
+        $$ = yy.Node('BlockStatement', body, @1);
+        $$.recurBlock = true;
+    }
+  ;
+
 DotForm
   : DOT IDENTIFIER[prop] SExpr[obj] SExprs?[args] {
         $args = getValueIfUndefined($args, []);
@@ -178,6 +236,8 @@ List
   | ConditionalExpr
   | VarDeclaration
   | LetForm
+  | LoopForm
+  | RecurForm
   | DotForm
   | Fn SExprs?[args] {
         var callee = yy.Node('MemberExpression', $Fn,
@@ -240,7 +300,7 @@ BlockStatement
 
 BlockStatementWithReturn
   : BlockStatement {
-        $$ = createReturnStatementIfPossible($BlockStatement);
+        $$ = createReturnStatementIfPossible($BlockStatement, yy);
     }
   ;
 
@@ -273,13 +333,51 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'UpdateExpression', 'LogicalExpression', 'ConditionalExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
+function processRecurFormIfAny(rootNode, actualArgs, yy) {
+    var hasRecurForm = false;
+    estraverse.traverse(rootNode, {
+        enter: function (node) {
+            if (node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration') {
+                return estraverse.VisitorOption.Skip;
+            } else if (node.type === 'BlockStatement' && node.recurBlock) {
+                hasRecurForm = true;
+                var body = node.body;
+
+                // get rid of return statement
+                var lastStmt = body.length > 0 ? body[body.length-1] : null;
+                if (lastStmt && lastStmt.type === 'ReturnStatement') {
+                    lastStmt.type = 'ExpressionStatement';
+                    lastStmt.expression = lastStmt.argument;
+                    delete lastStmt.argument;
+                }
+
+                estraverse.traverse(node, {
+                    enter: function (innerNode) {
+                        if (innerNode.type === 'Identifier' && innerNode.recurArg) {
+                            var actualArg = actualArgs[innerNode.recurArgIdx];
+                            body.push(wrapInExpressionStatement(yy.Node('AssignmentExpression', '=', actualArg, innerNode, innerNode.loc), yy));
+                            delete innerNode.recurArg;
+                            delete innerNode.recurArgIdx;
+                        }
+                    }
+                });
+
+                var lastLoc = (body.length > 0) ? (body[body.length-1].loc) : body.loc;
+                body.push(yy.Node('ContinueStatement', null, lastLoc));
+                delete node.recurBlock;
+            }
+        }
+    });
+    return hasRecurForm;
+}
+
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, loc, yy) {
     yyloc = yy.loc(loc);
     return yy.Node('CallExpression',
         yy.Node('FunctionExpression',
             null, [], null,
-            createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc)),
+            createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc), yy),
             false, false, yyloc
         ), [], yyloc);
 }
@@ -291,7 +389,7 @@ function wrapInExpressionStatement(expr, yy) {
     return expr;
 }
 
-function createReturnStatementIfPossible(stmt) {
+function createReturnStatementIfPossible(stmt, yy) {
     if (stmt === undefined || stmt === null || ! stmt.type)
         return stmt;
     var lastStmts = [], lastStmt;
@@ -299,19 +397,22 @@ function createReturnStatementIfPossible(stmt) {
         lastStmts.push(stmt.body[stmt.body.length - 1]);
     } else if (stmt.type === 'IfStatement') {
         lastStmts.push(stmt.consequent);
+        if (stmt.alternate === null) {
+            stmt.alternate = wrapInExpressionStatement(yy.Node('Literal', null, stmt.consequent.loc), yy);
+        }
         lastStmts.push(stmt.alternate);
     } else {
         return stmt;
     }
     for (var i = 0; i < lastStmts.length; ++i) {
         lastStmt = lastStmts[i];
-        if (lastStmt === null) continue;
+        if (! lastStmt) continue;
         if (lastStmt.type === 'ExpressionStatement') {
             lastStmt.type = 'ReturnStatement';
             lastStmt.argument = lastStmt.expression;
             delete lastStmt.expression;
         } else {
-            createReturnStatementIfPossible(lastStmt);
+            createReturnStatementIfPossible(lastStmt, yy);
         }
     }
     return stmt;

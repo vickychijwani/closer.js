@@ -17,13 +17,17 @@ ThisExpression = helpers.ThisExpression
 UnaryExpression = helpers.UnaryExpression
 BinaryExpression = helpers.BinaryExpression
 ArrayExpression = helpers.ArrayExpression
+AssignmentExpression = helpers.AssignmentExpression
 CallExpression = helpers.CallExpression
 MemberExpression = helpers.MemberExpression
 ConditionalExpression = helpers.ConditionalExpression
 FunctionExpression = helpers.FunctionExpression
 EmptyStatement = helpers.EmptyStatement
 ExpressionStatement = helpers.ExpressionStatement
+WhileStatement = helpers.WhileStatement
 IfStatement = helpers.IfStatement
+BreakStatement = helpers.BreakStatement
+ContinueStatement = helpers.ContinueStatement
 ReturnStatement = helpers.ReturnStatement
 VariableDeclaration = helpers.VariableDeclaration
 VariableDeclarator = helpers.VariableDeclarator
@@ -344,16 +348,15 @@ describe 'Closer parser', ->
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
-          BlockStatement(VariableDeclaration(
-            VariableDeclarator(
+          BlockStatement(
+            VariableDeclaration(VariableDeclarator(
               Identifier('x'),
               Integer(3))),
-            VariableDeclaration(
-              VariableDeclarator(
-                Identifier('y'),
-                CallExpression(
-                  MemberExpression(Identifier('-'), Identifier('call')),
-                  [Nil(), Identifier('x')]))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('y'),
+              CallExpression(
+                MemberExpression(Identifier('-'), Identifier('call')),
+                [Nil(), Identifier('x')]))),
             ReturnStatement(CallExpression(
               MemberExpression(Identifier('+'), Identifier('call')),
               [Nil(), Identifier('x'), Identifier('y')])))))))
@@ -394,6 +397,79 @@ describe 'Closer parser', ->
             String('function')),
           CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []),
           MemberExpression(ThisExpression(), String('pos'), true))))
+
+  it 'parses loop + recur forms', ->
+    expect(closer.parse('(loop [] (recur))')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null, [], null,
+          BlockStatement(
+            WhileStatement(
+              Boolean(true),
+              BlockStatement(
+                BlockStatement(ContinueStatement()),
+                BreakStatement())))),
+        [])))
+    expect(closer.parse('(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))')).toDeepEqual Program(
+      ExpressionStatement(CallExpression(
+        FunctionExpression(
+          null, [], null,
+          BlockStatement(
+            VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))),
+            WhileStatement(
+              Boolean(true),
+              BlockStatement(
+                IfStatement(
+                  CallExpression(
+                    MemberExpression(Identifier('>'), Identifier('call')),
+                    [Nil(), Identifier('x'), Integer(1)]),
+                  BlockStatement(
+                    ExpressionStatement(CallExpression(
+                      MemberExpression(Identifier('console'), String('log'), true),
+                      [Identifier('x')])),
+                    BlockStatement(
+                      ExpressionStatement(AssignmentExpression(
+                        Identifier('__$recur0'),
+                        CallExpression(
+                          MemberExpression(Identifier('-'), Identifier('call')),
+                          [Nil(), Identifier('x'), Integer(2)]))),
+                      ExpressionStatement(AssignmentExpression(
+                        Identifier('x'), Identifier('__$recur0')))
+                      ContinueStatement())),
+                  ReturnStatement(Nil())),
+                BreakStatement())))),
+        [])))
+
+  it 'parses fn + recur forms', ->
+    expect(closer.parse('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))')).toDeepEqual Program(
+      ExpressionStatement(
+        FunctionExpression(
+          null, [Identifier('n'), Identifier('acc')], null,
+          BlockStatement(
+            WhileStatement(
+              Boolean(true),
+              BlockStatement(
+                IfStatement(
+                  CallExpression(
+                    MemberExpression(Identifier('zero?'), Identifier('call')),
+                    [Nil(), Identifier('n')]),
+                  ReturnStatement(Identifier('acc')),
+                  BlockStatement(
+                    ExpressionStatement(AssignmentExpression(
+                      Identifier('__$recur0'),
+                      CallExpression(
+                        MemberExpression(Identifier('dec'), Identifier('call')),
+                        [Nil(), Identifier('n')]))),
+                    ExpressionStatement(AssignmentExpression(
+                      Identifier('__$recur1'),
+                      CallExpression(
+                        MemberExpression(Identifier('*'), Identifier('call')),
+                        [Nil(), Identifier('acc'), Identifier('n')]))),
+                    ExpressionStatement(AssignmentExpression(
+                      Identifier('n'), Identifier('__$recur0'))),
+                    ExpressionStatement(AssignmentExpression(
+                      Identifier('acc'), Identifier('__$recur1'))),
+                    ContinueStatement()))))))))
 
 
   # pending
