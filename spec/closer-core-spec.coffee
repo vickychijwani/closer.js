@@ -113,8 +113,8 @@ describe 'Closer core library', ->
   describe '(rand), (rand n)', ->
     it 'returns a random floating-point number between 0 (inclusive) and n (default 1) (exclusive)', ->
       throws '(rand 3.4 7.9)'
-      truthy '(every? #(if (>= % 0) (< % 1) false) (repeatedly 50 rand))'
-      truthy '(every? #(if (>= % 0) (< % 3) false) (repeatedly 50 #(rand 3)))'
+      truthy '(every? #(and (>= % 0) (< % 1)) (repeatedly 50 rand))'
+      truthy '(every? #(and (>= % 0) (< % 3)) (repeatedly 50 #(rand 3)))'
 
   describe '(rand-int n)', ->
     it 'returns a random integer between 0 (inclusive) and n (exclusive)', ->

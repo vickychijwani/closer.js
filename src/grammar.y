@@ -136,6 +136,17 @@ ConditionalExpr
     }
   ;
 
+LogicalExpr
+  : AND SExprs?[exprs] {
+        $exprs = getValueIfUndefined($exprs, [yy.Node('Literal', true, yy.loc(@1))]);
+        $$ = parseLogicalExpr('&&', $exprs, @1, yy);
+    }
+  | OR SExprs?[exprs] {
+        $exprs = getValueIfUndefined($exprs, [yy.Node('Literal', null, yy.loc(@1))]);
+        $$ = parseLogicalExpr('||', $exprs, @1, yy);
+    }
+  ;
+
 VarDeclaration
   : DEF Identifier SExpr?[init] { $$ = parseVarDecl($Identifier, $init, @1, yy); }
   ;
@@ -234,6 +245,7 @@ List
   : { $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
   | ConditionalExpr
+  | LogicalExpr
   | VarDeclaration
   | LetForm
   | LoopForm
@@ -433,6 +445,14 @@ function createRestArgsDecl(id, offset, loc, yy) {
              yy.Node('Literal', offset, yyloc)])],
         yyloc);
     return parseVarDecl(id, restInit, yyloc, yy);
+}
+
+function parseLogicalExpr(op, exprs, exprLoc, yy) {
+    var logicalExpr = exprs[0], yyExprLoc = yy.loc(exprLoc);
+    for (var i = 1, len = exprs.length; i < len; ++i) {
+        logicalExpr = yy.Node('LogicalExpression', op, logicalExpr, exprs[i], yyExprLoc);
+    }
+    return logicalExpr;
 }
 
 function parseVarDecl(id, init, loc, yy) {

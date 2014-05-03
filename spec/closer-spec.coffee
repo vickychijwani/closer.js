@@ -16,6 +16,7 @@ Identifier = helpers.Identifier
 ThisExpression = helpers.ThisExpression
 UnaryExpression = helpers.UnaryExpression
 BinaryExpression = helpers.BinaryExpression
+LogicalExpression = helpers.LogicalExpression
 ArrayExpression = helpers.ArrayExpression
 AssignmentExpression = helpers.AssignmentExpression
 CallExpression = helpers.CallExpression
@@ -470,6 +471,19 @@ describe 'Closer parser', ->
                     ExpressionStatement(AssignmentExpression(
                       Identifier('acc'), Identifier('__$recur1'))),
                     ContinueStatement()))))))))
+
+  it 'parses logical expressions (and / or)', ->
+    expect(closer.parse('(and) (or)')).toDeepEqual Program(
+      ExpressionStatement(Boolean(true)),
+      ExpressionStatement(Nil()))
+    expect(closer.parse('(and expr1 expr2 expr3)')).toDeepEqual Program(
+      ExpressionStatement(LogicalExpression('&&',
+        LogicalExpression('&&', Identifier('expr1'), Identifier('expr2')),
+        Identifier('expr3'))))
+    expect(closer.parse('(or expr1 expr2 expr3)')).toDeepEqual Program(
+      ExpressionStatement(LogicalExpression('||',
+        LogicalExpression('||', Identifier('expr1'), Identifier('expr2')),
+        Identifier('expr3'))))
 
 
   # pending

@@ -38,6 +38,12 @@ exports.BinaryExpression = (operator, left, right) ->
   left: left
   right: right
 
+exports.LogicalExpression = (operator, left, right) ->
+  type: 'LogicalExpression'
+  operator: operator
+  left: left
+  right: right
+
 exports.ArrayExpression = (elements) ->
   type: 'ArrayExpression'
   elements: elements
