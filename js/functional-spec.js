@@ -16533,8 +16533,11 @@ describe('Functional tests', function() {
     eq('(defn avg [& xs] (/ (apply + xs) (count xs))) (avg 1 2 3 4)', 2.5);
     return eq('(#(/ (apply + %&) (count %&)) 1 2 3 4)', 2.5);
   });
-  return it('quick sort', function() {
+  it('quick sort', function() {
     return eq('(defn qsort [coll] (let [pivot (first coll)] (when pivot (concat (qsort (filter #(< % pivot) coll)) (filter #{pivot} coll) (qsort (filter #(> % pivot) coll)))))) (qsort [8 3 7 3 2 10 1])', seq([1, 2, 3, 3, 7, 8, 10]));
+  });
+  return it('fibonacci sequence', function() {
+    return eq('(defn fibs [] (map first (iterate #(do [(% 1) (+ (% 0) (% 1))]) [0 1]))) (take 10 (fibs))', seq([0, 1, 1, 2, 3, 5, 8, 13, 21, 34]));
   });
 });
 
