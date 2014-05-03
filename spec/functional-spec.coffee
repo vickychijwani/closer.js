@@ -89,3 +89,10 @@ describe 'Functional tests', ->
 
         (qsort [8 3 7 3 2 10 1])',
       seq [1, 2, 3, 3, 7, 8, 10]
+
+  it 'fibonacci sequence', ->
+    eq '(defn fibs []
+          (map first (iterate #(do [(% 1) (+ (% 0) (% 1))]) [0 1])))
+
+        (take 10 (fibs))',
+      seq [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
