@@ -71,12 +71,24 @@ describe 'Functional tests', ->
         (map factorial (range 1 6))',
       seq [1, 2, 6, 24, 120]
 
+  it 'destructuring forms', ->
+    eq '(defn blah
+          [[a b & c :as coll1] d e & [f g & h :as coll2]]
+          {:args [a b c d e f g h] :coll1 coll1 :coll2 coll2})
+
+        (blah [1 2 3 4] 5 6 7 8 9)',
+      map key('args'), vec(1, 2, seq([3, 4]), 5, 6, 7, 8, seq([9])),
+        key('coll1'), vec([1..4]), key('coll2'), seq([7..9])
+
+    throws '(fn [[a :as coll1] :as coll2])'
+
   it 'averaging numbers', ->
     eq '(defn avg [& xs]
           (/ (apply + xs) (count xs)))
 
         (avg 1 2 3 4)',
       2.5
+
     eq '(#(/ (apply + %&) (count %&)) 1 2 3 4)', 2.5
 
   it 'quick sort', ->
