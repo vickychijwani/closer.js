@@ -92,7 +92,7 @@ describe 'Functional tests', ->
 
   it 'fibonacci sequence', ->
     eq '(defn fibs []
-          (map first (iterate #(do [(% 1) (+ (% 0) (% 1))]) [0 1])))
+          (map first (iterate (fn [[a b]] [b (+ a b)]) [0 1])))
 
         (take 10 (fibs))',
       seq [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]

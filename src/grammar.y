@@ -28,15 +28,6 @@ AnonArg
     }
   ;
 
-IdentifierList
-  : { $$ = []; }
-  | IdentifierList Identifier {
-        yy.locComb(@$, @Identifier);
-        $$ = $IdentifierList;
-        $IdentifierList.push($Identifier);
-  }
-;
-
 Atom
   : INTEGER { $$ = parseNumLiteral('Integer', $1, @1, yy, yytext); }
   | FLOAT { $$ = parseNumLiteral('Float', $1, @1, yy, yytext); }
@@ -66,31 +57,56 @@ Fn
   ;
 
 RestArgs
-  : '&' Identifier { $$ = $Identifier; }
+  : '&' IdOrDestrucForm { $$ = $IdOrDestrucForm; }
   ;
 
-FnParamsAndBody
-  : '[' IdentifierList RestArgs?[rest] ']' BlockStatementWithReturn {
-        if ($rest) {
-            var restDecl = createRestArgsDecl($rest, $IdentifierList.length, @rest, yy);
-            $BlockStatementWithReturn.body.unshift(restDecl);
-        }
+DestructuringForm
+  : '[' Args ']' {
+        $$ = $Args;
+        $$.destrucId = yy.Node('Identifier', '__$gen', yy.loc(@1));
+    }
+  ;
 
-        var hasRecurForm = processRecurFormIfAny($BlockStatementWithReturn, $IdentifierList, yy);
+IdOrDestrucForm
+  : Identifier
+  | DestructuringForm
+  ;
+
+IdOrDestrucList
+  : { $$ = []; }
+  | IdOrDestrucList IdOrDestrucForm {
+        yy.locComb(@$, @IdOrDestrucForm);
+        $$ = $IdOrDestrucList;
+        $IdOrDestrucList.push($IdOrDestrucForm);
+    }
+  ;
+
+Args
+  : IdOrDestrucList RestArgs?[rest] { $$ = { fixed: $IdOrDestrucList, rest: $rest }; }
+  ;
+
+FnArgsAndBody
+  : '[' Args ']' BlockStatementWithReturn {
+        var processed = processArgs($Args, yy);
+        var ids = processed.ids;
+        $BlockStatementWithReturn.body = processed.stmts.concat($BlockStatementWithReturn.body);
+
+        var hasRecurForm = processRecurFormIfAny($BlockStatementWithReturn, ids, yy);
         if (hasRecurForm) {
             var blockLoc = $BlockStatementWithReturn.loc;
             $BlockStatementWithReturn = yy.Node('BlockStatement', [
                 yy.Node('WhileStatement', yy.Node('Literal', true, blockLoc),
                     $BlockStatementWithReturn, blockLoc)], blockLoc);
         }
-        $$ = yy.Node('FunctionExpression', null, $IdentifierList, null,
+
+        $$ = yy.Node('FunctionExpression', null, ids, null,
             $BlockStatementWithReturn, false, false, yy.loc(@BlockStatementWithReturn));
     }
   ;
 
 FnDefinition
-  : FN FnParamsAndBody { $$ = $FnParamsAndBody; }
-  | DEFN Identifier FnParamsAndBody { $$ = parseVarDecl($Identifier, $FnParamsAndBody, @1, yy); }
+  : FN FnArgsAndBody { $$ = $FnArgsAndBody; }
+  | DEFN Identifier FnArgsAndBody { $$ = parseVarDecl($Identifier, $FnArgsAndBody, @1, yy); }
   ;
 
 AnonFnLiteral
@@ -119,7 +135,7 @@ AnonFnLiteral
         createReturnStatementIfPossible(body, yy);
         if (hasRestArg) {
             var restId = yy.Node('Identifier', '__$rest', yy.loc(bodyLoc));
-            var restDecl = createRestArgsDecl(restId, maxArgNum, bodyLoc, yy);
+            var restDecl = createRestArgsDecl(restId, null, maxArgNum, bodyLoc, yy);
             body.body.unshift(restDecl);
         }
         $$ = yy.Node('FunctionExpression', null, args, null, body,
@@ -345,6 +361,60 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'UpdateExpression', 'LogicalExpression', 'ConditionalExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
+var destrucArgIdx = 0;
+function processArgs(args, yy) {
+    var i, j, len, len2, arg;
+    var fixed = args.fixed, rest = args.rest;
+    var ids = [], stmts = [];
+    for (i = 0, len = fixed.length; i < len; ++i) {
+        arg = fixed[i];
+        if (arg.type && arg.type === 'Identifier') {
+            ids.push(arg);
+        } else if (! arg.type) {
+            arg.destrucId.name = '__$destruc' + destrucArgIdx++;
+            ids.push(arg.destrucId);
+            stmts = processDestrucForm(arg, stmts, yy);
+        }
+    }
+
+    if (rest) {
+        if (rest.type && rest.type === 'Identifier') {
+            decl = createRestArgsDecl(rest, args.destrucId, fixed.length, rest.loc, yy);
+            if (decl.loc) decl.loc = rest.loc;
+            stmts.push(decl);
+        } else if (! rest.type) {
+            rest.destrucId.name = '__$destruc' + destrucArgIdx++;
+            decl = createRestArgsDecl(rest.destrucId, args.destrucId, fixed.length, rest.destrucId.loc, yy);
+            if (decl.loc) decl.loc = rest.destrucId.loc;
+            stmts.push(decl);
+            stmts = processDestrucForm(rest, stmts, yy);
+        }
+    }
+
+    return { ids: ids, stmts: stmts };
+}
+
+function processDestrucForm(arg, stmts, yy) {
+    var processed = processArgs(arg, yy);
+    var processedId, yyloc, init, decl;
+    for (var j = 0, len2 = processed.ids.length; j < len2; ++j) {
+        processedId = processed.ids[j];
+        yyloc = processedId.loc;
+        init = yy.Node('CallExpression',
+            yy.Node('MemberExpression',
+                yy.Node('Identifier', 'nth', yyloc),
+                yy.Node('Identifier', 'call', yyloc),
+                false, yyloc),
+            [yy.Node('Literal', null, yyloc),
+             arg.destrucId, yy.Node('Literal', j, yyloc)],
+            yyloc);
+        decl = parseVarDecl(processedId, init, processedId.loc, yy);
+        if (decl.loc) decl.loc = processedId.loc;
+        stmts.push(decl);
+    }
+    return stmts.concat(processed.stmts);
+}
+
 function processRecurFormIfAny(rootNode, actualArgs, yy) {
     var hasRecurForm = false;
     estraverse.traverse(rootNode, {
@@ -430,20 +500,25 @@ function createReturnStatementIfPossible(stmt, yy) {
     return stmt;
 }
 
-function createRestArgsDecl(id, offset, loc, yy) {
-    yyloc = yy.loc(loc);
-    var restInit = yy.Node('CallExpression', yy.Node('Identifier', 'seq', yyloc),
-        [yy.Node('CallExpression',
-            yy.Node('MemberExpression',
+function createRestArgsDecl(id, argsId, offset, loc, yy) {
+    var yyloc = yy.loc(loc), restInit;
+    if (! argsId) {
+        restInit = yy.Node('CallExpression', yy.Node('Identifier', 'seq', yyloc),
+            [yy.Node('CallExpression',
                 yy.Node('MemberExpression',
                     yy.Node('MemberExpression',
-                        yy.Node('Identifier', 'Array', yyloc),
-                        yy.Node('Identifier', 'prototype', yyloc), false, yyloc),
-                    yy.Node('Identifier', 'slice', yyloc), false, yyloc),
-                yy.Node('Identifier', 'call', yyloc), false, yyloc),
-            [yy.Node('Identifier', 'arguments', yyloc),
-             yy.Node('Literal', offset, yyloc)])],
-        yyloc);
+                        yy.Node('MemberExpression',
+                            yy.Node('Identifier', 'Array', yyloc),
+                            yy.Node('Identifier', 'prototype', yyloc), false, yyloc),
+                        yy.Node('Identifier', 'slice', yyloc), false, yyloc),
+                    yy.Node('Identifier', 'call', yyloc), false, yyloc),
+                [yy.Node('Identifier', 'arguments', yyloc),
+                 yy.Node('Literal', offset, yyloc)])],
+            yyloc);
+    } else {
+        restInit = yy.Node('CallExpression', yy.Node('Identifier', 'drop', yyloc),
+            [yy.Node('Literal', offset, yyloc), argsId]);
+    }
     return parseVarDecl(id, restInit, yyloc, yy);
 }
 

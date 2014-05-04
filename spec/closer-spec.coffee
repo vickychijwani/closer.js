@@ -219,6 +219,44 @@ describe 'Closer parser', ->
                   MemberExpression(Identifier('count'), Identifier('call')),
                   [Nil(), Identifier('rest')])])))))))
 
+  it 'parses sequential destructuring forms', ->
+    expect(closer.parse('(defn fn-name [[a & b] c & [d & e]])')).toDeepEqual Program(
+      VariableDeclaration(VariableDeclarator(
+        Identifier('fn-name'),
+        FunctionExpression(
+          null, [Identifier('__$destruc2'), Identifier('c')], null,
+          BlockStatement(
+            VariableDeclaration(VariableDeclarator(
+              Identifier('a'),
+              CallExpression(
+                MemberExpression(Identifier('nth'), Identifier('call')),
+                [Nil(), Identifier('__$destruc2'), Integer(0)]))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('b'),
+              CallExpression(
+                Identifier('drop'), [Integer(1), Identifier('__$destruc2')]))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('__$destruc3'),
+              CallExpression(
+                Identifier('seq'),
+                [CallExpression(
+                  MemberExpression(
+                    MemberExpression(
+                      MemberExpression(Identifier('Array'), Identifier('prototype')),
+                      Identifier('slice')),
+                    Identifier('call')),
+                  [Identifier('arguments'), Integer(2)])]))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('d'),
+              CallExpression(
+                MemberExpression(Identifier('nth'), Identifier('call')),
+                [Nil(), Identifier('__$destruc3'), Integer(0)]))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('e'),
+              CallExpression(
+                Identifier('drop'), [Integer(1), Identifier('__$destruc3')]))),
+            ReturnStatement(Nil()))))))
+
   it 'parses collections and keywords in function position', ->
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
