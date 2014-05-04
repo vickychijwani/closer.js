@@ -232,9 +232,8 @@ describe 'Closer parser', ->
             TryStatement(BlockStatement(
               VariableDeclaration(VariableDeclarator(
                 Identifier('a'),
-                CallExpression(
-                  MemberExpression(Identifier('nth'), Identifier('call')),
-                  [Nil(), Identifier('__$destruc2'), Integer(0)])))),
+                CallExpression(Identifier('nth'),
+                  [Identifier('__$destruc2'), Integer(0)])))),
               CatchClause(
                 Identifier('__$error'),
                 BlockStatement(
@@ -247,8 +246,8 @@ describe 'Closer parser', ->
                     Identifier('a'), Nil()))))),
             VariableDeclaration(VariableDeclarator(
               Identifier('b'),
-              CallExpression(
-                Identifier('drop'), [Integer(1), Identifier('__$destruc2')]))),
+              CallExpression(Identifier('drop'),
+                [Integer(1), Identifier('__$destruc2')]))),
             VariableDeclaration(VariableDeclarator(
               Identifier('coll'),
               CallExpression(
@@ -263,9 +262,8 @@ describe 'Closer parser', ->
             TryStatement(BlockStatement(
               VariableDeclaration(VariableDeclarator(
                 Identifier('d'),
-                CallExpression(
-                  MemberExpression(Identifier('nth'), Identifier('call')),
-                  [Nil(), Identifier('coll'), Integer(0)])))),
+                CallExpression(Identifier('nth'),
+                  [Identifier('coll'), Integer(0)])))),
               CatchClause(
                 Identifier('__$error'),
                 BlockStatement(
@@ -278,9 +276,21 @@ describe 'Closer parser', ->
                     Identifier('d'), Nil()))))),
             VariableDeclaration(VariableDeclarator(
               Identifier('e'),
-              CallExpression(
-                Identifier('drop'), [Integer(1), Identifier('coll')]))),
+              CallExpression(Identifier('drop'),
+                [Integer(1), Identifier('coll')]))),
             ReturnStatement(Nil()))))))
+    expect(closer.parse('(defn fn-name [{:as m a :a}])')).toDeepEqual Program(
+      VariableDeclaration(VariableDeclarator(
+        Identifier('fn-name'),
+        FunctionExpression(
+          null, [Identifier('m')], null,
+          BlockStatement(
+            VariableDeclaration(VariableDeclarator(
+              Identifier('a'),
+              CallExpression(Identifier('get'),
+                [Identifier('m'), Keyword('a')])))
+            ReturnStatement(Nil()))))))
+
 
   it 'parses collections and keywords in function position', ->
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(

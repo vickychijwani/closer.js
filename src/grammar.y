@@ -72,23 +72,45 @@ IdOrDestrucList
 
 FnArgs
   : IdOrDestrucList { $$ = { fixed: $IdOrDestrucList, rest: null }; }
-  | IdOrDestrucList '&' IdOrDestrucForm { $$ = { fixed: $IdOrDestrucList, rest: $IdOrDestrucForm }; }
+  | IdOrDestrucList '&' IdOrDestrucForm {
+        if ($IdOrDestrucForm.keys && $IdOrDestrucForm.ids) {
+            throw new Error('Rest args cannot be destructured by a hash map');
+        }
+        $$ = { fixed: $IdOrDestrucList, rest: $IdOrDestrucForm };
+    }
+  ;
+
+AsForm
+  : AS Identifier { $$ = $Identifier; }
+  ;
+
+MapDestrucArgs
+  : { $$ = { keys: [], ids: [] }; }
+  | MapDestrucArgs AsForm {
+        $MapDestrucArgs.destrucId = $AsForm;
+        $$ = $MapDestrucArgs;
+    }
+  | MapDestrucArgs IdOrDestrucForm SExpr {
+        $MapDestrucArgs.ids.push($IdOrDestrucForm);
+        $MapDestrucArgs.keys.push($SExpr);
+        $$ = $MapDestrucArgs;
+    }
   ;
 
 DestructuringForm
-  : '[' FnArgs ']' {
+  : '[' FnArgs AsForm?[asForm] ']' {
         $$ = $FnArgs;
-        $$.destrucId = yy.Node('Identifier', null, yy.loc(@1));
+        $$.destrucId = getValueIfUndefined($asForm, yy.Node('Identifier', null, yy.loc(@1)));
     }
-  | '[' FnArgs AS Identifier ']' {
-        $$ = $FnArgs;
-        $$.destrucId = $Identifier;
+  | '{' MapDestrucArgs '}' {
+        $$ = $MapDestrucArgs;
+        $$.destrucId = getValueIfUndefined($$.destrucId, yy.Node('Identifier', null, yy.loc(@1)));
     }
   ;
 
 FnArgsAndBody
   : '[' FnArgs ']' BlockStatementWithReturn {
-        var processed = processArgs($FnArgs, yy);
+        var processed = processSeqDestrucForm($FnArgs, yy);
         var ids = processed.ids;
         $BlockStatementWithReturn.body = processed.stmts.concat($BlockStatementWithReturn.body);
 
@@ -363,8 +385,8 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
 var destrucArgIdx = 0;
-function processArgs(args, yy) {
-    var i, j, len, len2, arg;
+function processSeqDestrucForm(args, yy) {
+    var i, len, arg;
     var fixed = args.fixed, rest = args.rest;
     var ids = [], stmts = [];
     for (i = 0, len = fixed.length; i < len; ++i) {
@@ -374,7 +396,7 @@ function processArgs(args, yy) {
         } else if (! arg.type) {
             arg.destrucId.name = arg.destrucId.name || '__$destruc' + destrucArgIdx++;
             ids.push(arg.destrucId);
-            stmts = processDestrucForm(arg, stmts, yy);
+            stmts = processChildDestrucForm(arg, stmts, yy);
         }
     }
 
@@ -388,26 +410,53 @@ function processArgs(args, yy) {
             decl = createRestArgsDecl(rest.destrucId, args.destrucId, fixed.length, rest.destrucId.loc, yy);
             if (decl.loc) decl.loc = rest.destrucId.loc;
             stmts.push(decl);
-            stmts = processDestrucForm(rest, stmts, yy);
+            stmts = processChildDestrucForm(rest, stmts, yy);
         }
     }
 
-    return { ids: ids, stmts: stmts };
+    return { ids: ids, pairs: [], stmts: stmts };
 }
 
-function processDestrucForm(arg, stmts, yy) {
-    var processed = processArgs(arg, yy);
-    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause, errorId;
-    for (var j = 0, len2 = processed.ids.length; j < len2; ++j) {
-        processedId = processed.ids[j];
+function processMapDestrucForm(args, yy) {
+    var keys = args.keys, valIds = args.ids, key, id;
+    var pairs = [], stmts = [];
+    var decl, init, yyloc;
+    for (var i = 0, len = valIds.length; i < len; ++i) {
+        id = valIds[i], key = keys[i];
+        if (id.type && id.type === 'Identifier') {
+            yyloc = id.loc;
+            init = yy.Node('CallExpression',
+                yy.Node('Identifier', 'get', yyloc),
+                [args.destrucId, key], yyloc);
+            decl = parseVarDecl(id, init, yyloc, yy);
+            if (decl.loc) decl.loc = yyloc;
+            stmts.push(decl);
+        } else if (! id.type) {
+            id.destrucId.name = id.destrucId.name || '__$destruc' + destrucArgIdx++;
+            pairs.push({ id: id.destrucId, key: key });
+            stmts = processChildDestrucForm(id, stmts, yy);
+        }
+    }
+    return { ids: [], pairs: pairs, stmts: stmts };
+}
+
+function processDestrucForm(args, yy) {
+    if (args.fixed !== undefined && args.rest !== undefined) {
+        return processSeqDestrucForm(args, yy);
+    } else if (args.keys !== undefined && args.ids !== undefined) {
+        return processMapDestrucForm(args, yy);
+    }
+}
+
+function processChildDestrucForm(arg, stmts, yy) {
+    var i, len, processed = processDestrucForm(arg, yy);
+    var processedId, processedKey, yyloc, init, decl, nilDecl, tryStmt, catchClause, errorId;
+    for (i = 0, len = processed.ids.length; i < len; ++i) {
+        processedId = processed.ids[i];
         yyloc = processedId.loc;
         init = yy.Node('CallExpression',
-            yy.Node('MemberExpression',
-                yy.Node('Identifier', 'nth', yyloc),
-                yy.Node('Identifier', 'call', yyloc),
-                false, yyloc),
-            [yy.Node('Literal', null, yyloc),
-             arg.destrucId, yy.Node('Literal', j, yyloc)],
+            yy.Node('Identifier', 'nth', yyloc),
+            [arg.destrucId, yy.Node('Literal', i, yyloc)],
             yyloc);
 
         decl = parseVarDecl(processedId, init, processedId.loc, yy);
@@ -439,6 +488,16 @@ function processDestrucForm(arg, stmts, yy) {
             [catchClause], null, yyloc);
 
         stmts.push(tryStmt);
+    }
+    for (i = 0, len = processed.pairs.length; i < len; ++i) {
+        processedId = processed.pairs[i].id, processedKey = processed.pairs[i].key;
+        yyloc = processedId.loc;
+        init = yy.Node('CallExpression',
+            yy.Node('Identifier', 'get', yyloc),
+            [arg.destrucId, processedKey], yyloc);
+        decl = parseVarDecl(processedId, init, yyloc, yy);
+        if (decl.loc) decl.loc = yyloc;
+        stmts.push(decl);
     }
     return stmts.concat(processed.stmts);
 }
