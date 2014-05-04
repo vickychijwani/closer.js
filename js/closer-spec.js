@@ -556,7 +556,7 @@ function processArgs(args, yy) {
 
 function processDestrucForm(arg, stmts, yy) {
     var processed = processArgs(arg, yy);
-    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause;
+    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause, errorId;
     for (var j = 0, len2 = processed.ids.length; j < len2; ++j) {
         processedId = processed.ids[j];
         yyloc = processedId.loc;
@@ -575,9 +575,17 @@ function processDestrucForm(arg, stmts, yy) {
         nilDecl = parseVarDecl(processedId, yy.Node('Literal', null, yyloc), processedId.loc, yy);
         if (nilDecl.loc) nilDecl.loc = processedId.loc;
 
-        catchClause = yy.Node('CatchClause',
-            yy.Node('Identifier', '__$error', yyloc),
-            null, yy.Node('BlockStatement', [
+        errorId = yy.Node('Identifier', '__$error', yyloc);
+        catchClause = yy.Node('CatchClause', errorId, null,
+            yy.Node('BlockStatement', [
+                yy.Node('IfStatement',
+                    yy.Node('BinaryExpression', '!==',
+                        yy.Node('MemberExpression', errorId,
+                            yy.Node('Identifier', 'name', yyloc), false, yyloc),
+                        yy.Node('Literal', 'IndexOutOfBoundsError', yyloc),
+                        yyloc),
+                    yy.Node('ThrowStatement', errorId, yyloc),
+                    null, yyloc),
                 wrapInExpressionStatement(
                     yy.Node('AssignmentExpression', '=', processedId,
                         yy.Node('Literal', null, yyloc), yyloc),
@@ -4504,6 +4512,13 @@ exports.CatchClause = function(param, body) {
   };
 };
 
+exports.ThrowStatement = function(argument) {
+  return {
+    type: 'ThrowStatement',
+    argument: argument
+  };
+};
+
 exports.VariableDeclaration = function() {
   var args;
   args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -4549,7 +4564,7 @@ exports.Program = function() {
 
 
 },{"../src/closer":19,"json-diff":4}],18:[function(_dereq_,module,exports){
-var ArrayExpression, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, Nil, Program, ReturnStatement, String, ThisExpression, TryStatement, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, helpers, json_diff;
+var ArrayExpression, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, Nil, Program, ReturnStatement, String, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, helpers, json_diff;
 
 closer = _dereq_('../src/closer');
 
@@ -4616,6 +4631,8 @@ ReturnStatement = helpers.ReturnStatement;
 TryStatement = helpers.TryStatement;
 
 CatchClause = helpers.CatchClause;
+
+ThrowStatement = helpers.ThrowStatement;
 
 VariableDeclaration = helpers.VariableDeclaration;
 
@@ -4688,7 +4705,7 @@ describe('Closer parser', function() {
     return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('avg'), FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('/'), Identifier('call')), [Nil(), CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('+'), Identifier('rest')]), CallExpression(MemberExpression(Identifier('count'), Identifier('call')), [Nil(), Identifier('rest')])]))))))));
   });
   it('parses sequential destructuring forms', function() {
-    return expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn-name'), FunctionExpression(null, [Identifier('__$destruc2'), Identifier('c')], null, BlockStatement(TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(MemberExpression(Identifier('nth'), Identifier('call')), [Nil(), Identifier('__$destruc2'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('a'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('drop'), [Integer(1), Identifier('__$destruc2')]))), VariableDeclaration(VariableDeclarator(Identifier('coll'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('d'), CallExpression(MemberExpression(Identifier('nth'), Identifier('call')), [Nil(), Identifier('coll'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('d'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('e'), CallExpression(Identifier('drop'), [Integer(1), Identifier('coll')]))), ReturnStatement(Nil())))))));
+    return expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn-name'), FunctionExpression(null, [Identifier('__$destruc2'), Identifier('c')], null, BlockStatement(TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(MemberExpression(Identifier('nth'), Identifier('call')), [Nil(), Identifier('__$destruc2'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('a'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('drop'), [Integer(1), Identifier('__$destruc2')]))), VariableDeclaration(VariableDeclarator(Identifier('coll'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('d'), CallExpression(MemberExpression(Identifier('nth'), Identifier('call')), [Nil(), Identifier('coll'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('d'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('e'), CallExpression(Identifier('drop'), [Integer(1), Identifier('coll')]))), ReturnStatement(Nil())))))));
   });
   it('parses collections and keywords in function position', function() {
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3), Integer(4)]), Identifier('call')), [Nil(), Integer(1)]))));
