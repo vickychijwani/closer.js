@@ -56,14 +56,6 @@ Fn
   | AnonArg
   ;
 
-RestArgs
-  : '&' IdOrDestrucForm { $$ = $IdOrDestrucForm; }
-  ;
-
-DestructuringForm
-  : '[' Args ']' { $$ = $Args; }
-  ;
-
 IdOrDestrucForm
   : Identifier
   | DestructuringForm
@@ -78,19 +70,20 @@ IdOrDestrucList
     }
   ;
 
-Args
-  : FnArgs {
+FnArgs
+  : IdOrDestrucList { $$ = { fixed: $IdOrDestrucList, rest: null }; }
+  | IdOrDestrucList '&' IdOrDestrucForm { $$ = { fixed: $IdOrDestrucList, rest: $IdOrDestrucForm }; }
+  ;
+
+DestructuringForm
+  : '[' FnArgs ']' {
         $$ = $FnArgs;
         $$.destrucId = yy.Node('Identifier', null, yy.loc(@1));
     }
-  | FnArgs AS Identifier {
+  | '[' FnArgs AS Identifier ']' {
         $$ = $FnArgs;
         $$.destrucId = $Identifier;
     }
-  ;
-
-FnArgs
-  : IdOrDestrucList RestArgs?[rest] { $$ = { fixed: $IdOrDestrucList, rest: $rest }; }
   ;
 
 FnArgsAndBody
