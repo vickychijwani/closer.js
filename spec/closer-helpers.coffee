@@ -111,6 +111,18 @@ exports.ReturnStatement = (argument) ->
   type: 'ReturnStatement'
   argument: argument
 
+exports.TryStatement = (block, handler) ->
+  type: 'TryStatement'
+  block: block
+  handlers: [handler]
+  finalizer: null
+
+exports.CatchClause = (param, body) ->
+  type: 'CatchClause'
+  param: param
+  guard: null
+  body: body
+
 exports.VariableDeclaration = (args...) ->
   type: 'VariableDeclaration'
   kind: 'var'

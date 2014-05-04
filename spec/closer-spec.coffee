@@ -30,6 +30,8 @@ IfStatement = helpers.IfStatement
 BreakStatement = helpers.BreakStatement
 ContinueStatement = helpers.ContinueStatement
 ReturnStatement = helpers.ReturnStatement
+TryStatement = helpers.TryStatement
+CatchClause = helpers.CatchClause
 VariableDeclaration = helpers.VariableDeclaration
 VariableDeclarator = helpers.VariableDeclarator
 FunctionDeclaration = helpers.FunctionDeclaration
@@ -220,23 +222,29 @@ describe 'Closer parser', ->
                   [Nil(), Identifier('rest')])])))))))
 
   it 'parses sequential destructuring forms', ->
-    expect(closer.parse('(defn fn-name [[a & b] c & [d & e]])')).toDeepEqual Program(
+    expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual Program(
       VariableDeclaration(VariableDeclarator(
         Identifier('fn-name'),
         FunctionExpression(
           null, [Identifier('__$destruc2'), Identifier('c')], null,
           BlockStatement(
-            VariableDeclaration(VariableDeclarator(
-              Identifier('a'),
-              CallExpression(
-                MemberExpression(Identifier('nth'), Identifier('call')),
-                [Nil(), Identifier('__$destruc2'), Integer(0)]))),
+            TryStatement(BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('a'),
+                CallExpression(
+                  MemberExpression(Identifier('nth'), Identifier('call')),
+                  [Nil(), Identifier('__$destruc2'), Integer(0)])))),
+              CatchClause(
+                Identifier('__$error'),
+                BlockStatement(
+                  ExpressionStatement(AssignmentExpression(
+                    Identifier('a'), Nil()))))),
             VariableDeclaration(VariableDeclarator(
               Identifier('b'),
               CallExpression(
                 Identifier('drop'), [Integer(1), Identifier('__$destruc2')]))),
             VariableDeclaration(VariableDeclarator(
-              Identifier('__$destruc3'),
+              Identifier('coll'),
               CallExpression(
                 Identifier('seq'),
                 [CallExpression(
@@ -246,15 +254,21 @@ describe 'Closer parser', ->
                       Identifier('slice')),
                     Identifier('call')),
                   [Identifier('arguments'), Integer(2)])]))),
-            VariableDeclaration(VariableDeclarator(
-              Identifier('d'),
-              CallExpression(
-                MemberExpression(Identifier('nth'), Identifier('call')),
-                [Nil(), Identifier('__$destruc3'), Integer(0)]))),
+            TryStatement(BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('d'),
+                CallExpression(
+                  MemberExpression(Identifier('nth'), Identifier('call')),
+                  [Nil(), Identifier('coll'), Integer(0)])))),
+              CatchClause(
+                Identifier('__$error'),
+                BlockStatement(
+                  ExpressionStatement(AssignmentExpression(
+                    Identifier('d'), Nil()))))),
             VariableDeclaration(VariableDeclarator(
               Identifier('e'),
               CallExpression(
-                Identifier('drop'), [Integer(1), Identifier('__$destruc3')]))),
+                Identifier('drop'), [Integer(1), Identifier('coll')]))),
             ReturnStatement(Nil()))))))
 
   it 'parses collections and keywords in function position', ->

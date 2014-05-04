@@ -80,12 +80,11 @@ describe 'Functional tests', ->
     eq '(#(/ (apply + %&) (count %&)) 1 2 3 4)', 2.5
 
   it 'quick sort', ->
-    eq '(defn qsort [coll]
-          (let [pivot (first coll)]
-            (when pivot
-              (concat (qsort (filter #(< % pivot) coll))
-                      (filter #{pivot} coll)
-                      (qsort (filter #(> % pivot) coll))))))
+    eq '(defn qsort [[pivot :as coll]]
+          (if pivot
+            (concat (qsort (filter #(< % pivot) coll))
+                    (filter #{pivot} coll)
+                    (qsort (filter #(> % pivot) coll)))))
 
         (qsort [8 3 7 3 2 10 1])',
       seq [1, 2, 3, 3, 7, 8, 10]

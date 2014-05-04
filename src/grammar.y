@@ -61,10 +61,7 @@ RestArgs
   ;
 
 DestructuringForm
-  : '[' Args ']' {
-        $$ = $Args;
-        $$.destrucId = yy.Node('Identifier', '__$gen', yy.loc(@1));
-    }
+  : '[' Args ']' { $$ = $Args; }
   ;
 
 IdOrDestrucForm
@@ -82,12 +79,23 @@ IdOrDestrucList
   ;
 
 Args
+  : FnArgs {
+        $$ = $FnArgs;
+        $$.destrucId = yy.Node('Identifier', null, yy.loc(@1));
+    }
+  | FnArgs AS Identifier {
+        $$ = $FnArgs;
+        $$.destrucId = $Identifier;
+    }
+  ;
+
+FnArgs
   : IdOrDestrucList RestArgs?[rest] { $$ = { fixed: $IdOrDestrucList, rest: $rest }; }
   ;
 
 FnArgsAndBody
-  : '[' Args ']' BlockStatementWithReturn {
-        var processed = processArgs($Args, yy);
+  : '[' FnArgs ']' BlockStatementWithReturn {
+        var processed = processArgs($FnArgs, yy);
         var ids = processed.ids;
         $BlockStatementWithReturn.body = processed.stmts.concat($BlockStatementWithReturn.body);
 
@@ -371,7 +379,7 @@ function processArgs(args, yy) {
         if (arg.type && arg.type === 'Identifier') {
             ids.push(arg);
         } else if (! arg.type) {
-            arg.destrucId.name = '__$destruc' + destrucArgIdx++;
+            arg.destrucId.name = arg.destrucId.name || '__$destruc' + destrucArgIdx++;
             ids.push(arg.destrucId);
             stmts = processDestrucForm(arg, stmts, yy);
         }
@@ -383,7 +391,7 @@ function processArgs(args, yy) {
             if (decl.loc) decl.loc = rest.loc;
             stmts.push(decl);
         } else if (! rest.type) {
-            rest.destrucId.name = '__$destruc' + destrucArgIdx++;
+            rest.destrucId.name = rest.destrucId.name || '__$destruc' + destrucArgIdx++;
             decl = createRestArgsDecl(rest.destrucId, args.destrucId, fixed.length, rest.destrucId.loc, yy);
             if (decl.loc) decl.loc = rest.destrucId.loc;
             stmts.push(decl);
@@ -396,7 +404,7 @@ function processArgs(args, yy) {
 
 function processDestrucForm(arg, stmts, yy) {
     var processed = processArgs(arg, yy);
-    var processedId, yyloc, init, decl;
+    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause;
     for (var j = 0, len2 = processed.ids.length; j < len2; ++j) {
         processedId = processed.ids[j];
         yyloc = processedId.loc;
@@ -408,9 +416,28 @@ function processDestrucForm(arg, stmts, yy) {
             [yy.Node('Literal', null, yyloc),
              arg.destrucId, yy.Node('Literal', j, yyloc)],
             yyloc);
+
         decl = parseVarDecl(processedId, init, processedId.loc, yy);
         if (decl.loc) decl.loc = processedId.loc;
-        stmts.push(decl);
+
+        nilDecl = parseVarDecl(processedId, yy.Node('Literal', null, yyloc), processedId.loc, yy);
+        if (nilDecl.loc) nilDecl.loc = processedId.loc;
+
+        catchClause = yy.Node('CatchClause',
+            yy.Node('Identifier', '__$error', yyloc),
+            null, yy.Node('BlockStatement', [
+                wrapInExpressionStatement(
+                    yy.Node('AssignmentExpression', '=', processedId,
+                        yy.Node('Literal', null, yyloc), yyloc),
+                    yy)],
+                yyloc),
+            yyloc);
+
+        tryStmt = yy.Node('TryStatement',
+            yy.Node('BlockStatement', [decl], yyloc),
+            [catchClause], null, yyloc);
+
+        stmts.push(tryStmt);
     }
     return stmts.concat(processed.stmts);
 }

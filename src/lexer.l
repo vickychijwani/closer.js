@@ -58,6 +58,8 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 'and'   return 'AND';
 'or'    return 'OR';
 
+':as'   return 'AS';
+
 'true'  return 'true';
 'false' return 'false';
 'nil'   return 'nil';
