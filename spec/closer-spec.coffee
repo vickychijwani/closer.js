@@ -30,6 +30,9 @@ IfStatement = helpers.IfStatement
 BreakStatement = helpers.BreakStatement
 ContinueStatement = helpers.ContinueStatement
 ReturnStatement = helpers.ReturnStatement
+TryStatement = helpers.TryStatement
+CatchClause = helpers.CatchClause
+ThrowStatement = helpers.ThrowStatement
 VariableDeclaration = helpers.VariableDeclaration
 VariableDeclarator = helpers.VariableDeclarator
 FunctionDeclaration = helpers.FunctionDeclaration
@@ -218,6 +221,84 @@ describe 'Closer parser', ->
                 CallExpression(
                   MemberExpression(Identifier('count'), Identifier('call')),
                   [Nil(), Identifier('rest')])])))))))
+
+  it 'parses destructuring forms', ->
+    expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual Program(
+      VariableDeclaration(VariableDeclarator(
+        Identifier('fn-name'),
+        FunctionExpression(
+          null, [Identifier('__$destruc2'), Identifier('c')], null,
+          BlockStatement(
+            TryStatement(BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('a'),
+                CallExpression(Identifier('nth'),
+                  [Identifier('__$destruc2'), Integer(0)])))),
+              CatchClause(
+                Identifier('__$error'),
+                BlockStatement(
+                  IfStatement(
+                    BinaryExpression('!==',
+                      MemberExpression(Identifier('__$error'), Identifier('name')),
+                      String('IndexOutOfBoundsError')),
+                    ThrowStatement(Identifier('__$error'))),
+                  ExpressionStatement(AssignmentExpression(
+                    Identifier('a'), Nil()))))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('b'),
+              CallExpression(Identifier('drop'),
+                [Integer(1), Identifier('__$destruc2')]))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('coll'),
+              CallExpression(
+                Identifier('seq'),
+                [CallExpression(
+                  MemberExpression(
+                    MemberExpression(
+                      MemberExpression(Identifier('Array'), Identifier('prototype')),
+                      Identifier('slice')),
+                    Identifier('call')),
+                  [Identifier('arguments'), Integer(2)])]))),
+            TryStatement(BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('d'),
+                CallExpression(Identifier('nth'),
+                  [Identifier('coll'), Integer(0)])))),
+              CatchClause(
+                Identifier('__$error'),
+                BlockStatement(
+                  IfStatement(
+                    BinaryExpression('!==',
+                      MemberExpression(Identifier('__$error'), Identifier('name')),
+                      String('IndexOutOfBoundsError')),
+                    ThrowStatement(Identifier('__$error'))),
+                  ExpressionStatement(AssignmentExpression(
+                    Identifier('d'), Nil()))))),
+            VariableDeclaration(VariableDeclarator(
+              Identifier('e'),
+              CallExpression(Identifier('drop'),
+                [Integer(1), Identifier('coll')]))),
+            ReturnStatement(Nil()))))))
+    expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual Program(
+      VariableDeclaration(VariableDeclarator(
+        Identifier('fn-name'),
+        FunctionExpression(
+          null, [Identifier('m')], null,
+          BlockStatement(
+            VariableDeclaration(VariableDeclarator(
+              Identifier('b'),
+              CallExpression(Identifier('get'),
+                [Identifier('m'), Keyword('b')])))
+            VariableDeclaration(VariableDeclarator(
+              Identifier('c'),
+              CallExpression(Identifier('get'),
+                [Identifier('m'), String('c')])))
+            VariableDeclaration(VariableDeclarator(
+              Identifier('a'),
+              CallExpression(Identifier('get'),
+                [Identifier('m'), Keyword('a')])))
+            ReturnStatement(Nil()))))))
+
 
   it 'parses collections and keywords in function position', ->
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(

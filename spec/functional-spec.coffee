@@ -71,28 +71,65 @@ describe 'Functional tests', ->
         (map factorial (range 1 6))',
       seq [1, 2, 6, 24, 120]
 
+  it 'destructuring forms', ->
+    eq '(defn blah
+          [[a b & c :as coll1] d e & [f g & h :as coll2]]
+          {:args [a b c d e f g h] :coll1 coll1 :coll2 coll2})
+
+        (blah [1 2 3 4] 5 6 7 8 9)',
+      map key('args'), vec(1, 2, seq([3, 4]), 5, 6, 7, 8, seq([9])),
+        key('coll1'), vec([1..4]), key('coll2'), seq([7..9])
+
+    throws '(fn [[a :as coll1] :as coll2])'
+    throws '(fn [[:as coll1 a]])'
+
+    eq '(defn blah
+          [{{[a {:as m, :keys [b], e :d, :strs [c]}] [3 4]} :a}]
+          [a b c e])
+
+        (blah {:a {\'(3 4) [1 {:b true, :d :e, "c" :c}]}})',
+      vec 1, true, key('c'), key('e')
+
+    eq '(defn blah
+          [{a 0 {b 0 c 1} 1}]
+          [a b c])
+
+        (blah ["hello" "world"])',
+      vec 'hello', 'w', 'o'
+
+    eq '(let [[a b] [1 {:d "d" \'(3 4) true}]
+              {:keys [d] e [3 4]} b]
+          [a d e])',
+      vec 1, 'd', true
+
+    eq '(loop [[a :as coll] [1 2 3 4] copy \'()]
+          (if a
+              (recur (rest coll) (conj copy a))
+              copy))',
+      list [4..1]
+
   it 'averaging numbers', ->
     eq '(defn avg [& xs]
           (/ (apply + xs) (count xs)))
 
         (avg 1 2 3 4)',
       2.5
+
     eq '(#(/ (apply + %&) (count %&)) 1 2 3 4)', 2.5
 
   it 'quick sort', ->
-    eq '(defn qsort [coll]
-          (let [pivot (first coll)]
-            (when pivot
-              (concat (qsort (filter #(< % pivot) coll))
-                      (filter #{pivot} coll)
-                      (qsort (filter #(> % pivot) coll))))))
+    eq '(defn qsort [[pivot :as coll]]
+          (if pivot
+            (concat (qsort (filter #(< % pivot) coll))
+                    (filter #{pivot} coll)
+                    (qsort (filter #(> % pivot) coll)))))
 
         (qsort [8 3 7 3 2 10 1])',
       seq [1, 2, 3, 3, 7, 8, 10]
 
   it 'fibonacci sequence', ->
     eq '(defn fibs []
-          (map first (iterate #(do [(% 1) (+ (% 0) (% 1))]) [0 1])))
+          (map first (iterate (fn [[a b]] [b (+ a b)]) [0 1])))
 
         (take 10 (fibs))',
       seq [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]

@@ -747,7 +747,7 @@ describe 'Closer core library', ->
       eq '(filter even? [1 2 3 4])', seq [2, 4]
       eq '(filter even? \'(1 2 3 4))', seq [2, 4]
       eq '(filter even? #{1 2 3 4})', seq [2, 4]
-      eq '(filter #(< (% 0) (% 1)) {1 2 4 3})', seq [vec(1, 2)]
+      eq '(filter (fn [[k v]] (< k v)) {1 2 4 3})', seq [vec(1, 2)]
       eq '(filter #{"s"} "strings")', seq ['s', 's']
 
   describe '(remove pred coll)', ->
@@ -759,7 +759,7 @@ describe 'Closer core library', ->
       eq '(remove even? \'(1 2 3 4))', seq [1, 3]
       eq '(remove even? #{1 2 3 4})', seq [1, 3]
       eq '(remove #{2 4} (range 1 5))', seq [1, 3]
-      eq '(remove #(< (% 0) (% 1)) {1 2 4 3})', seq [vec(4, 3)]
+      eq '(remove (fn [[k v]] (< k v)) {1 2 4 3})', seq [vec(4, 3)]
       eq '(remove #{"s"} "strings")', seq ['t', 'r', 'i', 'n', 'g']
 
   describe '(reduce f coll), (reduce f val coll)', ->

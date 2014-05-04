@@ -260,8 +260,18 @@ core =
     assert.sequential coll
     assert.numbers index     # float is cast to int
     return (if notFound isnt undefined then notFound else null) if coll is null
-    throw new Error "index out of bounds" if _.isString(coll) and index >= coll.length and notFound is undefined
-    if notFound isnt undefined then m.nth(coll, index, notFound) else m.nth(coll, index)
+    if _.isString(coll) and index >= coll.length and notFound is undefined
+      error = new Error "Index out of bounds"
+      error.name = 'IndexOutOfBoundsError'
+      throw error
+    try
+      if notFound isnt undefined then m.nth(coll, index, notFound) else m.nth(coll, index)
+    catch e
+      if /^No item/.test(e.message) or /^Index out of bounds/.test(e.message)
+        error = new Error "Index out of bounds"
+        error.name = 'IndexOutOfBoundsError'
+        throw error
+      else throw e
 
   'peek': (coll) ->
     assert.arity 1, 1, arguments
