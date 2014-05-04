@@ -81,6 +81,21 @@ describe 'Functional tests', ->
         key('coll1'), vec([1..4]), key('coll2'), seq([7..9])
 
     throws '(fn [[a :as coll1] :as coll2])'
+    throws '(fn [[:as coll1 a]])'
+
+    eq '(defn blah
+          [{{[a {:as m, :keys [b], e :d, :strs [c]}] [3 4]} :a}]
+          [a b c e])
+
+        (blah {:a {\'(3 4) [1 {:b true, :d :e, "c" :c}]}})',
+      vec 1, true, key('c'), key('e')
+
+    eq '(defn blah
+          [{a 0 {b 0 c 1} 1}]
+          [a b c])
+
+        (blah ["hello" "world"])',
+      vec 'hello', 'w', 'o'
 
   it 'averaging numbers', ->
     eq '(defn avg [& xs]
