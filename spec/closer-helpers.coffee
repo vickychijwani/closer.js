@@ -123,6 +123,10 @@ exports.CatchClause = (param, body) ->
   guard: null
   body: body
 
+exports.ThrowStatement = (argument) ->
+  type: 'ThrowStatement'
+  argument: argument
+
 exports.VariableDeclaration = (args...) ->
   type: 'VariableDeclaration'
   kind: 'var'

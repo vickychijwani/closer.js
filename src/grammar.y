@@ -397,7 +397,7 @@ function processArgs(args, yy) {
 
 function processDestrucForm(arg, stmts, yy) {
     var processed = processArgs(arg, yy);
-    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause;
+    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause, errorId;
     for (var j = 0, len2 = processed.ids.length; j < len2; ++j) {
         processedId = processed.ids[j];
         yyloc = processedId.loc;
@@ -416,9 +416,17 @@ function processDestrucForm(arg, stmts, yy) {
         nilDecl = parseVarDecl(processedId, yy.Node('Literal', null, yyloc), processedId.loc, yy);
         if (nilDecl.loc) nilDecl.loc = processedId.loc;
 
-        catchClause = yy.Node('CatchClause',
-            yy.Node('Identifier', '__$error', yyloc),
-            null, yy.Node('BlockStatement', [
+        errorId = yy.Node('Identifier', '__$error', yyloc);
+        catchClause = yy.Node('CatchClause', errorId, null,
+            yy.Node('BlockStatement', [
+                yy.Node('IfStatement',
+                    yy.Node('BinaryExpression', '!==',
+                        yy.Node('MemberExpression', errorId,
+                            yy.Node('Identifier', 'name', yyloc), false, yyloc),
+                        yy.Node('Literal', 'IndexOutOfBoundsError', yyloc),
+                        yyloc),
+                    yy.Node('ThrowStatement', errorId, yyloc),
+                    null, yyloc),
                 wrapInExpressionStatement(
                     yy.Node('AssignmentExpression', '=', processedId,
                         yy.Node('Literal', null, yyloc), yyloc),

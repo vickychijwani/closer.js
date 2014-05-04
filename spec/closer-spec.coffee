@@ -32,6 +32,7 @@ ContinueStatement = helpers.ContinueStatement
 ReturnStatement = helpers.ReturnStatement
 TryStatement = helpers.TryStatement
 CatchClause = helpers.CatchClause
+ThrowStatement = helpers.ThrowStatement
 VariableDeclaration = helpers.VariableDeclaration
 VariableDeclarator = helpers.VariableDeclarator
 FunctionDeclaration = helpers.FunctionDeclaration
@@ -237,6 +238,11 @@ describe 'Closer parser', ->
               CatchClause(
                 Identifier('__$error'),
                 BlockStatement(
+                  IfStatement(
+                    BinaryExpression('!==',
+                      MemberExpression(Identifier('__$error'), Identifier('name')),
+                      String('IndexOutOfBoundsError')),
+                    ThrowStatement(Identifier('__$error'))),
                   ExpressionStatement(AssignmentExpression(
                     Identifier('a'), Nil()))))),
             VariableDeclaration(VariableDeclarator(
@@ -263,6 +269,11 @@ describe 'Closer parser', ->
               CatchClause(
                 Identifier('__$error'),
                 BlockStatement(
+                  IfStatement(
+                    BinaryExpression('!==',
+                      MemberExpression(Identifier('__$error'), Identifier('name')),
+                      String('IndexOutOfBoundsError')),
+                    ThrowStatement(Identifier('__$error'))),
                   ExpressionStatement(AssignmentExpression(
                     Identifier('d'), Nil()))))),
             VariableDeclaration(VariableDeclarator(

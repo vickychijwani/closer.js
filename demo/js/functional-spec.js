@@ -556,7 +556,7 @@ function processArgs(args, yy) {
 
 function processDestrucForm(arg, stmts, yy) {
     var processed = processArgs(arg, yy);
-    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause;
+    var processedId, yyloc, init, decl, nilDecl, tryStmt, catchClause, errorId;
     for (var j = 0, len2 = processed.ids.length; j < len2; ++j) {
         processedId = processed.ids[j];
         yyloc = processedId.loc;
@@ -575,9 +575,17 @@ function processDestrucForm(arg, stmts, yy) {
         nilDecl = parseVarDecl(processedId, yy.Node('Literal', null, yyloc), processedId.loc, yy);
         if (nilDecl.loc) nilDecl.loc = processedId.loc;
 
-        catchClause = yy.Node('CatchClause',
-            yy.Node('Identifier', '__$error', yyloc),
-            null, yy.Node('BlockStatement', [
+        errorId = yy.Node('Identifier', '__$error', yyloc);
+        catchClause = yy.Node('CatchClause', errorId, null,
+            yy.Node('BlockStatement', [
+                yy.Node('IfStatement',
+                    yy.Node('BinaryExpression', '!==',
+                        yy.Node('MemberExpression', errorId,
+                            yy.Node('Identifier', 'name', yyloc), false, yyloc),
+                        yy.Node('Literal', 'IndexOutOfBoundsError', yyloc),
+                        yyloc),
+                    yy.Node('ThrowStatement', errorId, yyloc),
+                    null, yyloc),
                 wrapInExpressionStatement(
                     yy.Node('AssignmentExpression', '=', processedId,
                         yy.Node('Literal', null, yyloc), yyloc),
@@ -17129,6 +17137,7 @@ core = {
     return m.last(coll);
   },
   'nth': function(coll, index, notFound) {
+    var e, error;
     assert.arity(2, 3, arguments);
     assert.sequential(coll);
     assert.numbers(index);
@@ -17136,12 +17145,25 @@ core = {
       return (notFound !== void 0 ? notFound : null);
     }
     if (_.isString(coll) && index >= coll.length && notFound === void 0) {
-      throw new Error("index out of bounds");
+      error = new Error("Index out of bounds");
+      error.name = 'IndexOutOfBoundsError';
+      throw error;
     }
-    if (notFound !== void 0) {
-      return m.nth(coll, index, notFound);
-    } else {
-      return m.nth(coll, index);
+    try {
+      if (notFound !== void 0) {
+        return m.nth(coll, index, notFound);
+      } else {
+        return m.nth(coll, index);
+      }
+    } catch (_error) {
+      e = _error;
+      if (/^No item/.test(e.message) || /^Index out of bounds/.test(e.message)) {
+        error = new Error("Index out of bounds");
+        error.name = 'IndexOutOfBoundsError';
+        throw error;
+      } else {
+        throw e;
+      }
     }
   },
   'peek': function(coll) {
