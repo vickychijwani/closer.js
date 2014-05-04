@@ -222,7 +222,7 @@ describe 'Closer parser', ->
                   MemberExpression(Identifier('count'), Identifier('call')),
                   [Nil(), Identifier('rest')])])))))))
 
-  it 'parses sequential destructuring forms', ->
+  it 'parses destructuring forms', ->
     expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual Program(
       VariableDeclaration(VariableDeclarator(
         Identifier('fn-name'),
@@ -279,12 +279,20 @@ describe 'Closer parser', ->
               CallExpression(Identifier('drop'),
                 [Integer(1), Identifier('coll')]))),
             ReturnStatement(Nil()))))))
-    expect(closer.parse('(defn fn-name [{:as m a :a}])')).toDeepEqual Program(
+    expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual Program(
       VariableDeclaration(VariableDeclarator(
         Identifier('fn-name'),
         FunctionExpression(
           null, [Identifier('m')], null,
           BlockStatement(
+            VariableDeclaration(VariableDeclarator(
+              Identifier('b'),
+              CallExpression(Identifier('get'),
+                [Identifier('m'), Keyword('b')])))
+            VariableDeclaration(VariableDeclarator(
+              Identifier('c'),
+              CallExpression(Identifier('get'),
+                [Identifier('m'), String('c')])))
             VariableDeclaration(VariableDeclarator(
               Identifier('a'),
               CallExpression(Identifier('get'),

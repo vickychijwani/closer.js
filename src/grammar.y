@@ -11,6 +11,15 @@ Identifier
     }
   ;
 
+IdentifierList
+  : { $$ = []; }
+  | IdentifierList Identifier {
+        yy.locComb(@$, @Identifier);
+        $$ = $IdentifierList;
+        $IdentifierList.push($Identifier);
+    }
+  ;
+
 Keyword
   : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
   ;
@@ -88,6 +97,26 @@ MapDestrucArgs
   : { $$ = { keys: [], ids: [] }; }
   | MapDestrucArgs AsForm {
         $MapDestrucArgs.destrucId = $AsForm;
+        $$ = $MapDestrucArgs;
+    }
+  | MapDestrucArgs KEYS '[' IdentifierList ']' {
+        var id;
+        for (var i = 0, len = $IdentifierList.length; i < len; ++i) {
+            id = $IdentifierList[i];
+            $MapDestrucArgs.ids.push(id);
+            $MapDestrucArgs.keys.push(yy.Node('CallExpression',
+                yy.Node('Identifier', 'keyword', id.loc),
+                [yy.Node('Literal', id.name, id.loc)], id.loc));
+        }
+        $$ = $MapDestrucArgs;
+    }
+  | MapDestrucArgs STRS '[' IdentifierList ']' {
+        var id;
+        for (var i = 0, len = $IdentifierList.length; i < len; ++i) {
+            id = $IdentifierList[i];
+            $MapDestrucArgs.ids.push(id);
+            $MapDestrucArgs.keys.push(yy.Node('Literal', id.name, id.loc));
+        }
         $$ = $MapDestrucArgs;
     }
   | MapDestrucArgs IdOrDestrucForm SExpr {
