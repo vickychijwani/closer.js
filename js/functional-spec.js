@@ -16744,7 +16744,10 @@ describe('Functional tests', function() {
   });
   it('destructuring forms', function() {
     eq('(defn blah [[a b & c :as coll1] d e & [f g & h :as coll2]] {:args [a b c d e f g h] :coll1 coll1 :coll2 coll2}) (blah [1 2 3 4] 5 6 7 8 9)', map(key('args'), vec(1, 2, seq([3, 4]), 5, 6, 7, 8, seq([9])), key('coll1'), vec([1, 2, 3, 4]), key('coll2'), seq([7, 8, 9])));
-    return throws('(fn [[a :as coll1] :as coll2])');
+    throws('(fn [[a :as coll1] :as coll2])');
+    throws('(fn [[:as coll1 a]])');
+    eq('(defn blah [{{[a {:as m, :keys [b], e :d, :strs [c]}] [3 4]} :a}] [a b c e]) (blah {:a {\'(3 4) [1 {:b true, :d :e, "c" :c}]}})', vec(1, true, key('c'), key('e')));
+    return eq('(defn blah [{a 0 {b 0 c 1} 1}] [a b c]) (blah ["hello" "world"])', vec('hello', 'w', 'o'));
   });
   it('averaging numbers', function() {
     eq('(defn avg [& xs] (/ (apply + xs) (count xs))) (avg 1 2 3 4)', 2.5);
