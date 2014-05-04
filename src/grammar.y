@@ -220,30 +220,45 @@ VarDeclaration
   ;
 
 LetBinding
-  : Identifier SExpr {
-        $$ = yy.Node('VariableDeclarator', $Identifier, getValueIfUndefined($SExpr, null), yy.loc(@Identifier));
+  : IdOrDestrucForm SExpr {
+        var processed = processDestrucForm({ fixed: [$IdOrDestrucForm], rest: null }, yy);
+        $$ = {
+            decl: yy.Node('VariableDeclarator', processed.ids[0], getValueIfUndefined($SExpr, null), yy.loc(@IdOrDestrucForm)),
+            stmts: processed.stmts
+        };
     }
   ;
 
 LetBindings
   : LetBindings LetBinding {
+        var decl = yy.Node('VariableDeclaration', 'var', [$LetBinding.decl], yy.loc(@LetBinding));
+        $LetBindings.push({ decl: decl, stmts: $LetBinding.stmts });
         $$ = $LetBindings;
-        var binding = yy.Node('VariableDeclaration', 'var', [$LetBinding], yy.loc(@LetBinding));
-        $LetBindings.push(binding);
     }
   | { $$ = []; }
   ;
 
 LetForm
   : LET '[' LetBindings ']' DoForm {
-        var body = [].concat($LetBindings).concat($DoForm);
+        var body = [], i, len, letBinding;
+        for (i = 0, len = $LetBindings.length; i < len; ++i) {
+            letBinding = $LetBindings[i];
+            body = body.concat([letBinding.decl]).concat(letBinding.stmts);
+        }
+        body = body.concat($DoForm);
         $$ = wrapInIIFE(body, @1, yy);
     }
   ;
 
 LoopForm
   : LOOP '[' LetBindings ']' BlockStatement {
-        var body = [].concat($LetBindings);
+        var body = [], i, len, letBinding;
+        for (i = 0, len = $LetBindings.length; i < len; ++i) {
+            letBinding = $LetBindings[i];
+            body.push(letBinding.decl);
+            $BlockStatement.body = letBinding.stmts.concat($BlockStatement.body);
+        }
+
         body.push($BlockStatement);
         $$ = wrapInIIFE(body, @1, yy);
 
@@ -258,7 +273,7 @@ LoopForm
 
         var actualArgs = [];
         for (var i = 0, len = $LetBindings.length; i < len; ++i) {
-            actualArgs.push($LetBindings[i].declarations[0].id);
+            actualArgs.push($LetBindings[i].decl.declarations[0].id);
         }
 
         processRecurFormIfAny(whileBlock, actualArgs, yy);

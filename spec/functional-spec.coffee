@@ -97,6 +97,17 @@ describe 'Functional tests', ->
         (blah ["hello" "world"])',
       vec 'hello', 'w', 'o'
 
+    eq '(let [[a b] [1 {:d "d" \'(3 4) true}]
+              {:keys [d] e [3 4]} b]
+          [a d e])',
+      vec 1, 'd', true
+
+    eq '(loop [[a :as coll] [1 2 3 4] copy \'()]
+          (if a
+              (recur (rest coll) (conj copy a))
+              copy))',
+      list [4..1]
+
   it 'averaging numbers', ->
     eq '(defn avg [& xs]
           (/ (apply + xs) (count xs)))
