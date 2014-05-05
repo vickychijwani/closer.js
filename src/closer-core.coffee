@@ -24,12 +24,12 @@ core =
     _.reduce nums.slice(1), ((quo, num) -> quo / num), nums[0]
 
   'inc': (num) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.numbers num
     ++num
 
   'dec': (num) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.numbers num
     --num
 
@@ -44,18 +44,18 @@ core =
     _.min nums
 
   'quot': (num, div) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.numbers arguments
     sign = if num > 0 and div > 0 or num < 0 and div < 0 then 1 else -1
     sign * Math.floor Math.abs num / div
 
   'rem': (num, div) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.numbers arguments
     num % div
 
   'mod': (num, div) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.numbers arguments
     rem = num % div
     if rem is 0 or (num > 0 and div > 0 or num < 0 and div < 0)
@@ -71,7 +71,7 @@ core =
     Math.random() * n
 
   'rand_$_int': (n) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     r = core.rand n
     if r >= 0 then Math.floor(r) else Math.ceil(r)
 
@@ -126,51 +126,51 @@ core =
     ), true
 
   'identical_$QMARK_': (x, y) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     x is y
 
   'true_$QMARK_': (arg) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     arg is true
 
   'false_$QMARK_': (arg) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     arg is false
 
   'nil_$QMARK_': (arg) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     arg is null
 
   'some_$QMARK_': (arg) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     arg isnt null
 
   'number_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     typeof x is 'number'
 
   'integer_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     typeof x is 'number' and x % 1 is 0
 
   'float_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     typeof x is 'number' and x % 1 isnt 0
 
   'zero_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     core['_$EQ__$EQ_'](x, 0)
 
   'pos_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     core['_$GT_'] x, 0
 
   'neg_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     core['_$LT_'] x, 0
 
   'even_$QMARK_': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.integers x
     core['zero_$QMARK_'] core['mod'] x, 2
 
@@ -178,30 +178,30 @@ core =
     core['not'] core['even_$QMARK_'] x
 
   'contains_$QMARK_': (coll, key) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.associativeOrSet coll
     m.has_key coll, key
 
   'empty_$QMARK_': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.is_empty coll
 
   'vector_$QMARK_': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.is_vector coll
 
   'map_$QMARK_': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.is_map coll
 
 
   # logic
   'boolean': (arg) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     arg isnt false and arg isnt null
 
   'not': (arg) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     not core.boolean(arg)
 
 
@@ -215,18 +215,18 @@ core =
 
   # collections
   'count': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.seqable coll
     m.count coll
 
   'empty': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     try m.empty coll
     catch error
       null
 
   'not_$_empty': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     if core.count(coll) is 0 then null else coll
 
   'get': (coll, key, notFound = null) ->
@@ -234,25 +234,25 @@ core =
     m.get coll, key, notFound
 
   'seq': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.seqable coll
     m.seq coll
 
   'first': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.first coll
 
   'rest': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.rest coll
 
   'next': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     rest = core.rest coll
     if core['empty_$QMARK_'](rest) then null else rest
 
   'last': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.last coll
 
   'nth': (coll, index, notFound) ->
@@ -274,17 +274,17 @@ core =
       else throw e
 
   'peek': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.stack coll
     m.peek coll
 
   'pop': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.stack coll
     m.pop coll
 
   'cons': (x, seq) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     m.cons x, seq
 
   'conj': (coll, xs...) ->
@@ -294,7 +294,7 @@ core =
     m.conj.apply null, _.flatten [coll, xs]
 
   'into': (to, from) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     return null if to is null and from is null
     m.reduce core.conj, to, from
 
@@ -304,11 +304,11 @@ core =
     m.concat.apply null, seqs
 
   'flatten': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.flatten coll
 
   'reverse': (coll) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     assert.seqable coll
     m.reverse coll
 
@@ -324,7 +324,7 @@ core =
     m.dissoc.apply null, _.flatten [map, keys]
 
   'find': (map, key) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.associative map
     m.find map, key
 
@@ -335,7 +335,7 @@ core =
     m.range.apply null, args
 
   'identity': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     x
 
   'apply': (f, args...) ->
@@ -359,12 +359,12 @@ core =
     m.mapcat.apply null, arguments
 
   'filter': (pred, coll) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.function pred
     m.filter pred, coll
 
   'remove': (pred, coll) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.function pred
     m.remove pred, coll
 
@@ -375,30 +375,30 @@ core =
     m.reduce.apply null, args
 
   'reduce_$_kv': (f, init, coll) ->
-    assert.arity 3, 3, arguments
+    assert.arity 3, arguments
     assert.function f
     m.reduce_kv f, init, coll
 
   'take': (n, coll) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.numbers n
     assert.seqable coll
     m.take n, coll
 
   'drop': (n, coll) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.numbers n
     assert.seqable coll
     m.drop n, coll
 
   'some': (pred, coll) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.function pred
     assert.seqable coll
     m.some pred, coll
 
   'every_$QMARK_': (pred, coll) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.function pred
     assert.seqable coll
     m.every pred, coll
@@ -425,12 +425,12 @@ core =
     m.sort_by.apply null, arguments
 
   'iterate': (f, x) ->
-    assert.arity 2, 2, arguments
+    assert.arity 2, arguments
     assert.function f
     m.iterate f, x
 
   'constantly': (x) ->
-    assert.arity 1, 1, arguments
+    assert.arity 1, arguments
     m.constantly x
 
   'repeat': () ->

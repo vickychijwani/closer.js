@@ -210,6 +210,9 @@ case 39:
                     $$[$0], blockLoc)], blockLoc);
         }
 
+        var arityCheck = createArityCheckStmt(ids.length, $$[$0-2].rest, _$[$0-2], yy);
+        $$[$0].body.unshift(arityCheck);
+
         this.$ = yy.Node('FunctionExpression', null, ids, null,
             $$[$0], false, false, yy.loc(_$[$0]));
     
@@ -246,6 +249,10 @@ case 42:
             var restDecl = createRestArgsDecl(restId, null, maxArgNum, bodyLoc, yy);
             body.body.unshift(restDecl);
         }
+
+        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, _$[$0-3], yy);
+        body.body.unshift(arityCheck);
+
         this.$ = yy.Node('FunctionExpression', null, args, null, body,
             false, false, yy.loc(_$[$0-3]));
     
@@ -759,6 +766,22 @@ function wrapInExpressionStatement(expr, yy) {
         return yy.Node('ExpressionStatement', expr, expr.loc);
     }
     return expr;
+}
+
+function createArityCheckStmt(minArity, hasRestArgs, loc, yy) {
+    var argsLoc = yy.loc(loc);
+    var arityCheckArgs = [yy.Node('Literal', minArity, argsLoc)];
+    if (hasRestArgs) {
+        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', argsLoc));
+    }
+    arityCheckArgs.push(yy.Node('Identifier', 'arguments', argsLoc));
+    var arityCheck = yy.Node('CallExpression',
+        yy.Node('MemberExpression',
+            yy.Node('Identifier', 'assertions', argsLoc),
+            yy.Node('Identifier', 'arity', argsLoc),
+            false, argsLoc),
+        arityCheckArgs, argsLoc);
+    return wrapInExpressionStatement(arityCheck, yy);
 }
 
 function createReturnStatementIfPossible(stmt, yy) {
@@ -4452,6 +4475,19 @@ for (_i = 0, _len = _ref.length; _i < _len; _i++) {
   })(type);
 }
 
+exports.AssertArity = function(min, max) {
+  var args;
+  if (max == null) {
+    max = null;
+  }
+  args = [exports.Literal(min)];
+  if (max === Infinity) {
+    args.push(exports.Identifier('Infinity'));
+  }
+  args.push(exports.Identifier('arguments'));
+  return exports.ExpressionStatement(exports.CallExpression(exports.MemberExpression(exports.Identifier('assertions'), exports.Identifier('arity')), args));
+};
+
 exports.Identifier = function(name) {
   return {
     type: 'Identifier',
@@ -4687,7 +4723,7 @@ exports.Program = function() {
 
 
 },{"../src/closer":19,"json-diff":4}],18:[function(_dereq_,module,exports){
-var ArrayExpression, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, Nil, Program, ReturnStatement, String, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, helpers, json_diff;
+var ArrayExpression, AssertArity, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, Nil, Program, ReturnStatement, String, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, helpers, json_diff;
 
 closer = _dereq_('../src/closer');
 
@@ -4714,6 +4750,8 @@ List = helpers['list'];
 HashSet = helpers['set'];
 
 HashMap = helpers['hash_map'];
+
+AssertArity = helpers.AssertArity;
 
 Identifier = helpers.Identifier;
 
@@ -4812,24 +4850,24 @@ describe('Closer parser', function() {
     return expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('fn_$_name'), Identifier('call')), [Nil(), Identifier('arg1'), Identifier('arg2')]))));
   });
   it('parses an anonymous function definition', function() {
-    return expect(closer.parse('(fn [x] x)\n')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))))));
+    return expect(closer.parse('(fn [x] x)\n')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x')))))));
   });
   it('parses an anonymous function call', function() {
-    return expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x')))), Identifier('call')), [Nil(), Integer(2)]))));
+    return expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x')))), Identifier('call')), [Nil(), Integer(2)]))));
   });
   it('parses anonymous function literals', function() {
-    expect(closer.parse('(#(apply + % %2 %&) 1 2 3 4)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('__$1'), Identifier('__$2')], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('__$rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('__$1'), Identifier('__$2'), Identifier('__$rest')])))), Identifier('call')), [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)]))));
-    return expect(closer.parse('(map #(if (even? %1) (- %) %) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3)])]))));
+    expect(closer.parse('(#(apply + % %2 %&) 1 2 3 4)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('__$1'), Identifier('__$2')], null, BlockStatement(AssertArity(2, Infinity), VariableDeclaration(VariableDeclarator(Identifier('__$rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('__$1'), Identifier('__$2'), Identifier('__$rest')])))), Identifier('call')), [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)]))));
+    return expect(closer.parse('(map #(if (even? %1) (- %) %) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(AssertArity(1), IfStatement(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3)])]))));
   });
   it('parses a named function definition', function() {
-    return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('x')], null, BlockStatement(ReturnStatement(Identifier('x'))))))));
+    return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x'))))))));
   });
   it('parses rest arguments', function() {
-    return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('avg'), FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('_$SLASH_'), Identifier('call')), [Nil(), CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('rest')]), CallExpression(MemberExpression(Identifier('count'), Identifier('call')), [Nil(), Identifier('rest')])]))))))));
+    return expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('avg'), FunctionExpression(null, [], null, BlockStatement(AssertArity(0, Infinity), VariableDeclaration(VariableDeclarator(Identifier('rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('_$SLASH_'), Identifier('call')), [Nil(), CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('rest')]), CallExpression(MemberExpression(Identifier('count'), Identifier('call')), [Nil(), Identifier('rest')])]))))))));
   });
   it('parses destructuring forms', function() {
-    expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('__$destruc0'), Identifier('c')], null, BlockStatement(TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('nth'), [Identifier('__$destruc0'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('a'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('drop'), [Integer(1), Identifier('__$destruc0')]))), VariableDeclaration(VariableDeclarator(Identifier('coll'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('d'), CallExpression(Identifier('nth'), [Identifier('coll'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('d'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('e'), CallExpression(Identifier('drop'), [Integer(1), Identifier('coll')]))), ReturnStatement(Nil())))))));
-    return expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('m')], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('b')]))), VariableDeclaration(VariableDeclarator(Identifier('c'), CallExpression(Identifier('get'), [Identifier('m'), String('c')]))), VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('a')]))), ReturnStatement(Nil())))))));
+    expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('__$destruc0'), Identifier('c')], null, BlockStatement(AssertArity(2, Infinity), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('nth'), [Identifier('__$destruc0'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('a'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('drop'), [Integer(1), Identifier('__$destruc0')]))), VariableDeclaration(VariableDeclarator(Identifier('coll'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('d'), CallExpression(Identifier('nth'), [Identifier('coll'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('d'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('e'), CallExpression(Identifier('drop'), [Integer(1), Identifier('coll')]))), ReturnStatement(Nil())))))));
+    return expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('m')], null, BlockStatement(AssertArity(1), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('b')]))), VariableDeclaration(VariableDeclarator(Identifier('c'), CallExpression(Identifier('get'), [Identifier('m'), String('c')]))), VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('a')]))), ReturnStatement(Nil())))))));
   });
   it('parses collections and keywords in function position', function() {
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3), Integer(4)]), Identifier('call')), [Nil(), Integer(1)]))));
@@ -4856,7 +4894,7 @@ describe('Closer parser', function() {
     return expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('sum'), CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(3), Integer(5)])))));
   });
   it('parses a var bound to an fn form', function() {
-    return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('numbers'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('numbers')]))))))));
+    return expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], null, BlockStatement(AssertArity(0, Infinity), VariableDeclaration(VariableDeclarator(Identifier('numbers'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('numbers')]))))))));
   });
   it('parses a let form with no bindings and no body', function() {
     return expect(closer.parse('(let [])')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil())))))));
@@ -4879,7 +4917,7 @@ describe('Closer parser', function() {
     return expect(closer.parse('(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))')).toDeepEqual(Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('_$GT_'), Identifier('call')), [Nil(), Identifier('x'), Integer(1)]), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('console'), String('log'), true), [Identifier('x')])), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x'), Integer(2)]))), ExpressionStatement(AssignmentExpression(Identifier('x'), Identifier('__$recur0'))), ContinueStatement())), ReturnStatement(Nil())), BreakStatement())))), []))));
   });
   it('parses fn + recur forms', function() {
-    return expect(closer.parse('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('n'), Identifier('acc')], null, BlockStatement(WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')), [Nil(), Identifier('n')]), ReturnStatement(Identifier('acc')), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('dec'), Identifier('call')), [Nil(), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('__$recur1'), CallExpression(MemberExpression(Identifier('_$STAR_'), Identifier('call')), [Nil(), Identifier('acc'), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('n'), Identifier('__$recur0'))), ExpressionStatement(AssignmentExpression(Identifier('acc'), Identifier('__$recur1'))), ContinueStatement())))))))));
+    return expect(closer.parse('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))')).toDeepEqual(Program(ExpressionStatement(FunctionExpression(null, [Identifier('n'), Identifier('acc')], null, BlockStatement(AssertArity(2), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')), [Nil(), Identifier('n')]), ReturnStatement(Identifier('acc')), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('dec'), Identifier('call')), [Nil(), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('__$recur1'), CallExpression(MemberExpression(Identifier('_$STAR_'), Identifier('call')), [Nil(), Identifier('acc'), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('n'), Identifier('__$recur0'))), ExpressionStatement(AssignmentExpression(Identifier('acc'), Identifier('__$recur1'))), ContinueStatement())))))))));
   });
   it('parses logical expressions (and / or)', function() {
     expect(closer.parse('(and) (or)')).toDeepEqual(Program(ExpressionStatement(Boolean(true)), ExpressionStatement(Nil())));

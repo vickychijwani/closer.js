@@ -151,6 +151,9 @@ FnArgsAndBody
                     $BlockStatementWithReturn, blockLoc)], blockLoc);
         }
 
+        var arityCheck = createArityCheckStmt(ids.length, $FnArgs.rest, @FnArgs, yy);
+        $BlockStatementWithReturn.body.unshift(arityCheck);
+
         $$ = yy.Node('FunctionExpression', null, ids, null,
             $BlockStatementWithReturn, false, false, yy.loc(@BlockStatementWithReturn));
     }
@@ -190,6 +193,10 @@ AnonFnLiteral
             var restDecl = createRestArgsDecl(restId, null, maxArgNum, bodyLoc, yy);
             body.body.unshift(restDecl);
         }
+
+        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, @1, yy);
+        body.body.unshift(arityCheck);
+
         $$ = yy.Node('FunctionExpression', null, args, null, body,
             false, false, yy.loc(@1));
     }
@@ -601,6 +608,22 @@ function wrapInExpressionStatement(expr, yy) {
         return yy.Node('ExpressionStatement', expr, expr.loc);
     }
     return expr;
+}
+
+function createArityCheckStmt(minArity, hasRestArgs, loc, yy) {
+    var argsLoc = yy.loc(loc);
+    var arityCheckArgs = [yy.Node('Literal', minArity, argsLoc)];
+    if (hasRestArgs) {
+        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', argsLoc));
+    }
+    arityCheckArgs.push(yy.Node('Identifier', 'arguments', argsLoc));
+    var arityCheck = yy.Node('CallExpression',
+        yy.Node('MemberExpression',
+            yy.Node('Identifier', 'assertions', argsLoc),
+            yy.Node('Identifier', 'arity', argsLoc),
+            false, argsLoc),
+        arityCheckArgs, argsLoc);
+    return wrapInExpressionStatement(arityCheck, yy);
 }
 
 function createReturnStatementIfPossible(stmt, yy) {

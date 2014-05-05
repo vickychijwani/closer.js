@@ -1,13 +1,11 @@
 nodeRepl = require 'repl'
 vm = require 'vm'
 closer = require './closer'
-
-core = require './closer-core'
-mori = require 'mori'
 repl = require './repl'
 
-global.mori = mori
-global.core = core
+global.assertions = require './assert'
+global.mori = require 'mori'
+global.core = require './closer-core'
 
 defaults =
   prompt: 'closer> '

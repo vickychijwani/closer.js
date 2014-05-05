@@ -57,8 +57,10 @@ assert =
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not a function"
 
-  arity: (expected_min, expected_max, args...) ->
-    args = _.flatten args, true
+  arity: (expected_min, expected_max, args) ->
+    if arguments.length is 2
+      args = expected_max
+      expected_max = expected_min
     unless expected_min <= args.length <= expected_max
       throw new ArityError expected_min, expected_max, args.length
 

@@ -2,6 +2,7 @@ _ = require '../src/lodash'
 mori = require 'mori'
 repl = require '../src/repl'
 core = require '../src/closer-core'
+assertions = require '../src/assert'
 
 beforeEach ->
   @addMatchers

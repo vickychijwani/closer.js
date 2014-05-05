@@ -12,6 +12,7 @@ Vector = helpers['vector']
 List = helpers['list']
 HashSet = helpers['set']
 HashMap = helpers['hash_map']
+AssertArity = helpers.AssertArity
 Identifier = helpers.Identifier
 ThisExpression = helpers.ThisExpression
 UnaryExpression = helpers.UnaryExpression
@@ -125,6 +126,7 @@ describe 'Closer parser', ->
           [Identifier('x')],
           null,
           BlockStatement(
+            AssertArity(1),
             ReturnStatement(Identifier('x'))))))
 
   it 'parses an anonymous function call', ->
@@ -136,6 +138,7 @@ describe 'Closer parser', ->
             [Identifier('x')],
             null,
             BlockStatement(
+              AssertArity(1),
               ReturnStatement(Identifier('x')))),
           Identifier('call')),
         [Nil(), Integer(2)])))
@@ -147,6 +150,7 @@ describe 'Closer parser', ->
           FunctionExpression(
             null, [Identifier('__$1'), Identifier('__$2')], null,
             BlockStatement(
+              AssertArity(2, Infinity),
               VariableDeclaration(VariableDeclarator(
                 Identifier('__$rest'),
                 CallExpression(
@@ -171,6 +175,7 @@ describe 'Closer parser', ->
         FunctionExpression(
           null, [Identifier('__$1')], null,
           BlockStatement(
+            AssertArity(1),
             IfStatement(
               CallExpression(
                 MemberExpression(Identifier('even_$QMARK_'), Identifier('call')),
@@ -190,8 +195,9 @@ describe 'Closer parser', ->
           Identifier('fn_$_name'),
           FunctionExpression(
             null, [Identifier('x')], null,
-            BlockStatement(ReturnStatement(
-              Identifier('x')))))))
+            BlockStatement(
+              AssertArity(1),
+              ReturnStatement(Identifier('x')))))))
 
   it 'parses rest arguments', ->
     expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual Program(
@@ -201,6 +207,7 @@ describe 'Closer parser', ->
           FunctionExpression(
             null, [], null,
             BlockStatement(
+              AssertArity(0, Infinity),
               VariableDeclaration(VariableDeclarator(
                 Identifier('rest'),
                 CallExpression(
@@ -229,6 +236,7 @@ describe 'Closer parser', ->
         FunctionExpression(
           null, [Identifier('__$destruc0'), Identifier('c')], null,
           BlockStatement(
+            AssertArity(2, Infinity),
             TryStatement(BlockStatement(
               VariableDeclaration(VariableDeclarator(
                 Identifier('a'),
@@ -285,6 +293,7 @@ describe 'Closer parser', ->
         FunctionExpression(
           null, [Identifier('m')], null,
           BlockStatement(
+            AssertArity(1),
             VariableDeclaration(VariableDeclarator(
               Identifier('b'),
               CallExpression(Identifier('get'),
@@ -402,6 +411,7 @@ describe 'Closer parser', ->
           FunctionExpression(
             null, [], null,
             BlockStatement(
+              AssertArity(0, Infinity),
               VariableDeclaration(VariableDeclarator(
                 Identifier('numbers'),
                 CallExpression(
@@ -528,6 +538,7 @@ describe 'Closer parser', ->
         FunctionExpression(
           null, [Identifier('n'), Identifier('acc')], null,
           BlockStatement(
+            AssertArity(2),
             WhileStatement(
               Boolean(true),
               BlockStatement(

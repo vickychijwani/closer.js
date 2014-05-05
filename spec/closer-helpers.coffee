@@ -15,6 +15,18 @@ for type in ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq']
       closer.node('CallExpression', closer.node('Identifier', type2), args)
   )(type)
 
+# compound nodes
+exports.AssertArity = (min, max = null) ->
+  args = [exports.Literal(min)]
+  if (max is Infinity) then args.push exports.Identifier('Infinity')
+  args.push exports.Identifier('arguments')
+  exports.ExpressionStatement(
+    exports.CallExpression(
+      exports.MemberExpression(
+        exports.Identifier('assertions'), exports.Identifier('arity')),
+      args))
+
+# primitive nodes
 exports.Identifier = (name) ->
   type: 'Identifier'
   name: name
