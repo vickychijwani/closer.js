@@ -323,6 +323,16 @@ core =
     return map if keys.length is 0
     m.dissoc.apply null, _.flatten [map, keys]
 
+  'keys': (map) ->
+    assert.arity 1, arguments
+    assert.map map
+    m.keys map
+
+  'vals': (map) ->
+    assert.arity 1, arguments
+    assert.map map
+    m.vals map
+
   'find': (map, key) ->
     assert.arity 2, arguments
     assert.associative map

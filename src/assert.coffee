@@ -35,6 +35,10 @@ assert =
     if unexpectedArg = firstFailure(args, (arg) -> mori.is_associative(arg))
       throw new ArgTypeError "#{unexpectedArg} is not an associative collection"
 
+  map: (args...) ->
+    if unexpectedArg = firstFailure(args, (arg) -> mori.is_map(arg))
+      throw new ArgTypeError "#{unexpectedArg} is not a map"
+
   seqable: (args...) ->
     unexpectedArg = firstFailure args, (arg) -> mori.is_seqable(arg) or _.isString(arg) or _.isArray(arg)
     if unexpectedArg

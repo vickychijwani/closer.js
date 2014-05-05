@@ -7959,6 +7959,26 @@ describe('Closer core library', function() {
       return nil('(dissoc nil #() true)');
     });
   });
+  describe('(keys map)', function() {
+    return it('returns a seq of the map\'s keys', function() {
+      throws('(keys {:a 1, :b 2} {:c 3, :d 4})');
+      throws('(keys [1 2 3 4])');
+      throws('(keys \'(1 2 3 4))');
+      throws('(keys #{1 2 3 4})');
+      throws('(keys "string")');
+      return eq('(keys {:a 1, :b 2})', seq([key('a'), key('b')]));
+    });
+  });
+  describe('(vals map)', function() {
+    return it('returns a seq of the map\'s values', function() {
+      throws('(vals {:a 1, :b 2} {:c 3, :d 4})');
+      throws('(vals [1 2 3 4])');
+      throws('(vals \'(1 2 3 4))');
+      throws('(vals #{1 2 3 4})');
+      throws('(vals "string")');
+      return eq('(vals {:a 1, :b 2})', seq([1, 2]));
+    });
+  });
   describe('(find map key)', function() {
     return it('returns the map entry for a given key', function() {
       throws('(find {:a 1 :b 2} :a :b)');
@@ -8326,6 +8346,15 @@ assert = {
       return mori.is_associative(arg);
     })) {
       throw new ArgTypeError("" + unexpectedArg + " is not an associative collection");
+    }
+  },
+  map: function() {
+    var args, unexpectedArg;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    if (unexpectedArg = firstFailure(args, function(arg) {
+      return mori.is_map(arg);
+    })) {
+      throw new ArgTypeError("" + unexpectedArg + " is not a map");
     }
   },
   seqable: function() {
@@ -8819,6 +8848,16 @@ core = {
       return map;
     }
     return m.dissoc.apply(null, _.flatten([map, keys]));
+  },
+  'keys': function(map) {
+    assert.arity(1, arguments);
+    assert.map(map);
+    return m.keys(map);
+  },
+  'vals': function(map) {
+    assert.arity(1, arguments);
+    assert.map(map);
+    return m.vals(map);
   },
   'find': function(map, key) {
     assert.arity(2, arguments);

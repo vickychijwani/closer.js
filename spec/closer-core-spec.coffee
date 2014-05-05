@@ -684,6 +684,24 @@ describe 'Closer core library', ->
       eq '(dissoc {1 2, 3 4, 5 6} 3 5 4 6 7)', map 1, 2
       nil '(dissoc nil #() true)'   # works with nil irrespective of rest args
 
+  describe '(keys map)', ->
+    it 'returns a seq of the map\'s keys', ->
+      throws '(keys {:a 1, :b 2} {:c 3, :d 4})'
+      throws '(keys [1 2 3 4])'
+      throws '(keys \'(1 2 3 4))'
+      throws '(keys #{1 2 3 4})'
+      throws '(keys "string")'
+      eq '(keys {:a 1, :b 2})', seq [key('a'), key('b')]
+
+  describe '(vals map)', ->
+    it 'returns a seq of the map\'s values', ->
+      throws '(vals {:a 1, :b 2} {:c 3, :d 4})'
+      throws '(vals [1 2 3 4])'
+      throws '(vals \'(1 2 3 4))'
+      throws '(vals #{1 2 3 4})'
+      throws '(vals "string")'
+      eq '(vals {:a 1, :b 2})', seq [1, 2]
+
   describe '(find map key)', ->
     it 'returns the map entry for a given key', ->
       throws '(find {:a 1 :b 2} :a :b)'
