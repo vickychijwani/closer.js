@@ -128,8 +128,8 @@ describe 'Functional tests', ->
       seq [1, 2, 3, 3, 7, 8, 10]
 
   it 'fibonacci sequence', ->
-    eq '(defn fibs []
+    eq '(defn fib-seq []
           (map first (iterate (fn [[a b]] [b (+ a b)]) [0 1])))
 
-        (take 10 (fibs))',
+        (take 10 (fib-seq))',
       seq [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]

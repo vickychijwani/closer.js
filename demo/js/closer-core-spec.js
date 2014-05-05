@@ -85,9 +85,9 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
-        this.$ = (String($$[$0]) === 'this')
+        this.$ = ($$[$0] === 'this')
             ? yy.Node('ThisExpression', yy.loc(_$[$0]))
-            : yy.Node('Identifier', String($$[$0]), yy.loc(_$[$0]));
+            : yy.Node('Identifier', parseIdentifier($$[$0]), yy.loc(_$[$0]));
     
 break;
 case 2: this.$ = []; 
@@ -98,10 +98,10 @@ case 3:
         $$[$0-1].push($$[$0]);
     
 break;
-case 4: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(_$[$0])), [yy.Node('Literal', String($$[$0]), yy.loc(_$[$0]))], yy.loc(_$[$0])); 
+case 4: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(_$[$0])), [yy.Node('Literal', $$[$0], yy.loc(_$[$0]))], yy.loc(_$[$0])); 
 break;
 case 5:
-        var name = String($$[$0]).slice(1);
+        var name = $$[$0].slice(1);
         if (name === '') name = '1';
         if (name === '&') name = 'rest';
         var anonArgNum = (name === 'rest') ? 0 : Number(name);
@@ -846,6 +846,22 @@ function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
     var value = type === 'set' ? [yy.Node('ArrayExpression', items, loc)] : items;
     return yy.Node('CallExpression', yy.Node('Identifier', type, loc), value, loc);
+}
+
+var charMap = {
+    '-': '_$_',
+    '+': '_$PLUS_',
+    '>': '_$GT_',
+    '<': '_$LT_',
+    '=': '_$EQ_',
+    '!': '_$BANG_',
+    '*': '_$STAR_',
+    '/': '_$SLASH_',
+    '?': '_$QMARK_'
+};
+function parseIdentifier(name) {
+    var charsToReplace = new RegExp('[' + Object.keys(charMap).join('') + ']', 'g');
+    return name.replace(charsToReplace, function (c) { return charMap[c]; });
 }
 
 function parseString(str) {
@@ -17655,7 +17671,7 @@ describe('Closer core library', function() {
       eq('((comp) [1 2 3])', vec([1, 2, 3]));
       eq('((comp - /) 8 3)', -8 / 3);
       eq('((comp str +) 8 4 5)', '17');
-      return eq('(def countif (comp count filter)) (countif even? [2 3 1 5 4])', 2);
+      return eq('(def count-if (comp count filter)) (count-if even? [2 3 1 5 4])', 2);
     });
   });
   return describe('(partial f args)', function() {
@@ -17665,7 +17681,7 @@ describe('Closer core library', function() {
       throws('((partial identity))');
       eq('((partial identity) 3)', 3);
       eq('((partial identity 3))', 3);
-      return eq('(def times100 (partial * 100)) (times100 5)', 500);
+      return eq('(def times-hundred (partial * 100)) (times-hundred 5)', 500);
     });
   });
 });
@@ -17818,7 +17834,7 @@ var assert, core, m, _,
   __slice = [].slice;
 
 core = {
-  '+': function() {
+  '_$PLUS_': function() {
     var nums;
     nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(0, Infinity, arguments);
@@ -17827,7 +17843,7 @@ core = {
       return sum + num;
     }), 0);
   },
-  '-': function() {
+  '_$_': function() {
     var nums;
     nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17839,7 +17855,7 @@ core = {
       return diff - num;
     }), nums[0]);
   },
-  '*': function() {
+  '_$STAR_': function() {
     var nums;
     nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(0, Infinity, arguments);
@@ -17848,7 +17864,7 @@ core = {
       return prod * num;
     }), 1);
   },
-  '/': function() {
+  '_$SLASH_': function() {
     var nums;
     nums = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17917,7 +17933,7 @@ core = {
     }
     return Math.random() * n;
   },
-  'rand-int': function(n) {
+  'rand_$_int': function(n) {
     var r;
     assert.arity(1, 1, arguments);
     r = core.rand(n);
@@ -17927,7 +17943,7 @@ core = {
       return Math.ceil(r);
     }
   },
-  '=': function() {
+  '_$EQ_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17937,13 +17953,13 @@ core = {
     }
     return m.equals.apply(null, args);
   },
-  'not=': function() {
+  'not_$EQ_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
-    return core.not(core['='].apply(null, args));
+    return core.not(core['_$EQ_'].apply(null, args));
   },
-  '==': function() {
+  '_$EQ__$EQ_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17951,9 +17967,9 @@ core = {
       return true;
     }
     assert.numbers(args);
-    return core['='].apply(null, args);
+    return core['_$EQ_'].apply(null, args);
   },
-  '<': function() {
+  '_$LT_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17965,7 +17981,7 @@ core = {
       return result && (idx + 1 === args.length || val < args[idx + 1]);
     }), true);
   },
-  '>': function() {
+  '_$GT_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17977,7 +17993,7 @@ core = {
       return result && (idx + 1 === args.length || val > args[idx + 1]);
     }), true);
   },
-  '<=': function() {
+  '_$LT__$EQ_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -17989,7 +18005,7 @@ core = {
       return result && (idx + 1 === args.length || val <= args[idx + 1]);
     }), true);
   },
-  '>=': function() {
+  '_$GT__$EQ_': function() {
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(1, Infinity, arguments);
@@ -18001,72 +18017,72 @@ core = {
       return result && (idx + 1 === args.length || val >= args[idx + 1]);
     }), true);
   },
-  'identical?': function(x, y) {
+  'identical_$QMARK_': function(x, y) {
     assert.arity(2, 2, arguments);
     return x === y;
   },
-  'true?': function(arg) {
+  'true_$QMARK_': function(arg) {
     assert.arity(1, 1, arguments);
     return arg === true;
   },
-  'false?': function(arg) {
+  'false_$QMARK_': function(arg) {
     assert.arity(1, 1, arguments);
     return arg === false;
   },
-  'nil?': function(arg) {
+  'nil_$QMARK_': function(arg) {
     assert.arity(1, 1, arguments);
     return arg === null;
   },
-  'some?': function(arg) {
+  'some_$QMARK_': function(arg) {
     assert.arity(1, 1, arguments);
     return arg !== null;
   },
-  'number?': function(x) {
+  'number_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
     return typeof x === 'number';
   },
-  'integer?': function(x) {
+  'integer_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
     return typeof x === 'number' && x % 1 === 0;
   },
-  'float?': function(x) {
+  'float_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
     return typeof x === 'number' && x % 1 !== 0;
   },
-  'zero?': function(x) {
+  'zero_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
-    return core['=='](x, 0);
+    return core['_$EQ__$EQ_'](x, 0);
   },
-  'pos?': function(x) {
+  'pos_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
-    return core['>'](x, 0);
+    return core['_$GT_'](x, 0);
   },
-  'neg?': function(x) {
+  'neg_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
-    return core['<'](x, 0);
+    return core['_$LT_'](x, 0);
   },
-  'even?': function(x) {
+  'even_$QMARK_': function(x) {
     assert.arity(1, 1, arguments);
     assert.integers(x);
-    return core['zero?'](core['mod'](x, 2));
+    return core['zero_$QMARK_'](core['mod'](x, 2));
   },
-  'odd?': function(x) {
-    return core['not'](core['even?'](x));
+  'odd_$QMARK_': function(x) {
+    return core['not'](core['even_$QMARK_'](x));
   },
-  'contains?': function(coll, key) {
+  'contains_$QMARK_': function(coll, key) {
     assert.arity(2, 2, arguments);
     assert.associativeOrSet(coll);
     return m.has_key(coll, key);
   },
-  'empty?': function(coll) {
+  'empty_$QMARK_': function(coll) {
     assert.arity(1, 1, arguments);
     return m.is_empty(coll);
   },
-  'vector?': function(coll) {
+  'vector_$QMARK_': function(coll) {
     assert.arity(1, 1, arguments);
     return m.is_vector(coll);
   },
-  'map?': function(coll) {
+  'map_$QMARK_': function(coll) {
     assert.arity(1, 1, arguments);
     return m.is_map(coll);
   },
@@ -18083,7 +18099,7 @@ core = {
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     assert.arity(0, Infinity, arguments);
     return _.reduce(args, (function(str, arg) {
-      return str += core['nil?'](arg) ? '' : arg.toString();
+      return str += core['nil_$QMARK_'](arg) ? '' : arg.toString();
     }), '');
   },
   'count': function(coll) {
@@ -18101,7 +18117,7 @@ core = {
       return null;
     }
   },
-  'not-empty': function(coll) {
+  'not_$_empty': function(coll) {
     assert.arity(1, 1, arguments);
     if (core.count(coll) === 0) {
       return null;
@@ -18133,7 +18149,7 @@ core = {
     var rest;
     assert.arity(1, 1, arguments);
     rest = core.rest(coll);
-    if (core['empty?'](rest)) {
+    if (core['empty_$QMARK_'](rest)) {
       return null;
     } else {
       return rest;
@@ -18191,8 +18207,8 @@ core = {
     var coll, xs;
     coll = arguments[0], xs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     assert.arity(2, Infinity, arguments);
-    if (core['map?'](coll) && _.any(xs, function(x) {
-      return core['vector?'](x) && core.count(x) !== 2;
+    if (core['map_$QMARK_'](coll) && _.any(xs, function(x) {
+      return core['vector_$QMARK_'](x) && core.count(x) !== 2;
     })) {
       throw new TypeError('vector args to conjoin to a map must be pairs');
     }
@@ -18301,7 +18317,7 @@ core = {
     assert["function"](args[0]);
     return m.reduce.apply(null, args);
   },
-  'reduce-kv': function(f, init, coll) {
+  'reduce_$_kv': function(f, init, coll) {
     assert.arity(3, 3, arguments);
     assert["function"](f);
     return m.reduce_kv(f, init, coll);
@@ -18324,7 +18340,7 @@ core = {
     assert.seqable(coll);
     return m.some(pred, coll);
   },
-  'every?': function(pred, coll) {
+  'every_$QMARK_': function(pred, coll) {
     assert.arity(2, 2, arguments);
     assert["function"](pred);
     assert.seqable(coll);
@@ -18340,7 +18356,7 @@ core = {
     }
     return m.sort.apply(null, arguments);
   },
-  'sort-by': function() {
+  'sort_$_by': function() {
     assert.arity(2, 3, arguments);
     if (arguments.length === 2) {
       assert["function"](arguments[0]);

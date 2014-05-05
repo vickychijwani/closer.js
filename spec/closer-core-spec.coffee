@@ -898,7 +898,7 @@ describe 'Closer core library', ->
       eq '((comp) [1 2 3])', vec [1..3]
       eq '((comp - /) 8 3)', -8/3
       eq '((comp str +) 8 4 5)', '17'
-      eq '(def countif (comp count filter)) (countif even? [2 3 1 5 4])', 2
+      eq '(def count-if (comp count filter)) (count-if even? [2 3 1 5 4])', 2
 
   describe '(partial f args)', ->
     it 'partially applies f to the given args, returning a function that can be invoked with more args to f', ->
@@ -907,4 +907,4 @@ describe 'Closer core library', ->
       throws '((partial identity))'   # wrong number of args passed to identity
       eq '((partial identity) 3)', 3
       eq '((partial identity 3))', 3
-      eq '(def times100 (partial * 100)) (times100 5)', 500
+      eq '(def times-hundred (partial * 100)) (times-hundred 5)', 500

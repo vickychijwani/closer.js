@@ -108,13 +108,13 @@ describe 'Closer parser', ->
   it 'parses a function call with 0 arguments', ->
     expect(closer.parse('(fn-name)\n')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
-        MemberExpression(Identifier('fn-name'), Identifier('call')),
+        MemberExpression(Identifier('fn_$_name'), Identifier('call')),
         [Nil()])))
 
   it 'parses a function call with > 0 arguments', ->
     expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
-        MemberExpression(Identifier('fn-name'), Identifier('call')),
+        MemberExpression(Identifier('fn_$_name'), Identifier('call')),
         [Nil(), Identifier('arg1'), Identifier('arg2')])))
 
   it 'parses an anonymous function definition', ->
@@ -160,7 +160,7 @@ describe 'Closer parser', ->
                     [Identifier('arguments'), Integer(2)])]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('apply'), Identifier('call')),
-                [Nil(), Identifier('+'), Identifier('__$1'),
+                [Nil(), Identifier('_$PLUS_'), Identifier('__$1'),
                  Identifier('__$2'), Identifier('__$rest')])))),
           Identifier('call')),
         [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)])))
@@ -173,10 +173,10 @@ describe 'Closer parser', ->
           BlockStatement(
             IfStatement(
               CallExpression(
-                MemberExpression(Identifier('even?'), Identifier('call')),
+                MemberExpression(Identifier('even_$QMARK_'), Identifier('call')),
                 [Nil(), Identifier('__$1')]),
               ReturnStatement(CallExpression(
-                MemberExpression(Identifier('-'), Identifier('call')),
+                MemberExpression(Identifier('_$_'), Identifier('call')),
                 [Nil(), Identifier('__$1')])),
               ReturnStatement(Identifier('__$1'))))),
         CallExpression(
@@ -187,7 +187,7 @@ describe 'Closer parser', ->
     expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
       VariableDeclaration(
         VariableDeclarator(
-          Identifier('fn-name'),
+          Identifier('fn_$_name'),
           FunctionExpression(
             null, [Identifier('x')], null,
             BlockStatement(ReturnStatement(
@@ -213,11 +213,11 @@ describe 'Closer parser', ->
                       Identifier('call')),
                     [Identifier('arguments'), Integer(0)])]))),
               ReturnStatement(CallExpression(
-                MemberExpression(Identifier('/'), Identifier('call')),
+                MemberExpression(Identifier('_$SLASH_'), Identifier('call')),
                 [Nil(),
                 CallExpression(
                   MemberExpression(Identifier('apply'), Identifier('call')),
-                  [Nil(), Identifier('+'), Identifier('rest')]),
+                  [Nil(), Identifier('_$PLUS_'), Identifier('rest')]),
                 CallExpression(
                   MemberExpression(Identifier('count'), Identifier('call')),
                   [Nil(), Identifier('rest')])])))))))
@@ -225,7 +225,7 @@ describe 'Closer parser', ->
   it 'parses destructuring forms', ->
     expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual Program(
       VariableDeclaration(VariableDeclarator(
-        Identifier('fn-name'),
+        Identifier('fn_$_name'),
         FunctionExpression(
           null, [Identifier('__$destruc2'), Identifier('c')], null,
           BlockStatement(
@@ -281,7 +281,7 @@ describe 'Closer parser', ->
             ReturnStatement(Nil()))))))
     expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual Program(
       VariableDeclaration(VariableDeclarator(
-        Identifier('fn-name'),
+        Identifier('fn_$_name'),
         FunctionExpression(
           null, [Identifier('m')], null,
           BlockStatement(
@@ -340,7 +340,7 @@ describe 'Closer parser', ->
     expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
-          MemberExpression(Identifier('>='), Identifier('call')),
+          MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
           [Nil(), Identifier('x'), Integer(0)]),
         ExpressionStatement(Identifier('x')),
         null))
@@ -349,19 +349,19 @@ describe 'Closer parser', ->
     expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
-          MemberExpression(Identifier('>='), Identifier('call')),
+          MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
           [Nil(), Identifier('x'), Integer(0)]),
         ExpressionStatement(Identifier('x')),
         ExpressionStatement(
           CallExpression(
-            MemberExpression(Identifier('-'), Identifier('call')),
+            MemberExpression(Identifier('_$_'), Identifier('call')),
             [Nil(), Identifier('x')]))))
 
   it 'parses a when form', ->
     expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual Program(
       IfStatement(
         CallExpression(
-          MemberExpression(Identifier('condition?'), Identifier('call')),
+          MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')),
           [Nil()]),
         BlockStatement(
           ExpressionStatement(CallExpression(
@@ -375,7 +375,7 @@ describe 'Closer parser', ->
     expect(closer.parse('(def var-name)')).toDeepEqual Program(
       VariableDeclaration(
         VariableDeclarator(
-          Identifier('var-name'),
+          Identifier('var_$_name'),
           null)))
 
   it 'parses a var bound to a literal', ->
@@ -391,7 +391,7 @@ describe 'Closer parser', ->
         VariableDeclarator(
           Identifier('sum'),
           CallExpression(
-            MemberExpression(Identifier('+'), Identifier('call')),
+            MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
             [Nil(), Integer(3), Integer(5)]))))
 
   it 'parses a var bound to an fn form', ->
@@ -415,7 +415,7 @@ describe 'Closer parser', ->
                     [Identifier('arguments'), Integer(0)])]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('apply'), Identifier('call')),
-                [Nil(), Identifier('+'), Identifier('numbers')])))))))
+                [Nil(), Identifier('_$PLUS_'), Identifier('numbers')])))))))
 
   it 'parses a let form with no bindings and no body', ->
     expect(closer.parse('(let [])')).toDeepEqual Program(
@@ -437,10 +437,10 @@ describe 'Closer parser', ->
             VariableDeclaration(VariableDeclarator(
               Identifier('y'),
               CallExpression(
-                MemberExpression(Identifier('-'), Identifier('call')),
+                MemberExpression(Identifier('_$_'), Identifier('call')),
                 [Nil(), Identifier('x')]))),
             ReturnStatement(CallExpression(
-              MemberExpression(Identifier('+'), Identifier('call')),
+              MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
               [Nil(), Identifier('x'), Identifier('y')])))))))
 
 
@@ -459,10 +459,10 @@ describe 'Closer parser', ->
           null, [], null,
           BlockStatement(
             ExpressionStatement(CallExpression(
-              MemberExpression(Identifier('+'), Identifier('call')),
+              MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
               [Nil(), Integer(1), Integer(2)])),
             ReturnStatement(CallExpression(
-              MemberExpression(Identifier('+'), Identifier('call')),
+              MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
               [Nil(), Integer(3), Integer(4)])))))))
 
   it 'parses dot special forms', ->
@@ -503,7 +503,7 @@ describe 'Closer parser', ->
               BlockStatement(
                 IfStatement(
                   CallExpression(
-                    MemberExpression(Identifier('>'), Identifier('call')),
+                    MemberExpression(Identifier('_$GT_'), Identifier('call')),
                     [Nil(), Identifier('x'), Integer(1)]),
                   BlockStatement(
                     ExpressionStatement(CallExpression(
@@ -513,7 +513,7 @@ describe 'Closer parser', ->
                       ExpressionStatement(AssignmentExpression(
                         Identifier('__$recur0'),
                         CallExpression(
-                          MemberExpression(Identifier('-'), Identifier('call')),
+                          MemberExpression(Identifier('_$_'), Identifier('call')),
                           [Nil(), Identifier('x'), Integer(2)]))),
                       ExpressionStatement(AssignmentExpression(
                         Identifier('x'), Identifier('__$recur0')))
@@ -533,7 +533,7 @@ describe 'Closer parser', ->
               BlockStatement(
                 IfStatement(
                   CallExpression(
-                    MemberExpression(Identifier('zero?'), Identifier('call')),
+                    MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')),
                     [Nil(), Identifier('n')]),
                   ReturnStatement(Identifier('acc')),
                   BlockStatement(
@@ -545,7 +545,7 @@ describe 'Closer parser', ->
                     ExpressionStatement(AssignmentExpression(
                       Identifier('__$recur1'),
                       CallExpression(
-                        MemberExpression(Identifier('*'), Identifier('call')),
+                        MemberExpression(Identifier('_$STAR_'), Identifier('call')),
                         [Nil(), Identifier('acc'), Identifier('n')]))),
                     ExpressionStatement(AssignmentExpression(
                       Identifier('n'), Identifier('__$recur0'))),

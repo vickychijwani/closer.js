@@ -1,23 +1,23 @@
 core =
 
   # arithmetic
-  '+': (nums...) ->
+  '_$PLUS_': (nums...) ->
     assert.arity 0, Infinity, arguments
     assert.numbers nums
     _.reduce nums, ((sum, num) -> sum + num), 0
 
-  '-': (nums...) ->
+  '_$_': (nums...) ->
     assert.arity 1, Infinity, arguments
     assert.numbers nums
     nums.unshift(0) if nums.length is 1
     _.reduce nums.slice(1), ((diff, num) -> diff - num), nums[0]
 
-  '*': (nums...) ->
+  '_$STAR_': (nums...) ->
     assert.arity 0, Infinity, arguments
     assert.numbers nums
     _.reduce nums, ((prod, num) -> prod * num), 1
 
-  '/': (nums...) ->
+  '_$SLASH_': (nums...) ->
     assert.arity 1, Infinity, arguments
     assert.numbers nums
     nums.unshift(1) if nums.length is 1
@@ -70,30 +70,30 @@ core =
       n = arguments[0]
     Math.random() * n
 
-  'rand-int': (n) ->
+  'rand_$_int': (n) ->
     assert.arity 1, 1, arguments
     r = core.rand n
     if r >= 0 then Math.floor(r) else Math.ceil(r)
 
 
   # comparison / test
-  '=': (args...) ->
+  '_$EQ_': (args...) ->
     assert.arity 1, Infinity, arguments
     args = _.uniq args   # remove duplicates
     return true if args.length is 1
     m.equals.apply null, args
 
-  'not=': (args...) ->
+  'not_$EQ_': (args...) ->
     assert.arity 1, Infinity, arguments
-    core.not core['='].apply null, args
+    core.not core['_$EQ_'].apply null, args
 
-  '==': (args...) ->
+  '_$EQ__$EQ_': (args...) ->
     assert.arity 1, Infinity, arguments
     return true if args.length is 1
     assert.numbers args
-    core['='].apply null, args
+    core['_$EQ_'].apply null, args
 
-  '<': (args...) ->
+  '_$LT_': (args...) ->
     assert.arity 1, Infinity, arguments
     return true if args.length is 1
     assert.numbers args
@@ -101,7 +101,7 @@ core =
       result and (idx+1 is args.length or val < args[idx+1])
     ), true
 
-  '>': (args...) ->
+  '_$GT_': (args...) ->
     assert.arity 1, Infinity, arguments
     return true if args.length is 1
     assert.numbers args
@@ -109,7 +109,7 @@ core =
       result and (idx+1 is args.length or val > args[idx+1])
     ), true
 
-  '<=': (args...) ->
+  '_$LT__$EQ_': (args...) ->
     assert.arity 1, Infinity, arguments
     return true if args.length is 1
     assert.numbers args
@@ -117,7 +117,7 @@ core =
       result and (idx+1 is args.length or val <= args[idx+1])
     ), true
 
-  '>=': (args...) ->
+  '_$GT__$EQ_': (args...) ->
     assert.arity 1, Infinity, arguments
     return true if args.length is 1
     assert.numbers args
@@ -125,72 +125,72 @@ core =
       result and (idx+1 is args.length or val >= args[idx+1])
     ), true
 
-  'identical?': (x, y) ->
+  'identical_$QMARK_': (x, y) ->
     assert.arity 2, 2, arguments
     x is y
 
-  'true?': (arg) ->
+  'true_$QMARK_': (arg) ->
     assert.arity 1, 1, arguments
     arg is true
 
-  'false?': (arg) ->
+  'false_$QMARK_': (arg) ->
     assert.arity 1, 1, arguments
     arg is false
 
-  'nil?': (arg) ->
+  'nil_$QMARK_': (arg) ->
     assert.arity 1, 1, arguments
     arg is null
 
-  'some?': (arg) ->
+  'some_$QMARK_': (arg) ->
     assert.arity 1, 1, arguments
     arg isnt null
 
-  'number?': (x) ->
+  'number_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
     typeof x is 'number'
 
-  'integer?': (x) ->
+  'integer_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
     typeof x is 'number' and x % 1 is 0
 
-  'float?': (x) ->
+  'float_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
     typeof x is 'number' and x % 1 isnt 0
 
-  'zero?': (x) ->
+  'zero_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
-    core['=='](x, 0)
+    core['_$EQ__$EQ_'](x, 0)
 
-  'pos?': (x) ->
+  'pos_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
-    core['>'] x, 0
+    core['_$GT_'] x, 0
 
-  'neg?': (x) ->
+  'neg_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
-    core['<'] x, 0
+    core['_$LT_'] x, 0
 
-  'even?': (x) ->
+  'even_$QMARK_': (x) ->
     assert.arity 1, 1, arguments
     assert.integers x
-    core['zero?'] core['mod'] x, 2
+    core['zero_$QMARK_'] core['mod'] x, 2
 
-  'odd?': (x) ->
-    core['not'] core['even?'] x
+  'odd_$QMARK_': (x) ->
+    core['not'] core['even_$QMARK_'] x
 
-  'contains?': (coll, key) ->
+  'contains_$QMARK_': (coll, key) ->
     assert.arity 2, 2, arguments
     assert.associativeOrSet coll
     m.has_key coll, key
 
-  'empty?': (coll) ->
+  'empty_$QMARK_': (coll) ->
     assert.arity 1, 1, arguments
     m.is_empty coll
 
-  'vector?': (coll) ->
+  'vector_$QMARK_': (coll) ->
     assert.arity 1, 1, arguments
     m.is_vector coll
 
-  'map?': (coll) ->
+  'map_$QMARK_': (coll) ->
     assert.arity 1, 1, arguments
     m.is_map coll
 
@@ -209,7 +209,7 @@ core =
   'str': (args...) ->
     assert.arity 0, Infinity, arguments
     _.reduce args, ((str, arg) ->
-      str += if core['nil?'](arg) then '' else arg.toString()
+      str += if core['nil_$QMARK_'](arg) then '' else arg.toString()
     ), ''
 
 
@@ -225,7 +225,7 @@ core =
     catch error
       null
 
-  'not-empty': (coll) ->
+  'not_$_empty': (coll) ->
     assert.arity 1, 1, arguments
     if core.count(coll) is 0 then null else coll
 
@@ -249,7 +249,7 @@ core =
   'next': (coll) ->
     assert.arity 1, 1, arguments
     rest = core.rest coll
-    if core['empty?'](rest) then null else rest
+    if core['empty_$QMARK_'](rest) then null else rest
 
   'last': (coll) ->
     assert.arity 1, 1, arguments
@@ -289,7 +289,7 @@ core =
 
   'conj': (coll, xs...) ->
     assert.arity 2, Infinity, arguments
-    if core['map?'](coll) and _.any(xs, (x) -> core['vector?'](x) and core.count(x) isnt 2)
+    if core['map_$QMARK_'](coll) and _.any(xs, (x) -> core['vector_$QMARK_'](x) and core.count(x) isnt 2)
       throw new TypeError 'vector args to conjoin to a map must be pairs'
     m.conj.apply null, _.flatten [coll, xs]
 
@@ -374,7 +374,7 @@ core =
     assert.function args[0]
     m.reduce.apply null, args
 
-  'reduce-kv': (f, init, coll) ->
+  'reduce_$_kv': (f, init, coll) ->
     assert.arity 3, 3, arguments
     assert.function f
     m.reduce_kv f, init, coll
@@ -397,7 +397,7 @@ core =
     assert.seqable coll
     m.some pred, coll
 
-  'every?': (pred, coll) ->
+  'every_$QMARK_': (pred, coll) ->
     assert.arity 2, 2, arguments
     assert.function pred
     assert.seqable coll
@@ -413,7 +413,7 @@ core =
       assert.seqable arguments[1]
     m.sort.apply null, arguments
 
-  'sort-by': () ->
+  'sort_$_by': () ->
     # arguments: keyfn, [cmp], coll
     assert.arity 2, 3, arguments
     if arguments.length is 2

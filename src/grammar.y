@@ -5,9 +5,9 @@
 
 Identifier
   : IDENTIFIER {
-        $$ = (String($1) === 'this')
+        $$ = ($1 === 'this')
             ? yy.Node('ThisExpression', yy.loc(@1))
-            : yy.Node('Identifier', String($1), yy.loc(@1));
+            : yy.Node('Identifier', parseIdentifier($1), yy.loc(@1));
     }
   ;
 
@@ -21,12 +21,12 @@ IdentifierList
   ;
 
 Keyword
-  : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', String($2), yy.loc(@2))], yy.loc(@2)); }
+  : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', $2, yy.loc(@2))], yy.loc(@2)); }
   ;
 
 AnonArg
   : ANON_ARG {
-        var name = String($1).slice(1);
+        var name = $1.slice(1);
         if (name === '') name = '1';
         if (name === '&') name = 'rest';
         var anonArgNum = (name === 'rest') ? 0 : Number(name);
@@ -688,6 +688,22 @@ function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
     var value = type === 'set' ? [yy.Node('ArrayExpression', items, loc)] : items;
     return yy.Node('CallExpression', yy.Node('Identifier', type, loc), value, loc);
+}
+
+var charMap = {
+    '-': '_$_',
+    '+': '_$PLUS_',
+    '>': '_$GT_',
+    '<': '_$LT_',
+    '=': '_$EQ_',
+    '!': '_$BANG_',
+    '*': '_$STAR_',
+    '/': '_$SLASH_',
+    '?': '_$QMARK_'
+};
+function parseIdentifier(name) {
+    var charsToReplace = new RegExp('[' + Object.keys(charMap).join('') + ']', 'g');
+    return name.replace(charsToReplace, function (c) { return charMap[c]; });
 }
 
 function parseString(str) {
