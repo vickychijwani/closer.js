@@ -227,13 +227,13 @@ describe 'Closer parser', ->
       VariableDeclaration(VariableDeclarator(
         Identifier('fn_$_name'),
         FunctionExpression(
-          null, [Identifier('__$destruc2'), Identifier('c')], null,
+          null, [Identifier('__$destruc0'), Identifier('c')], null,
           BlockStatement(
             TryStatement(BlockStatement(
               VariableDeclaration(VariableDeclarator(
                 Identifier('a'),
                 CallExpression(Identifier('nth'),
-                  [Identifier('__$destruc2'), Integer(0)])))),
+                  [Identifier('__$destruc0'), Integer(0)])))),
               CatchClause(
                 Identifier('__$error'),
                 BlockStatement(
@@ -247,7 +247,7 @@ describe 'Closer parser', ->
             VariableDeclaration(VariableDeclarator(
               Identifier('b'),
               CallExpression(Identifier('drop'),
-                [Integer(1), Identifier('__$destruc2')]))),
+                [Integer(1), Identifier('__$destruc0')]))),
             VariableDeclaration(VariableDeclarator(
               Identifier('coll'),
               CallExpression(

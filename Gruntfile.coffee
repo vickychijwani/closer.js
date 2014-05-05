@@ -69,14 +69,23 @@ module.exports = (grunt) ->
         files:
           'dist/<%= pkg.name %>-core.js': ['dist/<%= pkg.name %>-core.js']
 
+    lodash:
+      build:
+        dest: 'src/lodash.js',
+        options:
+          include: ['reduce', 'max', 'min', 'uniq', 'find', 'any',
+                    'flatten', 'isString', 'isArray']
+          flags: ['debug']
+
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-jasmine-node'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
+  grunt.loadNpmTasks 'grunt-lodash'
 
-  grunt.registerTask 'default', ['coffeelint', 'shell:jison', 'jasmine_node', 'shell:browserify', 'shell:browserify_spec', 'uglify', 'shell:copy_uglified']
   grunt.registerTask 'test', ['coffeelint', 'shell:jison', 'jasmine_node']
-  grunt.registerTask 'build', ['coffeelint', 'shell:jison']
+  grunt.registerTask 'build', ['coffeelint', 'lodash', 'shell:jison']
+  grunt.registerTask 'default', ['build', 'jasmine_node', 'shell:browserify', 'shell:browserify_spec', 'uglify', 'shell:copy_uglified']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']

@@ -405,6 +405,7 @@ Program
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
         if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($1);
+        destrucArgIdx = 0;
         return prog;
     }
   | {

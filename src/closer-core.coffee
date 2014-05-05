@@ -462,6 +462,6 @@ module.exports = core
 
 # requires go here, because of circular dependency
 # see https://coderwall.com/p/myzvmg for more
-_ = require 'lodash-node'
+_ = require './lodash'
 m = require 'mori'
 assert = require './assert'

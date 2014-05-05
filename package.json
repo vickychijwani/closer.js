@@ -38,13 +38,13 @@
     "grunt-contrib-uglify": "^0.4.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-jasmine-node": "^0.2.1",
+    "grunt-lodash": "^0.3.0",
     "grunt-shell": "^0.6.4",
     "jasmine-node": "^1.14.2",
     "jison": "^0.4.13",
     "json-diff": "^0.3.1"
   },
   "dependencies": {
-    "lodash-node": "^2.4.1",
     "mori": "^0.2.6"
   }
 }

@@ -71,5 +71,5 @@ module.exports = assert
 
 # requires go here, because of circular dependency
 # see https://coderwall.com/p/myzvmg for more
-_ = require 'lodash-node'
+_ = require './lodash'
 mori = require 'mori'
