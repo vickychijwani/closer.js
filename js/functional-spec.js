@@ -210,6 +210,9 @@ case 39:
                     $$[$0], blockLoc)], blockLoc);
         }
 
+        var arityCheck = createArityCheckStmt(ids.length, $$[$0-2].rest, _$[$0-2], yy);
+        $$[$0].body.unshift(arityCheck);
+
         this.$ = yy.Node('FunctionExpression', null, ids, null,
             $$[$0], false, false, yy.loc(_$[$0]));
     
@@ -246,6 +249,10 @@ case 42:
             var restDecl = createRestArgsDecl(restId, null, maxArgNum, bodyLoc, yy);
             body.body.unshift(restDecl);
         }
+
+        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, _$[$0-3], yy);
+        body.body.unshift(arityCheck);
+
         this.$ = yy.Node('FunctionExpression', null, args, null, body,
             false, false, yy.loc(_$[$0-3]));
     
@@ -759,6 +766,22 @@ function wrapInExpressionStatement(expr, yy) {
         return yy.Node('ExpressionStatement', expr, expr.loc);
     }
     return expr;
+}
+
+function createArityCheckStmt(minArity, hasRestArgs, loc, yy) {
+    var argsLoc = yy.loc(loc);
+    var arityCheckArgs = [yy.Node('Literal', minArity, argsLoc)];
+    if (hasRestArgs) {
+        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', argsLoc));
+    }
+    arityCheckArgs.push(yy.Node('Identifier', 'arguments', argsLoc));
+    var arityCheck = yy.Node('CallExpression',
+        yy.Node('MemberExpression',
+            yy.Node('Identifier', 'assertions', argsLoc),
+            yy.Node('Identifier', 'arity', argsLoc),
+            false, argsLoc),
+        arityCheckArgs, argsLoc);
+    return wrapInExpressionStatement(arityCheck, yy);
 }
 
 function createReturnStatementIfPossible(stmt, yy) {
@@ -7146,7 +7169,7 @@ n("mori.zip.next",function(a){if(Pb.a(wg,a.b?a.b(1):a.call(null,1)))return a;var
 n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf,b):b,c=P.a(b,xg),d=P.a(b,tg),e=P.a(b,sg),g=P.a(b,rg);if(null==b)throw"Remove at top";if(0<N(c))for(a=M(new X(null,2,5,Y,[nc(c),Q.e(b,xg,oc(c),H([vg,!0],0))],null),mc(a));;)if(b=bh(a),b=p(b)?eh(a):b,p(b))a=hh(b);else return a;else return M(new X(null,2,5,Y,[dh(a,nc(e),g),p(d)?Q.c(d,vg,!0):d],null),mc(a))});n("mori.mutable.thaw",function(a){return Ab(a)});n("mori.mutable.freeze",od);n("mori.mutable.conj1",function(a,b){return a.qa(null,b)});n("mori.mutable.conj",pd);n("mori.mutable.assoc",qd);n("mori.mutable.dissoc",rd);n("mori.mutable.pop",function(a){return Gb(a)});n("mori.mutable.disj",sd);;return this.mori;}.call({});});
 
 },{}],19:[function(_dereq_,module,exports){
-var core, emptySeq, eq, evaluate, falsy, key, list, map, mori, nil, repl, seq, set, throws, truthy, vec, _, __$this,
+var assertions, core, emptySeq, eq, evaluate, falsy, key, list, map, mori, nil, repl, seq, set, throws, truthy, vec, _, __$this,
   __slice = [].slice;
 
 _ = _dereq_('../src/lodash');
@@ -7156,6 +7179,8 @@ mori = _dereq_('mori');
 repl = _dereq_('../src/repl');
 
 core = _dereq_('../src/closer-core');
+
+assertions = _dereq_('../src/assert');
 
 beforeEach(function() {
   return this.addMatchers({
@@ -7289,7 +7314,7 @@ describe('Functional tests', function() {
 });
 
 
-},{"../src/closer-core":21,"../src/lodash":23,"../src/repl":25,"mori":18}],20:[function(_dereq_,module,exports){
+},{"../src/assert":20,"../src/closer-core":21,"../src/lodash":23,"../src/repl":25,"mori":18}],20:[function(_dereq_,module,exports){
 var ArgTypeError, ArityError, assert, firstFailure, mori, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -7408,10 +7433,12 @@ assert = {
       throw new ArgTypeError("" + unexpectedArg + " is not a function");
     }
   },
-  arity: function() {
-    var args, expected_max, expected_min, _ref;
-    expected_min = arguments[0], expected_max = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
-    args = _.flatten(args, true);
+  arity: function(expected_min, expected_max, args) {
+    var _ref;
+    if (arguments.length === 2) {
+      args = expected_max;
+      expected_max = expected_min;
+    }
     if (!((expected_min <= (_ref = args.length) && _ref <= expected_max))) {
       throw new ArityError(expected_min, expected_max, args.length);
     }
@@ -7479,12 +7506,12 @@ core = {
     }), nums[0]);
   },
   'inc': function(num) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.numbers(num);
     return ++num;
   },
   'dec': function(num) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.numbers(num);
     return --num;
   },
@@ -7504,19 +7531,19 @@ core = {
   },
   'quot': function(num, div) {
     var sign;
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.numbers(arguments);
     sign = num > 0 && div > 0 || num < 0 && div < 0 ? 1 : -1;
     return sign * Math.floor(Math.abs(num / div));
   },
   'rem': function(num, div) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.numbers(arguments);
     return num % div;
   },
   'mod': function(num, div) {
     var rem;
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.numbers(arguments);
     rem = num % div;
     if (rem === 0 || (num > 0 && div > 0 || num < 0 && div < 0)) {
@@ -7537,7 +7564,7 @@ core = {
   },
   'rand_$_int': function(n) {
     var r;
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     r = core.rand(n);
     if (r >= 0) {
       return Math.floor(r);
@@ -7620,51 +7647,51 @@ core = {
     }), true);
   },
   'identical_$QMARK_': function(x, y) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     return x === y;
   },
   'true_$QMARK_': function(arg) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return arg === true;
   },
   'false_$QMARK_': function(arg) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return arg === false;
   },
   'nil_$QMARK_': function(arg) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return arg === null;
   },
   'some_$QMARK_': function(arg) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return arg !== null;
   },
   'number_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return typeof x === 'number';
   },
   'integer_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return typeof x === 'number' && x % 1 === 0;
   },
   'float_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return typeof x === 'number' && x % 1 !== 0;
   },
   'zero_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return core['_$EQ__$EQ_'](x, 0);
   },
   'pos_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return core['_$GT_'](x, 0);
   },
   'neg_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return core['_$LT_'](x, 0);
   },
   'even_$QMARK_': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.integers(x);
     return core['zero_$QMARK_'](core['mod'](x, 2));
   },
@@ -7672,28 +7699,28 @@ core = {
     return core['not'](core['even_$QMARK_'](x));
   },
   'contains_$QMARK_': function(coll, key) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.associativeOrSet(coll);
     return m.has_key(coll, key);
   },
   'empty_$QMARK_': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.is_empty(coll);
   },
   'vector_$QMARK_': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.is_vector(coll);
   },
   'map_$QMARK_': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.is_map(coll);
   },
   'boolean': function(arg) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return arg !== false && arg !== null;
   },
   'not': function(arg) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return !core.boolean(arg);
   },
   'str': function() {
@@ -7705,13 +7732,13 @@ core = {
     }), '');
   },
   'count': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.seqable(coll);
     return m.count(coll);
   },
   'empty': function(coll) {
     var error;
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     try {
       return m.empty(coll);
     } catch (_error) {
@@ -7720,7 +7747,7 @@ core = {
     }
   },
   'not_$_empty': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     if (core.count(coll) === 0) {
       return null;
     } else {
@@ -7735,21 +7762,21 @@ core = {
     return m.get(coll, key, notFound);
   },
   'seq': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.seqable(coll);
     return m.seq(coll);
   },
   'first': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.first(coll);
   },
   'rest': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.rest(coll);
   },
   'next': function(coll) {
     var rest;
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     rest = core.rest(coll);
     if (core['empty_$QMARK_'](rest)) {
       return null;
@@ -7758,7 +7785,7 @@ core = {
     }
   },
   'last': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.last(coll);
   },
   'nth': function(coll, index, notFound) {
@@ -7792,17 +7819,17 @@ core = {
     }
   },
   'peek': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.stack(coll);
     return m.peek(coll);
   },
   'pop': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.stack(coll);
     return m.pop(coll);
   },
   'cons': function(x, seq) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     return m.cons(x, seq);
   },
   'conj': function() {
@@ -7817,7 +7844,7 @@ core = {
     return m.conj.apply(null, _.flatten([coll, xs]));
   },
   'into': function(to, from) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     if (to === null && from === null) {
       return null;
     }
@@ -7831,11 +7858,11 @@ core = {
     return m.concat.apply(null, seqs);
   },
   'flatten': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.flatten(coll);
   },
   'reverse': function(coll) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     assert.seqable(coll);
     return m.reverse(coll);
   },
@@ -7859,7 +7886,7 @@ core = {
     return m.dissoc.apply(null, _.flatten([map, keys]));
   },
   'find': function(map, key) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.associative(map);
     return m.find(map, key);
   },
@@ -7871,7 +7898,7 @@ core = {
     return m.range.apply(null, args);
   },
   'identity': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return x;
   },
   'apply': function() {
@@ -7903,12 +7930,12 @@ core = {
     return m.mapcat.apply(null, arguments);
   },
   'filter': function(pred, coll) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert["function"](pred);
     return m.filter(pred, coll);
   },
   'remove': function(pred, coll) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert["function"](pred);
     return m.remove(pred, coll);
   },
@@ -7920,30 +7947,30 @@ core = {
     return m.reduce.apply(null, args);
   },
   'reduce_$_kv': function(f, init, coll) {
-    assert.arity(3, 3, arguments);
+    assert.arity(3, arguments);
     assert["function"](f);
     return m.reduce_kv(f, init, coll);
   },
   'take': function(n, coll) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.numbers(n);
     assert.seqable(coll);
     return m.take(n, coll);
   },
   'drop': function(n, coll) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert.numbers(n);
     assert.seqable(coll);
     return m.drop(n, coll);
   },
   'some': function(pred, coll) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert["function"](pred);
     assert.seqable(coll);
     return m.some(pred, coll);
   },
   'every_$QMARK_': function(pred, coll) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert["function"](pred);
     assert.seqable(coll);
     return m.every(pred, coll);
@@ -7970,12 +7997,12 @@ core = {
     return m.sort_by.apply(null, arguments);
   },
   'iterate': function(f, x) {
-    assert.arity(2, 2, arguments);
+    assert.arity(2, arguments);
     assert["function"](f);
     return m.iterate(f, x);
   },
   'constantly': function(x) {
-    assert.arity(1, 1, arguments);
+    assert.arity(1, arguments);
     return m.constantly(x);
   },
   'repeat': function() {
