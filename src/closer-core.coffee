@@ -424,6 +424,28 @@ core =
       assert.seqable arguments[2]
     m.sort_by.apply null, arguments
 
+  'partition': () ->
+    # arguments: n, [step], [pad], coll
+    assert.arity 2, 4, arguments
+    switch arguments.length
+      when 2 then [n, coll] = arguments
+      when 3
+        [n, step, coll] = arguments
+        assert.numbers step
+      when 4
+        [n, step, pad, coll] = arguments
+        assert.numbers step
+        assert.seqable pad
+    assert.numbers n
+    assert.seqable coll
+    m.partition.apply null, arguments
+
+  'partition_$_by': (f, coll) ->
+    assert.arity 2, arguments
+    assert.function f
+    assert.seqable coll
+    m.partition_by f, coll
+
   'iterate': (f, x) ->
     assert.arity 2, arguments
     assert.function f

@@ -865,6 +865,35 @@ describe 'Closer core library', ->
         seq [map(key('age'), 16), map(key('age'), 29), map(key('age'), 32)]
       eq '(sort-by - > [3 1 2 4])', seq [1, 2, 3, 4]
 
+  describe '(partition n coll), (partition n step coll), (partition n step pad coll)', ->
+    it 'partitions coll into groups of n items each', ->
+      throws '(partition 2)'
+      throws '(partition true [1 2 3 4])'   # n must be a number
+      throws '(partition 2 true [1 2 3 4])'   # step must be a number
+      throws '(partition 3 3 3 [1 2 3 4])'   # pad must be seqable
+      throws '(partition 2 2)'   # coll must be seqable
+      eq '(partition 4 (range 10))', seq [seq([0..3]), seq([4..7])]
+      eq '(partition 4 4 (range 10))', seq [seq([0..3]), seq([4..7])]
+      eq '(partition 4 4 [] (range 10))', seq [seq([0..3]), seq([4..7]), seq([8..9])]
+      eq '(partition 4 4 [10 11] (range 10))', seq [seq([0..3]), seq([4..7]), seq([8..11])]
+      eq '(partition 4 4 (range 10 20) (range 10))', seq [seq([0..3]), seq([4..7]), seq([8..11])]
+      eq '(partition 5 3 (range 10))', seq [seq([0..4]), seq([3..7])]
+      eq '(partition 2 \'(1 2 3 4))', seq [seq([1, 2]), seq([3, 4])]
+      eq '(partition 2 #{1 2 3 4})', seq [seq([1, 2]), seq([3, 4])]
+      eq '(partition 1 {1 2 3 4})', seq [seq([vec 1, 2]), seq([vec 3, 4])]
+      eq '(partition 2 "string")', seq [seq(['s', 't']), seq(['r', 'i']), seq(['n', 'g'])]
+
+  describe '(partition-by f coll)', ->
+    it 'partitions coll with a new group being started whenever the value returned by f changes', ->
+      throws '(partition-by #(nth % 0))'
+      throws '(partition-by 2 [1 2 3 4])'
+      throws '(partition-by #(nth % 0) 3)'
+      eq '(partition-by #{3} [1 2 2.4 3 3 4 5 3])', seq [seq([1, 2, 2.4]), seq([3, 3]), seq([4, 5]), seq([3])]
+      eq '(partition-by odd? \'(1 1 2 3 3))', seq [seq([1, 1]), seq([2]), seq([3, 3])]
+      eq '(partition-by #(< % 3) #{1 2 3})', seq [seq([1, 2]), seq([3])]
+      eq '(partition-by #(% 1) {1 1, 2 1, 3 4})', seq [seq([vec(1, 1), vec(2, 1)]), seq([vec(3, 4)])]
+      eq '(partition-by identity "mummy")', seq [seq(['m']), seq(['u']), seq(['m', 'm']), seq(['y'])]
+
   describe '(iterate f x)', ->
     it 'creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', ->
       throws '(iterate inc)'

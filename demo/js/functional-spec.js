@@ -7996,6 +7996,32 @@ core = {
     }
     return m.sort_by.apply(null, arguments);
   },
+  'partition': function() {
+    var coll, n, pad, step;
+    assert.arity(2, 4, arguments);
+    switch (arguments.length) {
+      case 2:
+        n = arguments[0], coll = arguments[1];
+        break;
+      case 3:
+        n = arguments[0], step = arguments[1], coll = arguments[2];
+        assert.numbers(step);
+        break;
+      case 4:
+        n = arguments[0], step = arguments[1], pad = arguments[2], coll = arguments[3];
+        assert.numbers(step);
+        assert.seqable(pad);
+    }
+    assert.numbers(n);
+    assert.seqable(coll);
+    return m.partition.apply(null, arguments);
+  },
+  'partition_$_by': function(f, coll) {
+    assert.arity(2, arguments);
+    assert["function"](f);
+    assert.seqable(coll);
+    return m.partition_by(f, coll);
+  },
   'iterate': function(f, x) {
     assert.arity(2, arguments);
     assert["function"](f);
