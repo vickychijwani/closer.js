@@ -7393,6 +7393,15 @@ assert = {
       throw new ArgTypeError("" + unexpectedArg + " is not an associative collection");
     }
   },
+  map: function() {
+    var args, unexpectedArg;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    if (unexpectedArg = firstFailure(args, function(arg) {
+      return mori.is_map(arg);
+    })) {
+      throw new ArgTypeError("" + unexpectedArg + " is not a map");
+    }
+  },
   seqable: function() {
     var args, unexpectedArg;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -7884,6 +7893,16 @@ core = {
       return map;
     }
     return m.dissoc.apply(null, _.flatten([map, keys]));
+  },
+  'keys': function(map) {
+    assert.arity(1, arguments);
+    assert.map(map);
+    return m.keys(map);
+  },
+  'vals': function(map) {
+    assert.arity(1, arguments);
+    assert.map(map);
+    return m.vals(map);
   },
   'find': function(map, key) {
     assert.arity(2, arguments);
