@@ -894,6 +894,17 @@ describe 'Closer core library', ->
       eq '(partition-by #(% 1) {1 1, 2 1, 3 4})', seq [seq([vec(1, 1), vec(2, 1)]), seq([vec(3, 4)])]
       eq '(partition-by identity "mummy")', seq [seq(['m']), seq(['u']), seq(['m', 'm']), seq(['y'])]
 
+  describe '(group-by f coll)', ->
+    it 'returns a map of items grouped by the result of applying f to each element', ->
+      throws '(group-by even?)'
+      throws '(group-by 3 [1 2 3 4])'
+      throws '(group-by even? 2)'
+      eq '(group-by even? [1 2 3 4])', map true, vec(2, 4), false, vec(1, 3)
+      eq '(group-by even? \'(1 2 3 4))', map true, vec(2, 4), false, vec(1, 3)
+      eq '(group-by even? #{1 2 3 4})', map true, vec(2, 4), false, vec(1, 3)
+      eq '(group-by #(% 1) {1 1, 2 1, 3 4, 5 6})', map 1, vec(vec(1, 1), vec(2, 1)), 4, vec(vec(3, 4)), 6, vec(vec(5, 6))
+      eq '(group-by #{"c"} "soccer")', map null, vec('s', 'o', 'e', 'r'), 'c', vec('c', 'c')
+
   describe '(iterate f x)', ->
     it 'creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', ->
       throws '(iterate inc)'

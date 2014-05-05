@@ -446,6 +446,12 @@ core =
     assert.seqable coll
     m.partition_by f, coll
 
+  'group_$_by': (f, coll) ->
+    assert.arity 2, arguments
+    assert.function f
+    assert.seqable coll
+    m.group_by f, coll
+
   'iterate': (f, x) ->
     assert.arity 2, arguments
     assert.function f

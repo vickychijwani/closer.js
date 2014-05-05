@@ -8022,6 +8022,12 @@ core = {
     assert.seqable(coll);
     return m.partition_by(f, coll);
   },
+  'group_$_by': function(f, coll) {
+    assert.arity(2, arguments);
+    assert["function"](f);
+    assert.seqable(coll);
+    return m.group_by(f, coll);
+  },
   'iterate': function(f, x) {
     assert.arity(2, arguments);
     assert["function"](f);
