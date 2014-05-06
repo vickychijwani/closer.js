@@ -363,20 +363,113 @@ describe 'Closer core library', ->
       falsy '(empty? {:k1 "v1" :k2 "v2"})'
       truthy '(empty? #{})'
 
-  describe '(vector? coll)', ->
-    it 'returns true if coll is a vector', ->
+  describe '(keyword? x)', ->
+    it 'returns true if x is a keyword', ->
+      throws '(keyword? :k1 :k2)'
+      truthy '(keyword? :key)'
+      falsy '(keyword? ":key")'
+
+  describe '(list? x)', ->
+    it 'returns true if x is a list', ->
+      throws '(list? \'() \'())'
+      truthy '(list? \'())'
+      falsy '(list? 3)'
+      falsy '(list? [])'
+      falsy '(list? (range))'
+
+  describe '(seq? x)', ->
+    it 'returns true if x is a seq', ->
+      throws '(seq? (range) (range))'
+      truthy '(seq? (range))'
+      truthy '(seq? \'())'
+      falsy '(seq? 3)'
+      falsy '(seq? [])'
+
+  describe '(vector? x)', ->
+    it 'returns true if x is a vector', ->
+      throws '(vector? [] [])'
+      truthy '(vector? [])'
+      truthy '(vector? (first (seq {1 2})))'
       falsy '(vector? 3)'
       falsy '(vector? \'())'
-      truthy '(vector? [])'
-      throws '(vector? [] [])'
-      truthy '(vector? (first (seq {1 2})))'
 
-  describe '(map? coll)', ->
-    it 'returns true if coll is a map', ->
+  describe '(map? x)', ->
+    it 'returns true if x is a map', ->
+      throws '(map? {} {})'
+      truthy '(map? {})'
       falsy '(map? 3)'
       falsy '(map? #{})'
-      truthy '(map? {})'
-      throws '(map? {} {})'
+
+  describe '(set? x)', ->
+    it 'returns true if x is a set', ->
+      throws '(set? #{} #{})'
+      truthy '(set? #{})'
+      falsy '(set? 3)'
+      falsy '(set? {})'
+      falsy '(set? [])'
+
+  describe '(coll? x)', ->
+    it 'returns true if x is a collection', ->
+      throws '(coll? [] #{})'
+      truthy '(coll? [])'
+      truthy '(coll? \'())'
+      truthy '(coll? (range))'
+      truthy '(coll? {})'
+      truthy '(coll? #{})'
+      falsy '(coll? 3)'
+      falsy '(coll? "string")'
+
+  describe '(sequential? coll)', ->
+    it 'returns true if coll is a sequential collection', ->
+      throws '(sequential? [] \'())'
+      truthy '(sequential? [])'
+      truthy '(sequential? \'())'
+      truthy '(sequential? (range))'
+      falsy '(sequential? #{})'
+      falsy '(sequential? {})'
+      falsy '(sequential? "string")'
+
+  describe '(associative? coll)', ->
+    it 'returns true if coll is an associative collection', ->
+      throws '(associative? [] {})'
+      truthy '(associative? [])'
+      truthy '(associative? {})'
+      falsy '(associative? \'())'
+      falsy '(associative? (range))'
+      falsy '(associative? #{})'
+      falsy '(associative? "string")'
+
+  describe '(counted? coll)', ->
+    it 'returns true if coll can be counted in constant time', ->
+      throws '(counted? [] \'())'
+      truthy '(counted? [])'
+      truthy '(counted? \'())'
+      truthy '(counted? #{})'
+      truthy '(counted? {})'
+      truthy '(counted? (range))'   # different from Clojure; same as ClojureScript
+      falsy '(counted? "string")'
+
+  describe '(seqable? coll)', ->
+    it 'returns true if coll can be converted into a seq', ->
+      throws '(seqable? [] \'())'
+      truthy '(seqable? [])'
+      truthy '(seqable? \'())'
+      truthy '(seqable? (range))'
+      truthy '(seqable? #{})'
+      truthy '(seqable? {})'
+      falsy '(seqable? "string")'   # different from Clojure and ClojureScript
+      falsy '(seqable? 3)'
+      falsy '(seqable? nil)'
+
+  describe '(reversible? coll)', ->
+    it 'returns true if coll is a reversible collection', ->
+      throws '(reversible? [] []])'
+      truthy '(reversible? [])'
+      falsy '(reversible? \'())'
+      falsy '(reversible? (range))'
+      falsy '(reversible? #{})'
+      falsy '(reversible? {})'
+      falsy '(reversible? "string")'
 
 
   # logic

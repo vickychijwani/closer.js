@@ -7716,13 +7716,53 @@ core = {
     assert.arity(1, arguments);
     return m.is_empty(coll);
   },
-  'vector_$QMARK_': function(coll) {
+  'keyword_$QMARK_': function(x) {
     assert.arity(1, arguments);
-    return m.is_vector(coll);
+    return m.is_keyword(x);
   },
-  'map_$QMARK_': function(coll) {
+  'list_$QMARK_': function(x) {
     assert.arity(1, arguments);
-    return m.is_map(coll);
+    return m.is_list(x);
+  },
+  'seq_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_seq(x);
+  },
+  'vector_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_vector(x);
+  },
+  'map_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_map(x);
+  },
+  'set_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_set(x);
+  },
+  'coll_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_collection(x);
+  },
+  'sequential_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_sequential(coll);
+  },
+  'associative_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_associative(coll);
+  },
+  'counted_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_counted(coll);
+  },
+  'seqable_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_seqable(coll);
+  },
+  'reversible_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_reversible(coll);
   },
   'boolean': function(arg) {
     assert.arity(1, arguments);

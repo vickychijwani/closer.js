@@ -7619,21 +7619,124 @@ describe('Closer core library', function() {
       return truthy('(empty? #{})');
     });
   });
-  describe('(vector? coll)', function() {
-    return it('returns true if coll is a vector', function() {
-      falsy('(vector? 3)');
-      falsy('(vector? \'())');
-      truthy('(vector? [])');
-      throws('(vector? [] [])');
-      return truthy('(vector? (first (seq {1 2})))');
+  describe('(keyword? x)', function() {
+    return it('returns true if x is a keyword', function() {
+      throws('(keyword? :k1 :k2)');
+      truthy('(keyword? :key)');
+      return falsy('(keyword? ":key")');
     });
   });
-  describe('(map? coll)', function() {
-    return it('returns true if coll is a map', function() {
-      falsy('(map? 3)');
-      falsy('(map? #{})');
+  describe('(list? x)', function() {
+    return it('returns true if x is a list', function() {
+      throws('(list? \'() \'())');
+      truthy('(list? \'())');
+      falsy('(list? 3)');
+      falsy('(list? [])');
+      return falsy('(list? (range))');
+    });
+  });
+  describe('(seq? x)', function() {
+    return it('returns true if x is a seq', function() {
+      throws('(seq? (range) (range))');
+      truthy('(seq? (range))');
+      truthy('(seq? \'())');
+      falsy('(seq? 3)');
+      return falsy('(seq? [])');
+    });
+  });
+  describe('(vector? x)', function() {
+    return it('returns true if x is a vector', function() {
+      throws('(vector? [] [])');
+      truthy('(vector? [])');
+      truthy('(vector? (first (seq {1 2})))');
+      falsy('(vector? 3)');
+      return falsy('(vector? \'())');
+    });
+  });
+  describe('(map? x)', function() {
+    return it('returns true if x is a map', function() {
+      throws('(map? {} {})');
       truthy('(map? {})');
-      return throws('(map? {} {})');
+      falsy('(map? 3)');
+      return falsy('(map? #{})');
+    });
+  });
+  describe('(set? x)', function() {
+    return it('returns true if x is a set', function() {
+      throws('(set? #{} #{})');
+      truthy('(set? #{})');
+      falsy('(set? 3)');
+      falsy('(set? {})');
+      return falsy('(set? [])');
+    });
+  });
+  describe('(coll? x)', function() {
+    return it('returns true if x is a collection', function() {
+      throws('(coll? [] #{})');
+      truthy('(coll? [])');
+      truthy('(coll? \'())');
+      truthy('(coll? (range))');
+      truthy('(coll? {})');
+      truthy('(coll? #{})');
+      falsy('(coll? 3)');
+      return falsy('(coll? "string")');
+    });
+  });
+  describe('(sequential? coll)', function() {
+    return it('returns true if coll is a sequential collection', function() {
+      throws('(sequential? [] \'())');
+      truthy('(sequential? [])');
+      truthy('(sequential? \'())');
+      truthy('(sequential? (range))');
+      falsy('(sequential? #{})');
+      falsy('(sequential? {})');
+      return falsy('(sequential? "string")');
+    });
+  });
+  describe('(associative? coll)', function() {
+    return it('returns true if coll is an associative collection', function() {
+      throws('(associative? [] {})');
+      truthy('(associative? [])');
+      truthy('(associative? {})');
+      falsy('(associative? \'())');
+      falsy('(associative? (range))');
+      falsy('(associative? #{})');
+      return falsy('(associative? "string")');
+    });
+  });
+  describe('(counted? coll)', function() {
+    return it('returns true if coll can be counted in constant time', function() {
+      throws('(counted? [] \'())');
+      truthy('(counted? [])');
+      truthy('(counted? \'())');
+      truthy('(counted? #{})');
+      truthy('(counted? {})');
+      truthy('(counted? (range))');
+      return falsy('(counted? "string")');
+    });
+  });
+  describe('(seqable? coll)', function() {
+    return it('returns true if coll can be converted into a seq', function() {
+      throws('(seqable? [] \'())');
+      truthy('(seqable? [])');
+      truthy('(seqable? \'())');
+      truthy('(seqable? (range))');
+      truthy('(seqable? #{})');
+      truthy('(seqable? {})');
+      falsy('(seqable? "string")');
+      falsy('(seqable? 3)');
+      return falsy('(seqable? nil)');
+    });
+  });
+  describe('(reversible? coll)', function() {
+    return it('returns true if coll is a reversible collection', function() {
+      throws('(reversible? [] []])');
+      truthy('(reversible? [])');
+      falsy('(reversible? \'())');
+      falsy('(reversible? (range))');
+      falsy('(reversible? #{})');
+      falsy('(reversible? {})');
+      return falsy('(reversible? "string")');
     });
   });
   describe('(boolean x)', function() {
@@ -8671,13 +8774,53 @@ core = {
     assert.arity(1, arguments);
     return m.is_empty(coll);
   },
-  'vector_$QMARK_': function(coll) {
+  'keyword_$QMARK_': function(x) {
     assert.arity(1, arguments);
-    return m.is_vector(coll);
+    return m.is_keyword(x);
   },
-  'map_$QMARK_': function(coll) {
+  'list_$QMARK_': function(x) {
     assert.arity(1, arguments);
-    return m.is_map(coll);
+    return m.is_list(x);
+  },
+  'seq_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_seq(x);
+  },
+  'vector_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_vector(x);
+  },
+  'map_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_map(x);
+  },
+  'set_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_set(x);
+  },
+  'coll_$QMARK_': function(x) {
+    assert.arity(1, arguments);
+    return m.is_collection(x);
+  },
+  'sequential_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_sequential(coll);
+  },
+  'associative_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_associative(coll);
+  },
+  'counted_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_counted(coll);
+  },
+  'seqable_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_seqable(coll);
+  },
+  'reversible_$QMARK_': function(coll) {
+    assert.arity(1, arguments);
+    return m.is_reversible(coll);
   },
   'boolean': function(arg) {
     assert.arity(1, arguments);

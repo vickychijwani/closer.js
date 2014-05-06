@@ -186,13 +186,53 @@ core =
     assert.arity 1, arguments
     m.is_empty coll
 
-  'vector_$QMARK_': (coll) ->
+  'keyword_$QMARK_': (x) ->
     assert.arity 1, arguments
-    m.is_vector coll
+    m.is_keyword x
 
-  'map_$QMARK_': (coll) ->
+  'list_$QMARK_': (x) ->
     assert.arity 1, arguments
-    m.is_map coll
+    m.is_list x
+
+  'seq_$QMARK_': (x) ->
+    assert.arity 1, arguments
+    m.is_seq x
+
+  'vector_$QMARK_': (x) ->
+    assert.arity 1, arguments
+    m.is_vector x
+
+  'map_$QMARK_': (x) ->
+    assert.arity 1, arguments
+    m.is_map x
+
+  'set_$QMARK_': (x) ->
+    assert.arity 1, arguments
+    m.is_set x
+
+  'coll_$QMARK_': (x) ->
+    assert.arity 1, arguments
+    m.is_collection x
+
+  'sequential_$QMARK_': (coll) ->
+    assert.arity 1, arguments
+    m.is_sequential coll
+
+  'associative_$QMARK_': (coll) ->
+    assert.arity 1, arguments
+    m.is_associative coll
+
+  'counted_$QMARK_': (coll) ->
+    assert.arity 1, arguments
+    m.is_counted coll
+
+  'seqable_$QMARK_': (coll) ->
+    assert.arity 1, arguments
+    m.is_seqable coll
+
+  'reversible_$QMARK_': (coll) ->
+    assert.arity 1, arguments
+    m.is_reversible coll
 
 
   # logic
