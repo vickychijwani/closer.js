@@ -7780,6 +7780,34 @@ core = {
       return str += core['nil_$QMARK_'](arg) ? '' : arg.toString();
     }), '');
   },
+  'list': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    return m.list.apply(null, items);
+  },
+  'vector': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    return m.vector.apply(null, items);
+  },
+  'hash_$_map': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity_custom(arguments, function(args) {
+      if (args.length % 2 !== 0) {
+        return "Expected even number of args, got " + args.length;
+      }
+    });
+    return m.hash_map.apply(null, items);
+  },
+  'hash_$_set': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    return m.set(items);
+  },
   'count': function(coll) {
     assert.arity(1, arguments);
     assert.seqable(coll);
