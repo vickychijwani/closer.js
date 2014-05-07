@@ -7780,6 +7780,10 @@ core = {
       return str += core['nil_$QMARK_'](arg) ? '' : arg.toString();
     }), '');
   },
+  'keyword': function(name) {
+    assert.arity(1, arguments);
+    return m.keyword(name);
+  },
   'list': function() {
     var items;
     items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];

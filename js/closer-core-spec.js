@@ -7783,6 +7783,17 @@ describe('Closer core library', function() {
       return eq('(str [1 2 \'(3 4 5)])', '[1 2 (3 4 5)]');
     });
   });
+  describe('(keyword name)', function() {
+    return it('returns a keyword with the given name (do not use : in the name, it will be added automatically)', function() {
+      throws('(keyword "k1" "k2")');
+      eq('(keyword "key")', key('key'));
+      eq('(keyword :key)', key('key'));
+      nil('(keyword [])');
+      nil('(keyword #())');
+      nil('(keyword 3)');
+      return nil('(keyword true)');
+    });
+  });
   describe('(list items)', function() {
     return it('creates a new list containing the given items', function() {
       eq('(list)', list());
@@ -8864,6 +8875,10 @@ core = {
     return _.reduce(args, (function(str, arg) {
       return str += core['nil_$QMARK_'](arg) ? '' : arg.toString();
     }), '');
+  },
+  'keyword': function(name) {
+    assert.arity(1, arguments);
+    return m.keyword(name);
   },
   'list': function() {
     var items;
