@@ -7783,6 +7783,33 @@ describe('Closer core library', function() {
       return eq('(str [1 2 \'(3 4 5)])', '[1 2 (3 4 5)]');
     });
   });
+  describe('(list items)', function() {
+    return it('creates a new list containing the given items', function() {
+      eq('(list)', list());
+      return eq('(list 1 2 3 1)', list(1, 2, 3, 1));
+    });
+  });
+  describe('(vector items)', function() {
+    return it('creates a new vector containing the given items', function() {
+      eq('(vector)', vec());
+      return eq('(vector 1 2 3 1)', vec(1, 2, 3, 1));
+    });
+  });
+  describe('(hash-map keyvals)', function() {
+    return it('creates a new hash-map containing the given key-value pairs', function() {
+      eq('(hash-map)', map());
+      throws('(hash-map 1)');
+      truthy('(let [kv (first (hash-map \'() 1 [] 2))] (and (list? (first kv))) (= (last kv) 2))');
+      return truthy('(let [kv (first (hash-map [] 1 \'() 2))] (and (vector? (first kv))) (= (last kv) 2))');
+    });
+  });
+  describe('(hash-set keys)', function() {
+    return it('creates a new hash-set containing the given keys', function() {
+      eq('(hash-set)', set());
+      truthy('(vector? (#{[] 1 2 \'()} []))');
+      return truthy('(list? (#{\'() 1 2 []} \'()))');
+    });
+  });
   describe('(count coll)', function() {
     return it('returns the number of items the collection', function() {
       throws('(count [1 2 3] "hello")');
@@ -8837,6 +8864,34 @@ core = {
     return _.reduce(args, (function(str, arg) {
       return str += core['nil_$QMARK_'](arg) ? '' : arg.toString();
     }), '');
+  },
+  'list': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    return m.list.apply(null, items);
+  },
+  'vector': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    return m.vector.apply(null, items);
+  },
+  'hash_$_map': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity_custom(arguments, function(args) {
+      if (args.length % 2 !== 0) {
+        return "Expected even number of args, got " + args.length;
+      }
+    });
+    return m.hash_map.apply(null, items);
+  },
+  'hash_$_set': function() {
+    var items;
+    items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    assert.arity(0, Infinity, arguments);
+    return m.set(items);
   },
   'count': function(coll) {
     assert.arity(1, arguments);

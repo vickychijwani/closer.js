@@ -254,6 +254,24 @@ core =
 
 
   # collections
+  'list': (items...) ->
+    assert.arity 0, Infinity, arguments
+    m.list.apply null, items
+
+  'vector': (items...) ->
+    assert.arity 0, Infinity, arguments
+    m.vector.apply null, items
+
+  'hash_$_map': (items...) ->
+    assert.arity_custom arguments, (args) ->
+      if args.length % 2 isnt 0
+        "Expected even number of args, got #{args.length}"
+    m.hash_map.apply null, items
+
+  'hash_$_set': (items...) ->
+    assert.arity 0, Infinity, arguments
+    m.set items
+
   'count': (coll) ->
     assert.arity 1, arguments
     assert.seqable coll

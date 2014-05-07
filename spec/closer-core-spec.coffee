@@ -518,6 +518,35 @@ describe 'Closer core library', ->
 
 
   # collections
+  describe '(list items)', ->
+    it 'creates a new list containing the given items', ->
+      eq '(list)', list()
+      eq '(list 1 2 3 1)', list 1, 2, 3, 1
+
+  describe '(vector items)', ->
+    it 'creates a new vector containing the given items', ->
+      eq '(vector)', vec()
+      eq '(vector 1 2 3 1)', vec 1, 2, 3, 1
+
+  describe '(hash-map keyvals)', ->
+    it 'creates a new hash-map containing the given key-value pairs', ->
+      eq '(hash-map)', map()
+      throws '(hash-map 1)'   # even number of args required
+      # for equal keys, the first instance of the key and the last value corresponding to it wins
+      truthy '(let [kv (first (hash-map \'() 1 [] 2))]
+                (and (list? (first kv)))
+                     (= (last kv) 2))'
+      truthy '(let [kv (first (hash-map [] 1 \'() 2))]
+                (and (vector? (first kv)))
+                     (= (last kv) 2))'
+
+  describe '(hash-set keys)', ->
+    it 'creates a new hash-set containing the given keys', ->
+      eq '(hash-set)', set()
+      # for equal keys, the first instance wins
+      truthy '(vector? (#{[] 1 2 \'()} []))'
+      truthy '(list? (#{\'() 1 2 []} \'()))'
+
   describe '(count coll)', ->
     it 'returns the number of items the collection', ->
       throws '(count [1 2 3] "hello")'
