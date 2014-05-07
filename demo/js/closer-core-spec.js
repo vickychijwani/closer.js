@@ -127,9 +127,9 @@ case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1],
 break;
 case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 17: this.$ = parseCollectionLiteral('hash_map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 18: this.$ = parseCollectionLiteral('set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
 case 22: this.$ = $$[$0-1]; 
 break;
@@ -868,8 +868,7 @@ function parseLiteral(type, value, rawloc, raw, yy) {
 
 function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
-    var value = type === 'set' ? [yy.Node('ArrayExpression', items, loc)] : items;
-    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), value, loc);
+    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifier(type), loc), items, loc);
 }
 
 var charMap = {
@@ -7169,12 +7168,10 @@ n("mori.zip.next",function(a){if(Pb.a(wg,a.b?a.b(1):a.call(null,1)))return a;var
 n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf,b):b,c=P.a(b,xg),d=P.a(b,tg),e=P.a(b,sg),g=P.a(b,rg);if(null==b)throw"Remove at top";if(0<N(c))for(a=M(new X(null,2,5,Y,[nc(c),Q.e(b,xg,oc(c),H([vg,!0],0))],null),mc(a));;)if(b=bh(a),b=p(b)?eh(a):b,p(b))a=hh(b);else return a;else return M(new X(null,2,5,Y,[dh(a,nc(e),g),p(d)?Q.c(d,vg,!0):d],null),mc(a))});n("mori.mutable.thaw",function(a){return Ab(a)});n("mori.mutable.freeze",od);n("mori.mutable.conj1",function(a,b){return a.qa(null,b)});n("mori.mutable.conj",pd);n("mori.mutable.assoc",qd);n("mori.mutable.dissoc",rd);n("mori.mutable.pop",function(a){return Gb(a)});n("mori.mutable.disj",sd);;return this.mori;}.call({});});
 
 },{}],19:[function(_dereq_,module,exports){
-var assertions, core, emptySeq, eq, evaluate, falsy, key, list, map, mori, nil, repl, seq, set, throws, truthy, vec, _,
+var assertions, core, emptySeq, eq, evaluate, falsy, key, list, map, nil, repl, seq, set, throws, truthy, vec, _,
   __slice = [].slice;
 
 _ = _dereq_('../src/lodash');
-
-mori = _dereq_('mori');
 
 repl = _dereq_('../src/repl');
 
@@ -7184,11 +7181,11 @@ assertions = _dereq_('../src/assert');
 
 beforeEach(function() {
   return this.addMatchers({
-    toMoriEqual: function(expected) {
+    toCljEqual: function(expected) {
       this.message = function() {
         return "Expected " + this.actual + " to equal " + expected;
       };
-      return mori.equals(this.actual, expected);
+      return core._$EQ_(this.actual, expected);
     }
   });
 });
@@ -7198,7 +7195,7 @@ evaluate = function(src, options) {
 };
 
 eq = function(src, expected) {
-  return expect(evaluate(src)).toMoriEqual(expected);
+  return expect(evaluate(src)).toCljEqual(expected);
 };
 
 throws = function(src) {
@@ -7220,39 +7217,39 @@ nil = function(src) {
 };
 
 key = function(x) {
-  return mori.keyword(x);
+  return core.keyword(x);
 };
 
 seq = function(seqable) {
-  return mori.seq(seqable);
+  return core.seq(seqable);
 };
 
 emptySeq = function() {
-  return mori.empty(mori.seq([1]));
+  return core.empty(core.seq([1]));
 };
 
 vec = function() {
   var xs;
   xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-  return mori.vector.apply(this, _.flatten(xs));
+  return core.vector.apply(null, _.flatten(xs));
 };
 
 list = function() {
   var xs;
   xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-  return mori.list.apply(this, _.flatten(xs));
+  return core.list.apply(null, _.flatten(xs));
 };
 
 set = function() {
   var xs;
   xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-  return mori.set(_.flatten(xs));
+  return core.hash_$_set.apply(null, _.flatten(xs));
 };
 
 map = function() {
   var xs;
   xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-  return mori.hash_map.apply(this, _.flatten(xs));
+  return core.hash_$_map.apply(null, _.flatten(xs));
 };
 
 describe('Closer core library', function() {
@@ -8410,7 +8407,7 @@ describe('Closer core library', function() {
 });
 
 
-},{"../src/assert":20,"../src/closer-core":21,"../src/lodash":23,"../src/repl":25,"mori":18}],20:[function(_dereq_,module,exports){
+},{"../src/assert":20,"../src/closer-core":21,"../src/lodash":23,"../src/repl":25}],20:[function(_dereq_,module,exports){
 var ArgTypeError, ArityError, assert, firstFailure, mori, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -11980,7 +11977,7 @@ exports.defineNodes = function(builder) {
 
 
 },{}],25:[function(_dereq_,module,exports){
-var closer, core, escodegen, estraverse, mori, wireCallsToCore, wireThisAccess;
+var closer, core, escodegen, estraverse, wireCallsToCore, wireThisAccess;
 
 closer = _dereq_('./closer');
 
@@ -11990,24 +11987,14 @@ escodegen = _dereq_('escodegen');
 
 estraverse = _dereq_('estraverse');
 
-mori = _dereq_('mori');
-
 wireCallsToCore = function(ast) {
   estraverse.replace(ast, {
-    enter: function(node) {
-      var calleeObj, calleeProp, obj, prop, _ref;
-      if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name in core) {
-        calleeObj = closer.node('Identifier', 'core', node.loc);
-        calleeProp = closer.node('Literal', node.callee.name, node.loc);
-        node.callee = closer.node('MemberExpression', calleeObj, calleeProp, true, node.loc);
-      } else if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && ((_ref = node.callee.name) === 'list' || _ref === 'vector' || _ref === 'set' || _ref === 'hash_map' || _ref === 'keyword')) {
-        calleeObj = closer.node('Identifier', 'mori', node.loc);
-        calleeProp = closer.node('Identifier', node.callee.name, node.loc);
-        node.callee = closer.node('MemberExpression', calleeObj, calleeProp, false, node.loc);
-      } else if (node.type === 'Identifier' && node.name in core) {
+    leave: function(node) {
+      var obj, prop;
+      if (node.type === 'Identifier' && node.name in core) {
         obj = closer.node('Identifier', 'core', node.loc);
-        prop = closer.node('Literal', node.name, node.loc);
-        node = closer.node('MemberExpression', obj, prop, true, node.loc);
+        prop = closer.node('Identifier', node.name, node.loc);
+        node = closer.node('MemberExpression', obj, prop, false, node.loc);
       }
       return node;
     }
@@ -12017,7 +12004,7 @@ wireCallsToCore = function(ast) {
 
 wireThisAccess = function(ast) {
   estraverse.replace(ast, {
-    enter: function(node) {
+    leave: function(node) {
       if (node.type === 'ThisExpression') {
         node.type = 'Identifier';
         node.name = '__$this';
@@ -12037,7 +12024,7 @@ exports.generateJS = function(src, options) {
 };
 
 
-},{"./closer":22,"./closer-core":21,"escodegen":2,"estraverse":17,"mori":18}],26:[function(_dereq_,module,exports){
+},{"./closer":22,"./closer-core":21,"escodegen":2,"estraverse":17}],26:[function(_dereq_,module,exports){
 
 },{}],27:[function(_dereq_,module,exports){
 // shim for using process in browser

@@ -127,9 +127,9 @@ case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1],
 break;
 case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 17: this.$ = parseCollectionLiteral('hash_map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
-case 18: this.$ = parseCollectionLiteral('set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
 break;
 case 22: this.$ = $$[$0-1]; 
 break;
@@ -868,8 +868,7 @@ function parseLiteral(type, value, rawloc, raw, yy) {
 
 function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
-    var value = type === 'set' ? [yy.Node('ArrayExpression', items, loc)] : items;
-    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), value, loc);
+    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifier(type), loc), items, loc);
 }
 
 var charMap = {
@@ -4461,16 +4460,15 @@ exports.toDeepEqual = function(expected) {
   return typeof json_diff.diff(this.actual, expected) === 'undefined';
 };
 
-_ref = ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq'];
+_ref = ['keyword', 'vector', 'list', 'hash_$_set', 'hash_$_map'];
 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
   type = _ref[_i];
   exports[type] = (function(type2) {
     return function() {
-      var args, items;
+      var items;
       items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       items = type2 === 'keyword' ? [closer.node('Literal', items[0])] : items;
-      args = type2 === 'set' ? [closer.node('ArrayExpression', items)] : items;
-      return closer.node('CallExpression', closer.node('Identifier', type2), args);
+      return closer.node('CallExpression', closer.node('Identifier', type2), items);
     };
   })(type);
 }
@@ -4747,9 +4745,9 @@ Vector = helpers['vector'];
 
 List = helpers['list'];
 
-HashSet = helpers['set'];
+HashSet = helpers['hash_$_set'];
 
-HashMap = helpers['hash_map'];
+HashMap = helpers['hash_$_map'];
 
 AssertArity = helpers.AssertArity;
 
@@ -4857,7 +4855,7 @@ describe('Closer parser', function() {
   });
   it('parses anonymous function literals', function() {
     expect(closer.parse('(#(apply + % %2 %&) 1 2 3 4)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('__$1'), Identifier('__$2')], null, BlockStatement(AssertArity(2, Infinity), VariableDeclaration(VariableDeclarator(Identifier('__$rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('__$1'), Identifier('__$2'), Identifier('__$rest')])))), Identifier('call')), [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)]))));
-    return expect(closer.parse('(map #(if (even? %1) (- %) %) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(AssertArity(1), IfStatement(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3)])]))));
+    return expect(closer.parse('(map #(if (even? %1) (- %) %) [1 2 3])')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(AssertArity(1), IfStatement(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), Vector(Integer(1), Integer(2), Integer(3))]))));
   });
   it('parses a named function definition', function() {
     return expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x'))))))));
@@ -4870,10 +4868,10 @@ describe('Closer parser', function() {
     return expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual(Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('m')], null, BlockStatement(AssertArity(1), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('b')]))), VariableDeclaration(VariableDeclarator(Identifier('c'), CallExpression(Identifier('get'), [Identifier('m'), String('c')]))), VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('a')]))), ReturnStatement(Nil())))))));
   });
   it('parses collections and keywords in function position', function() {
-    expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(CallExpression(Identifier('vector'), [Integer(1), Integer(2), Integer(3), Integer(4)]), Identifier('call')), [Nil(), Integer(1)]))));
-    expect(closer.parse('({1 2 3 4} 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(CallExpression(Identifier('hash_map'), [Integer(1), Integer(2), Integer(3), Integer(4)]), Identifier('call')), [Nil(), Integer(1)]))));
-    expect(closer.parse('(#{1 2 3 4} 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(CallExpression(Identifier('set'), [ArrayExpression([Integer(1), Integer(2), Integer(3), Integer(4)])]), Identifier('call')), [Nil(), Integer(1)]))));
-    return expect(closer.parse('(:key {:key :val})')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Keyword('key'), Identifier('call')), [Nil(), CallExpression(Identifier('hash_map'), [Keyword('key'), Keyword('val')])]))));
+    expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Vector(Integer(1), Integer(2), Integer(3), Integer(4)), Identifier('call')), [Nil(), Integer(1)]))));
+    expect(closer.parse('({1 2 3 4} 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(HashMap(Integer(1), Integer(2), Integer(3), Integer(4)), Identifier('call')), [Nil(), Integer(1)]))));
+    expect(closer.parse('(#{1 2 3 4} 1)')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(HashSet(Integer(1), Integer(2), Integer(3), Integer(4)), Identifier('call')), [Nil(), Integer(1)]))));
+    return expect(closer.parse('(:key {:key :val})')).toDeepEqual(Program(ExpressionStatement(CallExpression(MemberExpression(Keyword('key'), Identifier('call')), [Nil(), HashMap(Keyword('key'), Keyword('val'))]))));
   });
   it('parses an if statement without else', function() {
     return expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual(Program(IfStatement(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), null)));

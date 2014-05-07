@@ -1,33 +1,32 @@
 _ = require '../src/lodash'
-mori = require 'mori'
 repl = require '../src/repl'
 core = require '../src/closer-core'
 assertions = require '../src/assert'
 
 beforeEach ->
   @addMatchers
-    # custom matcher to compare mori collections
-    toMoriEqual: (expected) ->
+    # custom matcher to compare Clojure collections
+    toCljEqual: (expected) ->
       @message = ->
         "Expected #{@actual} to equal #{expected}"
-      mori.equals(@actual, expected)
+      core._$EQ_(@actual, expected)
 
 evaluate = (src, options) ->
   eval repl.generateJS src, options
 
-eq = (src, expected) -> expect(evaluate src).toMoriEqual expected
+eq = (src, expected) -> expect(evaluate src).toCljEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
 truthy = (src) -> expect(evaluate src).toEqual true
 falsy = (src) -> expect(evaluate src).toEqual false
 nil = (src) -> expect(evaluate src).toEqual null
 
-key = (x) -> mori.keyword x
-seq = (seqable) -> mori.seq seqable
-emptySeq = -> mori.empty mori.seq [1]
-vec = (xs...) -> mori.vector.apply @, _.flatten xs
-list = (xs...) -> mori.list.apply @, _.flatten xs
-set = (xs...) -> mori.set _.flatten xs
-map = (xs...) -> mori.hash_map.apply @, _.flatten xs
+key = (x) -> core.keyword x
+seq = (seqable) -> core.seq seqable
+emptySeq = -> core.empty core.seq [1]
+vec = (xs...) -> core.vector.apply null, _.flatten xs
+list = (xs...) -> core.list.apply null, _.flatten xs
+set = (xs...) -> core.hash_$_set.apply null, _.flatten xs
+map = (xs...) -> core.hash_$_map.apply null, _.flatten xs
 
 describe 'Closer core library', ->
 

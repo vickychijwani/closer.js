@@ -4,7 +4,6 @@ closer = require './closer'
 repl = require './repl'
 
 global.assertions = require './assert'
-global.mori = require 'mori'
 global.core = require './closer-core'
 
 defaults =

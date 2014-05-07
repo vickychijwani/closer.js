@@ -52,8 +52,8 @@ Atom
 CollectionLiteral
   : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('vector', getValueIfUndefined($items, []), @items, yy); }
   | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('list', getValueIfUndefined($items, []), @items, yy); }
-  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash_map', getValueIfUndefined($items, []), @items, yy); }
-  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('set', getValueIfUndefined($items, []), @items, yy); }
+  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash-map', getValueIfUndefined($items, []), @items, yy); }
+  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('hash-set', getValueIfUndefined($items, []), @items, yy); }
   ;
 
 Fn
@@ -710,8 +710,7 @@ function parseLiteral(type, value, rawloc, raw, yy) {
 
 function parseCollectionLiteral(type, items, rawloc, yy) {
     var loc = yy.loc(rawloc);
-    var value = type === 'set' ? [yy.Node('ArrayExpression', items, loc)] : items;
-    return yy.Node('CallExpression', yy.Node('Identifier', type, loc), value, loc);
+    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifier(type), loc), items, loc);
 }
 
 var charMap = {

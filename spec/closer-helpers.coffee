@@ -7,12 +7,11 @@ exports.toDeepEqual = (expected) ->
     'actual != expected, diff is:\n' + json_diff.diffString(@actual, expected)
   typeof json_diff.diff(@actual, expected) is 'undefined'
 
-for type in ['keyword', 'vector', 'list', 'set', 'hash_map', 'seq']
+for type in ['keyword', 'vector', 'list', 'hash_$_set', 'hash_$_map']
   exports[type] = ((type2) ->
     (items...) ->
       items = if type2 is 'keyword' then [closer.node('Literal', items[0])] else items
-      args = if type2 is 'set' then [closer.node('ArrayExpression', items)] else items
-      closer.node('CallExpression', closer.node('Identifier', type2), args)
+      closer.node('CallExpression', closer.node('Identifier', type2), items)
   )(type)
 
 # compound nodes

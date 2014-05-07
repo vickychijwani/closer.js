@@ -10,8 +10,8 @@ Nil = helpers.Literal
 Keyword = helpers['keyword']
 Vector = helpers['vector']
 List = helpers['list']
-HashSet = helpers['set']
-HashMap = helpers['hash_map']
+HashSet = helpers['hash_$_set']
+HashMap = helpers['hash_$_map']
 AssertArity = helpers.AssertArity
 Identifier = helpers.Identifier
 ThisExpression = helpers.ThisExpression
@@ -184,9 +184,7 @@ describe 'Closer parser', ->
                 MemberExpression(Identifier('_$_'), Identifier('call')),
                 [Nil(), Identifier('__$1')])),
               ReturnStatement(Identifier('__$1'))))),
-        CallExpression(
-          Identifier('vector'),
-          [Integer(1), Integer(2), Integer(3)])])))
+        Vector(Integer(1), Integer(2), Integer(3))])))
 
   it 'parses a named function definition', ->
     expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
@@ -313,35 +311,25 @@ describe 'Closer parser', ->
     expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
-          CallExpression(
-            Identifier('vector'),
-            [Integer(1), Integer(2), Integer(3), Integer(4)]),
+          Vector(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
         [Nil(), Integer(1)])))
     expect(closer.parse('({1 2 3 4} 1)')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
-          CallExpression(
-            Identifier('hash_map'),
-            [Integer(1), Integer(2), Integer(3), Integer(4)]),
+          HashMap(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
         [Nil(), Integer(1)])))
     expect(closer.parse('(#{1 2 3 4} 1)')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
-          CallExpression(
-            Identifier('set'),
-            [ArrayExpression(
-              [Integer(1), Integer(2), Integer(3), Integer(4)])]),
+          HashSet(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
         [Nil(), Integer(1)])))
     expect(closer.parse('(:key {:key :val})')).toDeepEqual Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Keyword('key'), Identifier('call')),
-        [Nil(),
-        CallExpression(
-          Identifier('hash_map'),
-          [Keyword('key'), Keyword('val')])])))
+        [Nil(), HashMap(Keyword('key'), Keyword('val'))])))
 
 
   # conditional statements
