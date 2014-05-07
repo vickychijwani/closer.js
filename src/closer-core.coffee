@@ -254,6 +254,10 @@ core =
 
 
   # collections
+  'keyword': (name) ->
+    assert.arity 1, arguments
+    m.keyword name
+
   'list': (items...) ->
     assert.arity 0, Infinity, arguments
     m.list.apply null, items

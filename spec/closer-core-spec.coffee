@@ -518,6 +518,17 @@ describe 'Closer core library', ->
 
 
   # collections
+  describe '(keyword name)', ->
+    it 'returns a keyword with the given name (do not use : in the name, it will be added automatically)', ->
+      throws '(keyword "k1" "k2")'
+      eq '(keyword "key")', key 'key'
+      eq '(keyword :key)', key 'key'
+      # eq '(keyword \'+)', key '+'
+      nil '(keyword [])'
+      nil '(keyword #())'
+      nil '(keyword 3)'
+      nil '(keyword true)'
+
   describe '(list items)', ->
     it 'creates a new list containing the given items', ->
       eq '(list)', list()
