@@ -524,6 +524,11 @@ core =
     assert.seqable coll
     m.group_by f, coll
 
+  'zipmap': (keys, vals) ->
+    assert.arity 2, arguments
+    assert.seqable keys, vals
+    m.zipmap keys, vals
+
   'iterate': (f, x) ->
     assert.arity 2, arguments
     assert.function f

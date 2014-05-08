@@ -1055,6 +1055,19 @@ describe 'Closer core library', ->
       eq '(group-by #(% 1) {1 1, 2 1, 3 4, 5 6})', map 1, vec(vec(1, 1), vec(2, 1)), 4, vec(vec(3, 4)), 6, vec(vec(5, 6))
       eq '(group-by #{"c"} "soccer")', map null, vec('s', 'o', 'e', 'r'), 'c', vec('c', 'c')
 
+  describe '(zipmap keys vals)', ->
+    it 'returns a map with the keys mapped to the corresponding vals', ->
+      throws '(zipmap [1 2 3])'
+      throws '(zipmap [1 2 3] 3)'   # keys must be seqable or nil
+      throws '(zipmap 3 [1 2 3])'   # vals must be seqable or nil
+      eq '(zipmap nil nil)', map()
+      eq '(zipmap [1 2 3] nil)', map()
+      eq '(zipmap nil [1 2 3])', map()
+      eq '(zipmap [1 2 3 4] \'(5 6))', map 1, 5, 2, 6
+      eq '(zipmap #{1 2 3} "string")', map 1, "s", 2, "t", 3, "r"
+      eq '(zipmap {1 2, 3 4} [5])', map vec(1, 2), 5
+      eq '(zipmap [1 2 [] 1 \'()] (range))', map 1, 3, 2, 1, vec(), 4
+
   describe '(iterate f x)', ->
     it 'creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', ->
       throws '(iterate inc)'
