@@ -7429,6 +7429,12 @@ assert = {
       throw new ArgTypeError("" + unexpectedArg + " does not support stack operations");
     }
   },
+  type_custom: function(checkFn) {
+    var msg;
+    if (msg = checkFn()) {
+      throw new ArgTypeError(msg);
+    }
+  },
   "function": function() {
     var args, unexpectedArg;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -7972,6 +7978,24 @@ core = {
     assert.arity(1, arguments);
     assert.map(map);
     return m.vals(map);
+  },
+  'key': function(e) {
+    assert.arity(1, arguments);
+    assert.type_custom(function() {
+      if (!(core.vector_$QMARK_(e) && core.count(e) === 2)) {
+        return "" + e + " is not a valid map entry";
+      }
+    });
+    return core.first(e);
+  },
+  'val': function(e) {
+    assert.arity(1, arguments);
+    assert.type_custom(function() {
+      if (!(core.vector_$QMARK_(e) && core.count(e) === 2)) {
+        return "" + e + " is not a valid map entry";
+      }
+    });
+    return core.last(e);
   },
   'find': function(map, key) {
     assert.arity(2, arguments);

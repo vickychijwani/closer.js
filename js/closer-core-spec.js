@@ -8117,6 +8117,28 @@ describe('Closer core library', function() {
       return eq('(vals {:a 1, :b 2})', seq([1, 2]));
     });
   });
+  describe('(key e)', function() {
+    return it('returns the key of the given map entry', function() {
+      throws('(key (first {1 2}) (first {3 4}))');
+      throws('(key nil)');
+      throws('(key 3)');
+      eq('(key (last {1 2, 3 4}))', 3);
+      throws('(key \'(3 4))');
+      eq('(key [3 4])', 3);
+      return throws('(key [3 4 5 6])');
+    });
+  });
+  describe('(val e)', function() {
+    return it('returns the value of the given map entry', function() {
+      throws('(val (first {1 2}) (first {3 4}))');
+      throws('(val nil)');
+      throws('(val 3)');
+      eq('(val (last {1 2, 3 4}))', 4);
+      throws('(val \'(3 4))');
+      eq('(val [3 4])', 4);
+      return throws('(val [3 4 5 6])');
+    });
+  });
   describe('(find map key)', function() {
     return it('returns the map entry for a given key', function() {
       throws('(find {:a 1 :b 2} :a :b)');
@@ -8537,6 +8559,12 @@ assert = {
     });
     if (unexpectedArg) {
       throw new ArgTypeError("" + unexpectedArg + " does not support stack operations");
+    }
+  },
+  type_custom: function(checkFn) {
+    var msg;
+    if (msg = checkFn()) {
+      throw new ArgTypeError(msg);
     }
   },
   "function": function() {
@@ -9082,6 +9110,24 @@ core = {
     assert.arity(1, arguments);
     assert.map(map);
     return m.vals(map);
+  },
+  'key': function(e) {
+    assert.arity(1, arguments);
+    assert.type_custom(function() {
+      if (!(core.vector_$QMARK_(e) && core.count(e) === 2)) {
+        return "" + e + " is not a valid map entry";
+      }
+    });
+    return core.first(e);
+  },
+  'val': function(e) {
+    assert.arity(1, arguments);
+    assert.type_custom(function() {
+      if (!(core.vector_$QMARK_(e) && core.count(e) === 2)) {
+        return "" + e + " is not a valid map entry";
+      }
+    });
+    return core.last(e);
   },
   'find': function(map, key) {
     assert.arity(2, arguments);
