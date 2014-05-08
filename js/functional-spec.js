@@ -8116,6 +8116,11 @@ core = {
     assert.seqable(coll);
     return m.group_by(f, coll);
   },
+  'zipmap': function(keys, vals) {
+    assert.arity(2, arguments);
+    assert.seqable(keys, vals);
+    return m.zipmap(keys, vals);
+  },
   'iterate': function(f, x) {
     assert.arity(2, arguments);
     assert["function"](f);

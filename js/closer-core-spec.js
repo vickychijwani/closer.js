@@ -8353,6 +8353,20 @@ describe('Closer core library', function() {
       return eq('(group-by #{"c"} "soccer")', map(null, vec('s', 'o', 'e', 'r'), 'c', vec('c', 'c')));
     });
   });
+  describe('(zipmap keys vals)', function() {
+    return it('returns a map with the keys mapped to the corresponding vals', function() {
+      throws('(zipmap [1 2 3])');
+      throws('(zipmap [1 2 3] 3)');
+      throws('(zipmap 3 [1 2 3])');
+      eq('(zipmap nil nil)', map());
+      eq('(zipmap [1 2 3] nil)', map());
+      eq('(zipmap nil [1 2 3])', map());
+      eq('(zipmap [1 2 3 4] \'(5 6))', map(1, 5, 2, 6));
+      eq('(zipmap #{1 2 3} "string")', map(1, "s", 2, "t", 3, "r"));
+      eq('(zipmap {1 2, 3 4} [5])', map(vec(1, 2), 5));
+      return eq('(zipmap [1 2 [] 1 \'()] (range))', map(1, 3, 2, 1, vec(), 4));
+    });
+  });
   describe('(iterate f x)', function() {
     return it('creates a lazy sequence of x, f(x), f(f(x)), etc. f must be free of side-effects', function() {
       throws('(iterate inc)');
@@ -9211,6 +9225,11 @@ core = {
     assert["function"](f);
     assert.seqable(coll);
     return m.group_by(f, coll);
+  },
+  'zipmap': function(keys, vals) {
+    assert.arity(2, arguments);
+    assert.seqable(keys, vals);
+    return m.zipmap(keys, vals);
   },
   'iterate': function(f, x) {
     assert.arity(2, arguments);
