@@ -834,6 +834,26 @@ describe 'Closer core library', ->
       throws '(vals "string")'
       eq '(vals {:a 1, :b 2})', seq [1, 2]
 
+  describe '(key e)', ->
+    it 'returns the key of the given map entry', ->
+      throws '(key (first {1 2}) (first {3 4}))'   # must give exactly 1 arg
+      throws '(key nil)'
+      throws '(key 3)'
+      eq '(key (last {1 2, 3 4}))', 3
+      throws '(key \'(3 4))'
+      eq '(key [3 4])', 3   # different from Clojure, can't detect exact MapEntry type ...
+      throws '(key [3 4 5 6])'   # ... but that only works with vectors of size 2
+
+  describe '(val e)', ->
+    it 'returns the value of the given map entry', ->
+      throws '(val (first {1 2}) (first {3 4}))'   # must give exactly 1 arg
+      throws '(val nil)'
+      throws '(val 3)'
+      eq '(val (last {1 2, 3 4}))', 4
+      throws '(val \'(3 4))'
+      eq '(val [3 4])', 4   # different from Clojure, can't detect exact MapEntry type ...
+      throws '(val [3 4 5 6])'   # ... but that only works with vectors of size 2
+
   describe '(find map key)', ->
     it 'returns the map entry for a given key', ->
       throws '(find {:a 1 :b 2} :a :b)'

@@ -54,6 +54,9 @@ assert =
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} does not support stack operations"
 
+  type_custom: (checkFn) ->
+    throw new ArgTypeError msg if msg = checkFn()
+
   function: (args...) ->
     unexpectedArg = firstFailure args, (arg) ->
       typeof arg is 'function' or mori.is_vector(arg) or mori.is_map(arg) or
@@ -69,8 +72,7 @@ assert =
       throw new ArityError expected_min, expected_max, args.length
 
   arity_custom: (args, checkFn) ->
-    if msg = checkFn args
-      throw new ArityError msg
+    throw new ArityError msg if msg = checkFn args
 
 
 module.exports = assert

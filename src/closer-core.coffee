@@ -395,6 +395,20 @@ core =
     assert.map map
     m.vals map
 
+  'key': (e) ->
+    assert.arity 1, arguments
+    assert.type_custom ->
+      unless core.vector_$QMARK_(e) and core.count(e) is 2
+        "#{e} is not a valid map entry"
+    core.first e
+
+  'val': (e) ->
+    assert.arity 1, arguments
+    assert.type_custom ->
+      unless core.vector_$QMARK_(e) and core.count(e) is 2
+        "#{e} is not a valid map entry"
+    core.last e
+
   'find': (map, key) ->
     assert.arity 2, arguments
     assert.associative map
