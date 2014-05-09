@@ -8,6 +8,7 @@
 
         <link rel="stylesheet" href="bower/bootstrap/dist/css/bootstrap.min.css" />
         <link rel="stylesheet" href="bower/bootstrap/dist/css/bootstrap-theme.min.css" />
+        <link rel="stylesheet" href="css/demo.css" />
     </head>
 
     <body style="height:100%;">
@@ -34,6 +35,7 @@
                 <div class="col-md-7" style="height:100%;">
                     <h4>Abstract Syntax Tree:</h4>
                     <textarea name="output" data-editor="javascript"></textarea>
+                    <div id="error" class="alert alert-danger"></div>
                 </div>
             </div>
         </div>
@@ -50,6 +52,7 @@
                 var inputTabSize = 2, outputTabSize = 4;
                 var $inputTextArea = $('textarea[name="editor"]');
                 var $outputTextArea = $('textarea[name="output"]');
+                var $error = $('#error');
                 var inputEditor = setupAceEditor($inputTextArea);
                 var outputEditor = setupAceEditor($outputTextArea);
 
@@ -77,9 +80,19 @@
 
                 function parseInput () {
                     var input = inputEditor.getSession().getValue();
-                    var output = closer.parse(input, { loc: true });
-                    var formattedOutput = JSON.stringify(output, null, outputTabSize);
-                    outputEditor.getSession().setValue(formattedOutput);
+                    try {
+                        var output = closer.parse(input, { loc: true });
+                        var formattedOutput = JSON.stringify(output, null, outputTabSize);
+                        $error.html('');
+                        $error.hide();
+                        outputEditor.getSession().setValue(formattedOutput);
+                        $outputTextArea.prev().show();
+                    } catch (e) {
+                        $error.html(e.message.replace(/\n/g, "<br />"));
+                        $error.show();
+                        outputEditor.getSession().setValue('');
+                        $outputTextArea.prev().hide();
+                    }
                 }
 
                 function setupAceEditor($textarea) {

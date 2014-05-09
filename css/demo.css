@@ -1,5 +1,4 @@
-textarea {
-    position: relative;
-    top: 0;
-    left: 0;
+#error {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-size: 16px;
 }
