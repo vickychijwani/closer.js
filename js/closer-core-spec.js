@@ -98,7 +98,7 @@ case 3:
         $$[$0-1].push($$[$0]);
     
 break;
-case 4: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(_$[$0])), [yy.Node('Literal', $$[$0], yy.loc(_$[$0]))], yy.loc(_$[$0])); 
+case 4: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(this._$)), [yy.Node('Literal', $$[$0], yy.loc(this._$))], yy.loc(this._$)); 
 break;
 case 5:
         var name = $$[$0].slice(1);
@@ -123,13 +123,13 @@ case 10: this.$ = parseLiteral('Boolean', false, _$[$0], yytext, yy);
 break;
 case 11: this.$ = parseLiteral('Nil', null, _$[$0], yytext, yy); 
 break;
-case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
-case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
-case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
-case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
 case 22: this.$ = $$[$0-1]; 
 break;
@@ -275,7 +275,7 @@ case 46:
         this.$ = parseLogicalExpr('||', $$[$0], _$[$0-1], yy);
     
 break;
-case 47: this.$ = parseVarDecl($$[$0-1], $$[$0], _$[$0-2], yy); 
+case 47: this.$ = parseVarDecl($$[$0-1], $$[$0], this._$, yy); 
 break;
 case 48:
         var processed = processDestrucForm({ fixed: [$$[$0-1]], rest: null }, yy);
@@ -374,12 +374,13 @@ break;
 case 55: this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0])); 
 break;
 case 64:
+        yy.locComb(this._$, _$[$0]);
         var callee = yy.Node('MemberExpression', $$[$0-1],
             yy.Node('Identifier', 'call', yy.loc(_$[$0-1])),
             false, yy.loc(_$[$0-1]));
         $$[$0] = getValueIfUndefined($$[$0], []);
-        $$[$0].unshift(yy.Node('Literal', null, yy.loc(_$[$0])));   // value for "this"
-        this.$ = yy.Node('CallExpression', callee, $$[$0], yy.loc(_$[$0-1]));
+        $$[$0].unshift(yy.Node('Literal', null, yy.loc(_$[$0-1])));   // value for "this"
+        this.$ = yy.Node('CallExpression', callee, $$[$0], yy.loc(this._$));
     
 break;
 case 65: this.$ = wrapInIIFE($$[$0], _$[$0-1], yy); 
@@ -427,7 +428,6 @@ break;
 case 80:
         var prog = yy.Node('Program', $$[$0], yy.loc(_$[$0]));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
-        if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($$[$0]);
         destrucArgIdx = 0;
         return prog;
@@ -7168,7 +7168,7 @@ n("mori.zip.next",function(a){if(Pb.a(wg,a.b?a.b(1):a.call(null,1)))return a;var
 n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf,b):b,c=P.a(b,xg),d=P.a(b,tg),e=P.a(b,sg),g=P.a(b,rg);if(null==b)throw"Remove at top";if(0<N(c))for(a=M(new X(null,2,5,Y,[nc(c),Q.e(b,xg,oc(c),H([vg,!0],0))],null),mc(a));;)if(b=bh(a),b=p(b)?eh(a):b,p(b))a=hh(b);else return a;else return M(new X(null,2,5,Y,[dh(a,nc(e),g),p(d)?Q.c(d,vg,!0):d],null),mc(a))});n("mori.mutable.thaw",function(a){return Ab(a)});n("mori.mutable.freeze",od);n("mori.mutable.conj1",function(a,b){return a.qa(null,b)});n("mori.mutable.conj",pd);n("mori.mutable.assoc",qd);n("mori.mutable.dissoc",rd);n("mori.mutable.pop",function(a){return Gb(a)});n("mori.mutable.disj",sd);;return this.mori;}.call({});});
 
 },{}],19:[function(_dereq_,module,exports){
-var assertions, core, emptySeq, eq, evaluate, falsy, key, list, map, nil, repl, seq, set, throws, truthy, vec, _,
+var assertions, core, emptySeq, eq, evaluate, falsy, key, list, map, nil, parseOpts, repl, seq, set, throws, truthy, vec, _,
   __slice = [].slice;
 
 _ = _dereq_('../src/lodash');
@@ -7190,8 +7190,12 @@ beforeEach(function() {
   });
 });
 
-evaluate = function(src, options) {
-  return eval(repl.generateJS(src, options));
+parseOpts = {
+  loc: false
+};
+
+evaluate = function(src) {
+  return eval(repl.generateJS(src, parseOpts));
 };
 
 eq = function(src, expected) {
@@ -9394,7 +9398,7 @@ parser.yy.loc = function(loc) {
   if (!this.locations) {
     return null;
   }
-  if ("length" in loc) {
+  if ('length' in loc) {
     loc = this.locComb(loc[0], loc[1]);
   }
   newLoc = {
@@ -9410,25 +9414,19 @@ parser.yy.loc = function(loc) {
   return newLoc;
 };
 
-parser.yy.escapeString = function(s) {
-  return s.replace(/\\\n/, '').replace(/\\([^xubfnvrt0\\])/g, '$1');
-};
-
 oldParse = parser.parse;
 
 parser.parse = function(source, options) {
-  this.yy.inRegex = false;
   this.yy.raw = [];
-  this.yy.comments = [];
   this.yy.options = options || {};
   return oldParse.call(this, source);
 };
 
 Parser = (function() {
   function Parser(options) {
+    nodes.locations = this.yy.locations = options.loc !== false;
     this.yy.source = options.source || null;
     this.yy.startLine = options.line || 1;
-    this.yy.locations = options.locations;
   }
 
   return Parser;
@@ -11828,6 +11826,8 @@ module.exports = closer;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],24:[function(_dereq_,module,exports){
+exports.locations = true;
+
 exports.defineNodes = function(builder) {
   var convertExprToPattern, def, defaultIni, funIni;
   defaultIni = function(loc) {
@@ -11840,7 +11840,9 @@ exports.defineNodes = function(builder) {
       obj = {};
       obj.type = name;
       ini.call(obj, a, b, c, d, e, f, g, h);
-      delete obj.loc;
+      if (!exports.locations) {
+        delete obj.loc;
+      }
       return obj;
     };
   };

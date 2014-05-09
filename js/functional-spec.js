@@ -98,7 +98,7 @@ case 3:
         $$[$0-1].push($$[$0]);
     
 break;
-case 4: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(_$[$0])), [yy.Node('Literal', $$[$0], yy.loc(_$[$0]))], yy.loc(_$[$0])); 
+case 4: this.$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(this._$)), [yy.Node('Literal', $$[$0], yy.loc(this._$))], yy.loc(this._$)); 
 break;
 case 5:
         var name = $$[$0].slice(1);
@@ -123,13 +123,13 @@ case 10: this.$ = parseLiteral('Boolean', false, _$[$0], yytext, yy);
 break;
 case 11: this.$ = parseLiteral('Nil', null, _$[$0], yytext, yy); 
 break;
-case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
-case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
-case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
-case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), _$[$0-1], yy); 
+case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), this._$, yy); 
 break;
 case 22: this.$ = $$[$0-1]; 
 break;
@@ -275,7 +275,7 @@ case 46:
         this.$ = parseLogicalExpr('||', $$[$0], _$[$0-1], yy);
     
 break;
-case 47: this.$ = parseVarDecl($$[$0-1], $$[$0], _$[$0-2], yy); 
+case 47: this.$ = parseVarDecl($$[$0-1], $$[$0], this._$, yy); 
 break;
 case 48:
         var processed = processDestrucForm({ fixed: [$$[$0-1]], rest: null }, yy);
@@ -374,12 +374,13 @@ break;
 case 55: this.$ = yy.Node('EmptyStatement', yy.loc(_$[$0])); 
 break;
 case 64:
+        yy.locComb(this._$, _$[$0]);
         var callee = yy.Node('MemberExpression', $$[$0-1],
             yy.Node('Identifier', 'call', yy.loc(_$[$0-1])),
             false, yy.loc(_$[$0-1]));
         $$[$0] = getValueIfUndefined($$[$0], []);
-        $$[$0].unshift(yy.Node('Literal', null, yy.loc(_$[$0])));   // value for "this"
-        this.$ = yy.Node('CallExpression', callee, $$[$0], yy.loc(_$[$0-1]));
+        $$[$0].unshift(yy.Node('Literal', null, yy.loc(_$[$0-1])));   // value for "this"
+        this.$ = yy.Node('CallExpression', callee, $$[$0], yy.loc(this._$));
     
 break;
 case 65: this.$ = wrapInIIFE($$[$0], _$[$0-1], yy); 
@@ -427,7 +428,6 @@ break;
 case 80:
         var prog = yy.Node('Program', $$[$0], yy.loc(_$[$0]));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
-        if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($$[$0]);
         destrucArgIdx = 0;
         return prog;
@@ -8252,7 +8252,7 @@ parser.yy.loc = function(loc) {
   if (!this.locations) {
     return null;
   }
-  if ("length" in loc) {
+  if ('length' in loc) {
     loc = this.locComb(loc[0], loc[1]);
   }
   newLoc = {
@@ -8268,25 +8268,19 @@ parser.yy.loc = function(loc) {
   return newLoc;
 };
 
-parser.yy.escapeString = function(s) {
-  return s.replace(/\\\n/, '').replace(/\\([^xubfnvrt0\\])/g, '$1');
-};
-
 oldParse = parser.parse;
 
 parser.parse = function(source, options) {
-  this.yy.inRegex = false;
   this.yy.raw = [];
-  this.yy.comments = [];
   this.yy.options = options || {};
   return oldParse.call(this, source);
 };
 
 Parser = (function() {
   function Parser(options) {
+    nodes.locations = this.yy.locations = options.loc !== false;
     this.yy.source = options.source || null;
     this.yy.startLine = options.line || 1;
-    this.yy.locations = options.locations;
   }
 
   return Parser;
@@ -10686,6 +10680,8 @@ module.exports = closer;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],24:[function(_dereq_,module,exports){
+exports.locations = true;
+
 exports.defineNodes = function(builder) {
   var convertExprToPattern, def, defaultIni, funIni;
   defaultIni = function(loc) {
@@ -10698,7 +10694,9 @@ exports.defineNodes = function(builder) {
       obj = {};
       obj.type = name;
       ini.call(obj, a, b, c, d, e, f, g, h);
-      delete obj.loc;
+      if (!exports.locations) {
+        delete obj.loc;
+      }
       return obj;
     };
   };
