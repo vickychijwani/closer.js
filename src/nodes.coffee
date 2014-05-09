@@ -1,3 +1,5 @@
+exports.locations = true
+
 exports.defineNodes = (builder) ->
 
   defaultIni = (loc) ->
@@ -11,7 +13,7 @@ exports.defineNodes = (builder) ->
       ini.call obj, a, b, c, d, e, f, g, h
       # if obj.loc
       # obj.range = obj.loc.range || [0, 0]
-      delete obj.loc
+      delete obj.loc unless exports.locations
       # obj.loc = arguments_[ini.length - (if name is 'Literal' then 2 else 1)]
       # delete obj.loc.range
       obj

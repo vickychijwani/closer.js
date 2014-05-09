@@ -77,7 +77,7 @@
 
                 function parseInput () {
                     var input = inputEditor.getSession().getValue();
-                    var output = closer.parse(input);
+                    var output = closer.parse(input, { loc: true });
                     var formattedOutput = JSON.stringify(output, null, outputTabSize);
                     outputEditor.getSession().setValue(formattedOutput);
                 }

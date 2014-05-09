@@ -16,7 +16,7 @@ parser.yy.Node = (type, a, b, c, d, e, f, g, h) ->
   if builder and buildName of builder
     builder[buildName] a, b, c, d, e, f, g, h
   else
-    throw new ReferenceError "no such node type: " + type
+    throw new ReferenceError "no such node type: #{type}"
 
 parser.yy.locComb = (start, end) ->
   start.last_line = end.last_line
@@ -26,7 +26,7 @@ parser.yy.locComb = (start, end) ->
 
 parser.yy.loc = (loc) ->
   return null unless @locations
-  loc = @locComb(loc[0], loc[1]) if "length" of loc
+  loc = @locComb(loc[0], loc[1]) if 'length' of loc
   newLoc =
     start:
       line: @startLine + loc.first_line - 1
@@ -38,22 +38,17 @@ parser.yy.loc = (loc) ->
 
   newLoc
 
-parser.yy.escapeString = (s) ->
-  s.replace(/\\\n/, '').replace /\\([^xubfnvrt0\\])/g, '$1'
-
 oldParse = parser.parse
 parser.parse = (source, options) ->
-  @yy.inRegex = false
   @yy.raw = []
-  @yy.comments = []
   @yy.options = options or {}
   oldParse.call this, source
 
 class Parser
   constructor: (options) ->
+    nodes.locations = @yy.locations = options.loc isnt false
     @yy.source = options.source or null
     @yy.startLine = options.line or 1
-    @yy.locations = options.locations
 
 Parser:: = parser
 

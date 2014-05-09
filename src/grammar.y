@@ -21,7 +21,7 @@ IdentifierList
   ;
 
 Keyword
-  : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@2)), [yy.Node('Literal', $2, yy.loc(@2))], yy.loc(@2)); }
+  : COLON IDENTIFIER { $$ = yy.Node('CallExpression', yy.Node('Identifier', 'keyword', yy.loc(@$)), [yy.Node('Literal', $2, yy.loc(@$))], yy.loc(@$)); }
   ;
 
 AnonArg
@@ -50,10 +50,10 @@ Atom
   ;
 
 CollectionLiteral
-  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('vector', getValueIfUndefined($items, []), @items, yy); }
-  | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('list', getValueIfUndefined($items, []), @items, yy); }
-  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash-map', getValueIfUndefined($items, []), @items, yy); }
-  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('hash-set', getValueIfUndefined($items, []), @items, yy); }
+  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('vector', getValueIfUndefined($items, []), @$, yy); }
+  | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('list', getValueIfUndefined($items, []), @$, yy); }
+  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash-map', getValueIfUndefined($items, []), @$, yy); }
+  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('hash-set', getValueIfUndefined($items, []), @$, yy); }
   ;
 
 Fn
@@ -223,7 +223,7 @@ LogicalExpr
   ;
 
 VarDeclaration
-  : DEF Identifier SExpr?[init] { $$ = parseVarDecl($Identifier, $init, @1, yy); }
+  : DEF Identifier SExpr?[init] { $$ = parseVarDecl($Identifier, $init, @$, yy); }
   ;
 
 LetBinding
@@ -342,12 +342,13 @@ List
   | RecurForm
   | DotForm
   | Fn SExprs?[args] {
+        yy.locComb(@$, @2);
         var callee = yy.Node('MemberExpression', $Fn,
-            yy.Node('Identifier', 'call', yy.loc(@Fn)),
+            yy.Node('Identifier', 'call', yy.loc(@1)),
             false, yy.loc(@Fn));
         $args = getValueIfUndefined($args, []);
-        $args.unshift(yy.Node('Literal', null, yy.loc(@2)));   // value for "this"
-        $$ = yy.Node('CallExpression', callee, $args, yy.loc(@Fn));
+        $args.unshift(yy.Node('Literal', null, yy.loc(@1)));   // value for "this"
+        $$ = yy.Node('CallExpression', callee, $args, yy.loc(@$));
     }
   | DO DoForm { $$ = wrapInIIFE($DoForm, @1, yy); }
   ;
@@ -410,7 +411,6 @@ Program
   : NonEmptyDoForm {
         var prog = yy.Node('Program', $NonEmptyDoForm, yy.loc(@NonEmptyDoForm));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
-        if (yy.comments.length) prog.comments = yy.comments;
 //        if (prog.loc) prog.range = rangeBlock($1);
         destrucArgIdx = 0;
         return prog;

@@ -15,8 +15,9 @@ defaults =
     input = input.replace /^\(([\s\S]*)\n\)$/m, '$1'
 
     try
-      console.log '\nAST: ' + JSON.stringify repl.parse(input), null, 4
-      js = repl.generateJS input
+      opts = { loc: false }
+      console.log '\nAST: ' + JSON.stringify repl.parse(input, opts), null, 4
+      js = repl.generateJS input, opts
       console.log '\nGenerated JS:\n' + js + '\n'
       result = vm.runInThisContext js
     catch e
