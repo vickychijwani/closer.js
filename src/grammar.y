@@ -408,14 +408,14 @@ BlockStatementWithReturn
   ;
 
 Program
-  : NonEmptyDoForm {
+  : NonEmptyDoForm 'END-OF-FILE' {
         var prog = yy.Node('Program', $NonEmptyDoForm, yy.loc(@NonEmptyDoForm));
 //        if (yy.tokens.length) prog.tokens = yy.tokens;
 //        if (prog.loc) prog.range = rangeBlock($1);
         destrucArgIdx = 0;
         return prog;
     }
-  | {
+  | 'END-OF-FILE' {
         var prog = yy.Node('Program', [], {
             end: { column: 0, line: 0 },
             start: { column: 0, line: 0 },

@@ -69,3 +69,5 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 {IDENTIFIER} %{
     return 'IDENTIFIER';
 %}
+
+<<EOF>> %{ return 'END-OF-FILE'; %}
