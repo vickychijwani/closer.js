@@ -2,7 +2,7 @@
   "name": "closer",
   "description": "Closer.js - Clojure parser in JavaScript, compatible with the Mozilla Parser API (https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API)",
   "homepage": "http://github.com/vickychijwani/closer.js",
-  "main": "src/closer.js",
+  "main": "lib/closer.js",
   "version": "0.0.1",
   "license": "MIT",
   "engines": {
