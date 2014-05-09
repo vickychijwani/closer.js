@@ -43,27 +43,30 @@ Program = helpers.Program
 beforeEach ->
   @addMatchers toDeepEqual: helpers.toDeepEqual
 
+parseOpts = { loc: false }
+eq = (src, ast) ->
+  expect(closer.parse src, parseOpts).toDeepEqual ast
 
 describe 'Closer parser', ->
 
   # atoms
   it 'parses an empty program', ->
-    expect(closer.parse('\n')).toDeepEqual Program()
+    eq '\n', Program()
 
   it 'parses an empty s-expression', ->
-    expect(closer.parse('()\n')).toDeepEqual Program(
+    eq '()\n', Program(
       EmptyStatement())
 
   it 'parses comments', ->
-    expect(closer.parse('; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r')).toDeepEqual Program(
+    eq '; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r', Program(
       EmptyStatement())
 
   it 'parses an identifier', ->
-    expect(closer.parse('x\n')).toDeepEqual Program(
+    eq 'x\n', Program(
       ExpressionStatement(Identifier('x')))
 
   it 'parses integer, float, string, boolean, and nil literals', ->
-    expect(closer.parse('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n')).toDeepEqual Program(
+    eq '-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n', Program(
       ExpressionStatement(UnaryExpression('-', Integer(24))),
       ExpressionStatement(UnaryExpression('-', Float(23.67))),
       ExpressionStatement(UnaryExpression('-', Float(22.45e-5))),
@@ -74,11 +77,11 @@ describe 'Closer parser', ->
       ExpressionStatement(Nil()))
 
   it 'parses keywords', ->
-    expect(closer.parse(':keyword')).toDeepEqual Program(
+    eq ':keyword', Program(
       ExpressionStatement(Keyword('keyword')))
 
   it 'parses vector and list literals', ->
-    expect(closer.parse('[] ["string" true] \'() \'("string" true)')).toDeepEqual Program(
+    eq '[] ["string" true] \'() \'("string" true)', Program(
       ExpressionStatement(Vector()),
       ExpressionStatement(Vector(
         String('string'),
@@ -89,12 +92,12 @@ describe 'Closer parser', ->
         Boolean(true))))
 
   it 'parses set and map literals', ->
-    expect(closer.parse('#{} #{"string" true}')).toDeepEqual Program(
+    eq '#{} #{"string" true}', Program(
       ExpressionStatement(HashSet()),
       ExpressionStatement(HashSet(
         String('string'),
         Boolean(true))))
-    expect(closer.parse('{} {"string" true}')).toDeepEqual Program(
+    eq '{} {"string" true}', Program(
       ExpressionStatement(HashMap()),
       ExpressionStatement(HashMap(
         String('string'),
@@ -102,24 +105,24 @@ describe 'Closer parser', ->
     expect(-> closer.parse('{1 2 3}')).toThrow()
 
   it 'parses commas as whitespace', ->
-    expect(closer.parse(',,, ,,,  ,,\n')).toDeepEqual Program()
+    eq ',,, ,,,  ,,\n', Program()
 
 
   # functions
   it 'parses a function call with 0 arguments', ->
-    expect(closer.parse('(fn-name)\n')).toDeepEqual Program(
+    eq '(fn-name)\n', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('fn_$_name'), Identifier('call')),
         [Nil()])))
 
   it 'parses a function call with > 0 arguments', ->
-    expect(closer.parse('(fn-name arg1 arg2)\n')).toDeepEqual Program(
+    eq '(fn-name arg1 arg2)\n', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('fn_$_name'), Identifier('call')),
         [Nil(), Identifier('arg1'), Identifier('arg2')])))
 
   it 'parses an anonymous function definition', ->
-    expect(closer.parse('(fn [x] x)\n')).toDeepEqual Program(
+    eq '(fn [x] x)\n', Program(
       ExpressionStatement(
         FunctionExpression(
           null,
@@ -130,7 +133,7 @@ describe 'Closer parser', ->
             ReturnStatement(Identifier('x'))))))
 
   it 'parses an anonymous function call', ->
-    expect(closer.parse('((fn [x] x) 2)\n')).toDeepEqual Program(
+    eq '((fn [x] x) 2)\n', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           FunctionExpression(
@@ -144,7 +147,7 @@ describe 'Closer parser', ->
         [Nil(), Integer(2)])))
 
   it 'parses anonymous function literals', ->
-    expect(closer.parse('(#(apply + % %2 %&) 1 2 3 4)')).toDeepEqual Program(
+    eq '(#(apply + % %2 %&) 1 2 3 4)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           FunctionExpression(
@@ -168,7 +171,7 @@ describe 'Closer parser', ->
                  Identifier('__$2'), Identifier('__$rest')])))),
           Identifier('call')),
         [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)])))
-    expect(closer.parse('(map #(if (even? %1) (- %) %) [1 2 3])')).toDeepEqual Program(
+    eq '(map #(if (even? %1) (- %) %) [1 2 3])', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('map'), Identifier('call')),
         [Nil(),
@@ -187,7 +190,7 @@ describe 'Closer parser', ->
         Vector(Integer(1), Integer(2), Integer(3))])))
 
   it 'parses a named function definition', ->
-    expect(closer.parse('(defn fn-name [x] x)\n')).toDeepEqual Program(
+    eq '(defn fn-name [x] x)\n', Program(
       VariableDeclaration(
         VariableDeclarator(
           Identifier('fn_$_name'),
@@ -198,7 +201,7 @@ describe 'Closer parser', ->
               ReturnStatement(Identifier('x')))))))
 
   it 'parses rest arguments', ->
-    expect(closer.parse('(defn avg [& rest] (/ (apply + rest) (count rest)))\n')).toDeepEqual Program(
+    eq '(defn avg [& rest] (/ (apply + rest) (count rest)))\n', Program(
       VariableDeclaration(
         VariableDeclarator(
           Identifier('avg'),
@@ -228,7 +231,7 @@ describe 'Closer parser', ->
                   [Nil(), Identifier('rest')])])))))))
 
   it 'parses destructuring forms', ->
-    expect(closer.parse('(defn fn-name [[a & b] c & [d & e :as coll]])')).toDeepEqual Program(
+    eq '(defn fn-name [[a & b] c & [d & e :as coll]])', Program(
       VariableDeclaration(VariableDeclarator(
         Identifier('fn_$_name'),
         FunctionExpression(
@@ -285,7 +288,7 @@ describe 'Closer parser', ->
               CallExpression(Identifier('drop'),
                 [Integer(1), Identifier('coll')]))),
             ReturnStatement(Nil()))))))
-    expect(closer.parse('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])')).toDeepEqual Program(
+    eq '(defn fn-name [{:as m :keys [b] :strs [c] a :a}])', Program(
       VariableDeclaration(VariableDeclarator(
         Identifier('fn_$_name'),
         FunctionExpression(
@@ -308,25 +311,25 @@ describe 'Closer parser', ->
 
 
   it 'parses collections and keywords in function position', ->
-    expect(closer.parse('([1 2 3 4] 1)')).toDeepEqual Program(
+    eq '([1 2 3 4] 1)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           Vector(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
         [Nil(), Integer(1)])))
-    expect(closer.parse('({1 2 3 4} 1)')).toDeepEqual Program(
+    eq '({1 2 3 4} 1)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           HashMap(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
         [Nil(), Integer(1)])))
-    expect(closer.parse('(#{1 2 3 4} 1)')).toDeepEqual Program(
+    eq '(#{1 2 3 4} 1)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           HashSet(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
         [Nil(), Integer(1)])))
-    expect(closer.parse('(:key {:key :val})')).toDeepEqual Program(
+    eq '(:key {:key :val})', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Keyword('key'), Identifier('call')),
         [Nil(), HashMap(Keyword('key'), Keyword('val'))])))
@@ -334,7 +337,7 @@ describe 'Closer parser', ->
 
   # conditional statements
   it 'parses an if statement without else', ->
-    expect(closer.parse('(if (>= x 0) x)\n')).toDeepEqual Program(
+    eq '(if (>= x 0) x)\n', Program(
       IfStatement(
         CallExpression(
           MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
@@ -343,7 +346,7 @@ describe 'Closer parser', ->
         null))
 
   it 'parses an if-else statement', ->
-    expect(closer.parse('(if (>= x 0) x (- x))\n')).toDeepEqual Program(
+    eq '(if (>= x 0) x (- x))\n', Program(
       IfStatement(
         CallExpression(
           MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
@@ -355,7 +358,7 @@ describe 'Closer parser', ->
             [Nil(), Identifier('x')]))))
 
   it 'parses a when form', ->
-    expect(closer.parse('(when (condition?) (println \"hello\") true)\n')).toDeepEqual Program(
+    eq '(when (condition?) (println \"hello\") true)\n', Program(
       IfStatement(
         CallExpression(
           MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')),
@@ -369,21 +372,21 @@ describe 'Closer parser', ->
 
   # variables
   it 'parses an unbound var definition', ->
-    expect(closer.parse('(def var-name)')).toDeepEqual Program(
+    eq '(def var-name)', Program(
       VariableDeclaration(
         VariableDeclarator(
           Identifier('var_$_name'),
           null)))
 
   it 'parses a var bound to a literal', ->
-    expect(closer.parse('(def greeting \"Hello\")')).toDeepEqual Program(
+    eq '(def greeting \"Hello\")', Program(
       VariableDeclaration(
         VariableDeclarator(
           Identifier('greeting'),
           String('Hello'))))
 
   it 'parses a var bound to the result of an expression', ->
-    expect(closer.parse('(def sum (+ 3 5))')).toDeepEqual Program(
+    eq '(def sum (+ 3 5))', Program(
       VariableDeclaration(
         VariableDeclarator(
           Identifier('sum'),
@@ -392,7 +395,7 @@ describe 'Closer parser', ->
             [Nil(), Integer(3), Integer(5)]))))
 
   it 'parses a var bound to an fn form', ->
-    expect(closer.parse('(def add (fn [& numbers] (apply + numbers)))')).toDeepEqual Program(
+    eq '(def add (fn [& numbers] (apply + numbers)))', Program(
       VariableDeclaration(
         VariableDeclarator(
           Identifier('add'),
@@ -416,7 +419,7 @@ describe 'Closer parser', ->
                 [Nil(), Identifier('_$PLUS_'), Identifier('numbers')])))))))
 
   it 'parses a let form with no bindings and no body', ->
-    expect(closer.parse('(let [])')).toDeepEqual Program(
+    eq '(let [])', Program(
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
@@ -424,7 +427,7 @@ describe 'Closer parser', ->
             ReturnStatement(Nil()))))))
 
   it 'parses a let form with non-empty bindings and a non-empty body', ->
-    expect(closer.parse('(let [x 3 y (- x)] (+ x y))')).toDeepEqual Program(
+    eq '(let [x 3 y (- x)] (+ x y))', Program(
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
@@ -444,14 +447,14 @@ describe 'Closer parser', ->
 
   # other special forms
   it 'parses an empty do form', ->
-    expect(closer.parse('(do)')).toDeepEqual Program(
+    eq '(do)', Program(
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
           BlockStatement(ReturnStatement(Nil()))))))
 
   it 'parses a non-empty do form', ->
-    expect(closer.parse('(do (+ 1 2) (+ 3 4))')).toDeepEqual Program(
+    eq '(do (+ 1 2) (+ 3 4))', Program(
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
@@ -464,11 +467,11 @@ describe 'Closer parser', ->
               [Nil(), Integer(3), Integer(4)])))))))
 
   it 'parses dot special forms', ->
-    expect(closer.parse('(.move-x-y this 10 20)')).toDeepEqual Program(
+    eq '(.move-x-y this 10 20)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(ThisExpression(), String('move-x-y'), true),
         [Integer(10), Integer(20)])))
-    expect(closer.parse('(.pos this)')).toDeepEqual Program(
+    eq '(.pos this)', Program(
       ExpressionStatement(
         ConditionalExpression(
           BinaryExpression('===',
@@ -479,7 +482,7 @@ describe 'Closer parser', ->
           MemberExpression(ThisExpression(), String('pos'), true))))
 
   it 'parses loop + recur forms', ->
-    expect(closer.parse('(loop [] (recur))')).toDeepEqual Program(
+    eq '(loop [] (recur))', Program(
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
@@ -490,7 +493,7 @@ describe 'Closer parser', ->
                 BlockStatement(ContinueStatement()),
                 BreakStatement())))),
         [])))
-    expect(closer.parse('(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))')).toDeepEqual Program(
+    eq '(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))', Program(
       ExpressionStatement(CallExpression(
         FunctionExpression(
           null, [], null,
@@ -521,7 +524,7 @@ describe 'Closer parser', ->
         [])))
 
   it 'parses fn + recur forms', ->
-    expect(closer.parse('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))')).toDeepEqual Program(
+    eq '(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))', Program(
       ExpressionStatement(
         FunctionExpression(
           null, [Identifier('n'), Identifier('acc')], null,
@@ -553,14 +556,14 @@ describe 'Closer parser', ->
                     ContinueStatement()))))))))
 
   it 'parses logical expressions (and / or)', ->
-    expect(closer.parse('(and) (or)')).toDeepEqual Program(
+    eq '(and) (or)', Program(
       ExpressionStatement(Boolean(true)),
       ExpressionStatement(Nil()))
-    expect(closer.parse('(and expr1 expr2 expr3)')).toDeepEqual Program(
+    eq '(and expr1 expr2 expr3)', Program(
       ExpressionStatement(LogicalExpression('&&',
         LogicalExpression('&&', Identifier('expr1'), Identifier('expr2')),
         Identifier('expr3'))))
-    expect(closer.parse('(or expr1 expr2 expr3)')).toDeepEqual Program(
+    eq '(or expr1 expr2 expr3)', Program(
       ExpressionStatement(LogicalExpression('||',
         LogicalExpression('||', Identifier('expr1'), Identifier('expr2')),
         Identifier('expr3'))))

@@ -11,8 +11,9 @@ beforeEach ->
         "Expected #{@actual} to equal #{expected}"
       core._$EQ_(@actual, expected)
 
-evaluate = (src, options) ->
-  eval repl.generateJS src, options
+parseOpts = { loc: false }
+evaluate = (src) ->
+  eval repl.generateJS src, parseOpts
 
 eq = (src, expected) -> expect(evaluate src).toCljEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
