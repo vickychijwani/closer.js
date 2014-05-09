@@ -355,6 +355,14 @@ core =
       throw new TypeError 'vector args to conjoin to a map must be pairs'
     m.conj.apply null, _.flatten [coll, xs]
 
+  'disj': (set, ks...) ->
+    assert.arity 1, Infinity, arguments
+    assert.type_custom ->
+      unless core.set_$QMARK_(set)
+        "#{set} is not a set"
+    ks = [] if ks is undefined
+    core.apply m.disj, set, ks
+
   'into': (to, from) ->
     assert.arity 2, arguments
     return null if to is null and from is null

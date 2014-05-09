@@ -8015,6 +8015,16 @@ describe('Closer core library', function() {
       return eq('(conj \'(1 2) [3])', list(vec(3), 1, 2));
     });
   });
+  describe('(disj set), (disj set ks)', function() {
+    return it('returns a new set with the keys removed', function() {
+      throws('(disj)');
+      eq('(disj #{1 2 3})', set(1, 2, 3));
+      throws('(disj 3)');
+      eq('(disj #{1 2 3 []} 2 4 \'())', set(1, 3));
+      throws('(disj {1 2, 3 4} 1)');
+      return throws('(disj [1 2 3 4] 0 1)');
+    });
+  });
   describe('(into to from)', function() {
     return it('conjs all items from the second collection into the first', function() {
       throws('(into [])');
@@ -9058,6 +9068,20 @@ core = {
       throw new TypeError('vector args to conjoin to a map must be pairs');
     }
     return m.conj.apply(null, _.flatten([coll, xs]));
+  },
+  'disj': function() {
+    var ks, set;
+    set = arguments[0], ks = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    assert.arity(1, Infinity, arguments);
+    assert.type_custom(function() {
+      if (!core.set_$QMARK_(set)) {
+        return "" + set + " is not a set";
+      }
+    });
+    if (ks === void 0) {
+      ks = [];
+    }
+    return core.apply(m.disj, set, ks);
   },
   'into': function(to, from) {
     assert.arity(2, arguments);

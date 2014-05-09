@@ -740,6 +740,15 @@ describe 'Closer core library', ->
       eq '(conj [1 2] [3])', vec 1, 2, vec(3)   # whole collection is inserted as is
       eq '(conj \'(1 2) [3])', list vec(3), 1, 2   # whole collection is inserted as is
 
+  describe '(disj set), (disj set ks)', ->
+    it 'returns a new set with the keys removed', ->
+      throws '(disj)'
+      eq '(disj #{1 2 3})', set 1, 2, 3
+      throws '(disj 3)'
+      eq '(disj #{1 2 3 []} 2 4 \'())', set 1, 3
+      throws '(disj {1 2, 3 4} 1)'
+      throws '(disj [1 2 3 4] 0 1)'
+
   describe '(into to from)', ->
     it 'conjs all items from the second collection into the first', ->
       throws '(into [])'

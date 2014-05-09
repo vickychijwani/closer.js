@@ -7927,6 +7927,20 @@ core = {
     }
     return m.conj.apply(null, _.flatten([coll, xs]));
   },
+  'disj': function() {
+    var ks, set;
+    set = arguments[0], ks = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    assert.arity(1, Infinity, arguments);
+    assert.type_custom(function() {
+      if (!core.set_$QMARK_(set)) {
+        return "" + set + " is not a set";
+      }
+    });
+    if (ks === void 0) {
+      ks = [];
+    }
+    return core.apply(m.disj, set, ks);
+  },
   'into': function(to, from) {
     assert.arity(2, arguments);
     if (to === null && from === null) {
