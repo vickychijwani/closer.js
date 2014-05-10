@@ -269,7 +269,7 @@ LoopForm
         body.push($BlockStatement);
         $$ = wrapInIIFE(body, @1, yy);
 
-        var blockBody = $$.callee.body.body, whileBlock, whileBlockIdx, stmt;
+        var blockBody = $$.callee.object.body.body, whileBlock, whileBlockIdx, stmt;
         for (var i = 0, len = blockBody.length; i < len; ++i) {
             stmt = blockBody[i];
             if (stmt.type === 'BlockStatement') {
@@ -323,9 +323,15 @@ DotForm
             // (.prop obj) can either be a call to a 0-argument fn, or a property access
             // if both are possible, the function call is chosen
             $$ = yy.Node('ConditionalExpression',
-                yy.Node('BinaryExpression', '===',
-                    yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(@1)),
-                    yy.Node('Literal', 'function', yy.loc(@1)), yy.loc(@1)),
+                yy.Node('LogicalExpression', '&&',
+                    yy.Node('BinaryExpression', '===',
+                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(@1)),
+                        yy.Node('Literal', 'function', yy.loc(@1)), yy.loc(@1)),
+                    yy.Node('BinaryExpression', '===',
+                        yy.Node('MemberExpression', callee,
+                            yy.Node('Identifier', 'length', yy.loc(@1)),
+                            false, yy.loc(@1)),
+                        yy.Node('Literal', 0, yy.loc(@1)), yy.loc(@1))),
                 fnCall, callee, yy.loc(@1));
         }
     }
@@ -594,13 +600,22 @@ function processRecurFormIfAny(rootNode, actualArgs, yy) {
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, loc, yy) {
-    yyloc = yy.loc(loc);
+    var yyloc = yy.loc(loc);
+    var thisExp = yy.Node('ThisExpression', yyloc);
     return yy.Node('CallExpression',
-        yy.Node('FunctionExpression',
-            null, [], null,
-            createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc), yy),
-            false, false, yyloc
-        ), [], yyloc);
+        yy.Node('MemberExpression',
+            yy.Node('FunctionExpression',
+                null, [], null,
+                createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc), yy),
+                false, false, yyloc),
+            yy.Node('Identifier', 'call', yyloc), false, yyloc),
+        [yy.Node('ConditionalExpression',
+            yy.Node('BinaryExpression', '!==',
+                yy.Node('UnaryExpression', 'typeof', thisExp, true, yyloc),
+                yy.Node('Literal', 'undefined', yyloc), yyloc),
+            thisExp,
+            yy.Node('Literal', null, yyloc))],
+        yyloc);
 }
 
 function wrapInExpressionStatement(expr, yy) {

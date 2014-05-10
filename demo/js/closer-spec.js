@@ -314,7 +314,7 @@ case 52:
         body.push($$[$0]);
         this.$ = wrapInIIFE(body, _$[$0-4], yy);
 
-        var blockBody = this.$.callee.body.body, whileBlock, whileBlockIdx, stmt;
+        var blockBody = this.$.callee.object.body.body, whileBlock, whileBlockIdx, stmt;
         for (var i = 0, len = blockBody.length; i < len; ++i) {
             stmt = blockBody[i];
             if (stmt.type === 'BlockStatement') {
@@ -364,9 +364,15 @@ case 54:
             // (.prop obj) can either be a call to a 0-argument fn, or a property access
             // if both are possible, the function call is chosen
             this.$ = yy.Node('ConditionalExpression',
-                yy.Node('BinaryExpression', '===',
-                    yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(_$[$0-3])),
-                    yy.Node('Literal', 'function', yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
+                yy.Node('LogicalExpression', '&&',
+                    yy.Node('BinaryExpression', '===',
+                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(_$[$0-3])),
+                        yy.Node('Literal', 'function', yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
+                    yy.Node('BinaryExpression', '===',
+                        yy.Node('MemberExpression', callee,
+                            yy.Node('Identifier', 'length', yy.loc(_$[$0-3])),
+                            false, yy.loc(_$[$0-3])),
+                        yy.Node('Literal', 0, yy.loc(_$[$0-3])), yy.loc(_$[$0-3]))),
                 fnCall, callee, yy.loc(_$[$0-3]));
         }
     
@@ -752,13 +758,22 @@ function processRecurFormIfAny(rootNode, actualArgs, yy) {
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, loc, yy) {
-    yyloc = yy.loc(loc);
+    var yyloc = yy.loc(loc);
+    var thisExp = yy.Node('ThisExpression', yyloc);
     return yy.Node('CallExpression',
-        yy.Node('FunctionExpression',
-            null, [], null,
-            createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc), yy),
-            false, false, yyloc
-        ), [], yyloc);
+        yy.Node('MemberExpression',
+            yy.Node('FunctionExpression',
+                null, [], null,
+                createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc), yy),
+                false, false, yyloc),
+            yy.Node('Identifier', 'call', yyloc), false, yyloc),
+        [yy.Node('ConditionalExpression',
+            yy.Node('BinaryExpression', '!==',
+                yy.Node('UnaryExpression', 'typeof', thisExp, true, yyloc),
+                yy.Node('Literal', 'undefined', yyloc), yyloc),
+            thisExp,
+            yy.Node('Literal', null, yyloc))],
+        yyloc);
 }
 
 function wrapInExpressionStatement(expr, yy) {
@@ -4905,24 +4920,24 @@ describe('Closer parser', function() {
     return eq('(def add (fn [& numbers] (apply + numbers)))', Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], null, BlockStatement(AssertArity(0, Infinity), VariableDeclaration(VariableDeclarator(Identifier('numbers'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('numbers')]))))))));
   });
   it('parses a let form with no bindings and no body', function() {
-    return eq('(let [])', Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil())))))));
+    return eq('(let [])', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
   });
   it('parses a let form with non-empty bindings and a non-empty body', function() {
-    return eq('(let [x 3 y (- x)] (+ x y))', Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x')]))), ReturnStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Identifier('x'), Identifier('y')]))))))));
+    return eq('(let [x 3 y (- x)] (+ x y))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x')]))), ReturnStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Identifier('x'), Identifier('y')])))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
   });
   it('parses an empty do form', function() {
-    return eq('(do)', Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil())))))));
+    return eq('(do)', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
   });
   it('parses a non-empty do form', function() {
-    return eq('(do (+ 1 2) (+ 3 4))', Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(1), Integer(2)])), ReturnStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(3), Integer(4)]))))))));
+    return eq('(do (+ 1 2) (+ 3 4))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(1), Integer(2)])), ReturnStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(3), Integer(4)])))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
   });
   it('parses dot special forms', function() {
     eq('(.move-x-y this 10 20)', Program(ExpressionStatement(CallExpression(MemberExpression(ThisExpression(), String('move-x-y'), true), [Integer(10), Integer(20)]))));
-    return eq('(.pos this)', Program(ExpressionStatement(ConditionalExpression(BinaryExpression('===', UnaryExpression('typeof', MemberExpression(ThisExpression(), String('pos'), true)), String('function')), CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []), MemberExpression(ThisExpression(), String('pos'), true)))));
+    return eq('(.pos this)', Program(ExpressionStatement(ConditionalExpression(LogicalExpression('&&', BinaryExpression('===', UnaryExpression('typeof', MemberExpression(ThisExpression(), String('pos'), true)), String('function')), BinaryExpression('===', MemberExpression(MemberExpression(ThisExpression(), String('pos'), true), Identifier('length')), Integer(0))), CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []), MemberExpression(ThisExpression(), String('pos'), true)))));
   });
   it('parses loop + recur forms', function() {
-    eq('(loop [] (recur))', Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(WhileStatement(Boolean(true), BlockStatement(BlockStatement(ContinueStatement()), BreakStatement())))), []))));
-    return eq('(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))', Program(ExpressionStatement(CallExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('_$GT_'), Identifier('call')), [Nil(), Identifier('x'), Integer(1)]), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('console'), String('log'), true), [Identifier('x')])), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x'), Integer(2)]))), ExpressionStatement(AssignmentExpression(Identifier('x'), Identifier('__$recur0'))), ContinueStatement())), ReturnStatement(Nil())), BreakStatement())))), []))));
+    eq('(loop [] (recur))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(WhileStatement(Boolean(true), BlockStatement(BlockStatement(ContinueStatement()), BreakStatement())))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+    return eq('(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('_$GT_'), Identifier('call')), [Nil(), Identifier('x'), Integer(1)]), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('console'), String('log'), true), [Identifier('x')])), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x'), Integer(2)]))), ExpressionStatement(AssignmentExpression(Identifier('x'), Identifier('__$recur0'))), ContinueStatement())), ReturnStatement(Nil())), BreakStatement())))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
   });
   it('parses fn + recur forms', function() {
     return eq('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))', Program(ExpressionStatement(FunctionExpression(null, [Identifier('n'), Identifier('acc')], null, BlockStatement(AssertArity(2), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')), [Nil(), Identifier('n')]), ReturnStatement(Identifier('acc')), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('dec'), Identifier('call')), [Nil(), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('__$recur1'), CallExpression(MemberExpression(Identifier('_$STAR_'), Identifier('call')), [Nil(), Identifier('acc'), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('n'), Identifier('__$recur0'))), ExpressionStatement(AssignmentExpression(Identifier('acc'), Identifier('__$recur1'))), ContinueStatement())))))))));

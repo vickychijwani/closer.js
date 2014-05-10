@@ -421,50 +421,74 @@ describe 'Closer parser', ->
   it 'parses a let form with no bindings and no body', ->
     eq '(let [])', Program(
       ExpressionStatement(CallExpression(
-        FunctionExpression(
-          null, [], null,
-          BlockStatement(
-            ReturnStatement(Nil()))))))
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(
+              ReturnStatement(Nil()))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
 
   it 'parses a let form with non-empty bindings and a non-empty body', ->
     eq '(let [x 3 y (- x)] (+ x y))', Program(
       ExpressionStatement(CallExpression(
-        FunctionExpression(
-          null, [], null,
-          BlockStatement(
-            VariableDeclaration(VariableDeclarator(
-              Identifier('x'),
-              Integer(3))),
-            VariableDeclaration(VariableDeclarator(
-              Identifier('y'),
-              CallExpression(
-                MemberExpression(Identifier('_$_'), Identifier('call')),
-                [Nil(), Identifier('x')]))),
-            ReturnStatement(CallExpression(
-              MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-              [Nil(), Identifier('x'), Identifier('y')])))))))
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(
+              VariableDeclaration(VariableDeclarator(
+                Identifier('x'),
+                Integer(3))),
+              VariableDeclaration(VariableDeclarator(
+                Identifier('y'),
+                CallExpression(
+                  MemberExpression(Identifier('_$_'), Identifier('call')),
+                  [Nil(), Identifier('x')]))),
+              ReturnStatement(CallExpression(
+                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
+                [Nil(), Identifier('x'), Identifier('y')])))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
 
 
   # other special forms
   it 'parses an empty do form', ->
     eq '(do)', Program(
       ExpressionStatement(CallExpression(
-        FunctionExpression(
-          null, [], null,
-          BlockStatement(ReturnStatement(Nil()))))))
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(ReturnStatement(Nil()))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
 
   it 'parses a non-empty do form', ->
     eq '(do (+ 1 2) (+ 3 4))', Program(
       ExpressionStatement(CallExpression(
-        FunctionExpression(
-          null, [], null,
-          BlockStatement(
-            ExpressionStatement(CallExpression(
-              MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-              [Nil(), Integer(1), Integer(2)])),
-            ReturnStatement(CallExpression(
-              MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-              [Nil(), Integer(3), Integer(4)])))))))
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(
+              ExpressionStatement(CallExpression(
+                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
+                [Nil(), Integer(1), Integer(2)])),
+              ReturnStatement(CallExpression(
+                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
+                [Nil(), Integer(3), Integer(4)])))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
 
   it 'parses dot special forms', ->
     eq '(.move-x-y this 10 20)', Program(
@@ -474,54 +498,70 @@ describe 'Closer parser', ->
     eq '(.pos this)', Program(
       ExpressionStatement(
         ConditionalExpression(
-          BinaryExpression('===',
-            UnaryExpression('typeof',
-              MemberExpression(ThisExpression(), String('pos'), true)),
-            String('function')),
+          LogicalExpression('&&',
+            BinaryExpression('===',
+              UnaryExpression('typeof',
+                MemberExpression(ThisExpression(), String('pos'), true)),
+              String('function')),
+            BinaryExpression('===',
+              MemberExpression(
+                MemberExpression(ThisExpression(), String('pos'), true),
+                Identifier('length')),
+              Integer(0))),
           CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []),
           MemberExpression(ThisExpression(), String('pos'), true))))
 
   it 'parses loop + recur forms', ->
     eq '(loop [] (recur))', Program(
       ExpressionStatement(CallExpression(
-        FunctionExpression(
-          null, [], null,
-          BlockStatement(
-            WhileStatement(
-              Boolean(true),
-              BlockStatement(
-                BlockStatement(ContinueStatement()),
-                BreakStatement())))),
-        [])))
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(
+              WhileStatement(
+                Boolean(true),
+                BlockStatement(
+                  BlockStatement(ContinueStatement()),
+                  BreakStatement())))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
     eq '(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))', Program(
       ExpressionStatement(CallExpression(
-        FunctionExpression(
-          null, [], null,
-          BlockStatement(
-            VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))),
-            WhileStatement(
-              Boolean(true),
-              BlockStatement(
-                IfStatement(
-                  CallExpression(
-                    MemberExpression(Identifier('_$GT_'), Identifier('call')),
-                    [Nil(), Identifier('x'), Integer(1)]),
-                  BlockStatement(
-                    ExpressionStatement(CallExpression(
-                      MemberExpression(Identifier('console'), String('log'), true),
-                      [Identifier('x')])),
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(
+              VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))),
+              WhileStatement(
+                Boolean(true),
+                BlockStatement(
+                  IfStatement(
+                    CallExpression(
+                      MemberExpression(Identifier('_$GT_'), Identifier('call')),
+                      [Nil(), Identifier('x'), Integer(1)]),
                     BlockStatement(
-                      ExpressionStatement(AssignmentExpression(
-                        Identifier('__$recur0'),
-                        CallExpression(
-                          MemberExpression(Identifier('_$_'), Identifier('call')),
-                          [Nil(), Identifier('x'), Integer(2)]))),
-                      ExpressionStatement(AssignmentExpression(
-                        Identifier('x'), Identifier('__$recur0')))
-                      ContinueStatement())),
-                  ReturnStatement(Nil())),
-                BreakStatement())))),
-        [])))
+                      ExpressionStatement(CallExpression(
+                        MemberExpression(Identifier('console'), String('log'), true),
+                        [Identifier('x')])),
+                      BlockStatement(
+                        ExpressionStatement(AssignmentExpression(
+                          Identifier('__$recur0'),
+                          CallExpression(
+                            MemberExpression(Identifier('_$_'), Identifier('call')),
+                            [Nil(), Identifier('x'), Integer(2)]))),
+                        ExpressionStatement(AssignmentExpression(
+                          Identifier('x'), Identifier('__$recur0')))
+                        ContinueStatement())),
+                    ReturnStatement(Nil())),
+                  BreakStatement())))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
 
   it 'parses fn + recur forms', ->
     eq '(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))', Program(
