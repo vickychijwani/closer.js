@@ -11,7 +11,8 @@ module.exports = (grunt) ->
 
       browserify:
         command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %> src/<%= pkg.name %>.coffee > dist/<%= pkg.name %>.js;
-          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core src/<%= pkg.name %>-core.coffee > dist/<%= pkg.name %>-core.js;'
+          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core src/<%= pkg.name %>-core.coffee > dist/<%= pkg.name %>-core.js;
+          browserify -t coffeeify --extension=".coffee" -s assertions src/assert.coffee > dist/assertions.js;'
 
       browserify_spec:
         command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
