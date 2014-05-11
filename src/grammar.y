@@ -320,8 +320,9 @@ DotForm
         if ($args.length > 0) {
             $$ = fnCall;
         } else {
-            // (.prop obj) can either be a call to a 0-argument fn, or a property access
-            // if both are possible, the function call is chosen
+            // (.prop obj) can either be a call to a 0-argument fn, or a property access.
+            // if both are possible, the function call is chosen.
+            // (typeof obj['prop'] === 'function' && obj['prop'].length === 0) ? obj['prop']() : obj['prop'];
             $$ = yy.Node('ConditionalExpression',
                 yy.Node('LogicalExpression', '&&',
                     yy.Node('BinaryExpression', '===',
