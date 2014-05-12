@@ -1,4 +1,4 @@
-parser = require('../lib/parser').parser
+parser = require('./parser').parser
 nodes = require './nodes'
 
 # Define AST nodes
@@ -67,3 +67,6 @@ closer =
   node: parser.yy.Node
 
 module.exports = closer
+
+self.closer = closer if self?
+window.closer = closer if window?

@@ -1,4 +1,4 @@
-closer = require '../src/closer'
+closer = window?.closer ? self?.closer ? global?.closer ? require '../src/closer'
 json_diff = require 'json-diff'
 
 helpers = require './closer-helpers'

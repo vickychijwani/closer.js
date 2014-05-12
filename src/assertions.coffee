@@ -15,7 +15,7 @@ class ArgTypeError extends Error
 firstFailure = (args, testFn) ->
   _.find args, (arg) -> not testFn(arg)
 
-assert =
+assertions =
 
   numbers: (args...) ->
     unexpectedArg = firstFailure(_.flatten(args), (arg) -> typeof arg is 'number')
@@ -75,9 +75,12 @@ assert =
     throw new ArityError msg if msg = checkFn args
 
 
-module.exports = assert
+module.exports = assertions
 
 # requires go here, because of circular dependency
 # see https://coderwall.com/p/myzvmg for more
-_ = require './lodash'
-mori = require 'mori'
+_ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
+mori = window?.mori ? self?.mori ? global?.mori ? require 'mori'
+
+self.assertions = assertions if self?
+window.assertions = assertions if window?

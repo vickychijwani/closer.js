@@ -1,5 +1,5 @@
 json_diff = require 'json-diff'
-closer = require '../src/closer'
+closer = window?.closer ? self?.closer ? global?.closer ? require '../src/closer'
 
 # custom matcher to deep-compare objects
 exports.toDeepEqual = (expected) ->

@@ -3,8 +3,8 @@ vm = require 'vm'
 closer = require './closer'
 repl = require './repl'
 
-global.assertions = require './assert'
-global.core = require './closer-core'
+global.assertions = require './assertions'
+global.closerCore = require './closer-core'
 
 defaults =
   prompt: 'closer> '

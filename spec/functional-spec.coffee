@@ -1,7 +1,7 @@
-_ = require '../src/lodash'
+_ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
 repl = require '../src/repl'
-core = require '../src/closer-core'
-assertions = require '../src/assert'
+closerCore = window?.closerCore ? self?.closerCore ? global?.closerCore ? require '../src/closer-core'
+assertions = window?.assertions ? self?.assertions ? global?.assertions ? require '../src/assertions'
 
 beforeEach ->
   @addMatchers
@@ -9,7 +9,7 @@ beforeEach ->
     toCljEqual: (expected) ->
       @message = ->
         "Expected #{@actual} to equal #{expected}"
-      core._$EQ_(@actual, expected)
+      closerCore._$EQ_(@actual, expected)
 
 evaluate = (src, options) ->
   eval repl.generateJS src, options
@@ -20,13 +20,13 @@ truthy = (src) -> expect(evaluate src).toEqual true
 falsy = (src) -> expect(evaluate src).toEqual false
 nil = (src) -> expect(evaluate src).toEqual null
 
-key = (x) -> core.keyword x
-seq = (seqable) -> core.seq seqable
-emptySeq = -> core.empty core.seq [1]
-vec = (xs...) -> core.vector.apply null, _.flatten xs
-list = (xs...) -> core.list.apply null, _.flatten xs
-set = (xs...) -> core.hash_$_set.apply null, _.flatten xs
-map = (xs...) -> core.hash_$_map.apply null, _.flatten xs
+key = (x) -> closerCore.keyword x
+seq = (seqable) -> closerCore.seq seqable
+emptySeq = -> closerCore.empty closerCore.seq [1]
+vec = (xs...) -> closerCore.vector.apply null, _.flatten xs
+list = (xs...) -> closerCore.list.apply null, _.flatten xs
+set = (xs...) -> closerCore.hash_$_set.apply null, _.flatten xs
+map = (xs...) -> closerCore.hash_$_map.apply null, _.flatten xs
 
 __$this = (() ->
   class Soldier

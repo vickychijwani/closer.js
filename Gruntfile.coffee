@@ -7,21 +7,12 @@ module.exports = (grunt) ->
         failOnError: true
 
       jison:
-        command: 'mkdir -p lib/; jison src/grammar.y src/lexer.l -o lib/parser.js'
+        command: 'jison src/grammar.y src/lexer.l -o src/parser.js;
+                  mkdir -p lib/src/; cp src/parser.js lib/src/;'
 
-      browserify:
-        command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %> src/<%= pkg.name %>.coffee > dist/<%= pkg.name %>.js;
-          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core src/<%= pkg.name %>-core.coffee > dist/<%= pkg.name %>-core.js;
-          browserify -t coffeeify --extension=".coffee" -s assertions src/assert.coffee > dist/assertions.js;'
-
-      browserify_spec:
-        command: 'browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-spec spec/<%= pkg.name %>-spec.coffee > demo/js/<%= pkg.name %>-spec.js;
-          browserify -t coffeeify --extension=".coffee" -s <%= pkg.name %>-core-spec spec/<%= pkg.name %>-core-spec.coffee > demo/js/<%= pkg.name %>-core-spec.js;
-          browserify -t coffeeify --extension=".coffee" -s functional-spec spec/functional-spec.coffee > demo/js/functional-spec.js;'
-
-      copy_uglified:
-        command: 'cp dist/<%= pkg.name %>-core.js demo/js/<%= pkg.name %>-core.js;
-                  cp dist/<%= pkg.name %>.js demo/js/<%= pkg.name %>.js;'
+      copy_to_demo:
+        command: 'cp dist/<%= pkg.name %>-core.min.js demo/js/;
+                  cp dist/<%= pkg.name %>.min.js demo/js/;'
 
       push_ghpages:
         command: 'git subtree push --prefix demo origin gh-pages'
@@ -53,40 +44,72 @@ module.exports = (grunt) ->
           level: 'error'
 
     coffee:
-      compile:
+      lib:
         files: [
           expand: true         # Enable dynamic expansion.
           cwd: 'src/'          # Src matches are relative to this path.
           src: ['**/*.coffee'] # Actual pattern(s) to match.
-          dest: 'lib/'         # Destination path prefix.
+          dest: 'lib/src/'         # Destination path prefix.
+          ext: '.js'           # Dest filepaths will have this extension.
+        ]
+      specs:
+        files: [
+          expand: true         # Enable dynamic expansion.
+          cwd: 'spec/'         # Src matches are relative to this path.
+          src: ['**/*.coffee'] # Actual pattern(s) to match.
+          dest: 'lib/spec/'    # Destination path prefix.
           ext: '.js'           # Dest filepaths will have this extension.
         ]
 
-    uglify:
-      parser:
-        files:
-          'dist/<%= pkg.name %>.js': ['dist/<%= pkg.name %>.js']
-      core:
-        files:
-          'dist/<%= pkg.name %>-core.js': ['dist/<%= pkg.name %>-core.js']
-
-    lodash:
-      build:
-        dest: 'src/lodash.js',
+    browserify:
+      dist:
+        files: [
+          expand: true
+          cwd: 'lib/src/'
+          src: ['<%= pkg.name %>.js', '<%= pkg.name %>-core.js', 'assertions.js']
+          dest: 'dist/'
+        ]
         options:
-          include: ['reduce', 'max', 'min', 'uniq', 'find', 'any',
-                    'flatten', 'isString', 'isArray']
-          flags: ['debug']
+          exclude: ['lodash-node', 'mori', './<%= pkg.name %>', './<%= pkg.name %>-core', './assertions']
+      specs:
+        files: [
+          expand: true
+          cwd: 'lib/spec/'
+          src: ['<%= pkg.name %>-spec.js', '<%= pkg.name %>-core-spec.js', 'functional-spec.js']
+          dest: 'demo/js/'
+        ]
+        options:
+          exclude: ['lodash-node', 'mori', '../src/closer', '../src/closer-core', '../src/assertions']
+
+    uglify:
+      dist:
+        files: [
+          expand: true
+          cwd: 'dist/'
+          src: ['<%= pkg.name %>.js', '<%= pkg.name %>-core.js', 'assertions.js']
+          dest: 'dist/'
+          ext: '.min.js'
+        ]
+
+    concat:
+      mori:
+        src: ['node_modules/mori/mori.js', 'dist/<%= pkg.name %>-core.js']
+        dest: 'dist/<%= pkg.name %>-core.js'
+      mori_min:
+        src: ['node_modules/mori/mori.js', 'dist/<%= pkg.name %>-core.min.js']
+        dest: 'dist/<%= pkg.name %>-core.min.js'
+
 
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-jasmine-node'
   grunt.loadNpmTasks 'grunt-contrib-watch'
+  grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
+  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-lodash'
 
   grunt.registerTask 'test', ['coffeelint', 'shell:jison', 'jasmine_node']
-  grunt.registerTask 'build', ['coffeelint', 'lodash', 'shell:jison']
-  grunt.registerTask 'default', ['build', 'jasmine_node', 'shell:browserify', 'shell:browserify_spec', 'uglify', 'shell:copy_uglified']
+  grunt.registerTask 'build', ['coffeelint', 'shell:jison']
+  grunt.registerTask 'default', ['build', 'jasmine_node', 'coffee', 'browserify', 'uglify', 'concat', 'shell:copy_to_demo']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']
