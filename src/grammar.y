@@ -324,6 +324,16 @@ DoTimesForm
     }
   ;
 
+WhileForm
+  : WHILE SExpr BlockStatement {
+        var whileLoop = yy.Node('WhileStatement', $SExpr, $BlockStatement, yy.loc(@1));
+        // wrapping it in an IIFE makes it not work in CodeCombat
+        // see https://github.com/codecombat/aether/issues/49
+        // $$ = wrapInIIFE([whileLoop], @1, yy);
+        $$ = whileLoop;
+    }
+  ;
+
 DotForm
   : DOT IDENTIFIER[prop] SExpr[obj] SExprs?[args] {
         $args = getValueIfUndefined($args, []);
@@ -359,9 +369,11 @@ List
   | LogicalExpr
   | VarDeclaration
   | LetForm
+  | SETVAL Identifier SExpr { $$ = yy.Node('AssignmentExpression', '=', $Identifier, $SExpr, yy.loc(@1)); }
   | LoopForm
   | RecurForm
   | DoTimesForm
+  | WhileForm
   | DotForm
   | Fn SExprs?[args] {
         yy.locComb(@$, @2);

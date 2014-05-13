@@ -420,6 +420,10 @@ describe 'Closer parser', ->
                 MemberExpression(Identifier('apply'), Identifier('call')),
                 [Nil(), Identifier('_$PLUS_'), Identifier('numbers')])))))))
 
+  it 'parses var assignment (set! var value) forms', ->
+    eq '(set! x 4)', Program(
+      ExpressionStatement(AssignmentExpression(Identifier('x'), Integer(4))))
+
   it 'parses a let form with no bindings and no body', ->
     eq '(let [])', Program(
       ExpressionStatement(CallExpression(
@@ -554,6 +558,19 @@ describe 'Closer parser', ->
           ExpressionStatement(CallExpression(
             MemberExpression(Identifier('println'), Identifier('call')),
             [Nil(), Identifier('i')])))))
+
+  it 'parses while forms', ->
+    eq '(while (< i 5) (set! i (inc i)))', Program(
+      WhileStatement(
+        CallExpression(
+          MemberExpression(Identifier('_$LT_'), Identifier('call')),
+          [Nil(), Identifier('i'), Integer(5)]),
+        BlockStatement(
+          ExpressionStatement(AssignmentExpression(
+            Identifier('i'),
+            CallExpression(
+              MemberExpression(Identifier('inc'), Identifier('call')),
+              [Nil(), Identifier('i')]))))))
 
 
   # other special forms
