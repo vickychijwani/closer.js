@@ -288,8 +288,8 @@ LoopForm
         var whileBody = whileBlock.body;
         var lastLoc = (whileBody.length > 0) ? (whileBody[whileBody.length-1].loc) : whileBlock.loc;
         whileBody.push(yy.Node('BreakStatement', null, lastLoc));
-        blockBody[whileBlockIdx] = yy.Node('WhileStatement', yy.Node('Literal', true, @BlockStatement),
-            whileBlock, @BlockStatement);
+        blockBody[whileBlockIdx] = yy.Node('WhileStatement', yy.Node('Literal', true, yy.loc(@BlockStatement)),
+            whileBlock, yy.loc(@BlockStatement));
     }
   ;
 
@@ -305,7 +305,7 @@ RecurForm
             assignment = yy.Node('AssignmentExpression', '=', id, arg, arg.loc);
             body.push(wrapInExpressionStatement(assignment, yy));
         }
-        $$ = yy.Node('BlockStatement', body, @1);
+        $$ = yy.Node('BlockStatement', body, yy.loc(@1));
         $$.recurBlock = true;
     }
   ;

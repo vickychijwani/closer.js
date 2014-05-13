@@ -1760,8 +1760,8 @@ case 52:
         var whileBody = whileBlock.body;
         var lastLoc = (whileBody.length > 0) ? (whileBody[whileBody.length-1].loc) : whileBlock.loc;
         whileBody.push(yy.Node('BreakStatement', null, lastLoc));
-        blockBody[whileBlockIdx] = yy.Node('WhileStatement', yy.Node('Literal', true, _$[$0]),
-            whileBlock, _$[$0]);
+        blockBody[whileBlockIdx] = yy.Node('WhileStatement', yy.Node('Literal', true, yy.loc(_$[$0])),
+            whileBlock, yy.loc(_$[$0]));
     
 break;
 case 53:
@@ -1775,7 +1775,7 @@ case 53:
             assignment = yy.Node('AssignmentExpression', '=', id, arg, arg.loc);
             body.push(wrapInExpressionStatement(assignment, yy));
         }
-        this.$ = yy.Node('BlockStatement', body, _$[$0-1]);
+        this.$ = yy.Node('BlockStatement', body, yy.loc(_$[$0-1]));
         this.$.recurBlock = true;
     
 break;
