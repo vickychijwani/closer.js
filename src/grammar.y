@@ -311,10 +311,11 @@ RecurForm
   ;
 
 DoTimesForm
-  : DOTIMES '[' Identifier INTEGER ']' BlockStatement {
+  : DOTIMES '[' Identifier SExpr ']' BlockStatement {
         var init = parseVarDecl($Identifier, parseNumLiteral('Integer', '0', @Identifier, yy), @Identifier, yy);
-        var test = yy.Node('BinaryExpression', '<', $Identifier,
-            parseNumLiteral('Integer', $4, @4, yy), yy.loc(@Identifier));
+        var maxId = yy.Node('Identifier', '__$max', yy.loc(@SExpr));
+        addVarDecl(init, maxId, $SExpr, @SExpr, yy);
+        var test = yy.Node('BinaryExpression', '<', $Identifier, maxId, yy.loc(@Identifier));
         var update = yy.Node('UpdateExpression', '++', $Identifier, true, yy.loc(@Identifier));
         var forLoop = yy.Node('ForStatement', init, test, update, $BlockStatement, yy.loc(@1));
         // wrapping it in an IIFE makes it not work in CodeCombat
@@ -729,9 +730,14 @@ function parseLogicalExpr(op, exprs, exprLoc, yy) {
 }
 
 function parseVarDecl(id, init, loc, yy) {
-    var yyloc = yy.loc(loc);
-    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yyloc);
-    return yy.Node('VariableDeclaration', 'var', [decl], yyloc);
+    var stmt = yy.Node('VariableDeclaration', 'var', [], yy.loc(loc));
+    return addVarDecl(stmt, id, init, loc, yy);
+}
+
+function addVarDecl(stmt, id, init, loc, yy) {
+    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yy.loc(loc));
+    stmt.declarations.push(decl);
+    return stmt;
 }
 
 function parseNumLiteral(type, token, loc, yy, yytext) {

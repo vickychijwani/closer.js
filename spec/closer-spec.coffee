@@ -549,10 +549,12 @@ describe 'Closer parser', ->
                     ContinueStatement()))))))))
 
   it 'parses dotimes forms', ->
-    eq '(dotimes [i 5] (println i))', Program(
+    eq '(dotimes [i expr] (println i))', Program(
       ForStatement(
-        VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0))),
-        BinaryExpression('<', Identifier('i'), Integer(5)),
+        VariableDeclaration(
+          VariableDeclarator(Identifier('i'), Integer(0)),
+          VariableDeclarator(Identifier('__$max'), Identifier('expr'))),
+        BinaryExpression('<', Identifier('i'), Identifier('__$max')),
         UpdateExpression('++', Identifier('i')),
         BlockStatement(
           ExpressionStatement(CallExpression(
