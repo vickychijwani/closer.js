@@ -16,6 +16,7 @@ AssertArity = helpers.AssertArity
 Identifier = helpers.Identifier
 ThisExpression = helpers.ThisExpression
 UnaryExpression = helpers.UnaryExpression
+UpdateExpression = helpers.UpdateExpression
 BinaryExpression = helpers.BinaryExpression
 LogicalExpression = helpers.LogicalExpression
 ArrayExpression = helpers.ArrayExpression
@@ -26,6 +27,7 @@ ConditionalExpression = helpers.ConditionalExpression
 FunctionExpression = helpers.FunctionExpression
 EmptyStatement = helpers.EmptyStatement
 ExpressionStatement = helpers.ExpressionStatement
+ForStatement = helpers.ForStatement
 WhileStatement = helpers.WhileStatement
 IfStatement = helpers.IfStatement
 BreakStatement = helpers.BreakStatement
@@ -457,60 +459,7 @@ describe 'Closer parser', ->
           ThisExpression(), Nil())])))
 
 
-  # other special forms
-  it 'parses an empty do form', ->
-    eq '(do)', Program(
-      ExpressionStatement(CallExpression(
-        MemberExpression(
-          FunctionExpression(
-            null, [], null,
-            BlockStatement(ReturnStatement(Nil()))),
-          Identifier('call')),
-        [ConditionalExpression(
-          BinaryExpression('!==',
-            UnaryExpression('typeof', ThisExpression()), String('undefined')),
-          ThisExpression(), Nil())])))
-
-  it 'parses a non-empty do form', ->
-    eq '(do (+ 1 2) (+ 3 4))', Program(
-      ExpressionStatement(CallExpression(
-        MemberExpression(
-          FunctionExpression(
-            null, [], null,
-            BlockStatement(
-              ExpressionStatement(CallExpression(
-                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-                [Nil(), Integer(1), Integer(2)])),
-              ReturnStatement(CallExpression(
-                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-                [Nil(), Integer(3), Integer(4)])))),
-          Identifier('call')),
-        [ConditionalExpression(
-          BinaryExpression('!==',
-            UnaryExpression('typeof', ThisExpression()), String('undefined')),
-          ThisExpression(), Nil())])))
-
-  it 'parses dot special forms', ->
-    eq '(.move-x-y this 10 20)', Program(
-      ExpressionStatement(CallExpression(
-        MemberExpression(ThisExpression(), String('move-x-y'), true),
-        [Integer(10), Integer(20)])))
-    eq '(.pos this)', Program(
-      ExpressionStatement(
-        ConditionalExpression(
-          LogicalExpression('&&',
-            BinaryExpression('===',
-              UnaryExpression('typeof',
-                MemberExpression(ThisExpression(), String('pos'), true)),
-              String('function')),
-            BinaryExpression('===',
-              MemberExpression(
-                MemberExpression(ThisExpression(), String('pos'), true),
-                Identifier('length')),
-              Integer(0))),
-          CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []),
-          MemberExpression(ThisExpression(), String('pos'), true))))
-
+  # looping forms
   it 'parses loop + recur forms', ->
     eq '(loop [] (recur))', Program(
       ExpressionStatement(CallExpression(
@@ -594,6 +543,72 @@ describe 'Closer parser', ->
                     ExpressionStatement(AssignmentExpression(
                       Identifier('acc'), Identifier('__$recur1'))),
                     ContinueStatement()))))))))
+
+  it 'parses dotimes forms', ->
+    eq '(dotimes [i 5] (println i))', Program(
+      ForStatement(
+        VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0))),
+        BinaryExpression('<', Identifier('i'), Integer(5)),
+        UpdateExpression('++', Identifier('i')),
+        BlockStatement(
+          ExpressionStatement(CallExpression(
+            MemberExpression(Identifier('println'), Identifier('call')),
+            [Nil(), Identifier('i')])))))
+
+
+  # other special forms
+  it 'parses an empty do form', ->
+    eq '(do)', Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(ReturnStatement(Nil()))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
+
+  it 'parses a non-empty do form', ->
+    eq '(do (+ 1 2) (+ 3 4))', Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(
+          FunctionExpression(
+            null, [], null,
+            BlockStatement(
+              ExpressionStatement(CallExpression(
+                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
+                [Nil(), Integer(1), Integer(2)])),
+              ReturnStatement(CallExpression(
+                MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
+                [Nil(), Integer(3), Integer(4)])))),
+          Identifier('call')),
+        [ConditionalExpression(
+          BinaryExpression('!==',
+            UnaryExpression('typeof', ThisExpression()), String('undefined')),
+          ThisExpression(), Nil())])))
+
+  it 'parses dot special forms', ->
+    eq '(.move-x-y this 10 20)', Program(
+      ExpressionStatement(CallExpression(
+        MemberExpression(ThisExpression(), String('move-x-y'), true),
+        [Integer(10), Integer(20)])))
+    eq '(.pos this)', Program(
+      ExpressionStatement(
+        ConditionalExpression(
+          LogicalExpression('&&',
+            BinaryExpression('===',
+              UnaryExpression('typeof',
+                MemberExpression(ThisExpression(), String('pos'), true)),
+              String('function')),
+            BinaryExpression('===',
+              MemberExpression(
+                MemberExpression(ThisExpression(), String('pos'), true),
+                Identifier('length')),
+              Integer(0))),
+          CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []),
+          MemberExpression(ThisExpression(), String('pos'), true))))
 
   it 'parses logical expressions (and / or)', ->
     eq '(and) (or)', Program(

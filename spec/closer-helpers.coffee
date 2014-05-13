@@ -43,6 +43,12 @@ exports.UnaryExpression = (operator, argument) ->
   argument: argument
   prefix: true
 
+exports.UpdateExpression = (operator, argument) ->
+  type: 'UpdateExpression'
+  operator: '++'
+  argument: argument
+  prefix: true
+
 exports.BinaryExpression = (operator, left, right) ->
   type: 'BinaryExpression'
   operator: operator
@@ -98,6 +104,13 @@ exports.EmptyStatement = ->
 exports.ExpressionStatement = (expression) ->
   type: 'ExpressionStatement'
   expression: expression
+
+exports.ForStatement = (init, test, update, body) ->
+  type: 'ForStatement'
+  init: init
+  test: test
+  update: update
+  body: body
 
 exports.WhileStatement = (test, body) ->
   type: 'WhileStatement'

@@ -310,6 +310,20 @@ RecurForm
     }
   ;
 
+DoTimesForm
+  : DOTIMES '[' Identifier INTEGER ']' BlockStatement {
+        var init = parseVarDecl($Identifier, parseNumLiteral('Integer', '0', @Identifier, yy), @Identifier, yy);
+        var test = yy.Node('BinaryExpression', '<', $Identifier,
+            parseNumLiteral('Integer', $4, @4, yy), yy.loc(@Identifier));
+        var update = yy.Node('UpdateExpression', '++', $Identifier, true, yy.loc(@Identifier));
+        var forLoop = yy.Node('ForStatement', init, test, update, $BlockStatement, yy.loc(@1));
+        // wrapping it in an IIFE makes it not work in CodeCombat
+        // see https://github.com/codecombat/aether/issues/49
+        // $$ = wrapInIIFE([forLoop], @1, yy);
+        $$ = forLoop;
+    }
+  ;
+
 DotForm
   : DOT IDENTIFIER[prop] SExpr[obj] SExprs?[args] {
         $args = getValueIfUndefined($args, []);
@@ -347,6 +361,7 @@ List
   | LetForm
   | LoopForm
   | RecurForm
+  | DoTimesForm
   | DotForm
   | Fn SExprs?[args] {
         yy.locComb(@$, @2);

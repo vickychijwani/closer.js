@@ -57,6 +57,7 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 'recur' return 'RECUR';
 'and'   return 'AND';
 'or'    return 'OR';
+'dotimes' return 'DOTIMES';
 
 ':as'   return 'AS';
 ':keys' return 'KEYS';
