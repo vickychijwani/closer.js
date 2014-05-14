@@ -2841,11 +2841,11 @@ case 42:
     
 break;
 case 43:
-        this.$ = yy.Node('IfStatement', $$[$0-2], $$[$0-1], getValueIfUndefined($$[$0], null));
+        this.$ = yy.Node('IfStatement', $$[$0-2], $$[$0-1], getValueIfUndefined($$[$0], null), yy.loc(_$[$0-3]));
     
 break;
 case 44:
-        this.$ = yy.Node('IfStatement', $$[$0-1], $$[$0], null);
+        this.$ = yy.Node('IfStatement', $$[$0-1], $$[$0], null, yy.loc(_$[$0-2]));
     
 break;
 case 45:

@@ -204,10 +204,10 @@ AnonFnLiteral
 
 ConditionalExpr
   : IF SExpr[test] SExprStmt[consequent] SExprStmt?[alternate] {
-        $$ = yy.Node('IfStatement', $test, $consequent, getValueIfUndefined($alternate, null));
+        $$ = yy.Node('IfStatement', $test, $consequent, getValueIfUndefined($alternate, null), yy.loc(@1));
     }
   | WHEN SExpr[test] BlockStatement[consequent] {
-        $$ = yy.Node('IfStatement', $test, $consequent, null);
+        $$ = yy.Node('IfStatement', $test, $consequent, null, yy.loc(@1));
     }
   ;
 
