@@ -109,7 +109,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
 
-  grunt.registerTask 'test', ['coffeelint', 'shell:jison', 'jasmine_node']
-  grunt.registerTask 'build', ['coffeelint', 'shell:jison']
+  grunt.registerTask 'test', ['coffeelint', 'shell:jison', 'coffee', 'jasmine_node']
+  grunt.registerTask 'build', ['coffeelint', 'shell:jison', 'coffee']
   grunt.registerTask 'default', ['build', 'jasmine_node', 'coffee', 'browserify', 'uglify', 'concat', 'shell:copy_to_demo']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']
