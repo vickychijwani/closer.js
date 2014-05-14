@@ -1,5 +1,3 @@
 .idea
 node_modules
 /npm-debug.log
-lib
-/src/lodash.js
