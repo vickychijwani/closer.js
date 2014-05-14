@@ -64,12 +64,12 @@ assertions =
     if unexpectedArg
       throw new ArgTypeError "#{unexpectedArg} is not a function"
 
-  arity: (expected_min, expected_max, args) ->
+  arity: (expected_min, expected_max, actual) ->
     if arguments.length is 2
-      args = expected_max
+      actual = expected_max
       expected_max = expected_min
-    unless expected_min <= args.length <= expected_max
-      throw new ArityError expected_min, expected_max, args.length
+    unless expected_min <= actual <= expected_max
+      throw new ArityError expected_min, expected_max, actual
 
   arity_custom: (args, checkFn) ->
     throw new ArityError msg if msg = checkFn args

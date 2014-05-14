@@ -37,7 +37,7 @@
     if (max === Infinity) {
       args.push(exports.Identifier('Infinity'));
     }
-    args.push(exports.Identifier('arguments'));
+    args.push(exports.MemberExpression(exports.Identifier('arguments'), exports.Identifier('length')));
     return exports.ExpressionStatement(exports.CallExpression(exports.MemberExpression(exports.Identifier('assertions'), exports.Identifier('arity')), args));
   };
 

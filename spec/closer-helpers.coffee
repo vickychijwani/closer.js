@@ -18,7 +18,7 @@ for type in ['keyword', 'vector', 'list', 'hash_$_set', 'hash_$_map']
 exports.AssertArity = (min, max = null) ->
   args = [exports.Literal(min)]
   if (max is Infinity) then args.push exports.Identifier('Infinity')
-  args.push exports.Identifier('arguments')
+  args.push exports.MemberExpression(exports.Identifier('arguments'), exports.Identifier('length'))
   exports.ExpressionStatement(
     exports.CallExpression(
       exports.MemberExpression(

@@ -134,14 +134,13 @@
         throw new ArgTypeError("" + unexpectedArg + " is not a function");
       }
     },
-    arity: function(expected_min, expected_max, args) {
-      var _ref;
+    arity: function(expected_min, expected_max, actual) {
       if (arguments.length === 2) {
-        args = expected_max;
+        actual = expected_max;
         expected_max = expected_min;
       }
-      if (!((expected_min <= (_ref = args.length) && _ref <= expected_max))) {
-        throw new ArityError(expected_min, expected_max, args.length);
+      if (!((expected_min <= actual && actual <= expected_max))) {
+        throw new ArityError(expected_min, expected_max, actual);
       }
     },
     arity_custom: function(args, checkFn) {

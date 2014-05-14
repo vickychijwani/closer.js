@@ -811,7 +811,9 @@ function createArityCheckStmt(minArity, hasRestArgs, loc, yy) {
     if (hasRestArgs) {
         arityCheckArgs.push(yy.Node('Identifier', 'Infinity', argsLoc));
     }
-    arityCheckArgs.push(yy.Node('Identifier', 'arguments', argsLoc));
+    arityCheckArgs.push(yy.Node('MemberExpression',
+        yy.Node('Identifier', 'arguments', argsLoc),
+        yy.Node('Identifier', 'length', argsLoc), false, argsLoc));
     var arityCheck = yy.Node('CallExpression',
         yy.Node('MemberExpression',
             yy.Node('Identifier', 'assertions', argsLoc),
