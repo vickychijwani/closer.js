@@ -29,18 +29,18 @@
   parser.yy.locComb = function(start, end) {
     start.last_line = end.last_line;
     start.last_column = end.last_column;
+    start.range = [start.range[0], end.range[1]];
     return start;
   };
 
   parser.yy.loc = function(loc) {
-    var newLoc;
     if (!this.locations) {
       return null;
     }
     if ('length' in loc) {
       loc = this.locComb(loc[0], loc[1]);
     }
-    newLoc = {
+    return {
       start: {
         line: this.startLine + loc.first_line - 1,
         column: loc.first_column
@@ -48,10 +48,12 @@
       end: {
         line: this.startLine + loc.last_line - 1,
         column: loc.last_column
-      }
+      },
+      range: loc.range
     };
-    return newLoc;
   };
+
+  parser.lexer.options.ranges = true;
 
   oldParse = parser.parse;
 
@@ -63,9 +65,12 @@
 
   Parser = (function() {
     function Parser(options) {
-      nodes.locations = this.yy.locations = options.loc !== false;
+      this.yy.locs = options.loc !== false;
+      this.yy.ranges = options.range === true;
+      this.yy.locations = this.yy.locs || this.yy.ranges;
       this.yy.source = options.source || null;
       this.yy.startLine = options.line || 1;
+      nodes.forceNoLoc = options.forceNoLoc;
     }
 
     return Parser;
@@ -108,7 +113,7 @@
 
 },{"./nodes":2,"./parser":3}],2:[function(require,module,exports){
 (function() {
-  exports.locations = true;
+  exports.forceNoLoc = false;
 
   exports.defineNodes = function(builder) {
     var convertExprToPattern, def, defaultIni, funIni;
@@ -122,7 +127,7 @@
         obj = {};
         obj.type = name;
         ini.call(obj, a, b, c, d, e, f, g, h);
-        if (!exports.locations) {
+        if (exports.forceNoLoc === true) {
           delete obj.loc;
         }
         return obj;
@@ -439,7 +444,7 @@ switch (yystate) {
 case 1:
         this.$ = ($$[$0] === 'this')
             ? yy.Node('ThisExpression', yy.loc(_$[$0]))
-            : yy.Node('Identifier', parseIdentifier($$[$0]), yy.loc(_$[$0]));
+            : yy.Node('Identifier', parseIdentifierName($$[$0]), yy.loc(_$[$0]));
     
 break;
 case 2: this.$ = []; 
@@ -463,25 +468,25 @@ case 5:
         this.$.anonArgNum = anonArgNum;
     
 break;
-case 6: this.$ = parseNumLiteral('Integer', $$[$0], _$[$0], yy, yytext); 
+case 6: this.$ = parseNumLiteral('Integer', $$[$0], yy.loc(_$[$0]), yy, yytext); 
 break;
-case 7: this.$ = parseNumLiteral('Float', $$[$0], _$[$0], yy, yytext); 
+case 7: this.$ = parseNumLiteral('Float', $$[$0], yy.loc(_$[$0]), yy, yytext); 
 break;
-case 8: this.$ = parseLiteral('String', parseString($$[$0]), _$[$0], yy.raw[yy.raw.length-1], yy); 
+case 8: this.$ = parseLiteral('String', parseString($$[$0]), yy.loc(_$[$0]), yy.raw[yy.raw.length-1], yy); 
 break;
-case 9: this.$ = parseLiteral('Boolean', true, _$[$0], yytext, yy); 
+case 9: this.$ = parseLiteral('Boolean', true, yy.loc(_$[$0]), yytext, yy); 
 break;
-case 10: this.$ = parseLiteral('Boolean', false, _$[$0], yytext, yy); 
+case 10: this.$ = parseLiteral('Boolean', false, yy.loc(_$[$0]), yytext, yy); 
 break;
-case 11: this.$ = parseLiteral('Nil', null, _$[$0], yytext, yy); 
+case 11: this.$ = parseLiteral('Nil', null, yy.loc(_$[$0]), yytext, yy); 
 break;
-case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), this._$, yy); 
+case 15: this.$ = parseCollectionLiteral('vector', getValueIfUndefined($$[$0-1], []), yy.loc(this._$), yy); 
 break;
-case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), this._$, yy); 
+case 16: this.$ = parseCollectionLiteral('list', getValueIfUndefined($$[$0-1], []), yy.loc(this._$), yy); 
 break;
-case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), this._$, yy); 
+case 17: this.$ = parseCollectionLiteral('hash-map', getValueIfUndefined($$[$0-1], []), yy.loc(this._$), yy); 
 break;
-case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), this._$, yy); 
+case 18: this.$ = parseCollectionLiteral('hash-set', getValueIfUndefined($$[$0-1], []), yy.loc(this._$), yy); 
 break;
 case 22: this.$ = $$[$0-1]; 
 break;
@@ -562,7 +567,7 @@ case 39:
                     $$[$0], blockLoc)], blockLoc);
         }
 
-        var arityCheck = createArityCheckStmt(ids.length, $$[$0-2].rest, _$[$0-2], yy);
+        var arityCheck = createArityCheckStmt(ids.length, $$[$0-2].rest, yy.loc(_$[$0-2]), yy);
         $$[$0].body.unshift(arityCheck);
 
         this.$ = yy.Node('FunctionExpression', null, ids, null,
@@ -571,7 +576,7 @@ case 39:
 break;
 case 40: this.$ = $$[$0]; 
 break;
-case 41: this.$ = parseVarDecl($$[$0-1], $$[$0], _$[$0-2], yy); 
+case 41: this.$ = parseVarDecl($$[$0-1], $$[$0], yy.loc(_$[$0-2]), yy); 
 break;
 case 42:
         var body = $$[$0-1], bodyLoc = _$[$0-1];
@@ -598,11 +603,11 @@ case 42:
         createReturnStatementIfPossible(body, yy);
         if (hasRestArg) {
             var restId = yy.Node('Identifier', '__$rest', yy.loc(bodyLoc));
-            var restDecl = createRestArgsDecl(restId, null, maxArgNum, bodyLoc, yy);
+            var restDecl = createRestArgsDecl(restId, null, maxArgNum, yy.loc(bodyLoc), yy);
             body.body.unshift(restDecl);
         }
 
-        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, _$[$0-3], yy);
+        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, yy.loc(_$[$0-3]), yy);
         body.body.unshift(arityCheck);
 
         this.$ = yy.Node('FunctionExpression', null, args, null, body,
@@ -619,15 +624,15 @@ case 44:
 break;
 case 45:
         $$[$0] = getValueIfUndefined($$[$0], [yy.Node('Literal', true, yy.loc(_$[$0-1]))]);
-        this.$ = parseLogicalExpr('&&', $$[$0], _$[$0-1], yy);
+        this.$ = parseLogicalExpr('&&', $$[$0], yy.loc(_$[$0-1]), yy);
     
 break;
 case 46:
         $$[$0] = getValueIfUndefined($$[$0], [yy.Node('Literal', null, yy.loc(_$[$0-1]))]);
-        this.$ = parseLogicalExpr('||', $$[$0], _$[$0-1], yy);
+        this.$ = parseLogicalExpr('||', $$[$0], yy.loc(_$[$0-1]), yy);
     
 break;
-case 47: this.$ = parseVarDecl($$[$0-1], $$[$0], this._$, yy); 
+case 47: this.$ = parseVarDecl($$[$0-1], $$[$0], yy.loc(this._$), yy); 
 break;
 case 48:
         var processed = processDestrucForm({ fixed: [$$[$0-1]], rest: null }, yy);
@@ -652,7 +657,7 @@ case 51:
             body = body.concat([letBinding.decl]).concat(letBinding.stmts);
         }
         body = body.concat($$[$0]);
-        this.$ = wrapInIIFE(body, _$[$0-4], yy);
+        this.$ = wrapInIIFE(body, yy.loc(_$[$0-4]), yy);
     
 break;
 case 52:
@@ -664,7 +669,7 @@ case 52:
         }
 
         body.push($$[$0]);
-        this.$ = wrapInIIFE(body, _$[$0-4], yy);
+        this.$ = wrapInIIFE(body, yy.loc(_$[$0-4]), yy);
 
         var blockBody = this.$.callee.object.body.body, whileBlock, whileBlockIdx, stmt;
         for (var i = 0, len = blockBody.length; i < len; ++i) {
@@ -705,15 +710,17 @@ case 53:
     
 break;
 case 54:
-        var init = parseVarDecl($$[$0-3], parseNumLiteral('Integer', '0', _$[$0-3], yy), _$[$0-3], yy);
+        var init = parseVarDecl($$[$0-3],
+            parseNumLiteral('Integer', '0', yy.loc(_$[$0-3]), yy),
+            yy.loc(_$[$0-3]), yy);
         var maxId = yy.Node('Identifier', '__$max', yy.loc(_$[$0-2]));
-        addVarDecl(init, maxId, $$[$0-2], _$[$0-2], yy);
+        addVarDecl(init, maxId, $$[$0-2], yy.loc(_$[$0-2]), yy);
         var test = yy.Node('BinaryExpression', '<', $$[$0-3], maxId, yy.loc(_$[$0-3]));
         var update = yy.Node('UpdateExpression', '++', $$[$0-3], true, yy.loc(_$[$0-3]));
         var forLoop = yy.Node('ForStatement', init, test, update, $$[$0], yy.loc(_$[$0-5]));
         // wrapping it in an IIFE makes it not work in CodeCombat
         // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([forLoop], _$[$0-5], yy);
+        // this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
         this.$ = forLoop;
     
 break;
@@ -721,7 +728,7 @@ case 55:
         var whileLoop = yy.Node('WhileStatement', $$[$0-1], $$[$0], yy.loc(_$[$0-2]));
         // wrapping it in an IIFE makes it not work in CodeCombat
         // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([whileLoop], _$[$0-2], yy);
+        // this.$ = wrapInIIFE([whileLoop], yy.loc(_$[$0-2]), yy);
         this.$ = whileLoop;
     
 break;
@@ -765,7 +772,7 @@ case 69:
         this.$ = yy.Node('CallExpression', callee, $$[$0], yy.loc(this._$));
     
 break;
-case 70: this.$ = wrapInIIFE($$[$0], _$[$0-1], yy); 
+case 70: this.$ = wrapInIIFE($$[$0], yy.loc(_$[$0-1]), yy); 
 break;
 case 71: this.$ = $$[$0]; 
 break;
@@ -795,7 +802,7 @@ case 80:
 break;
 case 82:
         // do forms evaluate to nil if the body is empty
-        nilNode = parseLiteral('Nil', null, _$[$0], yytext, yy);
+        nilNode = parseLiteral('Nil', null, yy.loc(_$[$0]), yytext, yy);
         this.$ = [yy.Node('ExpressionStatement', nilNode, nilNode.loc)];
     
 break;
@@ -809,9 +816,8 @@ case 84:
 break;
 case 85:
         var prog = yy.Node('Program', $$[$0-1], yy.loc(_$[$0-1]));
-//        if (yy.tokens.length) prog.tokens = yy.tokens;
-//        if (prog.loc) prog.range = rangeBlock($$[$0-1]);
         destrucArgIdx = 0;
+        processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     
 break;
@@ -819,9 +825,9 @@ case 86:
         var prog = yy.Node('Program', [], {
             end: { column: 0, line: 0 },
             start: { column: 0, line: 0 },
+            range: [0, 0]
         });
-    //        prog.tokens = yy.tokens;
-    //        prog.range = [0, 0];
+        processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     
 break;
@@ -995,12 +1001,10 @@ function processSeqDestrucForm(args, yy) {
     if (rest) {
         if (rest.type && rest.type === 'Identifier') {
             decl = createRestArgsDecl(rest, args.destrucId, fixed.length, rest.loc, yy);
-            if (decl.loc) decl.loc = rest.loc;
             stmts.push(decl);
         } else if (! rest.type) {
             rest.destrucId.name = rest.destrucId.name || '__$destruc' + destrucArgIdx++;
             decl = createRestArgsDecl(rest.destrucId, args.destrucId, fixed.length, rest.destrucId.loc, yy);
-            if (decl.loc) decl.loc = rest.destrucId.loc;
             stmts.push(decl);
             stmts = processChildDestrucForm(rest, stmts, yy);
         }
@@ -1021,7 +1025,6 @@ function processMapDestrucForm(args, yy) {
                 yy.Node('Identifier', 'get', yyloc),
                 [args.destrucId, key], yyloc);
             decl = parseVarDecl(id, init, yyloc, yy);
-            if (decl.loc) decl.loc = yyloc;
             stmts.push(decl);
         } else if (! id.type) {
             id.destrucId.name = id.destrucId.name || '__$destruc' + destrucArgIdx++;
@@ -1052,10 +1055,7 @@ function processChildDestrucForm(arg, stmts, yy) {
             yyloc);
 
         decl = parseVarDecl(processedId, init, processedId.loc, yy);
-        if (decl.loc) decl.loc = processedId.loc;
-
         nilDecl = parseVarDecl(processedId, yy.Node('Literal', null, yyloc), processedId.loc, yy);
-        if (nilDecl.loc) nilDecl.loc = processedId.loc;
 
         errorId = yy.Node('Identifier', '__$error', yyloc);
         catchClause = yy.Node('CatchClause', errorId, null,
@@ -1088,7 +1088,6 @@ function processChildDestrucForm(arg, stmts, yy) {
             yy.Node('Identifier', 'get', yyloc),
             [arg.destrucId, processedKey], yyloc);
         decl = parseVarDecl(processedId, init, yyloc, yy);
-        if (decl.loc) decl.loc = yyloc;
         stmts.push(decl);
     }
     return stmts.concat(processed.stmts);
@@ -1133,8 +1132,7 @@ function processRecurFormIfAny(rootNode, actualArgs, yy) {
 }
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
-function wrapInIIFE(body, loc, yy) {
-    var yyloc = yy.loc(loc);
+function wrapInIIFE(body, yyloc, yy) {
     var thisExp = yy.Node('ThisExpression', yyloc);
     return yy.Node('CallExpression',
         yy.Node('MemberExpression',
@@ -1159,21 +1157,20 @@ function wrapInExpressionStatement(expr, yy) {
     return expr;
 }
 
-function createArityCheckStmt(minArity, hasRestArgs, loc, yy) {
-    var argsLoc = yy.loc(loc);
-    var arityCheckArgs = [yy.Node('Literal', minArity, argsLoc)];
+function createArityCheckStmt(minArity, hasRestArgs, yyloc, yy) {
+    var arityCheckArgs = [yy.Node('Literal', minArity, yyloc)];
     if (hasRestArgs) {
-        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', argsLoc));
+        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', yyloc));
     }
     arityCheckArgs.push(yy.Node('MemberExpression',
-        yy.Node('Identifier', 'arguments', argsLoc),
-        yy.Node('Identifier', 'length', argsLoc), false, argsLoc));
+        yy.Node('Identifier', 'arguments', yyloc),
+        yy.Node('Identifier', 'length', yyloc), false, yyloc));
     var arityCheck = yy.Node('CallExpression',
         yy.Node('MemberExpression',
-            yy.Node('Identifier', 'assertions', argsLoc),
-            yy.Node('Identifier', 'arity', argsLoc),
-            false, argsLoc),
-        arityCheckArgs, argsLoc);
+            yy.Node('Identifier', 'assertions', yyloc),
+            yy.Node('Identifier', 'arity', yyloc),
+            false, yyloc),
+        arityCheckArgs, yyloc);
     return wrapInExpressionStatement(arityCheck, yy);
 }
 
@@ -1206,8 +1203,8 @@ function createReturnStatementIfPossible(stmt, yy) {
     return stmt;
 }
 
-function createRestArgsDecl(id, argsId, offset, loc, yy) {
-    var yyloc = yy.loc(loc), restInit;
+function createRestArgsDecl(id, argsId, offset, yyloc, yy) {
+    var restInit;
     if (! argsId) {
         restInit = yy.Node('CallExpression', yy.Node('Identifier', 'seq', yyloc),
             [yy.Node('CallExpression',
@@ -1228,45 +1225,42 @@ function createRestArgsDecl(id, argsId, offset, loc, yy) {
     return parseVarDecl(id, restInit, yyloc, yy);
 }
 
-function parseLogicalExpr(op, exprs, exprLoc, yy) {
-    var logicalExpr = exprs[0], yyExprLoc = yy.loc(exprLoc);
+function parseLogicalExpr(op, exprs, yyloc, yy) {
+    var logicalExpr = exprs[0];
     for (var i = 1, len = exprs.length; i < len; ++i) {
-        logicalExpr = yy.Node('LogicalExpression', op, logicalExpr, exprs[i], yyExprLoc);
+        logicalExpr = yy.Node('LogicalExpression', op, logicalExpr, exprs[i], yyloc);
     }
     return logicalExpr;
 }
 
-function parseVarDecl(id, init, loc, yy) {
-    var stmt = yy.Node('VariableDeclaration', 'var', [], yy.loc(loc));
-    return addVarDecl(stmt, id, init, loc, yy);
+function parseVarDecl(id, init, yyloc, yy) {
+    var stmt = yy.Node('VariableDeclaration', 'var', [], yyloc);
+    return addVarDecl(stmt, id, init, yyloc, yy);
 }
 
-function addVarDecl(stmt, id, init, loc, yy) {
-    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yy.loc(loc));
+function addVarDecl(stmt, id, init, yyloc, yy) {
+    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yyloc);
     stmt.declarations.push(decl);
     return stmt;
 }
 
-function parseNumLiteral(type, token, loc, yy, yytext) {
+function parseNumLiteral(type, token, yyloc, yy, yytext) {
     var node;
     if (token[0] === '-') {
-        node = parseLiteral(type, -Number(token), loc, yytext, yy);
-        node = yy.Node('UnaryExpression', '-', node, true, yy.loc(loc));
+        node = parseLiteral(type, -Number(token), yyloc, yytext, yy);
+        node = yy.Node('UnaryExpression', '-', node, true, yyloc);
     } else {
-        node = parseLiteral(type, Number(token), loc, yytext, yy);
+        node = parseLiteral(type, Number(token), yyloc, yytext, yy);
     }
     return node;
 }
 
-function parseLiteral(type, value, rawloc, raw, yy) {
-    var loc = yy.loc(rawloc);
-    return yy.Node('Literal', value, loc, raw);
-//    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [lit], loc);
+function parseLiteral(type, value, yyloc, raw, yy) {
+    return yy.Node('Literal', value, yyloc, raw);
 }
 
-function parseCollectionLiteral(type, items, rawloc, yy) {
-    var loc = yy.loc(rawloc);
-    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifier(type), loc), items, loc);
+function parseCollectionLiteral(type, items, yyloc, yy) {
+    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifierName(type), yyloc), items, yyloc);
 }
 
 var charMap = {
@@ -1280,7 +1274,7 @@ var charMap = {
     '/': '_$SLASH_',
     '?': '_$QMARK_'
 };
-function parseIdentifier(name) {
+function parseIdentifierName(name) {
     var charsToReplace = new RegExp('[' + Object.keys(charMap).join('') + ']', 'g');
     return name.replace(charsToReplace, function (c) { return charMap[c]; });
 }
@@ -1302,6 +1296,28 @@ function parseString(str) {
         .replace(/\\f/g,'\f')
         .replace(/\\b/g,'\b')
         .replace(/\\(.)/g, '$1');
+}
+
+function processLocsAndRanges(prog, locs, ranges) {
+    // this cannot be done 1 pass over all the nodes
+    // because some of the loc / range objects point to the same instance in memory
+    // so deleting one deletes the other as well
+    estraverse.replace(prog, {
+        leave: function (node) {
+            if (ranges) node.range = node.loc.range || [0, 0];
+            return node;
+        }
+    });
+
+    estraverse.replace(prog, {
+        leave: function (node) {
+            if (node.loc && typeof node.loc.range !== 'undefined')
+                delete node.loc.range;
+            if (! locs && typeof node.loc !== 'undefined')
+                delete node.loc;
+            return node;
+        }
+    });
 }
 
 function getValueIfUndefined(variable, valueIfUndefined) {

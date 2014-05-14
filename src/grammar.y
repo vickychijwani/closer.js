@@ -7,7 +7,7 @@ Identifier
   : IDENTIFIER {
         $$ = ($1 === 'this')
             ? yy.Node('ThisExpression', yy.loc(@1))
-            : yy.Node('Identifier', parseIdentifier($1), yy.loc(@1));
+            : yy.Node('Identifier', parseIdentifierName($1), yy.loc(@1));
     }
   ;
 
@@ -38,22 +38,22 @@ AnonArg
   ;
 
 Atom
-  : INTEGER { $$ = parseNumLiteral('Integer', $1, @1, yy, yytext); }
-  | FLOAT { $$ = parseNumLiteral('Float', $1, @1, yy, yytext); }
-  | STRING { $$ = parseLiteral('String', parseString($1), @1, yy.raw[yy.raw.length-1], yy); }
-  | 'true' { $$ = parseLiteral('Boolean', true, @1, yytext, yy); }
-  | 'false' { $$ = parseLiteral('Boolean', false, @1, yytext, yy); }
-  | 'nil' { $$ = parseLiteral('Nil', null, @1, yytext, yy); }
+  : INTEGER { $$ = parseNumLiteral('Integer', $1, yy.loc(@1), yy, yytext); }
+  | FLOAT { $$ = parseNumLiteral('Float', $1, yy.loc(@1), yy, yytext); }
+  | STRING { $$ = parseLiteral('String', parseString($1), yy.loc(@1), yy.raw[yy.raw.length-1], yy); }
+  | 'true' { $$ = parseLiteral('Boolean', true, yy.loc(@1), yytext, yy); }
+  | 'false' { $$ = parseLiteral('Boolean', false, yy.loc(@1), yytext, yy); }
+  | 'nil' { $$ = parseLiteral('Nil', null, yy.loc(@1), yytext, yy); }
   | Keyword
   | Identifier
   | AnonArg
   ;
 
 CollectionLiteral
-  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('vector', getValueIfUndefined($items, []), @$, yy); }
-  | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('list', getValueIfUndefined($items, []), @$, yy); }
-  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash-map', getValueIfUndefined($items, []), @$, yy); }
-  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('hash-set', getValueIfUndefined($items, []), @$, yy); }
+  : '[' SExprs?[items] ']' { $$ = parseCollectionLiteral('vector', getValueIfUndefined($items, []), yy.loc(@$), yy); }
+  | QUOTE '(' SExprs?[items] ')' { $$ = parseCollectionLiteral('list', getValueIfUndefined($items, []), yy.loc(@$), yy); }
+  | '{' SExprPairs[items] '}' { $$ = parseCollectionLiteral('hash-map', getValueIfUndefined($items, []), yy.loc(@$), yy); }
+  | SHARP '{' SExprs?[items] '}' { $$ = parseCollectionLiteral('hash-set', getValueIfUndefined($items, []), yy.loc(@$), yy); }
   ;
 
 Fn
@@ -151,7 +151,7 @@ FnArgsAndBody
                     $BlockStatementWithReturn, blockLoc)], blockLoc);
         }
 
-        var arityCheck = createArityCheckStmt(ids.length, $FnArgs.rest, @FnArgs, yy);
+        var arityCheck = createArityCheckStmt(ids.length, $FnArgs.rest, yy.loc(@FnArgs), yy);
         $BlockStatementWithReturn.body.unshift(arityCheck);
 
         $$ = yy.Node('FunctionExpression', null, ids, null,
@@ -161,7 +161,7 @@ FnArgsAndBody
 
 FnDefinition
   : FN FnArgsAndBody { $$ = $FnArgsAndBody; }
-  | DEFN Identifier FnArgsAndBody { $$ = parseVarDecl($Identifier, $FnArgsAndBody, @1, yy); }
+  | DEFN Identifier FnArgsAndBody { $$ = parseVarDecl($Identifier, $FnArgsAndBody, yy.loc(@1), yy); }
   ;
 
 AnonFnLiteral
@@ -190,11 +190,11 @@ AnonFnLiteral
         createReturnStatementIfPossible(body, yy);
         if (hasRestArg) {
             var restId = yy.Node('Identifier', '__$rest', yy.loc(bodyLoc));
-            var restDecl = createRestArgsDecl(restId, null, maxArgNum, bodyLoc, yy);
+            var restDecl = createRestArgsDecl(restId, null, maxArgNum, yy.loc(bodyLoc), yy);
             body.body.unshift(restDecl);
         }
 
-        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, @1, yy);
+        var arityCheck = createArityCheckStmt(maxArgNum, hasRestArg, yy.loc(@1), yy);
         body.body.unshift(arityCheck);
 
         $$ = yy.Node('FunctionExpression', null, args, null, body,
@@ -214,16 +214,16 @@ ConditionalExpr
 LogicalExpr
   : AND SExprs?[exprs] {
         $exprs = getValueIfUndefined($exprs, [yy.Node('Literal', true, yy.loc(@1))]);
-        $$ = parseLogicalExpr('&&', $exprs, @1, yy);
+        $$ = parseLogicalExpr('&&', $exprs, yy.loc(@1), yy);
     }
   | OR SExprs?[exprs] {
         $exprs = getValueIfUndefined($exprs, [yy.Node('Literal', null, yy.loc(@1))]);
-        $$ = parseLogicalExpr('||', $exprs, @1, yy);
+        $$ = parseLogicalExpr('||', $exprs, yy.loc(@1), yy);
     }
   ;
 
 VarDeclaration
-  : DEF Identifier SExpr?[init] { $$ = parseVarDecl($Identifier, $init, @$, yy); }
+  : DEF Identifier SExpr?[init] { $$ = parseVarDecl($Identifier, $init, yy.loc(@$), yy); }
   ;
 
 LetBinding
@@ -253,7 +253,7 @@ LetForm
             body = body.concat([letBinding.decl]).concat(letBinding.stmts);
         }
         body = body.concat($DoForm);
-        $$ = wrapInIIFE(body, @1, yy);
+        $$ = wrapInIIFE(body, yy.loc(@1), yy);
     }
   ;
 
@@ -267,7 +267,7 @@ LoopForm
         }
 
         body.push($BlockStatement);
-        $$ = wrapInIIFE(body, @1, yy);
+        $$ = wrapInIIFE(body, yy.loc(@1), yy);
 
         var blockBody = $$.callee.object.body.body, whileBlock, whileBlockIdx, stmt;
         for (var i = 0, len = blockBody.length; i < len; ++i) {
@@ -312,15 +312,17 @@ RecurForm
 
 DoTimesForm
   : DOTIMES '[' Identifier SExpr ']' BlockStatement {
-        var init = parseVarDecl($Identifier, parseNumLiteral('Integer', '0', @Identifier, yy), @Identifier, yy);
+        var init = parseVarDecl($Identifier,
+            parseNumLiteral('Integer', '0', yy.loc(@Identifier), yy),
+            yy.loc(@Identifier), yy);
         var maxId = yy.Node('Identifier', '__$max', yy.loc(@SExpr));
-        addVarDecl(init, maxId, $SExpr, @SExpr, yy);
+        addVarDecl(init, maxId, $SExpr, yy.loc(@SExpr), yy);
         var test = yy.Node('BinaryExpression', '<', $Identifier, maxId, yy.loc(@Identifier));
         var update = yy.Node('UpdateExpression', '++', $Identifier, true, yy.loc(@Identifier));
         var forLoop = yy.Node('ForStatement', init, test, update, $BlockStatement, yy.loc(@1));
         // wrapping it in an IIFE makes it not work in CodeCombat
         // see https://github.com/codecombat/aether/issues/49
-        // $$ = wrapInIIFE([forLoop], @1, yy);
+        // $$ = wrapInIIFE([forLoop], yy.loc(@1), yy);
         $$ = forLoop;
     }
   ;
@@ -330,7 +332,7 @@ WhileForm
         var whileLoop = yy.Node('WhileStatement', $SExpr, $BlockStatement, yy.loc(@1));
         // wrapping it in an IIFE makes it not work in CodeCombat
         // see https://github.com/codecombat/aether/issues/49
-        // $$ = wrapInIIFE([whileLoop], @1, yy);
+        // $$ = wrapInIIFE([whileLoop], yy.loc(@1), yy);
         $$ = whileLoop;
     }
   ;
@@ -385,7 +387,7 @@ List
         $args.unshift(yy.Node('Literal', null, yy.loc(@1)));   // value for "this"
         $$ = yy.Node('CallExpression', callee, $args, yy.loc(@$));
     }
-  | DO DoForm { $$ = wrapInIIFE($DoForm, @1, yy); }
+  | DO DoForm { $$ = wrapInIIFE($DoForm, yy.loc(@1), yy); }
   ;
 
 SExpr
@@ -425,7 +427,7 @@ DoForm
   : NonEmptyDoForm
   | {
         // do forms evaluate to nil if the body is empty
-        nilNode = parseLiteral('Nil', null, @1, yytext, yy);
+        nilNode = parseLiteral('Nil', null, yy.loc(@1), yytext, yy);
         $$ = [yy.Node('ExpressionStatement', nilNode, nilNode.loc)];
     }
   ;
@@ -445,18 +447,17 @@ BlockStatementWithReturn
 Program
   : NonEmptyDoForm 'END-OF-FILE' {
         var prog = yy.Node('Program', $NonEmptyDoForm, yy.loc(@NonEmptyDoForm));
-//        if (yy.tokens.length) prog.tokens = yy.tokens;
-//        if (prog.loc) prog.range = rangeBlock($1);
         destrucArgIdx = 0;
+        processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     }
   | 'END-OF-FILE' {
         var prog = yy.Node('Program', [], {
             end: { column: 0, line: 0 },
             start: { column: 0, line: 0 },
+            range: [0, 0]
         });
-    //        prog.tokens = yy.tokens;
-    //        prog.range = [0, 0];
+        processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     }
   ;
@@ -490,12 +491,10 @@ function processSeqDestrucForm(args, yy) {
     if (rest) {
         if (rest.type && rest.type === 'Identifier') {
             decl = createRestArgsDecl(rest, args.destrucId, fixed.length, rest.loc, yy);
-            if (decl.loc) decl.loc = rest.loc;
             stmts.push(decl);
         } else if (! rest.type) {
             rest.destrucId.name = rest.destrucId.name || '__$destruc' + destrucArgIdx++;
             decl = createRestArgsDecl(rest.destrucId, args.destrucId, fixed.length, rest.destrucId.loc, yy);
-            if (decl.loc) decl.loc = rest.destrucId.loc;
             stmts.push(decl);
             stmts = processChildDestrucForm(rest, stmts, yy);
         }
@@ -516,7 +515,6 @@ function processMapDestrucForm(args, yy) {
                 yy.Node('Identifier', 'get', yyloc),
                 [args.destrucId, key], yyloc);
             decl = parseVarDecl(id, init, yyloc, yy);
-            if (decl.loc) decl.loc = yyloc;
             stmts.push(decl);
         } else if (! id.type) {
             id.destrucId.name = id.destrucId.name || '__$destruc' + destrucArgIdx++;
@@ -547,10 +545,7 @@ function processChildDestrucForm(arg, stmts, yy) {
             yyloc);
 
         decl = parseVarDecl(processedId, init, processedId.loc, yy);
-        if (decl.loc) decl.loc = processedId.loc;
-
         nilDecl = parseVarDecl(processedId, yy.Node('Literal', null, yyloc), processedId.loc, yy);
-        if (nilDecl.loc) nilDecl.loc = processedId.loc;
 
         errorId = yy.Node('Identifier', '__$error', yyloc);
         catchClause = yy.Node('CatchClause', errorId, null,
@@ -583,7 +578,6 @@ function processChildDestrucForm(arg, stmts, yy) {
             yy.Node('Identifier', 'get', yyloc),
             [arg.destrucId, processedKey], yyloc);
         decl = parseVarDecl(processedId, init, yyloc, yy);
-        if (decl.loc) decl.loc = yyloc;
         stmts.push(decl);
     }
     return stmts.concat(processed.stmts);
@@ -628,8 +622,7 @@ function processRecurFormIfAny(rootNode, actualArgs, yy) {
 }
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
-function wrapInIIFE(body, loc, yy) {
-    var yyloc = yy.loc(loc);
+function wrapInIIFE(body, yyloc, yy) {
     var thisExp = yy.Node('ThisExpression', yyloc);
     return yy.Node('CallExpression',
         yy.Node('MemberExpression',
@@ -654,21 +647,20 @@ function wrapInExpressionStatement(expr, yy) {
     return expr;
 }
 
-function createArityCheckStmt(minArity, hasRestArgs, loc, yy) {
-    var argsLoc = yy.loc(loc);
-    var arityCheckArgs = [yy.Node('Literal', minArity, argsLoc)];
+function createArityCheckStmt(minArity, hasRestArgs, yyloc, yy) {
+    var arityCheckArgs = [yy.Node('Literal', minArity, yyloc)];
     if (hasRestArgs) {
-        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', argsLoc));
+        arityCheckArgs.push(yy.Node('Identifier', 'Infinity', yyloc));
     }
     arityCheckArgs.push(yy.Node('MemberExpression',
-        yy.Node('Identifier', 'arguments', argsLoc),
-        yy.Node('Identifier', 'length', argsLoc), false, argsLoc));
+        yy.Node('Identifier', 'arguments', yyloc),
+        yy.Node('Identifier', 'length', yyloc), false, yyloc));
     var arityCheck = yy.Node('CallExpression',
         yy.Node('MemberExpression',
-            yy.Node('Identifier', 'assertions', argsLoc),
-            yy.Node('Identifier', 'arity', argsLoc),
-            false, argsLoc),
-        arityCheckArgs, argsLoc);
+            yy.Node('Identifier', 'assertions', yyloc),
+            yy.Node('Identifier', 'arity', yyloc),
+            false, yyloc),
+        arityCheckArgs, yyloc);
     return wrapInExpressionStatement(arityCheck, yy);
 }
 
@@ -701,8 +693,8 @@ function createReturnStatementIfPossible(stmt, yy) {
     return stmt;
 }
 
-function createRestArgsDecl(id, argsId, offset, loc, yy) {
-    var yyloc = yy.loc(loc), restInit;
+function createRestArgsDecl(id, argsId, offset, yyloc, yy) {
+    var restInit;
     if (! argsId) {
         restInit = yy.Node('CallExpression', yy.Node('Identifier', 'seq', yyloc),
             [yy.Node('CallExpression',
@@ -723,45 +715,42 @@ function createRestArgsDecl(id, argsId, offset, loc, yy) {
     return parseVarDecl(id, restInit, yyloc, yy);
 }
 
-function parseLogicalExpr(op, exprs, exprLoc, yy) {
-    var logicalExpr = exprs[0], yyExprLoc = yy.loc(exprLoc);
+function parseLogicalExpr(op, exprs, yyloc, yy) {
+    var logicalExpr = exprs[0];
     for (var i = 1, len = exprs.length; i < len; ++i) {
-        logicalExpr = yy.Node('LogicalExpression', op, logicalExpr, exprs[i], yyExprLoc);
+        logicalExpr = yy.Node('LogicalExpression', op, logicalExpr, exprs[i], yyloc);
     }
     return logicalExpr;
 }
 
-function parseVarDecl(id, init, loc, yy) {
-    var stmt = yy.Node('VariableDeclaration', 'var', [], yy.loc(loc));
-    return addVarDecl(stmt, id, init, loc, yy);
+function parseVarDecl(id, init, yyloc, yy) {
+    var stmt = yy.Node('VariableDeclaration', 'var', [], yyloc);
+    return addVarDecl(stmt, id, init, yyloc, yy);
 }
 
-function addVarDecl(stmt, id, init, loc, yy) {
-    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yy.loc(loc));
+function addVarDecl(stmt, id, init, yyloc, yy) {
+    var decl = yy.Node('VariableDeclarator', id, getValueIfUndefined(init, null), yyloc);
     stmt.declarations.push(decl);
     return stmt;
 }
 
-function parseNumLiteral(type, token, loc, yy, yytext) {
+function parseNumLiteral(type, token, yyloc, yy, yytext) {
     var node;
     if (token[0] === '-') {
-        node = parseLiteral(type, -Number(token), loc, yytext, yy);
-        node = yy.Node('UnaryExpression', '-', node, true, yy.loc(loc));
+        node = parseLiteral(type, -Number(token), yyloc, yytext, yy);
+        node = yy.Node('UnaryExpression', '-', node, true, yyloc);
     } else {
-        node = parseLiteral(type, Number(token), loc, yytext, yy);
+        node = parseLiteral(type, Number(token), yyloc, yytext, yy);
     }
     return node;
 }
 
-function parseLiteral(type, value, rawloc, raw, yy) {
-    var loc = yy.loc(rawloc);
-    return yy.Node('Literal', value, loc, raw);
-//    return yy.Node('NewExpression', yy.Node('Identifier', type, loc), [lit], loc);
+function parseLiteral(type, value, yyloc, raw, yy) {
+    return yy.Node('Literal', value, yyloc, raw);
 }
 
-function parseCollectionLiteral(type, items, rawloc, yy) {
-    var loc = yy.loc(rawloc);
-    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifier(type), loc), items, loc);
+function parseCollectionLiteral(type, items, yyloc, yy) {
+    return yy.Node('CallExpression', yy.Node('Identifier', parseIdentifierName(type), yyloc), items, yyloc);
 }
 
 var charMap = {
@@ -775,7 +764,7 @@ var charMap = {
     '/': '_$SLASH_',
     '?': '_$QMARK_'
 };
-function parseIdentifier(name) {
+function parseIdentifierName(name) {
     var charsToReplace = new RegExp('[' + Object.keys(charMap).join('') + ']', 'g');
     return name.replace(charsToReplace, function (c) { return charMap[c]; });
 }
@@ -797,6 +786,28 @@ function parseString(str) {
         .replace(/\\f/g,'\f')
         .replace(/\\b/g,'\b')
         .replace(/\\(.)/g, '$1');
+}
+
+function processLocsAndRanges(prog, locs, ranges) {
+    // this cannot be done 1 pass over all the nodes
+    // because some of the loc / range objects point to the same instance in memory
+    // so deleting one deletes the other as well
+    estraverse.replace(prog, {
+        leave: function (node) {
+            if (ranges) node.range = node.loc.range || [0, 0];
+            return node;
+        }
+    });
+
+    estraverse.replace(prog, {
+        leave: function (node) {
+            if (node.loc && typeof node.loc.range !== 'undefined')
+                delete node.loc.range;
+            if (! locs && typeof node.loc !== 'undefined')
+                delete node.loc;
+            return node;
+        }
+    });
 }
 
 function getValueIfUndefined(variable, valueIfUndefined) {

@@ -1,4 +1,4 @@
-exports.locations = true
+exports.forceNoLoc = false
 
 exports.defineNodes = (builder) ->
 
@@ -11,11 +11,7 @@ exports.defineNodes = (builder) ->
       obj = {}
       obj.type = name
       ini.call obj, a, b, c, d, e, f, g, h
-      # if obj.loc
-      # obj.range = obj.loc.range || [0, 0]
-      delete obj.loc unless exports.locations
-      # obj.loc = arguments_[ini.length - (if name is 'Literal' then 2 else 1)]
-      # delete obj.loc.range
+      delete obj.loc if exports.forceNoLoc is true
       obj
 
   # used in cases where object and array literals are valid expressions

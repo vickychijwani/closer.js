@@ -45,7 +45,7 @@ Program = helpers.Program
 beforeEach ->
   @addMatchers toDeepEqual: helpers.toDeepEqual
 
-parseOpts = { loc: false }
+parseOpts = { loc: false, forceNoLoc: true }
 eq = (src, ast) ->
   expect(closer.parse src, parseOpts).toDeepEqual ast
 

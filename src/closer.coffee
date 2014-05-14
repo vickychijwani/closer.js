@@ -21,22 +21,21 @@ parser.yy.Node = (type, a, b, c, d, e, f, g, h) ->
 parser.yy.locComb = (start, end) ->
   start.last_line = end.last_line
   start.last_column = end.last_column
-  # start.range = [start.range[0], end.range[1]];
+  start.range = [start.range[0], end.range[1]]
   start
 
 parser.yy.loc = (loc) ->
   return null unless @locations
   loc = @locComb(loc[0], loc[1]) if 'length' of loc
-  newLoc =
-    start:
-      line: @startLine + loc.first_line - 1
-      column: loc.first_column
-    end:
-      line: @startLine + loc.last_line - 1
-      column: loc.last_column
-    # range: loc.range
+  start:
+    line: @startLine + loc.first_line - 1
+    column: loc.first_column
+  end:
+    line: @startLine + loc.last_line - 1
+    column: loc.last_column
+  range: loc.range
 
-  newLoc
+parser.lexer.options.ranges = true
 
 oldParse = parser.parse
 parser.parse = (source, options) ->
@@ -46,9 +45,14 @@ parser.parse = (source, options) ->
 
 class Parser
   constructor: (options) ->
-    nodes.locations = @yy.locations = options.loc isnt false
+    @yy.locs = options.loc isnt false
+    @yy.ranges = options.range is true
+    @yy.locations = @yy.locs or @yy.ranges  # needed to enable locations from lexer
     @yy.source = options.source or null
     @yy.startLine = options.line or 1
+
+    # this is for testing purposes, to prevent json-diff from complaining about deleted properties
+    nodes.forceNoLoc = options.forceNoLoc
 
 Parser:: = parser
 
