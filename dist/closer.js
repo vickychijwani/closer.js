@@ -1147,7 +1147,7 @@ function wrapInIIFE(body, yyloc, yy) {
                 yy.Node('UnaryExpression', 'typeof', thisExp, true, yyloc),
                 yy.Node('Literal', 'undefined', yyloc), yyloc),
             thisExp,
-            yy.Node('Literal', null, yyloc))],
+            yy.Node('Literal', null, yyloc), yyloc)],
         yyloc);
 }
 
