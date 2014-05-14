@@ -359,7 +359,8 @@ DotForm
                         yy.Node('MemberExpression', callee,
                             yy.Node('Identifier', 'length', yy.loc(@1)),
                             false, yy.loc(@1)),
-                        yy.Node('Literal', 0, yy.loc(@1)), yy.loc(@1))),
+                        yy.Node('Literal', 0, yy.loc(@1)), yy.loc(@1)),
+                    yy.loc(@1)),
                 fnCall, callee, yy.loc(@1));
         }
     }
