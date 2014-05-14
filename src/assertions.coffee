@@ -1,16 +1,16 @@
 class ArityError extends Error
   constructor: (args...) ->
-    Error.captureStackTrace @, @.constructor
     @name = 'ArityError'
     @message = if args.length is 3
       "Expected #{args[0]}..#{args[1]} args, got #{args[2]}"
     else args[0]
+    @stack = (new Error()).stack
 
 class ArgTypeError extends Error
   constructor: (message) ->
-    Error.captureStackTrace @, @.constructor
     @name = 'ArgTypeError'
     @message = message
+    @stack = (new Error()).stack
 
 firstFailure = (args, testFn) ->
   _.find args, (arg) -> not testFn(arg)

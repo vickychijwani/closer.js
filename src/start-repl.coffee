@@ -21,7 +21,7 @@ defaults =
       console.log '\nGenerated JS:\n' + js + '\n'
       result = vm.runInThisContext js
     catch e
-    callback e, result
+    callback (if e then (e.name + ': ' + e.message) else e), result
   useGlobal: true
 
 nodeRepl.start(defaults)

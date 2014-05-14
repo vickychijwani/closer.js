@@ -1306,9 +1306,9 @@
     function ArityError() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      Error.captureStackTrace(this, this.constructor);
       this.name = 'ArityError';
       this.message = args.length === 3 ? "Expected " + args[0] + ".." + args[1] + " args, got " + args[2] : args[0];
+      this.stack = (new Error()).stack;
     }
 
     return ArityError;
@@ -1319,9 +1319,9 @@
     __extends(ArgTypeError, _super);
 
     function ArgTypeError(message) {
-      Error.captureStackTrace(this, this.constructor);
       this.name = 'ArgTypeError';
       this.message = message;
+      this.stack = (new Error()).stack;
     }
 
     return ArgTypeError;
