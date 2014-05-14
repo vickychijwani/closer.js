@@ -2979,7 +2979,8 @@ case 56:
                         yy.Node('MemberExpression', callee,
                             yy.Node('Identifier', 'length', yy.loc(_$[$0-3])),
                             false, yy.loc(_$[$0-3])),
-                        yy.Node('Literal', 0, yy.loc(_$[$0-3])), yy.loc(_$[$0-3]))),
+                        yy.Node('Literal', 0, yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
+                    yy.loc(_$[$0-3])),
                 fnCall, callee, yy.loc(_$[$0-3]));
         }
     
