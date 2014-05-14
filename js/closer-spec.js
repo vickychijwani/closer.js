@@ -392,7 +392,8 @@
   });
 
   parseOpts = {
-    loc: false
+    loc: false,
+    forceNoLoc: true
   };
 
   eq = function(src, ast) {
