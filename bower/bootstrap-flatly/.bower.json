@@ -1,0 +1,34 @@
+{
+  "name": "bootstrap-flatly",
+  "homepage": "https://github.com/nbsp/bower-flatly",
+  "authors": [
+    "kyr <kyrwastaken@gmail.com>"
+  ],
+  "description": "bootswatch's flatly theme for twbs",
+  "main": "flatly.min.css",
+  "keywords": [
+    "bootstrap",
+    "flatly",
+    "bootswatch",
+    "theme"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "README.md"
+  ],
+  "_release": "663c6ccf6f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "663c6ccf6fca1bc5aa84313ef5585b8ad949ac90"
+  },
+  "_source": "git://github.com/nbsp/bower-flatly.git",
+  "_target": "*",
+  "_originalSource": "bootstrap-flatly",
+  "_direct": true
+}
