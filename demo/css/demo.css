@@ -1,3 +1,11 @@
+html, body {
+	height: 100%;
+}
+
+.navbar {
+	border-radius: 0 !important;
+}
+
 #error {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     font-size: 16px;
