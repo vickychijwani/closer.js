@@ -25,16 +25,22 @@
             </div>
         </div>
 
-        <div class="container-fluid" style="height:100%;">
+        <div class="container-fluid">
             <div class="row" style="height:100%;">
                 <div class="col-md-5" style="height:100%;">
-                    <h4>Clojure code:</h4>
-                    <textarea name="editor" data-editor="clojure"></textarea>
+                    <div class="clojure editor">
+                        <textarea name="clojure" data-editor="clojure"></textarea>
+                    </div>
+
+                    <div class="js editor">
+                        <textarea name="js" data-editor="javascript"></textarea>
+                    </div>
                 </div>
                 <div class="col-md-7" style="height:100%;">
-                    <h4>Abstract Syntax Tree:</h4>
-                    <textarea name="output" data-editor="javascript"></textarea>
-                    <div id="error" class="alert alert-danger"></div>
+                    <div class="ast editor">
+                        <textarea name="ast" data-editor="javascript"></textarea>
+                        <div id="error" class="alert alert-danger"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -44,20 +50,29 @@
         <script type="text/javascript" src="bower/ace-builds/src-min/theme-tomorrow.js" charset="utf-8"></script>
         <script type="text/javascript" src="bower/ace-builds/src-min/mode-clojure.js" charset="utf-8"></script>
         <script type="text/javascript" src="bower/ace-builds/src-min/mode-json.js" charset="utf-8"></script>
+        <script type="text/javascript" src="js/escodegen.browser.js"></script>
+
+        <script type="text/javascript" src="bower/lodash/dist/lodash.min.js"></script>
         <script type="text/javascript" src="js/closer.min.js"></script>
+        <script type="text/javascript" src="js/closer-core.min.js"></script>
+
         <script type="text/javascript">
             // Hook up ACE editor to all textareas with data-editor attribute
             $(function () {
-                var inputTabSize = 2, outputTabSize = 4;
-                var $inputTextArea = $('textarea[name="editor"]');
-                var $outputTextArea = $('textarea[name="output"]');
+                var inputTabSize = 2, astTabSize = 4, jsTabSize = 4;
+                var $inputTextArea = $('textarea[name="clojure"]');
+                var $astTextArea = $('textarea[name="ast"]');
+                var $jsTextArea = $('textarea[name="js"]');
                 var $error = $('#error');
-                var inputEditor = setupAceEditor($inputTextArea);
-                var outputEditor = setupAceEditor($outputTextArea);
+                var inputEditor = setupAceEditor($inputTextArea, 0.5);
+                var astEditor = setupAceEditor($astTextArea, 1.0);
+                var jsEditor = setupAceEditor($jsTextArea, 0.5);
 
                 inputEditor.getSession().setTabSize(inputTabSize);
-                outputEditor.setReadOnly(true);
-                outputEditor.getSession().setTabSize(outputTabSize);
+                astEditor.setReadOnly(true);
+                astEditor.getSession().setTabSize(astTabSize);
+                jsEditor.setReadOnly(true);
+                jsEditor.getSession().setTabSize(astTabSize);
 
                 var timeout = null;
                 inputEditor.getSession().on('change', function (e) {
@@ -67,6 +82,7 @@
                 });
 
                 var initialInput =
+                        ";; type some clojure code here\n" +
                         "(defn average\n" +
                         "  [numbers]\n" +
                         "  (/ (apply + numbers) (count numbers)))\n" +
@@ -80,27 +96,32 @@
                 function parseInput () {
                     var input = inputEditor.getSession().getValue();
                     try {
-                        var output = closer.parse(input, { loc: true });
-                        var formattedOutput = JSON.stringify(output, null, outputTabSize);
+                        var ast = closer.parse(input, { loc: true });
+                        var formattedAst = JSON.stringify(ast, null, astTabSize);
                         $error.html('');
                         $error.hide();
-                        outputEditor.getSession().setValue(formattedOutput);
-                        $outputTextArea.prev().show();
+                        formattedAst = "// abstract syntax tree:\n" + formattedAst
+                        astEditor.getSession().setValue(formattedAst);
+                        $astTextArea.prev().show();
+
+                        var js = escodegen.generate(ast);
+                        js = "// equivalent javascript code:\n" + js
+                        jsEditor.getSession().setValue(js);
                     } catch (e) {
                         $error.html(e.message.replace(/\n/g, "<br />"));
                         $error.show();
-                        outputEditor.getSession().setValue('');
-                        $outputTextArea.prev().hide();
+                        astEditor.getSession().setValue('');
+                        $astTextArea.prev().hide();
                     }
                 }
 
-                function setupAceEditor($textarea) {
+                function setupAceEditor($textarea, heightRatio) {
                     var mode = $textarea.data('editor');
 
                     var editDiv = $('<div>', {
                         position: 'absolute',
                         width: '100%',
-                        height: '80%',
+                        height: '100%',
                         'class': $textarea.attr('class')
                     }).insertBefore($textarea);
 
