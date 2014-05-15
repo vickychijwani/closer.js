@@ -205,6 +205,16 @@ AnonFnLiteral
 ConditionalExpr
   : IF SExpr[test] SExprStmt[consequent] SExprStmt?[alternate] {
         $$ = yy.Node('IfStatement', $test, $consequent, getValueIfUndefined($alternate, null), yy.loc(@1));
+        // for code like ((if true +) 1 2 3)
+        if ($$.consequent.type === 'ExpressionStatement' &&
+            ($$.alternate === null || $$.alternate.type === 'ExpressionStatement')) {
+            $$.type = 'ConditionalExpression';
+            $$.consequent = $$.consequent.expression;
+            if ($$.alternate === null)
+                $$.alternate = yy.Node('Literal', null, yy.loc(@1));
+            else
+                $$.alternate = $$.alternate.expression;
+        }
     }
   | WHEN SExpr[test] BlockStatement[consequent] {
         $$ = yy.Node('IfStatement', $test, $consequent, null, yy.loc(@1));

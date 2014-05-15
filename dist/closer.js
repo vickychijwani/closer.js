@@ -616,6 +616,16 @@ case 42:
 break;
 case 43:
         this.$ = yy.Node('IfStatement', $$[$0-2], $$[$0-1], getValueIfUndefined($$[$0], null), yy.loc(_$[$0-3]));
+        // for code like ((if true +) 1 2 3)
+        if (this.$.consequent.type === 'ExpressionStatement' &&
+            (this.$.alternate === null || this.$.alternate.type === 'ExpressionStatement')) {
+            this.$.type = 'ConditionalExpression';
+            this.$.consequent = this.$.consequent.expression;
+            if (this.$.alternate === null)
+                this.$.alternate = yy.Node('Literal', null, yy.loc(_$[$0-3]));
+            else
+                this.$.alternate = this.$.alternate.expression;
+        }
     
 break;
 case 44:
@@ -1775,8 +1785,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"estraverse":7,"fs":4,"path":6}],4:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"estraverse":7,"fs":4,"path":6}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 // shim for using process in browser
@@ -2067,8 +2077,8 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5}],7:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5}],7:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>

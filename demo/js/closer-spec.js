@@ -446,7 +446,7 @@
     });
     it('parses anonymous function literals', function() {
       eq('(#(apply + % %2 %&) 1 2 3 4)', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('__$1'), Identifier('__$2')], null, BlockStatement(AssertArity(2, Infinity), VariableDeclaration(VariableDeclarator(Identifier('__$rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('__$1'), Identifier('__$2'), Identifier('__$rest')])))), Identifier('call')), [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)]))));
-      return eq('(map #(if (even? %1) (- %) %) [1 2 3])', Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(AssertArity(1), IfStatement(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), Vector(Integer(1), Integer(2), Integer(3))]))));
+      return eq('(map #(if (even? %1) (- %) %) [1 2 3])', Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(AssertArity(1), ReturnStatement(ConditionalExpression(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')]), Identifier('__$1'))))), Vector(Integer(1), Integer(2), Integer(3))]))));
     });
     it('parses a named function definition', function() {
       return eq('(defn fn-name [x] x)\n', Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x'))))))));
@@ -465,10 +465,10 @@
       return eq('(:key {:key :val})', Program(ExpressionStatement(CallExpression(MemberExpression(Keyword('key'), Identifier('call')), [Nil(), HashMap(Keyword('key'), Keyword('val'))]))));
     });
     it('parses an if statement without else', function() {
-      return eq('(if (>= x 0) x)\n', Program(IfStatement(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), null)));
+      return eq('(if (>= x 0) x)\n', Program(ExpressionStatement(ConditionalExpression(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), Identifier('x'), Nil()))));
     });
     it('parses an if-else statement', function() {
-      return eq('(if (>= x 0) x (- x))\n', Program(IfStatement(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), ExpressionStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x')])))));
+      return eq('(if (>= x 0) x (- x))\n', Program(ExpressionStatement(ConditionalExpression(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), Identifier('x'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x')])))));
     });
     it('parses a when form', function() {
       return eq('(when (condition?) (println \"hello\") true)\n', Program(IfStatement(CallExpression(MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')), [Nil()]), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [Nil(), String('hello')])), ExpressionStatement(Boolean(true))))));
@@ -1486,8 +1486,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":4,"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":7,"inherits":6}],6:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":4,"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":7,"inherits":6}],6:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {

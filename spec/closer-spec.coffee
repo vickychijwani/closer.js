@@ -181,14 +181,14 @@ describe 'Closer parser', ->
           null, [Identifier('__$1')], null,
           BlockStatement(
             AssertArity(1),
-            IfStatement(
+            ReturnStatement(ConditionalExpression(
               CallExpression(
                 MemberExpression(Identifier('even_$QMARK_'), Identifier('call')),
                 [Nil(), Identifier('__$1')]),
-              ReturnStatement(CallExpression(
+              CallExpression(
                 MemberExpression(Identifier('_$_'), Identifier('call')),
-                [Nil(), Identifier('__$1')])),
-              ReturnStatement(Identifier('__$1'))))),
+                [Nil(), Identifier('__$1')]),
+              Identifier('__$1'))))),
         Vector(Integer(1), Integer(2), Integer(3))])))
 
   it 'parses a named function definition', ->
@@ -340,24 +340,22 @@ describe 'Closer parser', ->
   # conditional statements
   it 'parses an if statement without else', ->
     eq '(if (>= x 0) x)\n', Program(
-      IfStatement(
+      ExpressionStatement(ConditionalExpression(
         CallExpression(
           MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
           [Nil(), Identifier('x'), Integer(0)]),
-        ExpressionStatement(Identifier('x')),
-        null))
+        Identifier('x'), Nil())))
 
   it 'parses an if-else statement', ->
     eq '(if (>= x 0) x (- x))\n', Program(
-      IfStatement(
+      ExpressionStatement(ConditionalExpression(
         CallExpression(
           MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
           [Nil(), Identifier('x'), Integer(0)]),
-        ExpressionStatement(Identifier('x')),
-        ExpressionStatement(
-          CallExpression(
-            MemberExpression(Identifier('_$_'), Identifier('call')),
-            [Nil(), Identifier('x')]))))
+        Identifier('x'),
+        CallExpression(
+          MemberExpression(Identifier('_$_'), Identifier('call')),
+          [Nil(), Identifier('x')]))))
 
   it 'parses a when form', ->
     eq '(when (condition?) (println \"hello\") true)\n', Program(
