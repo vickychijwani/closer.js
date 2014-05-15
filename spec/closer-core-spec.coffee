@@ -29,6 +29,8 @@ list = (xs...) -> closerCore.list.apply null, _.flatten xs
 set = (xs...) -> closerCore.hash_$_set.apply null, _.flatten xs
 map = (xs...) -> closerCore.hash_$_map.apply null, _.flatten xs
 
+__$this = {}
+
 describe 'Closer core library', ->
 
   # arithmetic

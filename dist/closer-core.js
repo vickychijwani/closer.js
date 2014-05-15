@@ -337,7 +337,7 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 (function() {
-  var assertions, core, m, _, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+  var assertions, bind, core, m, _, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
     __slice = [].slice;
 
   core = {
@@ -911,13 +911,14 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
       for (i = _i = 0, _ref = core.count(lastSeq); 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
         rest.push(core.nth(lastSeq, i));
       }
-      return f.apply(null, rest);
+      return f.apply(this, rest);
     },
     'map': function() {
       var colls, f;
       f = arguments[0], colls = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       assertions.arity(2, Infinity, arguments.length);
       assertions["function"](f);
+      bind(this, arguments);
       return m.map.apply(null, arguments);
     },
     'mapcat': function() {
@@ -925,28 +926,31 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
       f = arguments[0], colls = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       assertions.arity(2, Infinity, arguments.length);
       assertions["function"](f);
+      bind(this, arguments);
       return m.mapcat.apply(null, arguments);
     },
     'filter': function(pred, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](pred);
+      bind(this, arguments);
       return m.filter(pred, coll);
     },
     'remove': function(pred, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](pred);
+      bind(this, arguments);
       return m.remove(pred, coll);
     },
     'reduce': function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       assertions.arity(2, 3, arguments.length);
-      assertions["function"](args[0]);
-      return m.reduce.apply(null, args);
+      assertions["function"](arguments[0]);
+      bind(this, arguments);
+      return m.reduce.apply(null, arguments);
     },
     'reduce_$_kv': function(f, init, coll) {
       assertions.arity(3, arguments.length);
       assertions["function"](f);
+      bind(this, arguments);
       return m.reduce_kv(f, init, coll);
     },
     'take': function(n, coll) {
@@ -980,6 +984,7 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
       } else {
         assertions["function"](arguments[0]);
         assertions.seqable(arguments[1]);
+        bind(this, arguments);
       }
       return m.sort.apply(null, arguments);
     },
@@ -992,6 +997,7 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
         assertions["function"](arguments[0], arguments[1]);
         assertions.seqable(arguments[2]);
       }
+      bind(this, arguments);
       return m.sort_by.apply(null, arguments);
     },
     'partition': function() {
@@ -1018,12 +1024,14 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
       assertions.arity(2, arguments.length);
       assertions["function"](f);
       assertions.seqable(coll);
+      bind(this, arguments);
       return m.partition_by(f, coll);
     },
     'group_$_by': function(f, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](f);
       assertions.seqable(coll);
+      bind(this, arguments);
       return m.group_by(f, coll);
     },
     'zipmap': function(keys, vals) {
@@ -1034,6 +1042,7 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
     'iterate': function(f, x) {
       assertions.arity(2, arguments.length);
       assertions["function"](f);
+      bind(this, arguments);
       return m.iterate(f, x);
     },
     'constantly': function(x) {
@@ -1059,22 +1068,36 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
         assertions.numbers(n);
       }
       assertions["function"](f);
+      bind(this, arguments);
       return m.repeatedly.apply(null, arguments);
     },
     'comp': function() {
-      var fs;
-      fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       assertions.arity(0, Infinity, arguments.length);
-      assertions["function"].apply(null, fs);
-      return m.comp.apply(null, fs);
+      assertions["function"].apply(null, arguments);
+      bind(this, arguments);
+      return m.comp.apply(null, arguments);
     },
     'partial': function() {
       var args, f;
       f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       assertions.arity(1, Infinity, arguments.length);
       assertions["function"](f);
+      bind(this, arguments);
       return m.partial.apply(null, arguments);
     }
+  };
+
+  bind = function(that, args) {
+    var i, _i, _ref, _results;
+    _results = [];
+    for (i = _i = 0, _ref = args.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      if (_.isFunction(args[i])) {
+        _results.push(args[i] = _.bind(args[i], that));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
   };
 
   module.exports = core;

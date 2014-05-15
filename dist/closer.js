@@ -802,7 +802,7 @@ case 71:
             yy.Node('Identifier', 'call', yy.loc(_$[$0-1])),
             false, yy.loc(_$[$0-1]));
         $$[$0] = getValueIfUndefined($$[$0], []);
-        $$[$0].unshift(yy.Node('Literal', null, yy.loc(_$[$0-1])));   // value for "this"
+        $$[$0].unshift(yy.Node('ThisExpression', yy.loc(_$[$0-1])));
         this.$ = yy.Node('CallExpression', callee, $$[$0], yy.loc(this._$));
     
 break;

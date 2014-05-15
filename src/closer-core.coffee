@@ -444,37 +444,43 @@ core =
     assertions.seqable last
     lastSeq = core.seq(last)
     rest.push(core.nth(lastSeq, i)) for i in [0...core.count(lastSeq)]
-    f.apply null, rest
+    f.apply @, rest
 
   'map': (f, colls...) ->
     assertions.arity 2, Infinity, arguments.length
     assertions.function f
+    bind @, arguments
     m.map.apply null, arguments
 
   'mapcat': (f, colls...) ->
     assertions.arity 2, Infinity, arguments.length
     assertions.function f
+    bind @, arguments
     m.mapcat.apply null, arguments
 
   'filter': (pred, coll) ->
     assertions.arity 2, arguments.length
     assertions.function pred
+    bind @, arguments
     m.filter pred, coll
 
   'remove': (pred, coll) ->
     assertions.arity 2, arguments.length
     assertions.function pred
+    bind @, arguments
     m.remove pred, coll
 
-  'reduce': (args...) ->
+  'reduce': () ->
     # args: f, [initial], coll
     assertions.arity 2, 3, arguments.length
-    assertions.function args[0]
-    m.reduce.apply null, args
+    assertions.function arguments[0]
+    bind @, arguments
+    m.reduce.apply null, arguments
 
   'reduce_$_kv': (f, init, coll) ->
     assertions.arity 3, arguments.length
     assertions.function f
+    bind @, arguments
     m.reduce_kv f, init, coll
 
   'take': (n, coll) ->
@@ -509,6 +515,7 @@ core =
     else
       assertions.function arguments[0]
       assertions.seqable arguments[1]
+      bind @, arguments
     m.sort.apply null, arguments
 
   'sort_$_by': () ->
@@ -520,6 +527,7 @@ core =
     else
       assertions.function arguments[0], arguments[1]
       assertions.seqable arguments[2]
+    bind @, arguments
     m.sort_by.apply null, arguments
 
   'partition': () ->
@@ -542,12 +550,14 @@ core =
     assertions.arity 2, arguments.length
     assertions.function f
     assertions.seqable coll
+    bind @, arguments
     m.partition_by f, coll
 
   'group_$_by': (f, coll) ->
     assertions.arity 2, arguments.length
     assertions.function f
     assertions.seqable coll
+    bind @, arguments
     m.group_by f, coll
 
   'zipmap': (keys, vals) ->
@@ -558,6 +568,7 @@ core =
   'iterate': (f, x) ->
     assertions.arity 2, arguments.length
     assertions.function f
+    bind @, arguments
     m.iterate f, x
 
   'constantly': (x) ->
@@ -576,18 +587,26 @@ core =
     if arguments.length is 1 then [f] = arguments else [n, f] = arguments
     assertions.numbers n if typeof n isnt 'undefined'
     assertions.function f
+    bind @, arguments
     m.repeatedly.apply null, arguments
 
-  'comp': (fs...) ->
+  'comp': () ->
+    # arguments: fs...
     assertions.arity 0, Infinity, arguments.length
-    assertions.function.apply null, fs
-    m.comp.apply null, fs
+    assertions.function.apply null, arguments
+    bind @, arguments
+    m.comp.apply null, arguments
 
   'partial': (f, args...) ->
     assertions.arity 1, Infinity, arguments.length
     assertions.function f
+    bind @, arguments
     m.partial.apply null, arguments
 
+
+bind = (that, args) ->
+  for i in [0...args.length]
+    args[i] = _.bind(args[i], that) if _.isFunction(args[i])
 
 module.exports = core
 

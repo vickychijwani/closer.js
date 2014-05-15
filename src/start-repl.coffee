@@ -5,6 +5,7 @@ repl = require './repl'
 
 global.assertions = require './assertions'
 global.closerCore = require './closer-core'
+global.__$this = {}
 
 defaults =
   prompt: 'closer> '

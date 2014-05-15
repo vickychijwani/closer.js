@@ -116,13 +116,13 @@ describe 'Closer parser', ->
     eq '(fn-name)\n', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('fn_$_name'), Identifier('call')),
-        [Nil()])))
+        [ThisExpression()])))
 
   it 'parses a function call with > 0 arguments', ->
     eq '(fn-name arg1 arg2)\n', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('fn_$_name'), Identifier('call')),
-        [Nil(), Identifier('arg1'), Identifier('arg2')])))
+        [ThisExpression(), Identifier('arg1'), Identifier('arg2')])))
 
   it 'parses an anonymous function definition', ->
     eq '(fn [x] x)\n', Program(
@@ -147,7 +147,7 @@ describe 'Closer parser', ->
               AssertArity(1),
               ReturnStatement(Identifier('x')))),
           Identifier('call')),
-        [Nil(), Integer(2)])))
+        [ThisExpression(), Integer(2)])))
 
   it 'parses anonymous function literals', ->
     eq '(#(apply + % %2 %&) 1 2 3 4)', Program(
@@ -170,14 +170,14 @@ describe 'Closer parser', ->
                     [Identifier('arguments'), Integer(2)])]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('apply'), Identifier('call')),
-                [Nil(), Identifier('_$PLUS_'), Identifier('__$1'),
+                [ThisExpression(), Identifier('_$PLUS_'), Identifier('__$1'),
                  Identifier('__$2'), Identifier('__$rest')])))),
           Identifier('call')),
-        [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)])))
+        [ThisExpression(), Integer(1), Integer(2), Integer(3), Integer(4)])))
     eq '(map #(if (even? %1) (- %) %) [1 2 3])', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Identifier('map'), Identifier('call')),
-        [Nil(),
+        [ThisExpression(),
         FunctionExpression(
           null, [Identifier('__$1')], null,
           BlockStatement(
@@ -185,10 +185,10 @@ describe 'Closer parser', ->
             ReturnStatement(ConditionalExpression(
               CallExpression(
                 MemberExpression(Identifier('even_$QMARK_'), Identifier('call')),
-                [Nil(), Identifier('__$1')]),
+                [ThisExpression(), Identifier('__$1')]),
               CallExpression(
                 MemberExpression(Identifier('_$_'), Identifier('call')),
-                [Nil(), Identifier('__$1')]),
+                [ThisExpression(), Identifier('__$1')]),
               Identifier('__$1'))))),
         Vector(Integer(1), Integer(2), Integer(3))])))
 
@@ -225,13 +225,13 @@ describe 'Closer parser', ->
                     [Identifier('arguments'), Integer(0)])]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('_$SLASH_'), Identifier('call')),
-                [Nil(),
+                [ThisExpression(),
                 CallExpression(
                   MemberExpression(Identifier('apply'), Identifier('call')),
-                  [Nil(), Identifier('_$PLUS_'), Identifier('rest')]),
+                  [ThisExpression(), Identifier('_$PLUS_'), Identifier('rest')]),
                 CallExpression(
                   MemberExpression(Identifier('count'), Identifier('call')),
-                  [Nil(), Identifier('rest')])])))))))
+                  [ThisExpression(), Identifier('rest')])])))))))
 
   it 'parses destructuring forms', ->
     eq '(defn fn-name [[a & b] c & [d & e :as coll]])', Program(
@@ -319,23 +319,23 @@ describe 'Closer parser', ->
         MemberExpression(
           Vector(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
-        [Nil(), Integer(1)])))
+        [ThisExpression(), Integer(1)])))
     eq '({1 2 3 4} 1)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           HashMap(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
-        [Nil(), Integer(1)])))
+        [ThisExpression(), Integer(1)])))
     eq '(#{1 2 3 4} 1)', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(
           HashSet(Integer(1), Integer(2), Integer(3), Integer(4)),
           Identifier('call')),
-        [Nil(), Integer(1)])))
+        [ThisExpression(), Integer(1)])))
     eq '(:key {:key :val})', Program(
       ExpressionStatement(CallExpression(
         MemberExpression(Keyword('key'), Identifier('call')),
-        [Nil(), HashMap(Keyword('key'), Keyword('val'))])))
+        [ThisExpression(), HashMap(Keyword('key'), Keyword('val'))])))
 
 
   # conditional statements
@@ -344,7 +344,7 @@ describe 'Closer parser', ->
       ExpressionStatement(ConditionalExpression(
         CallExpression(
           MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
-          [Nil(), Identifier('x'), Integer(0)]),
+          [ThisExpression(), Identifier('x'), Integer(0)]),
         Identifier('x'), Nil())))
 
   it 'parses an if-else statement', ->
@@ -352,22 +352,22 @@ describe 'Closer parser', ->
       ExpressionStatement(ConditionalExpression(
         CallExpression(
           MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
-          [Nil(), Identifier('x'), Integer(0)]),
+          [ThisExpression(), Identifier('x'), Integer(0)]),
         Identifier('x'),
         CallExpression(
           MemberExpression(Identifier('_$_'), Identifier('call')),
-          [Nil(), Identifier('x')]))))
+          [ThisExpression(), Identifier('x')]))))
 
   it 'parses a when form', ->
     eq '(when (condition?) (println \"hello\") true)\n', Program(
       IfStatement(
         CallExpression(
           MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')),
-          [Nil()]),
+          [ThisExpression()]),
         BlockStatement(
           ExpressionStatement(CallExpression(
             MemberExpression(Identifier('println'), Identifier('call')),
-            [Nil(), String('hello')])),
+            [ThisExpression(), String('hello')])),
           ExpressionStatement(Boolean(true)))))
 
 
@@ -393,7 +393,7 @@ describe 'Closer parser', ->
           Identifier('sum'),
           CallExpression(
             MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-            [Nil(), Integer(3), Integer(5)]))))
+            [ThisExpression(), Integer(3), Integer(5)]))))
 
   it 'parses a var bound to an fn form', ->
     eq '(def add (fn [& numbers] (apply + numbers)))', Program(
@@ -417,7 +417,7 @@ describe 'Closer parser', ->
                     [Identifier('arguments'), Integer(0)])]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('apply'), Identifier('call')),
-                [Nil(), Identifier('_$PLUS_'), Identifier('numbers')])))))))
+                [ThisExpression(), Identifier('_$PLUS_'), Identifier('numbers')])))))))
 
   it 'parses var assignment (set! var value) forms', ->
     eq '(set! x 4)', Program(
@@ -451,10 +451,10 @@ describe 'Closer parser', ->
                 Identifier('y'),
                 CallExpression(
                   MemberExpression(Identifier('_$_'), Identifier('call')),
-                  [Nil(), Identifier('x')]))),
+                  [ThisExpression(), Identifier('x')]))),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-                [Nil(), Identifier('x'), Identifier('y')])))),
+                [ThisExpression(), Identifier('x'), Identifier('y')])))),
           Identifier('call')),
         [ConditionalExpression(
           BinaryExpression('!==',
@@ -493,7 +493,7 @@ describe 'Closer parser', ->
                   IfStatement(
                     CallExpression(
                       MemberExpression(Identifier('_$GT_'), Identifier('call')),
-                      [Nil(), Identifier('x'), Integer(1)]),
+                      [ThisExpression(), Identifier('x'), Integer(1)]),
                     BlockStatement(
                       ExpressionStatement(CallExpression(
                         MemberExpression(Identifier('console'), String('log'), true),
@@ -503,7 +503,7 @@ describe 'Closer parser', ->
                           Identifier('__$recur0'),
                           CallExpression(
                             MemberExpression(Identifier('_$_'), Identifier('call')),
-                            [Nil(), Identifier('x'), Integer(2)]))),
+                            [ThisExpression(), Identifier('x'), Integer(2)]))),
                         ExpressionStatement(AssignmentExpression(
                           Identifier('x'), Identifier('__$recur0')))
                         ContinueStatement())),
@@ -528,19 +528,19 @@ describe 'Closer parser', ->
                 IfStatement(
                   CallExpression(
                     MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')),
-                    [Nil(), Identifier('n')]),
+                    [ThisExpression(), Identifier('n')]),
                   ReturnStatement(Identifier('acc')),
                   BlockStatement(
                     ExpressionStatement(AssignmentExpression(
                       Identifier('__$recur0'),
                       CallExpression(
                         MemberExpression(Identifier('dec'), Identifier('call')),
-                        [Nil(), Identifier('n')]))),
+                        [ThisExpression(), Identifier('n')]))),
                     ExpressionStatement(AssignmentExpression(
                       Identifier('__$recur1'),
                       CallExpression(
                         MemberExpression(Identifier('_$STAR_'), Identifier('call')),
-                        [Nil(), Identifier('acc'), Identifier('n')]))),
+                        [ThisExpression(), Identifier('acc'), Identifier('n')]))),
                     ExpressionStatement(AssignmentExpression(
                       Identifier('n'), Identifier('__$recur0'))),
                     ExpressionStatement(AssignmentExpression(
@@ -558,7 +558,7 @@ describe 'Closer parser', ->
         BlockStatement(
           ExpressionStatement(CallExpression(
             MemberExpression(Identifier('println'), Identifier('call')),
-            [Nil(), Identifier('i')])))))
+            [ThisExpression(), Identifier('i')])))))
 
   it 'parses doseq forms', ->
     eq '(doseq [x (range 5)] (println x))', Program(
@@ -567,7 +567,7 @@ describe 'Closer parser', ->
           VariableDeclarator(Identifier('__$doseqSeq'),
             CallExpression(
               MemberExpression(Identifier('range'), Identifier('call')),
-              [Nil(), Integer(5)])),
+              [ThisExpression(), Integer(5)])),
           VariableDeclarator(Identifier('x'),
             CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))),
         BinaryExpression('!==', Identifier('x'), Nil()),
@@ -579,20 +579,20 @@ describe 'Closer parser', ->
         BlockStatement(
           ExpressionStatement(CallExpression(
             MemberExpression(Identifier('println'), Identifier('call')),
-            [Nil(), Identifier('x')])))))
+            [ThisExpression(), Identifier('x')])))))
 
   it 'parses while forms', ->
     eq '(while (< i 5) (set! i (inc i)))', Program(
       WhileStatement(
         CallExpression(
           MemberExpression(Identifier('_$LT_'), Identifier('call')),
-          [Nil(), Identifier('i'), Integer(5)]),
+          [ThisExpression(), Identifier('i'), Integer(5)]),
         BlockStatement(
           ExpressionStatement(AssignmentExpression(
             Identifier('i'),
             CallExpression(
               MemberExpression(Identifier('inc'), Identifier('call')),
-              [Nil(), Identifier('i')]))))))
+              [ThisExpression(), Identifier('i')]))))))
 
 
   # other special forms
@@ -618,10 +618,10 @@ describe 'Closer parser', ->
             BlockStatement(
               ExpressionStatement(CallExpression(
                 MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-                [Nil(), Integer(1), Integer(2)])),
+                [ThisExpression(), Integer(1), Integer(2)])),
               ReturnStatement(CallExpression(
                 MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
-                [Nil(), Integer(3), Integer(4)])))),
+                [ThisExpression(), Integer(3), Integer(4)])))),
           Identifier('call')),
         [ConditionalExpression(
           BinaryExpression('!==',

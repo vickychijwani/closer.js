@@ -421,7 +421,7 @@ List
             yy.Node('Identifier', 'call', yy.loc(@1)),
             false, yy.loc(@Fn));
         $args = getValueIfUndefined($args, []);
-        $args.unshift(yy.Node('Literal', null, yy.loc(@1)));   // value for "this"
+        $args.unshift(yy.Node('ThisExpression', yy.loc(@1)));
         $$ = yy.Node('CallExpression', callee, $args, yy.loc(@$));
     }
   | DO DoForm { $$ = wrapInIIFE($DoForm, yy.loc(@1), yy); }
