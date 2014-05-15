@@ -2,11 +2,37 @@ html, body {
 	height: 100%;
 }
 
+body > .container-fluid {
+	position: absolute;
+	box-sizing: border-box;
+	top: 0; left: 0;
+	width: 100%; height: 100%;
+	padding-top: 83px;
+}
+
 .navbar {
 	border-radius: 0 !important;
+	z-index: 9999;
 }
 
 #error {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     font-size: 16px;
+}
+
+.editor {
+	box-sizing: border-box;
+	padding-bottom: 20px;
+}
+
+.ace_editor {
+	border: 1px solid #ccc;
+}
+
+.clojure, .js {
+	height: 50%;
+}
+
+.ast {
+	height: 100%;
 }
