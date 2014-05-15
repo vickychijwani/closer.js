@@ -1,94 +1,24 @@
 Closer.js
 =========
 
-Closer.js - Clojure parser in JavaScript, compatible with the Mozilla Parser API
-(https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API).
+Closer.js is a Clojure parser written in JavaScript, compatible with the Mozilla Parser API
+(https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API). It also contains a port of (much of) the Clojure core library.
 
-**NOTE**: This is pre-alpha quality software, still taking its first baby
-steps. You have been warned!
+It was created to be used on [CodeCombat.com](http://codecombat.com), a site that teaches users how to code by playing a game (there's multiplayer too!). CodeCombat is [open-source](https://github.com/codecombat/codecombat), backed by [YCombinator](http://blog.codecombat.com/codecombat-in-y-combinator), participating in [Google Summer of Code 2014](https://www.google-melange.com/gsoc/org2/google/gsoc2014/codecombat), and is generally awesome all around. Go [check it out](http://codecombat.com)!
 
 
-Usage
------
+Documentation & Demo
+--------------------
 
-```js
-var closer = require("closer");
+Up-to-date documentation is available on [the project website](https://vickychijwani.github.io/closer.js).
 
-var ast = closer.parse("(println \"hello, world\")", { locations: true });
-```
 
-The value of `ast` is:
+License
+-------
 
-```js
-{
-    "type": "Program",
-    "body": [
-        {
-            "type": "ExpressionStatement",
-            "expression": {
-                "type": "CallExpression",
-                "callee": {
-                    "type": "Identifier",
-                    "name": "println",
-                    "loc": {
-                        "start": {
-                            "line": 1,
-                            "column": 1
-                        },
-                        "end": {
-                            "line": 1,
-                            "column": 8
-                        }
-                    }
-                },
-                "arguments": [
-                    {
-                        "type": "Literal",
-                        "value": "hello, world",
-                        "loc": {
-                            "start": {
-                                "line": 1,
-                                "column": 9
-                            },
-                            "end": {
-                                "line": 1,
-                                "column": 23
-                            }
-                        }
-                    }
-                ],
-                "loc": {
-                    "start": {
-                        "line": 1,
-                        "column": 0
-                    },
-                    "end": {
-                        "line": 1,
-                        "column": 25
-                    }
-                }
-            },
-            "loc": {
-                "start": {
-                    "line": 1,
-                    "column": 0
-                },
-                "end": {
-                    "line": 1,
-                    "column": 25
-                }
-            }
-        }
-    ],
-    "loc": {
-        "start": {
-            "line": 1,
-            "column": 0
-        },
-        "end": {
-            "line": 1,
-            "column": 25
-        }
-    }
-}
-```
+Licensed under the [MIT License](LICENSE).
+
+
+Contributors
+------------
+ - [Vicky Chijwani](http://github.com/vickychijwani)
