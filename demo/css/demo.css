@@ -15,6 +15,10 @@ body > .container-fluid {
 	z-index: 9999;
 }
 
+.gh-buttons {
+	margin-top: 20px;
+}
+
 #error {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     font-size: 16px;
