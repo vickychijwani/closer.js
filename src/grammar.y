@@ -337,6 +337,31 @@ DoTimesForm
     }
   ;
 
+DoSeqForm
+  : DOSEQ '[' Identifier SExpr ']' BlockStatement {
+        var idLoc = yy.loc(@Identifier), sexprLoc = yy.loc(@SExpr);
+        var seqId = yy.Node('Identifier', '__$doseqSeq', sexprLoc);
+        var init = parseVarDecl(seqId, $SExpr, sexprLoc, yy);
+        addVarDecl(init, $Identifier,
+            yy.Node('CallExpression', yy.Node('Identifier', 'first', idLoc),
+                [seqId], idLoc), idLoc, yy);
+        var test = yy.Node('BinaryExpression', '!==', $Identifier,
+            yy.Node('Literal', null, idLoc), idLoc);
+        var seqUpdate = yy.Node('AssignmentExpression', '=', seqId,
+            yy.Node('CallExpression', yy.Node('Identifier', 'rest', sexprLoc),
+                [seqId], sexprLoc), sexprLoc);
+        var idUpdate = yy.Node('AssignmentExpression', '=', $Identifier,
+            yy.Node('CallExpression', yy.Node('Identifier', 'first', idLoc),
+                [seqId], idLoc), idLoc);
+        var update = yy.Node('SequenceExpression', [seqUpdate, idUpdate], idLoc);
+        var forLoop = yy.Node('ForStatement', init, test, update, $BlockStatement, yy.loc(@1));
+        // wrapping it in an IIFE makes it not work in CodeCombat
+        // see https://github.com/codecombat/aether/issues/49
+        // $$ = wrapInIIFE([forLoop], yy.loc(@1), yy);
+        $$ = forLoop;
+    }
+  ;
+
 WhileForm
   : WHILE SExpr BlockStatement {
         var whileLoop = yy.Node('WhileStatement', $SExpr, $BlockStatement, yy.loc(@1));
@@ -387,6 +412,7 @@ List
   | LoopForm
   | RecurForm
   | DoTimesForm
+  | DoSeqForm
   | WhileForm
   | DotForm
   | Fn SExprs?[args] {

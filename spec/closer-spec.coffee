@@ -19,6 +19,7 @@ UnaryExpression = helpers.UnaryExpression
 UpdateExpression = helpers.UpdateExpression
 BinaryExpression = helpers.BinaryExpression
 LogicalExpression = helpers.LogicalExpression
+SequenceExpression = helpers.SequenceExpression
 ArrayExpression = helpers.ArrayExpression
 AssignmentExpression = helpers.AssignmentExpression
 CallExpression = helpers.CallExpression
@@ -558,6 +559,27 @@ describe 'Closer parser', ->
           ExpressionStatement(CallExpression(
             MemberExpression(Identifier('println'), Identifier('call')),
             [Nil(), Identifier('i')])))))
+
+  it 'parses doseq forms', ->
+    eq '(doseq [x (range 5)] (println x))', Program(
+      ForStatement(
+        VariableDeclaration(
+          VariableDeclarator(Identifier('__$doseqSeq'),
+            CallExpression(
+              MemberExpression(Identifier('range'), Identifier('call')),
+              [Nil(), Integer(5)])),
+          VariableDeclarator(Identifier('x'),
+            CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))),
+        BinaryExpression('!==', Identifier('x'), Nil()),
+        SequenceExpression(
+          AssignmentExpression(Identifier('__$doseqSeq'),
+            CallExpression(Identifier('rest'), [Identifier('__$doseqSeq')])),
+          AssignmentExpression(Identifier('x'),
+            CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))),
+        BlockStatement(
+          ExpressionStatement(CallExpression(
+            MemberExpression(Identifier('println'), Identifier('call')),
+            [Nil(), Identifier('x')])))))
 
   it 'parses while forms', ->
     eq '(while (< i 5) (set! i (inc i)))', Program(

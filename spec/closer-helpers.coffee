@@ -61,6 +61,10 @@ exports.LogicalExpression = (operator, left, right) ->
   left: left
   right: right
 
+exports.SequenceExpression = (expressions...) ->
+  type: 'SequenceExpression'
+  expressions: expressions
+
 exports.ArrayExpression = (elements) ->
   type: 'ArrayExpression'
   elements: elements
