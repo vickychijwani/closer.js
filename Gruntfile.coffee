@@ -17,13 +17,28 @@ module.exports = (grunt) ->
       push_ghpages:
         command: 'git subtree push --prefix demo origin gh-pages'
 
-    jasmine_node:
-      all: ['spec/']
+    jasmine_test:
+      all: ['lib/spec/']
       options:
+        specFolders: ['lib/spec/']
         showColors: true
         includeStackTrace: false
         forceExit: true
-        coffee: true
+
+    # this is actually the code coverage task, but renaming it causes problems
+    jasmine_node:
+      coverage:
+        savePath: 'demo/coverage/'
+        report: ['html']
+        excludes: ['lib/spec/*.js']
+        thresholds:
+          lines: 75
+      all: ['lib/spec/']
+      options:
+        specFolders: ['lib/spec/']
+        showColors: true
+        includeStackTrace: false
+        forceExit: true
 
     watch:
       files: ['src/lexer.l', 'src/grammar.y', 'src/**/*.coffee', 'spec/**/*.coffee']
@@ -101,7 +116,6 @@ module.exports = (grunt) ->
 
 
   grunt.loadNpmTasks 'grunt-shell'
-  grunt.loadNpmTasks 'grunt-jasmine-node'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-coffeelint'
@@ -109,7 +123,12 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
 
-  grunt.registerTask 'test', ['coffeelint', 'shell:jison', 'coffee', 'jasmine_node']
+  # grunt-jasmine-node is for tests, grunt-jasmine-node-coverage is for code coverage
+  grunt.loadNpmTasks 'grunt-jasmine-node'
+  grunt.renameTask 'jasmine_node', 'jasmine_test'
+  grunt.loadNpmTasks 'grunt-jasmine-node-coverage'
+
   grunt.registerTask 'build', ['coffeelint', 'shell:jison', 'coffee']
-  grunt.registerTask 'default', ['test', 'browserify', 'uglify', 'concat', 'shell:copy_to_demo']
+  grunt.registerTask 'test', ['build', 'jasmine_test']
+  grunt.registerTask 'default', ['build', 'browserify', 'uglify', 'concat', 'shell:copy_to_demo', 'jasmine_node']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']
