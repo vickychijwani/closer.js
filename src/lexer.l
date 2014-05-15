@@ -73,4 +73,5 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
     return 'IDENTIFIER';
 %}
 
+.       return 'ILLEGAL-TOKEN';
 <<EOF>> %{ return 'END-OF-FILE'; %}
