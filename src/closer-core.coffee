@@ -81,7 +81,7 @@ core =
     assertions.arity 1, Infinity, arguments.length
     args = _.uniq args   # remove duplicates
     return true if args.length is 1
-    m.equals.apply null, args
+    m.equals.apply null, _.map(args, (arg) -> m.js_to_clj(arg))
 
   'not_$EQ_': (args...) ->
     assertions.arity 1, Infinity, arguments.length
@@ -431,6 +431,11 @@ core =
     assertions.arity 0, 3, arguments.length
     assertions.numbers args
     m.range.apply null, args
+
+  'to_$_array': (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.seqable coll
+    core.reduce ((arr, x) -> arr.push(x); arr), [], coll
 
   'identity': (x) ->
     assertions.arity 1, arguments.length

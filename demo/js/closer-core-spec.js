@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 (function() {
-  var assertions, closerCore, emptySeq, eq, evaluate, falsy, key, list, map, nil, parseOpts, repl, seq, set, throws, truthy, vec, _, __$this, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+  var assertions, closerCore, emptySeq, eq, evaluate, falsy, key, list, map, nil, obj, parseOpts, repl, seq, set, throws, truthy, vec, _, __$this, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
     __slice = [].slice;
 
   _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
@@ -90,6 +90,10 @@
   };
 
   __$this = {};
+
+  obj = {
+    'a': 1
+  };
 
   describe('Closer core library', function() {
     describe('(+ x y & more)', function() {
@@ -220,7 +224,10 @@
         truthy('(= #{1 2} #{2 1})');
         truthy('(= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
         falsy('(= #{1 2} #{2 1 3})');
-        return falsy('(= #{1 2} [2 1])');
+        falsy('(= #{1 2} [2 1])');
+        truthy('(= (to-array [0 1 2 3]) (range 4))');
+        truthy('(= obj {"a" 1})');
+        return falsy('(= obj {:a 1})');
       });
     });
     describe('(not= x y & more)', function() {
@@ -246,7 +253,10 @@
         falsy('(not= #{1 2} #{2 1})');
         falsy('(not= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})');
         truthy('(not= #{1 2} #{2 1 3})');
-        return truthy('(not= #{1 2} [2 1])');
+        truthy('(not= #{1 2} [2 1])');
+        falsy('(not= (to-array [0 1 2 3]) (range 4))');
+        falsy('(not= obj {"a" 1})');
+        return truthy('(not= obj {:a 1})');
       });
     });
     describe('(== x y & more)', function() {
@@ -1013,6 +1023,18 @@
         return throws('(range 1.2 6.9 "1.6")');
       });
     });
+    describe('(to-array coll)', function() {
+      return it('converts coll to a javascript array', function() {
+        throws('(to-array [] [])');
+        throws('(to-array 1)');
+        eq('(to-array nil)', []);
+        eq('(to-array [1 [2]])', [1, vec(2)]);
+        eq('(to-array \'(1 \'(2)))', [1, list(2)]);
+        eq('(to-array #{1 #{2}})', [1, set(2)]);
+        eq('(to-array {1 {2 3}})', [vec(1, map(2, 3))]);
+        return eq('(to-array "string")', 'string'.split(''));
+      });
+    });
     describe('(identity x)', function() {
       return it('returns its argument', function() {
         throws('(identity 34 45)');
@@ -1588,7 +1610,9 @@
       if (args.length === 1) {
         return true;
       }
-      return m.equals.apply(null, args);
+      return m.equals.apply(null, _.map(args, function(arg) {
+        return m.js_to_clj(arg);
+      }));
     },
     'not_$EQ_': function() {
       var args;
@@ -2024,6 +2048,14 @@
       assertions.arity(0, 3, arguments.length);
       assertions.numbers(args);
       return m.range.apply(null, args);
+    },
+    'to_$_array': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.seqable(coll);
+      return core.reduce((function(arr, x) {
+        arr.push(x);
+        return arr;
+      }), [], coll);
     },
     'identity': function(x) {
       assertions.arity(1, arguments.length);

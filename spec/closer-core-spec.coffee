@@ -5,7 +5,7 @@ assertions = window?.assertions ? self?.assertions ? global?.assertions ? requir
 
 beforeEach ->
   @addMatchers
-    # custom matcher to compare Clojure collections
+    # custom matcher to compare Clojure values
     toCljEqual: (expected) ->
       @message = ->
         "Expected #{@actual} to equal #{expected}"
@@ -30,6 +30,7 @@ set = (xs...) -> closerCore.hash_$_set.apply null, _.flatten xs
 map = (xs...) -> closerCore.hash_$_map.apply null, _.flatten xs
 
 __$this = {}
+obj = { 'a': 1 }  # simple object for use in some tests (like = and not=)
 
 describe 'Closer core library', ->
 
@@ -152,6 +153,9 @@ describe 'Closer core library', ->
       truthy '(= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})'
       falsy '(= #{1 2} #{2 1 3})'
       falsy '(= #{1 2} [2 1])'
+      truthy '(= (to-array [0 1 2 3]) (range 4))'
+      truthy '(= obj {"a" 1})'  # obj is defined at the top
+      falsy '(= obj {:a 1})'  # obj is defined at the top
 
   describe '(not= x y & more)', ->
     it 'returns true if some of its arguments are unequal (by value, not identity)', ->
@@ -177,6 +181,9 @@ describe 'Closer core library', ->
       falsy '(not= {#{1 2} 1 :keyword true} {:keyword true #{1 2} 1})'
       truthy '(not= #{1 2} #{2 1 3})'
       truthy '(not= #{1 2} [2 1])'
+      falsy '(not= (to-array [0 1 2 3]) (range 4))'
+      falsy '(not= obj {"a" 1})'  # obj is defined at the top
+      truthy '(not= obj {:a 1})'  # obj is defined at the top
 
   describe '(== x y & more)', ->
     it 'returns true if all its arguments are numeric and equal', ->
@@ -888,6 +895,17 @@ describe 'Closer core library', ->
       eq '(range 10 2 -2)', seq [10, 8, 6, 4]
       eq '(range 1.2 6.9 1.6)', seq [1.2, 2.8, 4.4, 6.0]
       throws '(range 1.2 6.9 "1.6")'
+
+  describe '(to-array coll)', ->
+    it 'converts coll to a javascript array', ->
+      throws '(to-array [] [])'
+      throws '(to-array 1)'
+      eq '(to-array nil)', []
+      eq '(to-array [1 [2]])', [1, vec 2]
+      eq '(to-array \'(1 \'(2)))', [1, list 2]
+      eq '(to-array #{1 #{2}})', [1, set 2]
+      eq '(to-array {1 {2 3}})', [vec 1, map(2, 3)]
+      eq '(to-array "string")', 'string'.split('')
 
   describe '(identity x)', ->
     it 'returns its argument', ->

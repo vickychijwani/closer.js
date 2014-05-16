@@ -458,7 +458,9 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
       if (args.length === 1) {
         return true;
       }
-      return m.equals.apply(null, args);
+      return m.equals.apply(null, _.map(args, function(arg) {
+        return m.js_to_clj(arg);
+      }));
     },
     'not_$EQ_': function() {
       var args;
@@ -894,6 +896,14 @@ n("mori.zip.remove",function(a){O.c(a,0,null);var b=O.c(a,1,null),b=Dc(b)?R.a(vf
       assertions.arity(0, 3, arguments.length);
       assertions.numbers(args);
       return m.range.apply(null, args);
+    },
+    'to_$_array': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.seqable(coll);
+      return core.reduce((function(arr, x) {
+        arr.push(x);
+        return arr;
+      }), [], coll);
     },
     'identity': function(x) {
       assertions.arity(1, arguments.length);
