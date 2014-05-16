@@ -775,7 +775,8 @@ case 57:
             this.$ = fnCall;
         } else {
             // (.prop obj) can either be a call to a 0-argument fn, or a property access.
-            // if both are possible, the function call is chosen.
+            // if both are possible, the function call is chosen. This is as per Clojure.
+            // see http://clojure.org/java_interop#Java%20Interop-The%20Dot%20special%20form
             // (typeof obj['prop'] === 'function' && obj['prop'].length === 0) ? obj['prop']() : obj['prop'];
             this.$ = yy.Node('ConditionalExpression',
                 yy.Node('LogicalExpression', '&&',
