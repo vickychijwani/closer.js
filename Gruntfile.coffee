@@ -7,12 +7,8 @@ module.exports = (grunt) ->
         failOnError: true
 
       jison:
-        command: 'jison src/grammar.y src/lexer.l -o src/parser.js;
-                  mkdir -p lib/src/; cp src/parser.js lib/src/;'
-
-      copy_to_demo:
-        command: 'cp dist/<%= pkg.name %>-core.min.js demo/js/;
-                  cp dist/<%= pkg.name %>.min.js demo/js/;'
+        command: 'jison src/grammar.y src/lexer.l -o src/parser.js &&
+                  mkdir -p lib/src/ && cp src/parser.js lib/src/'
 
       push_ghpages:
         command: 'git subtree push --prefix demo origin gh-pages'
@@ -77,51 +73,23 @@ module.exports = (grunt) ->
         ]
 
     browserify:
-      dist:
+      demo:
         files: [
           expand: true
-          cwd: 'lib/src/'
-          src: ['<%= pkg.name %>.js', '<%= pkg.name %>-core.js', 'assertions.js']
-          dest: 'dist/'
-        ]
-        options:
-          exclude: ['lodash-node', 'mori', './<%= pkg.name %>', './<%= pkg.name %>-core', './assertions']
-      specs:
-        files: [
-          expand: true
-          cwd: 'lib/spec/'
-          src: ['<%= pkg.name %>-spec.js', '<%= pkg.name %>-core-spec.js', 'functional-spec.js']
+          cwd: 'lib/'
+          src: ['src/repl.js', 'spec/<%= pkg.name %>-spec.js', 'spec/functional-spec.js',
+                'spec/<%= pkg.name %>-core-spec.js']
           dest: 'demo/js/'
         ]
         options:
-          exclude: ['lodash-node', 'mori', '../src/closer', '../src/closer-core', '../src/assertions']
-
-    uglify:
-      dist:
-        files: [
-          expand: true
-          cwd: 'dist/'
-          src: ['<%= pkg.name %>.js', '<%= pkg.name %>-core.js', 'assertions.js']
-          dest: 'dist/'
-          ext: '.min.js'
-        ]
-
-    concat:
-      mori:
-        src: ['node_modules/mori/mori.js', 'dist/<%= pkg.name %>-core.js']
-        dest: 'dist/<%= pkg.name %>-core.js'
-      mori_min:
-        src: ['node_modules/mori/mori.js', 'dist/<%= pkg.name %>-core.min.js']
-        dest: 'dist/<%= pkg.name %>-core.min.js'
+          exclude: ['lodash-node']
 
 
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-contrib-watch'
-  grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-browserify'
-  grunt.loadNpmTasks 'grunt-contrib-uglify'
 
   # grunt-jasmine-node is for tests, grunt-jasmine-node-coverage is for code coverage
   grunt.loadNpmTasks 'grunt-jasmine-node'
@@ -130,5 +98,5 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'build', ['coffeelint', 'shell:jison', 'coffee']
   grunt.registerTask 'test', ['build', 'jasmine_test']
-  grunt.registerTask 'default', ['build', 'browserify', 'uglify', 'concat', 'shell:copy_to_demo', 'jasmine_node']
+  grunt.registerTask 'default', ['build', 'browserify', 'jasmine_node']
   grunt.registerTask 'push_demo', ['shell:push_ghpages']

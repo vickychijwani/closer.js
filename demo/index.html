@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Closer.js - Demo</title>
+        <title>Parser Demo | Closer.js</title>
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -51,6 +51,13 @@
                         <textarea name="ast" data-editor="javascript"></textarea>
                         <div id="error" class="alert alert-danger"></div>
                     </div>
+                    <div class="output-wrapper">
+                        <button class="run-code btn btn-primary">▶&nbsp;&nbsp;&nbsp;Run</button>
+                        <div class="output-container">
+                            <textarea name="output" data-editor="clojure"></textarea>
+                            <div class="output editor"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -64,30 +71,37 @@
         <script type="text/javascript" src="js/escodegen.browser.js"></script>
 
         <script type="text/javascript" src="bower/lodash/dist/lodash.min.js"></script>
-        <script type="text/javascript" src="js/closer.min.js"></script>
-        <script type="text/javascript" src="js/closer-core.min.js"></script>
+        <script type="text/javascript" src="js/src/repl.js"></script>
 
         <script type="text/javascript">
             // Hook up ACE editor to all textareas with data-editor attribute
             $(function () {
                 var inputTabSize = 2, astTabSize = 4, jsTabSize = 4;
-                var $inputTextArea = $('textarea[name="clojure"]');
-                var $astTextArea = $('textarea[name="ast"]');
-                var $jsTextArea = $('textarea[name="js"]');
-                var $error = $('#error');
-                var inputEditor = setupAceEditor($inputTextArea, 0.5);
-                var astEditor = setupAceEditor($astTextArea, 1.0);
-                var jsEditor = setupAceEditor($jsTextArea, 0.5);
+                var $error = $('#error'), runCodeBtn = $('.run-code');
 
+                var $inputTextArea = $('textarea[name="clojure"]');
+                var inputEditor = setupAceEditor($inputTextArea);
                 inputEditor.getSession().setTabSize(inputTabSize);
+
+                var $astTextArea = $('textarea[name="ast"]');
+                var astEditor = setupAceEditor($astTextArea);
                 astEditor.setReadOnly(true);
+                astEditor.setOption("showLineNumbers", false);
                 astEditor.getSession().setTabSize(astTabSize);
+
+                var $jsTextArea = $('textarea[name="js"]');
+                var jsEditor = setupAceEditor($jsTextArea);
                 jsEditor.setReadOnly(true);
                 jsEditor.getSession().setTabSize(astTabSize);
 
+                var $outputTextArea = $('textarea[name="output"]');
+                var outputEditor = setupAceEditor($outputTextArea);
+                outputEditor.setReadOnly(true);
+                outputEditor.renderer.setShowGutter(false);
+                outputEditor.getSession().setValue(";; output:\n");
+
                 var timeout = null;
                 inputEditor.getSession().on('change', function (e) {
-                    console.log(e);
                     clearTimeout(timeout);
                     timeout = setTimeout(parseInput, 200);
                 });
@@ -104,10 +118,34 @@
                 inputEditor.getSession().setValue(initialInput);
                 parseInput();
 
+                runCodeBtn.click(function () {
+                    var __$this = {};  // value for "this"
+                    var input = inputEditor.getSession().getValue();
+                    try {
+                        var ast = repl.parse(input, { loc: false });
+                        var lastStmt = ast.body[ast.body.length-1];
+                        if (lastStmt && lastStmt.type === 'ExpressionStatement') {
+                            lastStmt.type = 'ReturnStatement';
+                            lastStmt.argument = lastStmt.expression;
+                            delete lastStmt.expression;
+                        }
+                        var js = escodegen.generate(ast);
+                        js = "(function () { " + js + " })();";
+                        var output = eval(js);
+                        if (typeof output === "undefined") output = "nil";
+                        output = ";; output:\n" + output;
+                        outputEditor.getSession().setValue(output);
+                    } catch (e) {
+                        output = e.message;
+                        if (e.name) output = e.name + ": " + output;
+                        outputEditor.getSession().setValue(output);
+                    }
+                });
+
                 function parseInput () {
                     var input = inputEditor.getSession().getValue();
                     try {
-                        var ast = closer.parse(input, { loc: true });
+                        var ast = repl.parse(input, { loc: true });
                         var formattedAst = JSON.stringify(ast, null, astTabSize);
                         $error.html('');
                         $error.hide();
@@ -126,7 +164,7 @@
                     }
                 }
 
-                function setupAceEditor($textarea, heightRatio) {
+                function setupAceEditor($textarea) {
                     var mode = $textarea.data('editor');
 
                     var editDiv = $('<div>', {
