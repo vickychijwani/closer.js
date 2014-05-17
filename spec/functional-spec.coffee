@@ -45,6 +45,11 @@ __$this = (() ->
 
 describe 'Functional tests', ->
 
+  it 'allows user-defined identifiers to shadow core functions', ->
+    eq '(min 1 2 3)', 1
+    throws '(def min 2), (min 1 2 3)'  # min is shadowed, so is not a function
+    eq '(def min 2), min', 2
+
   it 'js interop - \'this\' access', ->
     __$this['move-x-y'](0, 0)
     __$this.enemy['move-x-y'](10, 20)
