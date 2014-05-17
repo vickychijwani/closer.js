@@ -42,15 +42,15 @@
   };
 
   truthy = function(src) {
-    return expect(evaluate(src)).toEqual(true);
+    return expect(evaluate(src)).toCljEqual(true);
   };
 
   falsy = function(src) {
-    return expect(evaluate(src)).toEqual(false);
+    return expect(evaluate(src)).toCljEqual(false);
   };
 
   nil = function(src) {
-    return expect(evaluate(src)).toEqual(null);
+    return expect(evaluate(src)).toCljEqual(null);
   };
 
   key = function(x) {
@@ -814,6 +814,58 @@
         eq('(nth "string" 6 "not-found")', 'not-found');
         eq('(nth \'(1 2 3 4) 3)', 4);
         return eq('(nth (seq #{1 2 3 4}) 3)', 4);
+      });
+    });
+    describe('(second coll)', function() {
+      return it('is equivalent to (first (next x))', function() {
+        throws('(second [1 2 3] [4 5 6])');
+        throws('(second 3)');
+        eq('(second "string")', 't');
+        eq('(second \'(1 2 3))', 2);
+        return eq('(second {1 2 3 4})', vec(3, 4));
+      });
+    });
+    describe('(ffirst coll)', function() {
+      return it('is equivalent to (first (first x))', function() {
+        throws('(ffirst [[1]] [[2]])');
+        throws('(ffirst [1 2])');
+        eq('(ffirst \'([1 2] 3))', 1);
+        return eq('(ffirst {1 2 3 4})', 1);
+      });
+    });
+    describe('(nfirst coll)', function() {
+      return it('is equivalent to (next (first x))', function() {
+        throws('(nfirst [[1 2]] [[3 4]])');
+        throws('(nfirst [1 2])');
+        eq('(nfirst \'([1 2] 3))', seq([2]));
+        return eq('(nfirst {1 2 3 4})', seq([2]));
+      });
+    });
+    describe('(fnext coll)', function() {
+      return it('is equivalent to (first (next x))', function() {
+        throws('(fnext [1 2 3] [4 5 6])');
+        throws('(fnext 3)');
+        eq('(fnext "string")', 't');
+        eq('(fnext \'(1 2 3))', 2);
+        return eq('(fnext {1 2 3 4})', vec(3, 4));
+      });
+    });
+    describe('(nnext coll)', function() {
+      return it('is equivalent to (next (next x))', function() {
+        throws('(nnext [1 2] [3 4])');
+        throws('(nnext 3)');
+        nil('(nnext [1 2])');
+        eq('(nnext \'(1 2 [3 4]))', seq([vec(3, 4)]));
+        return eq('(nnext {1 2 3 4 5 6})', seq([vec(5, 6)]));
+      });
+    });
+    describe('(nthnext coll n)', function() {
+      return it('returns the nth next of coll, or (seq coll) when n is 0', function() {
+        throws('(nthnext [1 2 3])');
+        throws('(nthnext 3)');
+        eq('(nthnext (range 10) 0)', seq([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
+        eq('(nthnext (range 10) 5)', seq([5, 6, 7, 8, 9]));
+        return nil('(nthnext (range 10) 10)');
       });
     });
     describe('(peek coll)', function() {
@@ -1946,6 +1998,30 @@
           throw e;
         }
       }
+    },
+    'second': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.first(core.next(coll));
+    },
+    'ffirst': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.first(core.first(coll));
+    },
+    'nfirst': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.next(core.first(coll));
+    },
+    'fnext': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.first(core.next(coll));
+    },
+    'nnext': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.next(core.next(coll));
+    },
+    'nthnext': function(coll, n) {
+      assertions.arity(2, arguments.length);
+      return core.nth(core.iterate(core.next, coll), n);
     },
     'peek': function(coll) {
       assertions.arity(1, arguments.length);

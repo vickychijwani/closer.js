@@ -17,9 +17,9 @@ evaluate = (src) ->
 
 eq = (src, expected) -> expect(evaluate src).toCljEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
-truthy = (src) -> expect(evaluate src).toEqual true
-falsy = (src) -> expect(evaluate src).toEqual false
-nil = (src) -> expect(evaluate src).toEqual null
+truthy = (src) -> expect(evaluate src).toCljEqual true
+falsy = (src) -> expect(evaluate src).toCljEqual false
+nil = (src) -> expect(evaluate src).toCljEqual null
 
 key = (x) -> closerCore.keyword x
 seq = (seqable) -> closerCore.seq seqable
@@ -699,6 +699,52 @@ describe 'Closer core library', ->
       eq '(nth "string" 6 "not-found")', 'not-found'
       eq '(nth \'(1 2 3 4) 3)', 4   # takes O(n) time
       eq '(nth (seq #{1 2 3 4}) 3)', 4   # takes O(n) time
+
+  describe '(second coll)', ->
+    it 'is equivalent to (first (next x))', ->
+      throws '(second [1 2 3] [4 5 6])'
+      throws '(second 3)'
+      eq '(second "string")', 't'
+      eq '(second \'(1 2 3))', 2
+      eq '(second {1 2 3 4})', vec 3, 4
+
+  describe '(ffirst coll)', ->
+    it 'is equivalent to (first (first x))', ->
+      throws '(ffirst [[1]] [[2]])'
+      throws '(ffirst [1 2])'
+      eq '(ffirst \'([1 2] 3))', 1
+      eq '(ffirst {1 2 3 4})', 1
+
+  describe '(nfirst coll)', ->
+    it 'is equivalent to (next (first x))', ->
+      throws '(nfirst [[1 2]] [[3 4]])'
+      throws '(nfirst [1 2])'
+      eq '(nfirst \'([1 2] 3))', seq [2]
+      eq '(nfirst {1 2 3 4})', seq [2]
+
+  describe '(fnext coll)', ->
+    it 'is equivalent to (first (next x))', ->
+      throws '(fnext [1 2 3] [4 5 6])'
+      throws '(fnext 3)'
+      eq '(fnext "string")', 't'
+      eq '(fnext \'(1 2 3))', 2
+      eq '(fnext {1 2 3 4})', vec 3, 4
+
+  describe '(nnext coll)', ->
+    it 'is equivalent to (next (next x))', ->
+      throws '(nnext [1 2] [3 4])'
+      throws '(nnext 3)'
+      nil '(nnext [1 2])'
+      eq '(nnext \'(1 2 [3 4]))', seq [vec 3, 4]
+      eq '(nnext {1 2 3 4 5 6})', seq [vec 5, 6]
+
+  describe '(nthnext coll n)', ->
+    it 'returns the nth next of coll, or (seq coll) when n is 0', ->
+      throws '(nthnext [1 2 3])'
+      throws '(nthnext 3)'
+      eq '(nthnext (range 10) 0)', seq [0..9]
+      eq '(nthnext (range 10) 5)', seq [5..9]
+      nil '(nthnext (range 10) 10)'
 
   describe '(peek coll)', ->
     it 'returns the first item of a list or the last item of a vector', ->

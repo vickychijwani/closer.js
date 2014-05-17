@@ -344,6 +344,30 @@ core =
         throw error
       else throw e
 
+  'second': (coll) ->
+    assertions.arity 1, arguments.length
+    core.first core.next coll
+
+  'ffirst': (coll) ->
+    assertions.arity 1, arguments.length
+    core.first core.first coll
+
+  'nfirst': (coll) ->
+    assertions.arity 1, arguments.length
+    core.next core.first coll
+
+  'fnext': (coll) ->
+    assertions.arity 1, arguments.length
+    core.first core.next coll
+
+  'nnext': (coll) ->
+    assertions.arity 1, arguments.length
+    core.next core.next coll
+
+  'nthnext': (coll, n) ->
+    assertions.arity 2, arguments.length
+    core.nth core.iterate(core.next, coll), n
+
   'peek': (coll) ->
     assertions.arity 1, arguments.length
     assertions.stack coll

@@ -16,9 +16,9 @@ evaluate = (src, options) ->
 
 eq = (src, expected) -> expect(evaluate src).toCljEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
-truthy = (src) -> expect(evaluate src).toEqual true
-falsy = (src) -> expect(evaluate src).toEqual false
-nil = (src) -> expect(evaluate src).toEqual null
+truthy = (src) -> expect(evaluate src).toCljEqual true
+falsy = (src) -> expect(evaluate src).toCljEqual false
+nil = (src) -> expect(evaluate src).toCljEqual null
 
 key = (x) -> closerCore.keyword x
 seq = (seqable) -> closerCore.seq seqable
