@@ -98,7 +98,6 @@
                 var outputEditor = setupAceEditor($outputTextArea);
                 outputEditor.setReadOnly(true);
                 outputEditor.renderer.setShowGutter(false);
-                outputEditor.getSession().setValue(";; output:\n");
 
                 var timeout = null;
                 inputEditor.getSession().on('change', function (e) {
@@ -141,6 +140,7 @@
                         outputEditor.getSession().setValue(output);
                     }
                 });
+                runCodeBtn.click();
 
                 function parseInput () {
                     var input = inputEditor.getSession().getValue();
