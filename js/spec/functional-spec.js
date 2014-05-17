@@ -38,15 +38,15 @@
   };
 
   truthy = function(src) {
-    return expect(evaluate(src)).toEqual(true);
+    return expect(evaluate(src)).toCljEqual(true);
   };
 
   falsy = function(src) {
-    return expect(evaluate(src)).toEqual(false);
+    return expect(evaluate(src)).toCljEqual(false);
   };
 
   nil = function(src) {
-    return expect(evaluate(src)).toEqual(null);
+    return expect(evaluate(src)).toCljEqual(null);
   };
 
   key = function(x) {
@@ -771,6 +771,30 @@
           throw e;
         }
       }
+    },
+    'second': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.first(core.next(coll));
+    },
+    'ffirst': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.first(core.first(coll));
+    },
+    'nfirst': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.next(core.first(coll));
+    },
+    'fnext': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.first(core.next(coll));
+    },
+    'nnext': function(coll) {
+      assertions.arity(1, arguments.length);
+      return core.next(core.next(coll));
+    },
+    'nthnext': function(coll, n) {
+      assertions.arity(2, arguments.length);
+      return core.nth(core.iterate(core.next, coll), n);
     },
     'peek': function(coll) {
       assertions.arity(1, arguments.length);
