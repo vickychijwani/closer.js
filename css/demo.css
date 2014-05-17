@@ -39,4 +39,26 @@ body > .container-fluid {
 
 .ast {
 	height: 100%;
+    padding-bottom: 200px;
+}
+
+.output-wrapper {
+    position: absolute;
+    bottom: 20px; height: 160px;
+    left: 15px; right: 15px;
+}
+
+.run-code {
+    position: absolute;
+    width: 100px;
+}
+
+.output-container {
+    margin-left: 120px;
+    height: 100%;
+}
+
+.output {
+    position: absolute;
+    height: 160px;
 }
