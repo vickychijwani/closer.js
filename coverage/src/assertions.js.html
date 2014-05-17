@@ -372,6 +372,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
@@ -519,10 +523,6 @@
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -536,6 +536,10 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { <span class="missing-if-branch" title="else path not taken"" >E</span>if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
+&nbsp;
+  _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >window !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >window._ </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref2 </span>: typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >self._ </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref1 </span>: typeof global !== "undefined" &amp;&amp; global !== null ? global._ : <span class="branch-1 cbranch-no" title="branch not covered" >void 0)</span> != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref </span>: require('lodash-node');
+&nbsp;
+  mori = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >window !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >window.mori </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref5 </span>: typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >self.mori </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref4 </span>: typeof global !== "undefined" &amp;&amp; global !== null ? global.mori : <span class="branch-1 cbranch-no" title="branch not covered" >void 0)</span> != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref3 </span>: require('mori');
 &nbsp;
   ArityError = (function(_super) {
     __extends(ArityError, _super);
@@ -684,10 +688,6 @@
 &nbsp;
   module.exports = assertions;
 &nbsp;
-  _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >window !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >window._ </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref2 </span>: typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >self._ </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref1 </span>: typeof global !== "undefined" &amp;&amp; global !== null ? global._ : <span class="branch-1 cbranch-no" title="branch not covered" >void 0)</span> != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref </span>: require('lodash-node');
-&nbsp;
-  mori = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >window !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >window.mori </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref5 </span>: typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >self.mori </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref4 </span>: typeof global !== "undefined" &amp;&amp; global !== null ? global.mori : <span class="branch-1 cbranch-no" title="branch not covered" >void 0)</span> != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref3 </span>: require('mori');
-&nbsp;
   <span class="missing-if-branch" title="if path not taken"" >I</span>if (typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null)</span> {
 <span class="cstat-no" title="statement not covered" >    self.assertions = assertions;</span>
   }
@@ -702,7 +702,7 @@
 
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat May 17 2014 22:52:21 GMT+0530 (IST)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat May 17 2014 23:30:11 GMT+0530 (IST)</div>
 </div>
 
 <script src="../prettify.js"></script>
