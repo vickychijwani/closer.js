@@ -1,3 +1,6 @@
+_ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
+mori = window?.mori ? self?.mori ? global?.mori ? require 'mori'
+
 class ArityError extends Error
   constructor: (args...) ->
     @name = 'ArityError'
@@ -76,11 +79,6 @@ assertions =
 
 
 module.exports = assertions
-
-# requires go here, because of circular dependency
-# see https://coderwall.com/p/myzvmg for more
-_ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
-mori = window?.mori ? self?.mori ? global?.mori ? require 'mori'
 
 self.assertions = assertions if self?
 window.assertions = assertions if window?

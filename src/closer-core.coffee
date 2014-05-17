@@ -1,3 +1,8 @@
+_ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
+m = window?.mori ? self?.mori ? global?.mori ? require 'mori'
+estraverse = require 'estraverse'
+assertions = require './assertions'
+
 core =
 
   # arithmetic
@@ -613,13 +618,35 @@ bind = (that, args) ->
   for i in [0...args.length]
     args[i] = _.bind(args[i], that) if _.isFunction(args[i])
 
-module.exports = core
 
-# requires go here, because of circular dependency
-# see https://coderwall.com/p/myzvmg for more
-_ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
-m = window?.mori ? self?.mori ? global?.mori ? require 'mori'
-assertions = window?.assertions ? self?.assertions ? global?.assertions ? require './assertions'
+# Call this function to hook-up core function calls in the AST obtained from the parser.
+# The second parameter is the name by which the core library will be available at the
+# time of execution. In a browser this parameter will usually not need to be passed.
+core.$wireCallsToCoreFunctions = (ast, coreIdentifier = 'closerCore') ->
+  # gather all user-defined identifiers to allow them to shadow core functions
+  userIdentifiers = []
+  estraverse.traverse ast,
+    leave: (node) ->
+      if node.type is 'VariableDeclarator' and node.id.type is 'Identifier' and node.id.name not in userIdentifiers
+        userIdentifiers.push node.id.name
+
+  estraverse.replace ast,
+    leave: (node) ->
+      if node.type is 'Identifier' and node.name of core and node.name not in userIdentifiers
+        obj = { type: 'Identifier', name: coreIdentifier, loc: node.loc }
+        prop = { type: 'Identifier', name: node.name, loc: node.loc }
+        node = { type: 'MemberExpression', object: obj, property: prop, computed: false, loc: node.loc }
+      else if (node.type is 'MemberExpression' and node.object.type is 'Identifier' and node.object.name is coreIdentifier and
+      node.property.type is 'MemberExpression' and node.property.object.type is 'Identifier' and node.property.object.name is coreIdentifier)
+        # some nodes are the same object instance in memory, so they will be processed multiple times
+        # so map.call(...) will become closerCore.closerCore.closerCore.map.call(...)
+        # this is to reverse that effect
+        return node.property
+      node
+  ast
+
+
+module.exports = core
 
 self.closerCore = core if self?
 window.closerCore = core if window?

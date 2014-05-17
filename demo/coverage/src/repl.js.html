@@ -183,16 +183,16 @@
     <h1>Code coverage report for <span class="entity">src/repl.js</span></h1>
     <h2>
         
-        Statements: <span class="metric">83.33% <small>(35 / 42)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Statements: <span class="metric">90.48% <small>(19 / 21)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Branches: <span class="metric">58.57% <small>(41 / 70)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Branches: <span class="metric">56.52% <small>(26 / 46)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Functions: <span class="metric">88.89% <small>(8 / 9)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Functions: <span class="metric">100% <small>(5 / 5)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Lines: <span class="metric">89.74% <small>(35 / 39)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Lines: <span class="metric">90.48% <small>(19 / 21)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
     </h2>
     <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">src/</a> &#187; repl.js</div>
@@ -243,38 +243,7 @@
 42
 43
 44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+45</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
@@ -284,31 +253,6 @@
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">794</span>
-<span class="cline-any cline-yes">794</span>
-<span class="cline-any cline-yes">794</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11474</span>
-<span class="cline-any cline-yes">11474</span>
-<span class="cline-any cline-yes">56</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">794</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11474</span>
-<span class="cline-any cline-yes">11474</span>
-<span class="cline-any cline-yes">1690</span>
-<span class="cline-any cline-yes">1690</span>
-<span class="cline-any cline-yes">1690</span>
-<span class="cline-any cline-yes">9784</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11474</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">794</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">794</span>
@@ -344,8 +288,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">(function() {
-  var closer, closerCore, escodegen, estraverse, repl, wireCallsToCore, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
-    __indexOf = [].indexOf || <span class="fstat-no" title="function not covered" ><span class="branch-1 cbranch-no" title="branch not covered" >function(item) {</span> <span class="cstat-no" title="statement not covered" >for (var i = 0, l = this.length; i &lt; l; i++) { <span class="cstat-no" title="statement not covered" >if (i in this &amp;&amp; this[i] === item) <span class="cstat-no" title="statement not covered" >return i; </span></span>} <span class="cstat-no" title="statement not covered" ></span>return -1; </span>};</span>
+  var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
 &nbsp;
   closer = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >window !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >window.closer </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref2 </span>: typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >self.closer </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref1 </span>: typeof global !== "undefined" &amp;&amp; global !== null ? global.closer : <span class="branch-1 cbranch-no" title="branch not covered" >void 0)</span> != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref </span>: require('./closer');
 &nbsp;
@@ -354,33 +297,6 @@
   escodegen = require('escodegen');
 &nbsp;
   estraverse = require('estraverse');
-&nbsp;
-  wireCallsToCore = function(ast) {
-    var userIdentifiers;
-    userIdentifiers = [];
-    estraverse.traverse(ast, {
-      leave: function(node) {
-        var _ref6;
-        if (node.type === 'VariableDeclarator' &amp;&amp; node.id.type === 'Identifier' &amp;&amp; (_ref6 = node.id.name, __indexOf.call(userIdentifiers, _ref6) &lt; 0)) {
-          return userIdentifiers.push(node.id.name);
-        }
-      }
-    });
-    estraverse.replace(ast, {
-      leave: function(node) {
-        var obj, prop, _ref6;
-        if (node.type === 'Identifier' &amp;&amp; node.name in closerCore &amp;&amp; (_ref6 = node.name, __indexOf.call(userIdentifiers, _ref6) &lt; 0)) {
-          obj = closer.node('Identifier', 'closerCore', node.loc);
-          prop = closer.node('Identifier', node.name, node.loc);
-          node = closer.node('MemberExpression', obj, prop, false, node.loc);
-        } else <span class="missing-if-branch" title="if path not taken"" >I</span>if (node.type === 'MemberExpression' &amp;&amp; node.object.type === 'Identifier' &amp;&amp; node.object.name === 'closerCore' &amp;&amp; <span class="branch-3 cbranch-no" title="branch not covered" >node.property.type === 'MemberExpression' </span>&amp;&amp; <span class="branch-4 cbranch-no" title="branch not covered" >node.property.object.type === 'Identifier' </span>&amp;&amp; <span class="branch-5 cbranch-no" title="branch not covered" >node.property.object.name === 'closerCore')</span> {
-<span class="cstat-no" title="statement not covered" >          return node.property;</span>
-        }
-        return node;
-      }
-    });
-    return ast;
-  };
 &nbsp;
   wireThisAccess = function(ast) {
     estraverse.replace(ast, {
@@ -397,7 +313,7 @@
 &nbsp;
   repl = {
     parse: function(src, options) {
-      return wireThisAccess(wireCallsToCore(closer.parse(src, options)));
+      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options)));
     },
     generateJS: function(src, options) {
       return escodegen.generate(repl.parse(src, options));
@@ -420,7 +336,7 @@
 
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat May 17 2014 22:52:21 GMT+0530 (IST)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat May 17 2014 23:30:11 GMT+0530 (IST)</div>
 </div>
 
 <script src="../prettify.js"></script>

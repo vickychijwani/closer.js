@@ -154,6 +154,10 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
 
+  _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
+
+  mori = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" && window !== null ? window.mori : void 0) != null ? _ref5 : typeof self !== "undefined" && self !== null ? self.mori : void 0) != null ? _ref4 : typeof global !== "undefined" && global !== null ? global.mori : void 0) != null ? _ref3 : require('mori');
+
   ArityError = (function(_super) {
     __extends(ArityError, _super);
 
@@ -301,10 +305,6 @@
 
   module.exports = assertions;
 
-  _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
-
-  mori = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" && window !== null ? window.mori : void 0) != null ? _ref5 : typeof self !== "undefined" && self !== null ? self.mori : void 0) != null ? _ref4 : typeof global !== "undefined" && global !== null ? global.mori : void 0) != null ? _ref3 : require('mori');
-
   if (typeof self !== "undefined" && self !== null) {
     self.assertions = assertions;
   }
@@ -319,8 +319,17 @@
 },{"mori":27}],3:[function(require,module,exports){
 (function (global){
 (function() {
-  var assertions, bind, core, m, _, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
-    __slice = [].slice;
+  var assertions, bind, core, estraverse, m, _, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
+    __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
+
+  m = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" && window !== null ? window.mori : void 0) != null ? _ref5 : typeof self !== "undefined" && self !== null ? self.mori : void 0) != null ? _ref4 : typeof global !== "undefined" && global !== null ? global.mori : void 0) != null ? _ref3 : require('mori');
+
+  estraverse = require('estraverse');
+
+  assertions = require('./assertions');
 
   core = {
     '_$PLUS_': function() {
@@ -892,7 +901,7 @@
       return x;
     },
     'apply': function() {
-      var args, f, i, last, lastSeq, rest, _i, _ref;
+      var args, f, i, last, lastSeq, rest, _i, _ref6;
       f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       assertions.arity(2, Infinity, arguments.length);
       last = args[args.length - 1];
@@ -900,7 +909,7 @@
       assertions["function"](f);
       assertions.seqable(last);
       lastSeq = core.seq(last);
-      for (i = _i = 0, _ref = core.count(lastSeq); 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _i = 0, _ref6 = core.count(lastSeq); 0 <= _ref6 ? _i < _ref6 : _i > _ref6; i = 0 <= _ref6 ? ++_i : --_i) {
         rest.push(core.nth(lastSeq, i));
       }
       return f.apply(this, rest);
@@ -1080,9 +1089,9 @@
   };
 
   bind = function(that, args) {
-    var i, _i, _ref, _results;
+    var i, _i, _ref6, _results;
     _results = [];
-    for (i = _i = 0, _ref = args.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+    for (i = _i = 0, _ref6 = args.length; 0 <= _ref6 ? _i < _ref6 : _i > _ref6; i = 0 <= _ref6 ? ++_i : --_i) {
       if (_.isFunction(args[i])) {
         _results.push(args[i] = _.bind(args[i], that));
       } else {
@@ -1092,13 +1101,51 @@
     return _results;
   };
 
+  core.$wireCallsToCoreFunctions = function(ast, coreIdentifier) {
+    var userIdentifiers;
+    if (coreIdentifier == null) {
+      coreIdentifier = 'closerCore';
+    }
+    userIdentifiers = [];
+    estraverse.traverse(ast, {
+      leave: function(node) {
+        var _ref6;
+        if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && (_ref6 = node.id.name, __indexOf.call(userIdentifiers, _ref6) < 0)) {
+          return userIdentifiers.push(node.id.name);
+        }
+      }
+    });
+    estraverse.replace(ast, {
+      leave: function(node) {
+        var obj, prop, _ref6;
+        if (node.type === 'Identifier' && node.name in core && (_ref6 = node.name, __indexOf.call(userIdentifiers, _ref6) < 0)) {
+          obj = {
+            type: 'Identifier',
+            name: coreIdentifier,
+            loc: node.loc
+          };
+          prop = {
+            type: 'Identifier',
+            name: node.name,
+            loc: node.loc
+          };
+          node = {
+            type: 'MemberExpression',
+            object: obj,
+            property: prop,
+            computed: false,
+            loc: node.loc
+          };
+        } else if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === coreIdentifier && node.property.type === 'MemberExpression' && node.property.object.type === 'Identifier' && node.property.object.name === coreIdentifier) {
+          return node.property;
+        }
+        return node;
+      }
+    });
+    return ast;
+  };
+
   module.exports = core;
-
-  _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
-
-  m = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" && window !== null ? window.mori : void 0) != null ? _ref5 : typeof self !== "undefined" && self !== null ? self.mori : void 0) != null ? _ref4 : typeof global !== "undefined" && global !== null ? global.mori : void 0) != null ? _ref3 : require('mori');
-
-  assertions = (_ref6 = (_ref7 = (_ref8 = typeof window !== "undefined" && window !== null ? window.assertions : void 0) != null ? _ref8 : typeof self !== "undefined" && self !== null ? self.assertions : void 0) != null ? _ref7 : typeof global !== "undefined" && global !== null ? global.assertions : void 0) != null ? _ref6 : require('./assertions');
 
   if (typeof self !== "undefined" && self !== null) {
     self.closerCore = core;
@@ -1111,7 +1158,7 @@
 }).call(this);
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./assertions":2,"mori":27}],4:[function(require,module,exports){
+},{"./assertions":2,"estraverse":26,"mori":27}],4:[function(require,module,exports){
 (function() {
   var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
 
@@ -2930,8 +2977,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 },{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
 (function (global){
 (function() {
-  var closer, closerCore, escodegen, estraverse, repl, wireCallsToCore, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
 
   closer = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window.closer : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self.closer : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global.closer : void 0) != null ? _ref : require('./closer');
 
@@ -2940,33 +2986,6 @@ if (typeof module !== 'undefined' && require.main === module) {
   escodegen = require('escodegen');
 
   estraverse = require('estraverse');
-
-  wireCallsToCore = function(ast) {
-    var userIdentifiers;
-    userIdentifiers = [];
-    estraverse.traverse(ast, {
-      leave: function(node) {
-        var _ref6;
-        if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && (_ref6 = node.id.name, __indexOf.call(userIdentifiers, _ref6) < 0)) {
-          return userIdentifiers.push(node.id.name);
-        }
-      }
-    });
-    estraverse.replace(ast, {
-      leave: function(node) {
-        var obj, prop, _ref6;
-        if (node.type === 'Identifier' && node.name in closerCore && (_ref6 = node.name, __indexOf.call(userIdentifiers, _ref6) < 0)) {
-          obj = closer.node('Identifier', 'closerCore', node.loc);
-          prop = closer.node('Identifier', node.name, node.loc);
-          node = closer.node('MemberExpression', obj, prop, false, node.loc);
-        } else if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === 'closerCore' && node.property.type === 'MemberExpression' && node.property.object.type === 'Identifier' && node.property.object.name === 'closerCore') {
-          return node.property;
-        }
-        return node;
-      }
-    });
-    return ast;
-  };
 
   wireThisAccess = function(ast) {
     estraverse.replace(ast, {
@@ -2983,7 +3002,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   repl = {
     parse: function(src, options) {
-      return wireThisAccess(wireCallsToCore(closer.parse(src, options)));
+      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options)));
     },
     generateJS: function(src, options) {
       return escodegen.generate(repl.parse(src, options));
