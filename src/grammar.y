@@ -340,7 +340,7 @@ DoTimesForm
 DoSeqForm
   : DOSEQ '[' Identifier SExpr ']' BlockStatement {
         var idLoc = yy.loc(@Identifier), sexprLoc = yy.loc(@SExpr);
-        var seqId = yy.Node('Identifier', '__$doseqSeq', sexprLoc);
+        var seqId = yy.Node('Identifier', '__$doseqSeq' + doseqIdx++, sexprLoc);
         var init = parseVarDecl(seqId, $SExpr, sexprLoc, yy);
         addVarDecl(init, $Identifier,
             yy.Node('CallExpression', yy.Node('Identifier', 'first', idLoc),
@@ -485,7 +485,7 @@ BlockStatementWithReturn
 Program
   : NonEmptyDoForm 'END-OF-FILE' {
         var prog = yy.Node('Program', $NonEmptyDoForm, yy.loc(@NonEmptyDoForm));
-        destrucArgIdx = 0;
+        resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     }
@@ -495,6 +495,7 @@ Program
             start: { column: 0, line: 0 },
             range: [0, 0]
         });
+        resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     }
@@ -510,7 +511,12 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'UpdateExpression', 'LogicalExpression', 'ConditionalExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
-var destrucArgIdx = 0;
+// indices for generated identifiers
+var destrucArgIdx, doseqIdx;
+function resetGeneratedIds() {
+    destrucArgIdx = doseqIdx = 0;
+}
+
 function processSeqDestrucForm(args, yy) {
     var i, len, arg;
     var fixed = args.fixed, rest = args.rest;

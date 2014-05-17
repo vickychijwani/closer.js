@@ -516,7 +516,7 @@
       return eq('(dotimes [i expr] (println i))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0)), VariableDeclarator(Identifier('__$max'), Identifier('expr'))), BinaryExpression('<', Identifier('i'), Identifier('__$max')), UpdateExpression('++', Identifier('i')), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('i')]))))));
     });
     it('parses doseq forms', function() {
-      return eq('(doseq [x (range 5)] (println x))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('__$doseqSeq'), CallExpression(MemberExpression(Identifier('range'), Identifier('call')), [ThisExpression(), Integer(5)])), VariableDeclarator(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))), BinaryExpression('!==', Identifier('x'), Nil()), SequenceExpression(AssignmentExpression(Identifier('__$doseqSeq'), CallExpression(Identifier('rest'), [Identifier('__$doseqSeq')])), AssignmentExpression(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('x')]))))));
+      return eq('(doseq [x (range 5)] (println x))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('__$doseqSeq0'), CallExpression(MemberExpression(Identifier('range'), Identifier('call')), [ThisExpression(), Integer(5)])), VariableDeclarator(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BinaryExpression('!==', Identifier('x'), Nil()), SequenceExpression(AssignmentExpression(Identifier('__$doseqSeq0'), CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])), AssignmentExpression(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('x')]))))));
     });
     it('parses while forms', function() {
       return eq('(while (< i 5) (set! i (inc i)))', Program(WhileStatement(CallExpression(MemberExpression(Identifier('_$LT_'), Identifier('call')), [ThisExpression(), Identifier('i'), Integer(5)]), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('i'), CallExpression(MemberExpression(Identifier('inc'), Identifier('call')), [ThisExpression(), Identifier('i')])))))));
@@ -1280,7 +1280,7 @@ case 54:
 break;
 case 55:
         var idLoc = yy.loc(_$[$0-3]), sexprLoc = yy.loc(_$[$0-2]);
-        var seqId = yy.Node('Identifier', '__$doseqSeq', sexprLoc);
+        var seqId = yy.Node('Identifier', '__$doseqSeq' + doseqIdx++, sexprLoc);
         var init = parseVarDecl(seqId, $$[$0-2], sexprLoc, yy);
         addVarDecl(init, $$[$0-3],
             yy.Node('CallExpression', yy.Node('Identifier', 'first', idLoc),
@@ -1395,7 +1395,7 @@ case 86:
 break;
 case 87:
         var prog = yy.Node('Program', $$[$0-1], yy.loc(_$[$0-1]));
-        destrucArgIdx = 0;
+        resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     
@@ -1406,6 +1406,7 @@ case 88:
             start: { column: 0, line: 0 },
             range: [0, 0]
         });
+        resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     
@@ -1561,7 +1562,12 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'UpdateExpression', 'LogicalExpression', 'ConditionalExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
-var destrucArgIdx = 0;
+// indices for generated identifiers
+var destrucArgIdx, doseqIdx;
+function resetGeneratedIds() {
+    destrucArgIdx = doseqIdx = 0;
+}
+
 function processSeqDestrucForm(args, yy) {
     var i, len, arg;
     var fixed = args.fixed, rest = args.rest;

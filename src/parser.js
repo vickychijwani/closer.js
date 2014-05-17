@@ -377,7 +377,7 @@ case 54:
 break;
 case 55:
         var idLoc = yy.loc(_$[$0-3]), sexprLoc = yy.loc(_$[$0-2]);
-        var seqId = yy.Node('Identifier', '__$doseqSeq', sexprLoc);
+        var seqId = yy.Node('Identifier', '__$doseqSeq' + doseqIdx++, sexprLoc);
         var init = parseVarDecl(seqId, $$[$0-2], sexprLoc, yy);
         addVarDecl(init, $$[$0-3],
             yy.Node('CallExpression', yy.Node('Identifier', 'first', idLoc),
@@ -492,7 +492,7 @@ case 86:
 break;
 case 87:
         var prog = yy.Node('Program', $$[$0-1], yy.loc(_$[$0-1]));
-        destrucArgIdx = 0;
+        resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     
@@ -503,6 +503,7 @@ case 88:
             start: { column: 0, line: 0 },
             range: [0, 0]
         });
+        resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
         return prog;
     
@@ -658,7 +659,12 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'UpdateExpression', 'LogicalExpression', 'ConditionalExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
-var destrucArgIdx = 0;
+// indices for generated identifiers
+var destrucArgIdx, doseqIdx;
+function resetGeneratedIds() {
+    destrucArgIdx = doseqIdx = 0;
+}
+
 function processSeqDestrucForm(args, yy) {
     var i, len, arg;
     var fixed = args.fixed, rest = args.rest;

@@ -564,18 +564,18 @@ describe 'Closer parser', ->
     eq '(doseq [x (range 5)] (println x))', Program(
       ForStatement(
         VariableDeclaration(
-          VariableDeclarator(Identifier('__$doseqSeq'),
+          VariableDeclarator(Identifier('__$doseqSeq0'),
             CallExpression(
               MemberExpression(Identifier('range'), Identifier('call')),
               [ThisExpression(), Integer(5)])),
           VariableDeclarator(Identifier('x'),
-            CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))),
+            CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))),
         BinaryExpression('!==', Identifier('x'), Nil()),
         SequenceExpression(
-          AssignmentExpression(Identifier('__$doseqSeq'),
-            CallExpression(Identifier('rest'), [Identifier('__$doseqSeq')])),
+          AssignmentExpression(Identifier('__$doseqSeq0'),
+            CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])),
           AssignmentExpression(Identifier('x'),
-            CallExpression(Identifier('first'), [Identifier('__$doseqSeq')]))),
+            CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))),
         BlockStatement(
           ExpressionStatement(CallExpression(
             MemberExpression(Identifier('println'), Identifier('call')),
