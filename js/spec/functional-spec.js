@@ -111,6 +111,11 @@
   })();
 
   describe('Functional tests', function() {
+    it('allows user-defined identifiers to shadow core functions', function() {
+      eq('(min 1 2 3)', 1);
+      throws('(def min 2), (min 1 2 3)');
+      return eq('(def min 2), min', 2);
+    });
     it('js interop - \'this\' access', function() {
       __$this['move-x-y'](0, 0);
       __$this.enemy['move-x-y'](10, 20);
