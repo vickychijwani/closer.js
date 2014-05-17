@@ -521,6 +521,14 @@ describe 'Closer core library', ->
       eq '(str (seq {1 2 3 4}))', '([1 2] [3 4])'
       eq '(str [1 2 \'(3 4 5)])', '[1 2 (3 4 5)]'
 
+  describe '(println args)', ->
+    it 'prints the given args separated by a single space and followed by a newline', ->
+      oldLog = console.log
+      console.log = (args...) -> args.join ' '
+      eq '(println 1 2 [3 4])', '1 2 [3 4]'
+      eq '(println #{1 2} {3 4})', '#{1 2} {3 4}'
+      console.log = oldLog
+
 
   # collections
   describe '(keyword name)', ->
