@@ -513,7 +513,7 @@
       return eq('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))', Program(ExpressionStatement(FunctionExpression(null, [Identifier('n'), Identifier('acc')], null, BlockStatement(AssertArity(2), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')), [ThisExpression(), Identifier('n')]), ReturnStatement(Identifier('acc')), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('dec'), Identifier('call')), [ThisExpression(), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('__$recur1'), CallExpression(MemberExpression(Identifier('_$STAR_'), Identifier('call')), [ThisExpression(), Identifier('acc'), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('n'), Identifier('__$recur0'))), ExpressionStatement(AssignmentExpression(Identifier('acc'), Identifier('__$recur1'))), ContinueStatement())))))))));
     });
     it('parses dotimes forms', function() {
-      return eq('(dotimes [i expr] (println i))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0)), VariableDeclarator(Identifier('__$max'), Identifier('expr'))), BinaryExpression('<', Identifier('i'), Identifier('__$max')), UpdateExpression('++', Identifier('i')), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('i')]))))));
+      return eq('(dotimes [i expr] (println i))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0)), VariableDeclarator(Identifier('__$max0'), Identifier('expr'))), BinaryExpression('<', Identifier('i'), Identifier('__$max0')), UpdateExpression('++', Identifier('i')), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('i')]))))));
     });
     it('parses doseq forms', function() {
       return eq('(doseq [x (range 5)] (println x))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('__$doseqSeq0'), CallExpression(MemberExpression(Identifier('range'), Identifier('call')), [ThisExpression(), Integer(5)])), VariableDeclarator(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BinaryExpression('!==', Identifier('x'), Nil()), SequenceExpression(AssignmentExpression(Identifier('__$doseqSeq0'), CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])), AssignmentExpression(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('x')]))))));
@@ -1267,7 +1267,7 @@ case 54:
         var init = parseVarDecl($$[$0-3],
             parseNumLiteral('Integer', '0', yy.loc(_$[$0-3]), yy),
             yy.loc(_$[$0-3]), yy);
-        var maxId = yy.Node('Identifier', '__$max', yy.loc(_$[$0-2]));
+        var maxId = yy.Node('Identifier', '__$max' + dotimesIdx++, yy.loc(_$[$0-2]));
         addVarDecl(init, maxId, $$[$0-2], yy.loc(_$[$0-2]), yy);
         var test = yy.Node('BinaryExpression', '<', $$[$0-3], maxId, yy.loc(_$[$0-3]));
         var update = yy.Node('UpdateExpression', '++', $$[$0-3], true, yy.loc(_$[$0-3]));
@@ -1563,9 +1563,9 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
 // indices for generated identifiers
-var destrucArgIdx, doseqIdx;
+var destrucArgIdx, doseqIdx, dotimesIdx;
 function resetGeneratedIds() {
-    destrucArgIdx = doseqIdx = 0;
+    destrucArgIdx = doseqIdx = dotimesIdx = 0;
 }
 
 function processSeqDestrucForm(args, yy) {

@@ -1759,7 +1759,7 @@ case 54:
         var init = parseVarDecl($$[$0-3],
             parseNumLiteral('Integer', '0', yy.loc(_$[$0-3]), yy),
             yy.loc(_$[$0-3]), yy);
-        var maxId = yy.Node('Identifier', '__$max', yy.loc(_$[$0-2]));
+        var maxId = yy.Node('Identifier', '__$max' + dotimesIdx++, yy.loc(_$[$0-2]));
         addVarDecl(init, maxId, $$[$0-2], yy.loc(_$[$0-2]), yy);
         var test = yy.Node('BinaryExpression', '<', $$[$0-3], maxId, yy.loc(_$[$0-3]));
         var update = yy.Node('UpdateExpression', '++', $$[$0-3], true, yy.loc(_$[$0-3]));
@@ -2055,9 +2055,9 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
 // indices for generated identifiers
-var destrucArgIdx, doseqIdx;
+var destrucArgIdx, doseqIdx, dotimesIdx;
 function resetGeneratedIds() {
-    destrucArgIdx = doseqIdx = 0;
+    destrucArgIdx = doseqIdx = dotimesIdx = 0;
 }
 
 function processSeqDestrucForm(args, yy) {
