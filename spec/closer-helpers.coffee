@@ -86,6 +86,11 @@ exports.MemberExpression = (obj, prop, computed = false) ->
   property: prop
   computed: computed
 
+exports.NewExpression = (callee, args) ->
+  type: 'NewExpression'
+  callee: callee
+  arguments: args
+
 exports.ConditionalExpression = (test, consequent, alternate) ->
   type: 'ConditionalExpression'
   test: test

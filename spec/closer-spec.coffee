@@ -24,6 +24,7 @@ ArrayExpression = helpers.ArrayExpression
 AssignmentExpression = helpers.AssignmentExpression
 CallExpression = helpers.CallExpression
 MemberExpression = helpers.MemberExpression
+NewExpression = helpers.NewExpression
 ConditionalExpression = helpers.ConditionalExpression
 FunctionExpression = helpers.FunctionExpression
 EmptyStatement = helpers.EmptyStatement
@@ -659,6 +660,12 @@ describe 'Closer parser', ->
               Integer(0))),
           CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []),
           MemberExpression(ThisExpression(), String('pos'), true))))
+
+  it 'parses new forms like (new Array 1 2 3)', ->
+    eq '(new Array 1 2 3)', Program(
+      ExpressionStatement(NewExpression(
+        Identifier('Array'),
+        [Integer(1), Integer(2), Integer(3)])))
 
   it 'parses logical expressions (and / or)', ->
     eq '(and) (or)', Program(

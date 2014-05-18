@@ -267,6 +267,16 @@ LetForm
     }
   ;
 
+SetForm
+  : SETVAL Identifier SExpr { $$ = yy.Node('AssignmentExpression', '=', $Identifier, $SExpr, yy.loc(@1)); }
+  | SETVAL '(' DOT IDENTIFIER[prop] SExpr[obj] ')' SExpr[val] {
+        var lhs = yy.Node('MemberExpression', $obj,
+            yy.Node('Identifier', $prop, yy.loc(@prop)),
+            false, yy.loc(@DOT));
+        $$ = yy.Node('AssignmentExpression', '=', lhs, $val, yy.loc(@1));
+    }
+  ;
+
 LoopForm
   : LOOP '[' LetBindings ']' BlockStatement {
         var body = [], i, len, letBinding;
@@ -402,13 +412,9 @@ DotForm
     }
   ;
 
-SetForm
-  : SETVAL Identifier SExpr { $$ = yy.Node('AssignmentExpression', '=', $Identifier, $SExpr, yy.loc(@1)); }
-  | SETVAL '(' DOT IDENTIFIER[prop] SExpr[obj] ')' SExpr[val] {
-        var lhs = yy.Node('MemberExpression', $obj,
-            yy.Node('Identifier', $prop, yy.loc(@prop)),
-            false, yy.loc(@DOT));
-        $$ = yy.Node('AssignmentExpression', '=', lhs, $val, yy.loc(@1));
+NewForm
+  : NEW SExpr[konstructor] SExprs?[args] {
+        $$ = yy.Node('NewExpression', $konstructor, getValueIfUndefined($args, []), yy.loc(@1));
     }
   ;
 
@@ -426,6 +432,7 @@ List
   | DoSeqForm
   | WhileForm
   | DotForm
+  | NewForm
   | Fn SExprs?[args] {
         yy.locComb(@$, @2);
         var callee = yy.Node('MemberExpression', $Fn,

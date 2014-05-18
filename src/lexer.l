@@ -61,6 +61,7 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 'dotimes' return 'DOTIMES';
 'doseq' return 'DOSEQ';
 'while' return 'WHILE';
+'new'   return 'NEW';
 
 ':as'   return 'AS';
 ':keys' return 'KEYS';
