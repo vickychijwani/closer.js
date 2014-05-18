@@ -666,6 +666,10 @@ describe 'Closer parser', ->
       ExpressionStatement(NewExpression(
         Identifier('Array'),
         [Integer(1), Integer(2), Integer(3)])))
+    eq '(Array. 1 2 3)', Program(
+      ExpressionStatement(NewExpression(
+        Identifier('Array'),
+        [Integer(1), Integer(2), Integer(3)])))
 
   it 'parses logical expressions (and / or)', ->
     eq '(and) (or)', Program(

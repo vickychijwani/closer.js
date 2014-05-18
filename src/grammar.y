@@ -413,7 +413,10 @@ DotForm
   ;
 
 NewForm
-  : NEW SExpr[konstructor] SExprs?[args] {
+  : NEW Identifier[konstructor] SExprs?[args] {
+        $$ = yy.Node('NewExpression', $konstructor, getValueIfUndefined($args, []), yy.loc(@1));
+    }
+  | Identifier[konstructor] DOT SExprs?[args] {
         $$ = yy.Node('NewExpression', $konstructor, getValueIfUndefined($args, []), yy.loc(@1));
     }
   ;
