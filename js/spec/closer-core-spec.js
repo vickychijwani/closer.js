@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 (function() {
-  var assertions, closerCore, emptySeq, eq, evaluate, falsy, key, list, map, nil, obj, parseOpts, repl, seq, set, throws, truthy, vec, _, __$this, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+  var assertions, closerCore, emptySeq, eq, evaluate, falsy, jseq, key, list, map, nil, obj, parseOpts, repl, seq, set, throws, truthy, vec, _, __$this, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
     __slice = [].slice;
 
   _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
@@ -19,6 +19,12 @@
           return "Expected " + this.actual + " to equal " + expected;
         };
         return closerCore._$EQ_(this.actual, expected);
+      },
+      toJSEqual: function(expected) {
+        this.message = function() {
+          return "Expected " + this.actual + " to equal " + expected;
+        };
+        return _.isEqual(this.actual, expected);
       }
     });
   });
@@ -33,6 +39,10 @@
 
   eq = function(src, expected) {
     return expect(evaluate(src)).toCljEqual(expected);
+  };
+
+  jseq = function(src, expected) {
+    return expect(evaluate(src)).toJSEqual(expected);
   };
 
   throws = function(src) {
@@ -1381,7 +1391,7 @@
         return eq('(def count-if (comp count filter)) (count-if even? [2 3 1 5 4])', 2);
       });
     });
-    return describe('(partial f args)', function() {
+    describe('(partial f args)', function() {
       return it('partially applies f to the given args, returning a function that can be invoked with more args to f', function() {
         throws('(partial)');
         throws('(partial true)');
@@ -1389,6 +1399,21 @@
         eq('((partial identity) 3)', 3);
         eq('((partial identity 3))', 3);
         return eq('(def times-hundred (partial * 100)) (times-hundred 5)', 500);
+      });
+    });
+    describe('(clj->js x)', function() {
+      return it('recursively transforms maps to JS objects, collections to JS arrays, and keywords to JS strings', function() {
+        throws('(clj->js :key [])');
+        return jseq('(clj->js { :a [1 2] :b #{3 4} })', {
+          a: [1, 2],
+          b: [3, 4]
+        });
+      });
+    });
+    return describe('(js->clj x)', function() {
+      return it('recursively transforms JS objects to maps, and JS arrays to vectors', function() {
+        throws('(js->clj :key [])');
+        return eq('(js->clj (clj->js { :a [1 2] :b #{3 4} }))', map('a', vec(1, 2), 'b', vec(3, 4)));
       });
     });
   });
@@ -2389,6 +2414,14 @@
       assertions["function"](f);
       bind(this, arguments);
       return m.partial.apply(null, arguments);
+    },
+    'clj_$__$GT_js': function(x) {
+      assertions.arity(1, arguments.length);
+      return m.clj_to_js(x);
+    },
+    'js_$__$GT_clj': function(x) {
+      assertions.arity(1, arguments.length);
+      return m.js_to_clj(x);
     }
   };
 
