@@ -1144,6 +1144,14 @@
       assertions["function"](f);
       bind(this, arguments);
       return m.partial.apply(null, arguments);
+    },
+    'clj_$__$GT_js': function(x) {
+      assertions.arity(1, arguments.length);
+      return m.clj_to_js(x);
+    },
+    'js_$__$GT_clj': function(x) {
+      assertions.arity(1, arguments.length);
+      return m.js_to_clj(x);
     }
   };
 

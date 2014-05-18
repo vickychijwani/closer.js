@@ -652,6 +652,16 @@ core =
     m.partial.apply null, arguments
 
 
+  # interop functions
+  'clj_$__$GT_js': (x) ->
+    assertions.arity 1, arguments.length
+    m.clj_to_js x
+
+  'js_$__$GT_clj': (x) ->
+    assertions.arity 1, arguments.length
+    m.js_to_clj x
+
+
 bind = (that, args) ->
   for i in [0...args.length]
     args[i] = _.bind(args[i], that) if _.isFunction(args[i])

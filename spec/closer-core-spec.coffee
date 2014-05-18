@@ -10,12 +10,18 @@ beforeEach ->
       @message = ->
         "Expected #{@actual} to equal #{expected}"
       closerCore._$EQ_(@actual, expected)
+    # custom matcher to compare JS objects / arrays
+    toJSEqual: (expected) ->
+      @message = ->
+        "Expected #{@actual} to equal #{expected}"
+      _.isEqual @actual, expected
 
 parseOpts = { loc: false }
 evaluate = (src) ->
   eval repl.generateJS src, parseOpts
 
 eq = (src, expected) -> expect(evaluate src).toCljEqual expected
+jseq = (src, expected) -> expect(evaluate src).toJSEqual expected
 throws = (src) -> expect(-> evaluate src).toThrow()
 truthy = (src) -> expect(evaluate src).toCljEqual true
 falsy = (src) -> expect(evaluate src).toCljEqual false
@@ -1228,3 +1234,13 @@ describe 'Closer core library', ->
       eq '((partial identity) 3)', 3
       eq '((partial identity 3))', 3
       eq '(def times-hundred (partial * 100)) (times-hundred 5)', 500
+
+  describe '(clj->js x)', ->
+    it 'recursively transforms maps to JS objects, collections to JS arrays, and keywords to JS strings', ->
+      throws '(clj->js :key [])'
+      jseq '(clj->js { :a [1 2] :b #{3 4} })', { a: [1, 2], b: [3, 4] }
+
+  describe '(js->clj x)', ->
+    it 'recursively transforms JS objects to maps, and JS arrays to vectors', ->
+      throws '(js->clj :key [])'
+      eq '(js->clj (clj->js { :a [1 2] :b #{3 4} }))', map 'a', vec(1, 2), 'b', vec(3, 4)
