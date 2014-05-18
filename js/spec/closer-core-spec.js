@@ -868,6 +868,24 @@
         return nil('(nthnext (range 10) 10)');
       });
     });
+    describe('(max-key k xs)', function() {
+      return it('returns the x for which (k x), a number, is greatest', function() {
+        throws('(max-key count)');
+        throws('(max-key true 2 3 4)');
+        eq('(max-key count "hello" "world!")', 'world!');
+        eq('(max-key count "hello" "world")', 'world');
+        return eq('(apply max-key identity (range 10))', 9);
+      });
+    });
+    describe('(min-key k xs)', function() {
+      return it('returns the x for which (k x), a number, is least', function() {
+        throws('(min-key count)');
+        throws('(min-key true 2 3 4)');
+        eq('(min-key count "hello" "world!")', 'hello');
+        eq('(min-key count "hello" "world")', 'world');
+        return eq('(apply min-key identity (range 10))', 0);
+      });
+    });
     describe('(peek coll)', function() {
       return it('returns the first item of a list or the last item of a vector', function() {
         throws('(peek [1 2] [3 4])');
@@ -2022,6 +2040,36 @@
     'nthnext': function(coll, n) {
       assertions.arity(2, arguments.length);
       return core.nth(core.iterate(core.next, coll), n);
+    },
+    'max_$_key': function() {
+      var k, more, x, y;
+      k = arguments[0], x = arguments[1], y = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
+      assertions.arity(2, Infinity, arguments.length);
+      assertions["function"](k);
+      if (arguments.length === 2) {
+        return x;
+      }
+      if (arguments.length === 3) {
+        return (k(x) > k(y) ? x : y);
+      }
+      return core.reduce((function(x, y) {
+        return core.max_$_key(k, x, y);
+      }), core.max_$_key(k, x, y), more);
+    },
+    'min_$_key': function() {
+      var k, more, x, y;
+      k = arguments[0], x = arguments[1], y = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
+      assertions.arity(2, Infinity, arguments.length);
+      assertions["function"](k);
+      if (arguments.length === 2) {
+        return x;
+      }
+      if (arguments.length === 3) {
+        return (k(x) < k(y) ? x : y);
+      }
+      return core.reduce((function(x, y) {
+        return core.min_$_key(k, x, y);
+      }), core.min_$_key(k, x, y), more);
     },
     'peek': function(coll) {
       assertions.arity(1, arguments.length);
