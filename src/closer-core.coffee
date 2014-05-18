@@ -368,6 +368,20 @@ core =
     assertions.arity 2, arguments.length
     core.nth core.iterate(core.next, coll), n
 
+  'max_$_key': (k, x, y, more...) ->
+    assertions.arity 2, Infinity, arguments.length
+    assertions.function k
+    if arguments.length is 2 then return x
+    if arguments.length is 3 then return (if k(x) > k(y) then x else y)
+    core.reduce ((x, y) -> core.max_$_key(k, x, y)), core.max_$_key(k, x, y), more
+
+  'min_$_key': (k, x, y, more...) ->
+    assertions.arity 2, Infinity, arguments.length
+    assertions.function k
+    if arguments.length is 2 then return x
+    if arguments.length is 3 then return (if k(x) < k(y) then x else y)
+    core.reduce ((x, y) -> core.min_$_key(k, x, y)), core.min_$_key(k, x, y), more
+
   'peek': (coll) ->
     assertions.arity 1, arguments.length
     assertions.stack coll

@@ -746,6 +746,22 @@ describe 'Closer core library', ->
       eq '(nthnext (range 10) 5)', seq [5..9]
       nil '(nthnext (range 10) 10)'
 
+  describe '(max-key k xs)', ->
+    it 'returns the x for which (k x), a number, is greatest', ->
+      throws '(max-key count)'
+      throws '(max-key true 2 3 4)'
+      eq '(max-key count "hello" "world!")', 'world!'
+      eq '(max-key count "hello" "world")', 'world'
+      eq '(apply max-key identity (range 10))', 9
+
+  describe '(min-key k xs)', ->
+    it 'returns the x for which (k x), a number, is least', ->
+      throws '(min-key count)'
+      throws '(min-key true 2 3 4)'
+      eq '(min-key count "hello" "world!")', 'hello'
+      eq '(min-key count "hello" "world")', 'world'
+      eq '(apply min-key identity (range 10))', 0
+
   describe '(peek coll)', ->
     it 'returns the first item of a list or the last item of a vector', ->
       throws '(peek [1 2] [3 4])'   # wrong arity
