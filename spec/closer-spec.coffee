@@ -419,9 +419,20 @@ describe 'Closer parser', ->
                 MemberExpression(Identifier('apply'), Identifier('call')),
                 [ThisExpression(), Identifier('_$PLUS_'), Identifier('numbers')])))))))
 
-  it 'parses var assignment (set! var value) forms', ->
+  it 'parses assignment forms like (set! var value) and (set! (.prop obj) value)', ->
     eq '(set! x 4)', Program(
       ExpressionStatement(AssignmentExpression(Identifier('x'), Integer(4))))
+    eq '(set! (.length (to-array (range 5))) 3)', Program(
+      ExpressionStatement(AssignmentExpression(
+        MemberExpression(
+          CallExpression(
+            MemberExpression(Identifier('to_$_array'), Identifier('call')),
+            [ThisExpression(),
+            CallExpression(
+              MemberExpression(Identifier('range'), Identifier('call')),
+              [ThisExpression(), Integer(5)])]),
+          Identifier('length')),
+        Integer(3))))
 
   it 'parses a let form with no bindings and no body', ->
     eq '(let [])', Program(

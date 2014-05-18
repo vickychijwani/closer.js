@@ -402,6 +402,16 @@ DotForm
     }
   ;
 
+SetForm
+  : SETVAL Identifier SExpr { $$ = yy.Node('AssignmentExpression', '=', $Identifier, $SExpr, yy.loc(@1)); }
+  | SETVAL '(' DOT IDENTIFIER[prop] SExpr[obj] ')' SExpr[val] {
+        var lhs = yy.Node('MemberExpression', $obj,
+            yy.Node('Identifier', $prop, yy.loc(@prop)),
+            false, yy.loc(@DOT));
+        $$ = yy.Node('AssignmentExpression', '=', lhs, $val, yy.loc(@1));
+    }
+  ;
+
 List
   : { $$ = yy.Node('EmptyStatement', yy.loc(@1)); }
   | FnDefinition
@@ -409,7 +419,7 @@ List
   | LogicalExpr
   | VarDeclaration
   | LetForm
-  | SETVAL Identifier SExpr { $$ = yy.Node('AssignmentExpression', '=', $Identifier, $SExpr, yy.loc(@1)); }
+  | SetForm
   | LoopForm
   | RecurForm
   | DoTimesForm
