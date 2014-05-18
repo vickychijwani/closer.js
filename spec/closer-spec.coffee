@@ -552,8 +552,8 @@ describe 'Closer parser', ->
       ForStatement(
         VariableDeclaration(
           VariableDeclarator(Identifier('i'), Integer(0)),
-          VariableDeclarator(Identifier('__$max'), Identifier('expr'))),
-        BinaryExpression('<', Identifier('i'), Identifier('__$max')),
+          VariableDeclarator(Identifier('__$max0'), Identifier('expr'))),
+        BinaryExpression('<', Identifier('i'), Identifier('__$max0')),
         UpdateExpression('++', Identifier('i')),
         BlockStatement(
           ExpressionStatement(CallExpression(

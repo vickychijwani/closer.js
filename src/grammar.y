@@ -325,7 +325,7 @@ DoTimesForm
         var init = parseVarDecl($Identifier,
             parseNumLiteral('Integer', '0', yy.loc(@Identifier), yy),
             yy.loc(@Identifier), yy);
-        var maxId = yy.Node('Identifier', '__$max', yy.loc(@SExpr));
+        var maxId = yy.Node('Identifier', '__$max' + dotimesIdx++, yy.loc(@SExpr));
         addVarDecl(init, maxId, $SExpr, yy.loc(@SExpr), yy);
         var test = yy.Node('BinaryExpression', '<', $Identifier, maxId, yy.loc(@Identifier));
         var update = yy.Node('UpdateExpression', '++', $Identifier, true, yy.loc(@Identifier));
@@ -512,9 +512,9 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
     'NewExpression', 'CallExpression', 'MemberExpression'];
 
 // indices for generated identifiers
-var destrucArgIdx, doseqIdx;
+var destrucArgIdx, doseqIdx, dotimesIdx;
 function resetGeneratedIds() {
-    destrucArgIdx = doseqIdx = 0;
+    destrucArgIdx = doseqIdx = dotimesIdx = 0;
 }
 
 function processSeqDestrucForm(args, yy) {
