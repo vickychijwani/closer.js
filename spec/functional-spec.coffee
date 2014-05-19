@@ -57,6 +57,9 @@ describe 'Functional tests', ->
     eq '[(min 1 2 3), (let [min 1 max 9] (range min max)), (min 1 2 3), ((fn [min max] (range min max)) 1 9)]',
       vec 1, seq([1...9]), 1, seq([1...9])
 
+  it 'closures', ->
+    eq '(defn adder [x] (fn [y] (+ x y))), (def add-3 (adder 3)), (add-3 4)', 7
+
   it 'js interop - \'this\' access', ->
     __$this['move-x-y'](0, 0)
     __$this.enemy['move-x-y'](10, 20)
