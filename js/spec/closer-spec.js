@@ -316,7 +316,7 @@
 },{"../src/closer":3,"json-diff":15}],2:[function(require,module,exports){
 (function (global){
 (function() {
-  var ArrayExpression, AssertArity, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, ForStatement, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, NewExpression, Nil, Program, ReturnStatement, SequenceExpression, String, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, UpdateExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, eq, helpers, json_diff, parseOpts, _ref, _ref1, _ref2;
+  var ArrayExpression, AssertArity, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, ForStatement, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, NewExpression, Nil, Program, ReturnStatement, SequenceExpression, String, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, UpdateExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, eq, helpers, json_diff, looseEq, looseParseOpts, parseOpts, _ref, _ref1, _ref2;
 
   closer = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window.closer : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self.closer : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global.closer : void 0) != null ? _ref : require('../src/closer');
 
@@ -417,8 +417,21 @@
     forceNoLoc: true
   };
 
+  looseParseOpts = {
+    loc: false,
+    forceNoLoc: true,
+    loose: true
+  };
+
   eq = function(src, ast) {
     return expect(closer.parse(src, parseOpts)).toDeepEqual(ast);
+  };
+
+  looseEq = function(src, ast) {
+    var actual;
+    actual = closer.parse(src, looseParseOpts);
+    delete actual.errors;
+    return expect(actual).toDeepEqual(ast);
   };
 
   describe('Closer parser', function() {
@@ -551,6 +564,23 @@
       eq('(and expr1 expr2 expr3)', Program(ExpressionStatement(LogicalExpression('&&', LogicalExpression('&&', Identifier('expr1'), Identifier('expr2')), Identifier('expr3')))));
       return eq('(or expr1 expr2 expr3)', Program(ExpressionStatement(LogicalExpression('||', LogicalExpression('||', Identifier('expr1'), Identifier('expr2')), Identifier('expr3')))));
     });
+    describe('Loose mode', function() {
+      it('parses incomplete forms in loose mode', function() {
+        return looseEq('(let [x 1\n', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(1))), ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+      });
+      it('parses forms with excess closing delimiters at the end', function() {
+        return looseEq('(let [x 1])) )\n)', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(1))), ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+      });
+      it('parses forms with unmatched closing delimiters at the end', function() {
+        return looseEq('(let [x 1) \n  ]', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(1))), ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+      });
+      it('returns an empty AST for forms with excess closing delimiters in between', function() {
+        return looseEq('(let [x 1)]\nx\n', Program());
+      });
+      return it('returns an empty AST for forms with unmatched closing delimiters in between', function() {
+        return looseEq('(let [x 1)]\nx\n', Program());
+      });
+    });
     return xit('parses source locations');
   });
 
@@ -559,7 +589,7 @@
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../src/closer":3,"./closer-helpers":1,"json-diff":15}],3:[function(require,module,exports){
 (function() {
-  var Closer, Parser, builder, closer, con, nodes, oldParse, parser;
+  var Closer, Parser, balanceDelimiters, builder, closer, con, nodes, oldParse, parser;
 
   parser = require('./parser').parser;
 
@@ -618,7 +648,7 @@
 
   parser.parse = function(source, options) {
     this.yy.raw = [];
-    this.yy.options = options || {};
+    this.yy.options = options;
     return oldParse.call(this, source);
   };
 
@@ -638,13 +668,74 @@
 
   Parser.prototype = parser;
 
+  balanceDelimiters = function(source) {
+    var c, close, delims, existingClose, last, match, open, _i, _j, _len, _len1;
+    match = {
+      '(': ')',
+      '[': ']',
+      '{': '}'
+    };
+    open = /[(\[{]/g;
+    close = /[)\]}]/g;
+    existingClose = source.match(/[ \r\n)\]}]+$/);
+    if (existingClose) {
+      existingClose = existingClose[0];
+      source = source.replace(existingClose, '');
+      existingClose = existingClose.replace(/[ \r\n]+/g, '');
+    } else {
+      existingClose = '';
+    }
+    delims = [];
+    for (_i = 0, _len = source.length; _i < _len; _i++) {
+      c = source[_i];
+      if (c.match(open)) {
+        delims.push(c);
+      } else if (c.match(close)) {
+        last = delims[delims.length - 1];
+        if (last) {
+          if (c === match[last]) {
+            delims.pop();
+          } else {
+            throw new Error("unmatched existing delimiters, can't balance");
+          }
+        } else {
+          throw new Error("too many closing delimiters, can't balance");
+        }
+      }
+    }
+    delims.reverse();
+    for (_j = 0, _len1 = delims.length; _j < _len1; _j++) {
+      c = delims[_j];
+      source += match[c];
+    }
+    return [source, delims.length - existingClose.length];
+  };
+
   Closer = (function() {
     function Closer(options) {
-      this.parser = new Parser(options || {});
+      this.parser = new Parser(options);
     }
 
     Closer.prototype.parse = function(source, options) {
-      return this.parser.parse(source, options);
+      var ast, e, unbalancedCount, _ref;
+      if (options.loose === true) {
+        try {
+          _ref = balanceDelimiters(source), source = _ref[0], unbalancedCount = _ref[1];
+        } catch (_error) {
+          e = _error;
+          console.log("" + e.name + ": " + e.message);
+          source = '';
+        }
+        ast = this.parser.parse(source, options);
+        if (!e && unbalancedCount > 0) {
+          e = new Error("Missing " + unbalancedCount + " closing delimiters");
+          e.startOffset = e.endOffset = source.length - 1;
+          ast.errors = [e];
+        }
+      } else {
+        ast = this.parser.parse(source, options);
+      }
+      return ast;
     };
 
     return Closer;
@@ -653,6 +744,9 @@
 
   closer = {
     parse: function(src, options) {
+      if (options == null) {
+        options = {};
+      }
       return new Closer(options).parse(src, options);
     },
     node: parser.yy.Node
