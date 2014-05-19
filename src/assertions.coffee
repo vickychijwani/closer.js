@@ -80,5 +80,5 @@ assertions =
 
 module.exports = assertions
 
-self.assertions = assertions if self?
-window.assertions = assertions if window?
+self.closerAssertions = assertions if self?
+window.closerAssertions = assertions if window?

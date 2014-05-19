@@ -673,7 +673,7 @@ bind = (that, args) ->
 # Call this function to hook-up core function calls in the AST obtained from the parser.
 # The second parameter is the name by which the core library will be available at the
 # time of execution. In a browser this parameter will usually not need to be passed.
-core.$wireCallsToCoreFunctions = (ast, coreIdentifier = 'closerCore') ->
+core.$wireCallsToCoreFunctions = (ast, coreIdentifier = 'closerCore', assertionsIdentifier = 'closerAssertions') ->
   globalScope = []  # list of identifiers in current scope (this one is the global scope)
   currentScope = globalScope
   scopeChain = [globalScope]   # the nth item represents the nth function scope starting from the global scope
@@ -698,6 +698,9 @@ core.$wireCallsToCoreFunctions = (ast, coreIdentifier = 'closerCore') ->
         # so map.call(...) will become closerCore.closerCore.closerCore.map.call(...)
         # this is to reverse that effect
         return node.property
+      else if node.type is 'MemberExpression' and node.object.type is 'Identifier' and node.object.name is 'assertions' and
+      node.property.type is 'Identifier' and node.property.name of assertions
+        node.object.name = assertionsIdentifier
       else if node.type is 'FunctionExpression'
         scopeChain.pop()
         currentScope = scopeChain[scopeChain.length-1]
