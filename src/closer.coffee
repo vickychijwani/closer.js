@@ -88,8 +88,7 @@ class Closer
       try
         [source, unbalancedCount] = balanceDelimiters(source)
       catch e
-        console.log "#{e.name}: #{e.message}"
-        source = ''
+        source = ''; unbalancedCount = 0
       ast = @parser.parse source, options
       if not e and unbalancedCount > 0
         e = new Error "Missing #{unbalancedCount} closing delimiters"

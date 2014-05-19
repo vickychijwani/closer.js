@@ -1,0 +1,10 @@
+.idea
+node_modules
+/npm-debug.log
+src/
+spec/
+demo/
+.bowerrc
+.gitignore
+.git
+Gruntfile.coffee

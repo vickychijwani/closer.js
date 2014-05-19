@@ -5,11 +5,9 @@ module.exports = (grunt) ->
     shell:
       options:
         failOnError: true
-
       jison:
         command: 'jison src/grammar.y src/lexer.l -o src/parser.js &&
                   mkdir -p lib/src/ && cp src/parser.js lib/src/'
-
       push_ghpages:
         command: 'git subtree push --prefix demo origin gh-pages'
         options:

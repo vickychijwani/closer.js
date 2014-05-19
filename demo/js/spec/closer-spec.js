@@ -769,8 +769,8 @@
           _ref = balanceDelimiters(source), source = _ref[0], unbalancedCount = _ref[1];
         } catch (_error) {
           e = _error;
-          console.log("" + e.name + ": " + e.message);
           source = '';
+          unbalancedCount = 0;
         }
         ast = this.parser.parse(source, options);
         if (!e && unbalancedCount > 0) {
