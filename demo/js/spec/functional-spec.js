@@ -140,6 +140,7 @@
       eq('(defn blah [[a b & c :as coll1] d e & [f g & h :as coll2]] {:args [a b c d e f g h] :coll1 coll1 :coll2 coll2}) (blah [1 2 3 4] 5 6 7 8 9)', map(key('args'), vec(1, 2, seq([3, 4]), 5, 6, 7, 8, seq([9])), key('coll1'), vec([1, 2, 3, 4]), key('coll2'), seq([7, 8, 9])));
       throws('(fn [[a :as coll1] :as coll2])');
       throws('(fn [[:as coll1 a]])');
+      nil('((fn [[x]] x) [])');
       eq('(defn blah [{{[a {:as m, :keys [b], e :d, :strs [c]}] [3 4]} :a}] [a b c e]) (blah {:a {\'(3 4) [1 {:b true, :d :e, "c" :c}]}})', vec(1, true, key('c'), key('e')));
       eq('(defn blah [{a 0 {b 0 c 1} 1}] [a b c]) (blah ["hello" "world"])', vec('hello', 'w', 'o'));
       eq('(let [[a b] [1 {:d "d" \'(3 4) true}] {:keys [d] e [3 4]} b] [a d e])', vec(1, 'd', true));
@@ -3088,8 +3089,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
 (function (global){
 (function() {
   var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
@@ -3428,8 +3429,8 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9}],11:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9}],11:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -8141,8 +8142,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"path":10}],25:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"path":10}],25:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",

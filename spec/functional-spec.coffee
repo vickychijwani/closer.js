@@ -97,6 +97,7 @@ describe 'Functional tests', ->
 
     throws '(fn [[a :as coll1] :as coll2])'
     throws '(fn [[:as coll1 a]])'
+    nil '((fn [[x]] x) [])'
 
     eq '(defn blah
           [{{[a {:as m, :keys [b], e :d, :strs [c]}] [3 4]} :a}]

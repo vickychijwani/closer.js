@@ -25,80 +25,102 @@ exports.AssertArity = (min, max = null) ->
         exports.Identifier('assertions'), exports.Identifier('arity')),
       args))
 
+exports.DestructuringVector = (id, destrucId, idx) ->
+  exports.TryStatement(exports.BlockStatement(
+    exports.VariableDeclaration(exports.VariableDeclarator(
+      exports.Identifier(id),
+      exports.CallExpression(exports.Identifier('nth'),
+        [exports.Identifier(destrucId), exports.Literal(idx)])))),
+    exports.CatchClause(
+      exports.Identifier('__$error'),
+      exports.BlockStatement(
+        exports.IfStatement(
+          exports.BinaryExpression('!==',
+            exports.MemberExpression(exports.Identifier('__$error'), exports.Identifier('name')),
+            exports.Literal('IndexOutOfBoundsError')),
+          exports.ThrowStatement(exports.Identifier('__$error'))),
+        exports.ExpressionStatement(exports.AssignmentExpression(
+          exports.Identifier(id), exports.Literal(null))))))
+
+exports.DestructuringVectorRest = (id, destrucId, dropCount) ->
+  exports.VariableDeclaration(exports.VariableDeclarator(
+    exports.Identifier(id),
+    exports.CallExpression(exports.Identifier('drop'),
+      [exports.Literal(dropCount), exports.Identifier(destrucId)])))
+
+
+exports.DestructuringMap = (id, destrucId, key) ->
+  exports.VariableDeclaration(exports.VariableDeclarator(
+    exports.Identifier(id),
+    exports.CallExpression(exports.Identifier('get'),
+      [exports.Identifier(destrucId), key])))
+
+
 # primitive nodes
-exports.Identifier = (name) ->
-  type: 'Identifier'
+def = (type, initFn) ->
+  exports[type] = ->
+    obj = initFn.apply(null, arguments) || {}
+    obj.type = type
+    obj
+
+def 'Identifier', (name) ->
   name: name
 
-exports.Literal = (value = null) ->
-  type: 'Literal'
+def 'Literal', (value = null) ->
   value: value
 
-exports.ThisExpression = ->
-  type: 'ThisExpression'
+def 'ThisExpression', (() -> )
 
-exports.UnaryExpression = (operator, argument) ->
-  type: 'UnaryExpression'
+def 'UnaryExpression', (operator, argument) ->
   operator: operator
   argument: argument
   prefix: true
 
-exports.UpdateExpression = (operator, argument) ->
-  type: 'UpdateExpression'
+def 'UpdateExpression', (operator, argument) ->
   operator: '++'
   argument: argument
   prefix: true
 
-exports.BinaryExpression = (operator, left, right) ->
-  type: 'BinaryExpression'
+def 'BinaryExpression', (operator, left, right) ->
   operator: operator
   left: left
   right: right
 
-exports.LogicalExpression = (operator, left, right) ->
-  type: 'LogicalExpression'
+def 'LogicalExpression', (operator, left, right) ->
   operator: operator
   left: left
   right: right
 
-exports.SequenceExpression = (expressions...) ->
-  type: 'SequenceExpression'
+def 'SequenceExpression', (expressions...) ->
   expressions: expressions
 
-exports.ArrayExpression = (elements) ->
-  type: 'ArrayExpression'
+def 'ArrayExpression', (elements) ->
   elements: elements
 
-exports.AssignmentExpression = (left, right) ->
-  type: 'AssignmentExpression'
+def 'AssignmentExpression', (left, right) ->
   operator: '='
   left: left
   right: right
 
-exports.CallExpression = (callee, args) ->
-  type: 'CallExpression'
+def 'CallExpression', (callee, args) ->
   callee: callee
   arguments: (if (typeof args isnt 'undefined') then args else [])
 
-exports.MemberExpression = (obj, prop, computed = false) ->
-  type: 'MemberExpression'
+def 'MemberExpression', (obj, prop, computed = false) ->
   object: obj
   property: prop
   computed: computed
 
-exports.NewExpression = (callee, args) ->
-  type: 'NewExpression'
+def 'NewExpression', (callee, args) ->
   callee: callee
   arguments: args
 
-exports.ConditionalExpression = (test, consequent, alternate) ->
-  type: 'ConditionalExpression'
+def 'ConditionalExpression', (test, consequent, alternate) ->
   test: test
   consequent: consequent
   alternate: alternate
 
-exports.FunctionExpression = (id, params, rest, body) ->
-  type: 'FunctionExpression'
+def 'FunctionExpression', (id, params, rest, body) ->
   id: id
   params: params
   defaults: []
@@ -107,78 +129,58 @@ exports.FunctionExpression = (id, params, rest, body) ->
   generator: false
   expression: false
 
-exports.EmptyStatement = ->
-  type: 'EmptyStatement'
+def 'EmptyStatement', (() -> )
 
-exports.ExpressionStatement = (expression) ->
-  type: 'ExpressionStatement'
+def 'ExpressionStatement', (expression) ->
   expression: expression
 
-exports.ForStatement = (init, test, update, body) ->
-  type: 'ForStatement'
+def 'ForStatement', (init, test, update, body) ->
   init: init
   test: test
   update: update
   body: body
 
-exports.WhileStatement = (test, body) ->
-  type: 'WhileStatement'
+def 'WhileStatement', (test, body) ->
   test: test
   body: body
 
-exports.IfStatement = (test, consequent, alternate) ->
-  type: 'IfStatement'
+def 'IfStatement', (test, consequent, alternate) ->
   test: test
   consequent: consequent
   alternate: (if (typeof alternate isnt 'undefined') then alternate else null)
 
-exports.BreakStatement = (label = null) ->
-  type: 'BreakStatement'
+def 'BreakStatement', (label = null) ->
   label: label
 
-exports.ContinueStatement = (label = null) ->
-  type: 'ContinueStatement'
+def 'ContinueStatement', (label = null) ->
   label: label
 
-exports.ReturnStatement = (argument) ->
-  type: 'ReturnStatement'
+def 'ReturnStatement', (argument) ->
   argument: argument
 
-exports.TryStatement = (block, handler) ->
-  type: 'TryStatement'
+def 'TryStatement', (block, handler) ->
   block: block
   handlers: [handler]
   finalizer: null
 
-exports.CatchClause = (param, body) ->
-  type: 'CatchClause'
+def 'CatchClause', (param, body) ->
   param: param
   guard: null
   body: body
 
-exports.ThrowStatement = (argument) ->
-  type: 'ThrowStatement'
+def 'ThrowStatement', (argument) ->
   argument: argument
 
-exports.VariableDeclaration = (args...) ->
-  type: 'VariableDeclaration'
+def 'VariableDeclaration', (args...) ->
   kind: 'var'
   declarations: args
 
-exports.VariableDeclarator = (id, init) ->
-  type: 'VariableDeclarator'
+def 'VariableDeclarator', (id, init) ->
   id: id
   init: init
 
-exports.FunctionDeclaration = (id, params, rest, body) ->
-  node = exports.FunctionExpression(id, params, rest, body)
-  node.type = 'FunctionDeclaration'
-  node
-
-exports.BlockStatement = (args...) ->
-  type: 'BlockStatement'
+def 'BlockStatement', (args...) ->
   body: args
 
-exports.Program = (args...) ->
-  type: 'Program'
+def 'Program', (args...) ->
   body: args
