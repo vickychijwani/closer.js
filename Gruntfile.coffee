@@ -12,6 +12,8 @@ module.exports = (grunt) ->
 
       push_ghpages:
         command: 'git subtree push --prefix demo origin gh-pages'
+        options:
+          stdout: true
 
     jasmine_test:
       all: ['lib/spec/']
