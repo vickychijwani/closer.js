@@ -667,20 +667,28 @@ bind = (that, args) ->
     args[i] = _.bind(args[i], that) if _.isFunction(args[i])
 
 
+# as yet unimplemented functions
+
+
 # Call this function to hook-up core function calls in the AST obtained from the parser.
 # The second parameter is the name by which the core library will be available at the
 # time of execution. In a browser this parameter will usually not need to be passed.
 core.$wireCallsToCoreFunctions = (ast, coreIdentifier = 'closerCore') ->
-  # gather all user-defined identifiers to allow them to shadow core functions
-  userIdentifiers = []
-  estraverse.traverse ast,
-    leave: (node) ->
-      if node.type is 'VariableDeclarator' and node.id.type is 'Identifier' and node.id.name not in userIdentifiers
-        userIdentifiers.push node.id.name
-
+  globalScope = []  # list of identifiers in current scope (this one is the global scope)
+  currentScope = globalScope
+  scopeChain = [globalScope]   # the nth item represents the nth function scope starting from the global scope
   estraverse.replace ast,
+    enter: (node) ->
+      if node.type is 'FunctionExpression'
+        fnScope = _.map node.params, (p) -> p.name
+        currentScope = fnScope
+        scopeChain.push fnScope
+      else if node.type is 'VariableDeclarator' and node.id.type is 'Identifier' and node.id.name not in currentScope
+        # NOTE that var declarations enter the current scope only at their point of declaration, so "var hoisting" does not come into the picture
+        currentScope.push node.id.name
+      node
     leave: (node) ->
-      if node.type is 'Identifier' and node.name of core and node.name not in userIdentifiers
+      if node.type is 'Identifier' and node.name of core and _.every(scopeChain, (scope) -> node.name not in scope)
         obj = { type: 'Identifier', name: coreIdentifier, loc: node.loc }
         prop = { type: 'Identifier', name: node.name, loc: node.loc }
         node = { type: 'MemberExpression', object: obj, property: prop, computed: false, loc: node.loc }
@@ -690,6 +698,9 @@ core.$wireCallsToCoreFunctions = (ast, coreIdentifier = 'closerCore') ->
         # so map.call(...) will become closerCore.closerCore.closerCore.map.call(...)
         # this is to reverse that effect
         return node.property
+      else if node.type is 'FunctionExpression'
+        scopeChain.pop()
+        currentScope = scopeChain[scopeChain.length-1]
       node
   ast
 

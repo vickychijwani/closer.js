@@ -45,10 +45,17 @@ __$this = (() ->
 
 describe 'Functional tests', ->
 
-  it 'allows user-defined identifiers to shadow core functions', ->
+  it 'identifier scope handling (allow shadowing of core functions)', ->
     eq '(min 1 2 3)', 1
     throws '(def min 2), (min 1 2 3)'  # min is shadowed, so is not a function
+    throws '(defn min [x] x), (min 1 2 3)'  # min is shadowed, so is a function that can accept only 1 param
     eq '(def min 2), min', 2
+    eq '(let [] (def min 2)), (min 1 2 3)', 1  # still works
+    eq '(def m (min 1 2 3)), (let [] (def min 2)), m', 1  # still works
+    throws '(defn blah [min] (min 1 2 3)), (blah 2)'
+    eq '(defn blah [min] (min 1 2 3)), (blah min)', 1  # still works because core.min is passed into blah's scope
+    eq '[(min 1 2 3), (let [min 1 max 9] (range min max)), (min 1 2 3), ((fn [min max] (range min max)) 1 9)]',
+      vec 1, seq([1...9]), 1, seq([1...9])
 
   it 'js interop - \'this\' access', ->
     __$this['move-x-y'](0, 0)
