@@ -1387,12 +1387,13 @@
       if (options.loose === true) {
         try {
           _ref = balanceDelimiters(source), source = _ref[0], unbalancedCount = _ref[1];
+          ast = this.parser.parse(source, options);
         } catch (_error) {
           e = _error;
           source = '';
           unbalancedCount = 0;
+          ast = this.parser.parse(source, options);
         }
-        ast = this.parser.parse(source, options);
         if (!e && unbalancedCount > 0) {
           e = new Error("Missing " + unbalancedCount + " closing delimiters");
           e.startOffset = e.endOffset = source.length - 1;
