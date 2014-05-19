@@ -111,10 +111,16 @@
   })();
 
   describe('Functional tests', function() {
-    it('allows user-defined identifiers to shadow core functions', function() {
+    it('identifier scope handling (allow shadowing of core functions)', function() {
       eq('(min 1 2 3)', 1);
       throws('(def min 2), (min 1 2 3)');
-      return eq('(def min 2), min', 2);
+      throws('(defn min [x] x), (min 1 2 3)');
+      eq('(def min 2), min', 2);
+      eq('(let [] (def min 2)), (min 1 2 3)', 1);
+      eq('(def m (min 1 2 3)), (let [] (def min 2)), m', 1);
+      throws('(defn blah [min] (min 1 2 3)), (blah 2)');
+      eq('(defn blah [min] (min 1 2 3)), (blah min)', 1);
+      return eq('[(min 1 2 3), (let [min 1 max 9] (range min max)), (min 1 2 3), ((fn [min max] (range min max)) 1 9)]', vec(1, seq([1, 2, 3, 4, 5, 6, 7, 8]), 1, seq([1, 2, 3, 4, 5, 6, 7, 8])));
     });
     it('js interop - \'this\' access', function() {
       __$this['move-x-y'](0, 0);
@@ -1169,23 +1175,33 @@
   };
 
   core.$wireCallsToCoreFunctions = function(ast, coreIdentifier) {
-    var userIdentifiers;
+    var currentScope, globalScope, scopeChain;
     if (coreIdentifier == null) {
       coreIdentifier = 'closerCore';
     }
-    userIdentifiers = [];
-    estraverse.traverse(ast, {
-      leave: function(node) {
-        var _ref6;
-        if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && (_ref6 = node.id.name, __indexOf.call(userIdentifiers, _ref6) < 0)) {
-          return userIdentifiers.push(node.id.name);
-        }
-      }
-    });
+    globalScope = [];
+    currentScope = globalScope;
+    scopeChain = [globalScope];
     estraverse.replace(ast, {
+      enter: function(node) {
+        var fnScope, _ref6;
+        if (node.type === 'FunctionExpression') {
+          fnScope = _.map(node.params, function(p) {
+            return p.name;
+          });
+          currentScope = fnScope;
+          scopeChain.push(fnScope);
+        } else if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && (_ref6 = node.id.name, __indexOf.call(currentScope, _ref6) < 0)) {
+          currentScope.push(node.id.name);
+        }
+        return node;
+      },
       leave: function(node) {
-        var obj, prop, _ref6;
-        if (node.type === 'Identifier' && node.name in core && (_ref6 = node.name, __indexOf.call(userIdentifiers, _ref6) < 0)) {
+        var obj, prop;
+        if (node.type === 'Identifier' && node.name in core && _.every(scopeChain, function(scope) {
+          var _ref6;
+          return _ref6 = node.name, __indexOf.call(scope, _ref6) < 0;
+        })) {
           obj = {
             type: 'Identifier',
             name: coreIdentifier,
@@ -1205,6 +1221,9 @@
           };
         } else if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === coreIdentifier && node.property.type === 'MemberExpression' && node.property.object.type === 'Identifier' && node.property.object.name === coreIdentifier) {
           return node.property;
+        } else if (node.type === 'FunctionExpression') {
+          scopeChain.pop();
+          currentScope = scopeChain[scopeChain.length - 1];
         }
         return node;
       }
@@ -3127,8 +3146,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
+}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
 (function (global){
 (function() {
   var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
@@ -3467,8 +3486,8 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9}],11:[function(require,module,exports){
+}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9}],11:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -8180,8 +8199,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"path":10}],25:[function(require,module,exports){
+}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"path":10}],25:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
