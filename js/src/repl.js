@@ -1267,7 +1267,7 @@
   exports.forceNoLoc = false;
 
   exports.defineNodes = function(builder) {
-    var convertExprToPattern, def, defaultIni, funIni;
+    var def, defaultIni, funIni;
     defaultIni = function(loc) {
       this.loc = loc;
       return this;
@@ -1283,14 +1283,6 @@
         }
         return obj;
       };
-    };
-    convertExprToPattern = function(expr) {
-      if (expr.type === 'ObjectExpression') {
-        expr.type = 'ObjectPattern';
-      }
-      if (expr.type === 'ArrayExpression') {
-        return expr.type = 'ArrayPattern';
-      }
     };
     def('Program', function(elements, loc) {
       this.body = elements;
@@ -1332,12 +1324,6 @@
       this.properties = properties;
       return this.loc = loc;
     });
-    def('Property', function(key, value, kind, loc) {
-      this.key = key;
-      this.value = value;
-      this.kind = kind;
-      return this.loc = loc;
-    });
     funIni = function(ident, params, rest, body, isGen, isExp, loc) {
       this.id = ident;
       this.params = params;
@@ -1370,34 +1356,12 @@
       this.argument = argument;
       return this.loc = loc;
     });
-    def('LabeledStatement', function(label, body, loc) {
-      this.label = label;
-      this.body = body;
-      return this.loc = loc;
-    });
     def('BreakStatement', function(label, loc) {
       this.label = label;
       return this.loc = loc;
     });
     def('ContinueStatement', function(label, loc) {
       this.label = label;
-      return this.loc = loc;
-    });
-    def('SwitchStatement', function(discriminant, cases, lexical, loc) {
-      this.discriminant = discriminant;
-      if (cases.length) {
-        this.cases = cases;
-      }
-      return this.loc = loc;
-    });
-    def('SwitchCase', function(test, consequent, loc) {
-      this.test = test;
-      this.consequent = consequent;
-      return this.loc = loc;
-    });
-    def('WithStatement', function(object, body, loc) {
-      this.object = object;
-      this.body = body;
       return this.loc = loc;
     });
     def('ConditionalExpression', function(test, consequent, alternate, loc) {
@@ -1420,8 +1384,7 @@
       this.operator = op;
       this.left = left;
       this.right = right;
-      this.loc = loc;
-      return convertExprToPattern(left);
+      return this.loc = loc;
     });
     def('LogicalExpression', function(op, left, right, loc) {
       this.operator = op;
@@ -1464,41 +1427,17 @@
       this.body = body;
       return this.loc = loc;
     });
-    def('DoWhileStatement', function(body, test, loc) {
-      this.body = body;
-      this.test = test;
-      return this.loc = loc;
-    });
     def('ForStatement', function(init, test, update, body, loc) {
       this.init = init;
       this.test = test;
       this.update = update;
       this.body = body;
-      this.loc = loc;
-      if (init) {
-        return convertExprToPattern(init);
-      }
-    });
-    def('ForInStatement', function(left, right, body, each, loc) {
-      this.left = left;
-      this.right = right;
-      this.body = body;
-      this.each = !!each;
-      this.loc = loc;
-      return convertExprToPattern(left);
+      return this.loc = loc;
     });
     def('IfStatement', function(test, consequent, alternate, loc) {
       this.test = test;
       this.consequent = consequent;
       this.alternate = alternate;
-      return this.loc = loc;
-    });
-    def('ObjectPattern', function(properties, loc) {
-      this.properties = properties;
-      return this.loc = loc;
-    });
-    def('ArrayPattern', function(elements, loc) {
-      this.elements = elements;
       return this.loc = loc;
     });
     return def;
