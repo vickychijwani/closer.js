@@ -1581,11 +1581,11 @@
   module.exports = assertions;
 
   if (typeof self !== "undefined" && self !== null) {
-    self.assertions = assertions;
+    self.closerAssertions = assertions;
   }
 
   if (typeof window !== "undefined" && window !== null) {
-    window.assertions = assertions;
+    window.closerAssertions = assertions;
   }
 
 }).call(this);
@@ -2438,10 +2438,13 @@
     return _results;
   };
 
-  core.$wireCallsToCoreFunctions = function(ast, coreIdentifier) {
+  core.$wireCallsToCoreFunctions = function(ast, coreIdentifier, assertionsIdentifier) {
     var currentScope, globalScope, scopeChain;
     if (coreIdentifier == null) {
       coreIdentifier = 'closerCore';
+    }
+    if (assertionsIdentifier == null) {
+      assertionsIdentifier = 'closerAssertions';
     }
     globalScope = [];
     currentScope = globalScope;
@@ -2485,6 +2488,8 @@
           };
         } else if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === coreIdentifier && node.property.type === 'MemberExpression' && node.property.object.type === 'Identifier' && node.property.object.name === coreIdentifier) {
           return node.property;
+        } else if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === 'assertions' && node.property.type === 'Identifier' && node.property.name in assertions) {
+          node.object.name = assertionsIdentifier;
         } else if (node.type === 'FunctionExpression') {
           scopeChain.pop();
           currentScope = scopeChain[scopeChain.length - 1];
@@ -4378,7 +4383,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   repl = {
     parse: function(src, options) {
-      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options)));
+      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options), 'closerCore', 'assertions'));
     },
     generateJS: function(src, options) {
       return escodegen.generate(repl.parse(src, options));
