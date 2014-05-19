@@ -14,11 +14,6 @@ exports.defineNodes = (builder) ->
       delete obj.loc if exports.forceNoLoc is true
       obj
 
-  # used in cases where object and array literals are valid expressions
-  convertExprToPattern = (expr) ->
-    expr.type = 'ObjectPattern' if expr.type is 'ObjectExpression'
-    expr.type = 'ArrayPattern' if expr.type is 'ArrayExpression'
-
 
   # Nodes
   def 'Program', (elements, loc) ->
@@ -64,12 +59,6 @@ exports.defineNodes = (builder) ->
     @properties = properties
     @loc = loc
 
-  def 'Property', (key, value, kind, loc) ->
-    @key = key
-    @value = value
-    @kind = kind
-    @loc = loc
-
   funIni = (ident, params, rest, body, isGen, isExp, loc) ->
     @id = ident
     @params = params
@@ -79,10 +68,6 @@ exports.defineNodes = (builder) ->
     @loc = loc
     @generator = isGen
     @expression = isExp
-    # if not @expression
-    #   @body.body.forEach (el) ->
-    #     if el.type is 'VariableDeclaration' and el.kind is 'let'
-    #       el.kind = 'var'
 
   def 'FunctionDeclaration', funIni
 
@@ -108,32 +93,12 @@ exports.defineNodes = (builder) ->
     @argument = argument
     @loc = loc
 
-  def 'LabeledStatement', (label, body, loc) ->
-    @label = label
-    @body = body
-    @loc = loc
-
   def 'BreakStatement', (label, loc) ->
     @label = label
     @loc = loc
 
   def 'ContinueStatement', (label, loc) ->
     @label = label
-    @loc = loc
-
-  def 'SwitchStatement', (discriminant, cases, lexical, loc) ->
-    @discriminant = discriminant
-    @cases = cases if cases.length
-    @loc = loc
-
-  def 'SwitchCase', (test, consequent, loc) ->
-    @test = test
-    @consequent = consequent
-    @loc = loc
-
-  def 'WithStatement', (object, body, loc) ->
-    @object = object
-    @body = body
     @loc = loc
 
   # operators
@@ -158,7 +123,6 @@ exports.defineNodes = (builder) ->
     @left = left
     @right = right
     @loc = loc
-    convertExprToPattern left
 
   def 'LogicalExpression', (op, left, right, loc) ->
     @operator = op
@@ -206,39 +170,17 @@ exports.defineNodes = (builder) ->
     @body = body
     @loc = loc
 
-  def 'DoWhileStatement', (body, test, loc) ->
-    @body = body
-    @test = test
-    @loc = loc
-
   def 'ForStatement', (init, test, update, body, loc) ->
     @init = init
     @test = test
     @update = update
     @body = body
     @loc = loc
-    convertExprToPattern init if init
-
-  def 'ForInStatement', (left, right, body, each, loc) ->
-    @left = left
-    @right = right
-    @body = body
-    @each = not not each
-    @loc = loc
-    convertExprToPattern left
 
   def 'IfStatement', (test, consequent, alternate, loc) ->
     @test = test
     @consequent = consequent
     @alternate = alternate
-    @loc = loc
-
-  def 'ObjectPattern', (properties, loc) ->
-    @properties = properties
-    @loc = loc
-
-  def 'ArrayPattern', (elements, loc) ->
-    @elements = elements
     @loc = loc
 
   def
