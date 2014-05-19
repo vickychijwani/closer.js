@@ -87,9 +87,10 @@ class Closer
     if options.loose is true
       try
         [source, unbalancedCount] = balanceDelimiters(source)
+        ast = @parser.parse source, options
       catch e
         source = ''; unbalancedCount = 0
-      ast = @parser.parse source, options
+        ast = @parser.parse source, options
       if not e and unbalancedCount > 0
         e = new Error "Missing #{unbalancedCount} closing delimiters"
         e.startOffset = e.endOffset = source.length-1

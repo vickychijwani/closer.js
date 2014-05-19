@@ -779,5 +779,8 @@ describe 'Closer parser', ->
     it 'returns an empty AST for forms with unmatched closing delimiters in between', ->
       looseEq '(let [x 1)]\nx\n', Program()
 
+    it 'never throws in loose mode, and always returns a valid AST, even when given illegal tokens', ->
+      looseEq '$$$$$&^%&^#$%@:[|', Program()
+
   # pending
   xit 'parses source locations'

@@ -623,8 +623,11 @@
       it('returns an empty AST for forms with excess closing delimiters in between', function() {
         return looseEq('(let [x 1)]\nx\n', Program());
       });
-      return it('returns an empty AST for forms with unmatched closing delimiters in between', function() {
+      it('returns an empty AST for forms with unmatched closing delimiters in between', function() {
         return looseEq('(let [x 1)]\nx\n', Program());
+      });
+      return it('never throws in loose mode, and always returns a valid AST, even when given illegal tokens', function() {
+        return looseEq('$$$$$&^%&^#$%@:[|', Program());
       });
     });
     return xit('parses source locations');
@@ -767,12 +770,13 @@
       if (options.loose === true) {
         try {
           _ref = balanceDelimiters(source), source = _ref[0], unbalancedCount = _ref[1];
+          ast = this.parser.parse(source, options);
         } catch (_error) {
           e = _error;
           source = '';
           unbalancedCount = 0;
+          ast = this.parser.parse(source, options);
         }
-        ast = this.parser.parse(source, options);
         if (!e && unbalancedCount > 0) {
           e = new Error("Missing " + unbalancedCount + " closing delimiters");
           e.startOffset = e.endOffset = source.length - 1;
