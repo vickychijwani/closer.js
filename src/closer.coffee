@@ -40,7 +40,7 @@ parser.lexer.options.ranges = true
 oldParse = parser.parse
 parser.parse = (source, options) ->
   @yy.raw = []
-  @yy.options = options or {}
+  @yy.options = options
   oldParse.call this, source
 
 class Parser
@@ -56,16 +56,51 @@ class Parser
 
 Parser:: = parser
 
+balanceDelimiters = (source) ->
+  match = { '(': ')', '[': ']', '{': '}' }
+  open = /[(\[{]/g; close = /[)\]}]/g
+  existingClose = source.match(/[ \r\n)\]}]+$/)
+  if existingClose
+    existingClose = existingClose[0]
+    source = source.replace(existingClose, '')
+    existingClose = existingClose.replace(/[ \r\n]+/g, '')  # get rid of the whitespace
+  else existingClose = ''
+  delims = []
+  for c in source
+    if c.match open
+      delims.push c
+    else if c.match close
+      last = delims[delims.length-1]
+      if last
+        if c is match[last] then delims.pop() else throw new Error "unmatched existing delimiters, can't balance"
+      else throw new Error "too many closing delimiters, can't balance"
+  delims.reverse()  # reverse the order of the remaining opening delimiters
+  source += match[c] for c in delims
+  [source, delims.length - existingClose.length]
+
 class Closer
   constructor: (options) ->
     # Create a parser constructor and an instance
-    @parser = new Parser(options or {})
+    @parser = new Parser(options)
 
   parse: (source, options) ->
-    @parser.parse source, options
+    if options.loose is true
+      try
+        [source, unbalancedCount] = balanceDelimiters(source)
+      catch e
+        console.log "#{e.name}: #{e.message}"
+        source = ''
+      ast = @parser.parse source, options
+      if not e and unbalancedCount > 0
+        e = new Error "Missing #{unbalancedCount} closing delimiters"
+        e.startOffset = e.endOffset = source.length-1
+        ast.errors = [e]
+    else
+      ast = @parser.parse source, options
+    ast
 
 closer =
-  parse: (src, options) ->
+  parse: (src, options = {}) ->
     new Closer(options).parse src, options
 
   node: parser.yy.Node

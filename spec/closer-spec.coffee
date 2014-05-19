@@ -48,8 +48,13 @@ beforeEach ->
   @addMatchers toDeepEqual: helpers.toDeepEqual
 
 parseOpts = { loc: false, forceNoLoc: true }
+looseParseOpts = { loc: false, forceNoLoc: true, loose: true }
 eq = (src, ast) ->
   expect(closer.parse src, parseOpts).toDeepEqual ast
+looseEq = (src, ast) ->
+  actual = closer.parse src, looseParseOpts
+  delete actual.errors
+  expect(actual).toDeepEqual ast
 
 describe 'Closer parser', ->
 
@@ -684,6 +689,61 @@ describe 'Closer parser', ->
         LogicalExpression('||', Identifier('expr1'), Identifier('expr2')),
         Identifier('expr3'))))
 
+
+  describe 'Loose mode', ->
+    it 'parses incomplete forms in loose mode', ->
+      looseEq '(let [x 1\n', Program(
+        ExpressionStatement(CallExpression(
+          MemberExpression(
+            FunctionExpression(
+              null, [], null,
+              BlockStatement(
+                VariableDeclaration(VariableDeclarator(
+                  Identifier('x'), Integer(1)))
+                ReturnStatement(Nil()))),
+            Identifier('call')),
+          [ConditionalExpression(
+            BinaryExpression('!==',
+              UnaryExpression('typeof', ThisExpression()), String('undefined')),
+            ThisExpression(), Nil())])))
+
+    it 'parses forms with excess closing delimiters at the end', ->
+      looseEq '(let [x 1])) )\n)', Program(
+        ExpressionStatement(CallExpression(
+          MemberExpression(
+            FunctionExpression(
+              null, [], null,
+              BlockStatement(
+                VariableDeclaration(VariableDeclarator(
+                  Identifier('x'), Integer(1)))
+                ReturnStatement(Nil()))),
+            Identifier('call')),
+          [ConditionalExpression(
+            BinaryExpression('!==',
+              UnaryExpression('typeof', ThisExpression()), String('undefined')),
+            ThisExpression(), Nil())])))
+
+    it 'parses forms with unmatched closing delimiters at the end', ->
+      looseEq '(let [x 1) \n  ]', Program(
+        ExpressionStatement(CallExpression(
+          MemberExpression(
+            FunctionExpression(
+              null, [], null,
+              BlockStatement(
+                VariableDeclaration(VariableDeclarator(
+                  Identifier('x'), Integer(1)))
+                ReturnStatement(Nil()))),
+            Identifier('call')),
+          [ConditionalExpression(
+            BinaryExpression('!==',
+              UnaryExpression('typeof', ThisExpression()), String('undefined')),
+            ThisExpression(), Nil())])))
+
+    it 'returns an empty AST for forms with excess closing delimiters in between', ->
+      looseEq '(let [x 1)]\nx\n', Program()
+
+    it 'returns an empty AST for forms with unmatched closing delimiters in between', ->
+      looseEq '(let [x 1)]\nx\n', Program()
 
   # pending
   xit 'parses source locations'
