@@ -2961,7 +2961,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   repl = {
     parse: function(src, options) {
-      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options), 'closerCore', 'assertions'));
+      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options), 'closerCore', 'closerAssertions'));
     },
     generateJS: function(src, options) {
       return escodegen.generate(repl.parse(src, options));

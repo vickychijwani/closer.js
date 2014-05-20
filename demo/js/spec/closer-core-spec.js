@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 (function() {
-  var assertions, closerCore, emptySeq, eq, evaluate, falsy, jseq, key, list, map, nil, obj, parseOpts, repl, seq, set, throws, truthy, vec, _, __$this, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
+  var closerAssertions, closerCore, emptySeq, eq, evaluate, falsy, jseq, key, list, map, nil, obj, parseOpts, repl, seq, set, throws, truthy, vec, _, __$this, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8,
     __slice = [].slice;
 
   _ = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" && window !== null ? window._ : void 0) != null ? _ref2 : typeof self !== "undefined" && self !== null ? self._ : void 0) != null ? _ref1 : typeof global !== "undefined" && global !== null ? global._ : void 0) != null ? _ref : require('lodash-node');
@@ -10,7 +10,7 @@
 
   closerCore = (_ref3 = (_ref4 = (_ref5 = typeof window !== "undefined" && window !== null ? window.closerCore : void 0) != null ? _ref5 : typeof self !== "undefined" && self !== null ? self.closerCore : void 0) != null ? _ref4 : typeof global !== "undefined" && global !== null ? global.closerCore : void 0) != null ? _ref3 : require('../src/closer-core');
 
-  assertions = (_ref6 = (_ref7 = (_ref8 = typeof window !== "undefined" && window !== null ? window.assertions : void 0) != null ? _ref8 : typeof self !== "undefined" && self !== null ? self.assertions : void 0) != null ? _ref7 : typeof global !== "undefined" && global !== null ? global.assertions : void 0) != null ? _ref6 : require('../src/assertions');
+  closerAssertions = (_ref6 = (_ref7 = (_ref8 = typeof window !== "undefined" && window !== null ? window.closerAssertions : void 0) != null ? _ref8 : typeof self !== "undefined" && self !== null ? self.closerAssertions : void 0) != null ? _ref7 : typeof global !== "undefined" && global !== null ? global.closerAssertions : void 0) != null ? _ref6 : require('../src/assertions');
 
   beforeEach(function() {
     return this.addMatchers({
@@ -4384,7 +4384,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   repl = {
     parse: function(src, options) {
-      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options), 'closerCore', 'assertions'));
+      return wireThisAccess(closerCore.$wireCallsToCoreFunctions(closer.parse(src, options), 'closerCore', 'closerAssertions'));
     },
     generateJS: function(src, options) {
       return escodegen.generate(repl.parse(src, options));

@@ -1,7 +1,7 @@
 _ = window?._ ? self?._ ? global?._ ? require 'lodash-node'
 repl = require '../src/repl'
 closerCore = window?.closerCore ? self?.closerCore ? global?.closerCore ? require '../src/closer-core'
-assertions = window?.assertions ? self?.assertions ? global?.assertions ? require '../src/assertions'
+closerAssertions = window?.closerAssertions ? self?.closerAssertions ? global?.closerAssertions ? require '../src/assertions'
 
 beforeEach ->
   @addMatchers

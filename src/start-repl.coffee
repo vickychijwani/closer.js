@@ -3,7 +3,7 @@ vm = require 'vm'
 closer = require './closer'
 repl = require './repl'
 
-global.assertions = require './assertions'
+global.closerAssertions = require './assertions'
 global.closerCore = require './closer-core'
 global.__$this = {}
 

@@ -14,7 +14,7 @@ wireThisAccess = (ast) ->
 
 repl =
   parse: (src, options) ->
-    wireThisAccess closerCore.$wireCallsToCoreFunctions closer.parse(src, options), 'closerCore', 'assertions'
+    wireThisAccess closerCore.$wireCallsToCoreFunctions closer.parse(src, options), 'closerCore', 'closerAssertions'
 
   generateJS: (src, options) ->
     escodegen.generate repl.parse src, options
