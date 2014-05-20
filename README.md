@@ -21,7 +21,10 @@ Key Features
  - [Persistent data structures](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20parser) (courtesy [mori](http://swannodette.github.io/mori/))
  - [JavaScript interop](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20parser%20JavaScript%20interop)
  - [Destructuring forms](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20parser%20Destructuring%20forms)
+ - [Anonymous function literals](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20parser%20Functions%20parses%20anonymous%20function%20literals.)
  - [More than 100 functions](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20core%20library) from [clojure.core](http://jafingerhut.github.io/cheatsheet-clj-1.3/cheatsheet-use-title-attribute-cdocs-summary.html)
+ - Many of the core functions can work with [lazy sequences](http://clojure.org/sequences), like `range`, `map`, `filter`, `iterate`, `take` and `repeat`
+ - In [loose mode](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20parser%20Loose%20mode), the parser can handle common syntax errors (missing / excess parentheses at the end, etc.) and will always return a valid AST, even if empty, similar to [Acorn's loose mode](https://github.com/marijnh/acorn#acorn_loosejs)
  - More on the way
 
 `defmacro` is __not__ supported at the moment, as I haven't quite figured it out yet. Ideas and pull requests on how to go about it are always welcome!
@@ -94,7 +97,7 @@ This is a small module emulating Clojure's arity and type checks. You will never
 Demo
 ----
 
-Check out [the demo page](https://vickychijwani.github.io/closer.js).
+Check out [the demo page](https://vickychijwani.github.io/closer.js). Extensive examples of usage can be found in the [core](https://github.com/vickychijwani/closer.js/blob/master/spec/closer-core-spec.coffee) and [functional](https://github.com/vickychijwani/closer.js/blob/master/spec/functional-spec.coffee) tests.
 
 
 Contributing
@@ -111,4 +114,15 @@ Licensed under the [MIT License](LICENSE).
 
 Contributors
 ------------
+
  - [Vicky Chijwani](http://github.com/vickychijwani)
+ - Closer exists thanks to the following projects:
+   - [CodeCombat](https://github.com/codecombat/codecombat/) and [Aether](https://github.com/codecombat/aether/) (the _raisons d'être_ for this project)
+   - [Jison](http://zaach.github.io/jison/)
+   - [Mori](http://swannodette.github.io/mori/)
+   - [Lodash](http://lodash.com/)
+   - [Jasmine](http://jasmine.github.io/)
+   - [Reflect.js](https://github.com/zaach/reflect.js) (for helping me get started)
+   - [Browserify](http://browserify.org/)
+   - [@Constellation's escodegen and estraverse](https://github.com/Constellation?tab=repositories)
+   - [Grunt](http://gruntjs.com/)
