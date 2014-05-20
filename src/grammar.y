@@ -533,6 +533,7 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
 
 // indices for generated identifiers
 var destrucArgIdx, doseqIdx, dotimesIdx;
+resetGeneratedIds();
 function resetGeneratedIds() {
     destrucArgIdx = doseqIdx = dotimesIdx = 0;
 }

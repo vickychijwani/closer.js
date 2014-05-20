@@ -26,7 +26,6 @@ parser.yy.locComb = (start, end) ->
 
 parser.yy.loc = (loc) ->
   return null unless @locations
-  loc = @locComb(loc[0], loc[1]) if 'length' of loc
   start:
     line: @startLine + loc.first_line - 1
     column: loc.first_column
