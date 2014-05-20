@@ -35,7 +35,7 @@ Get it [via NPM](http://npm.im/closer): `npm install closer`.
 Closer works on Node.js and all modern browsers (via [browserify](http://browserify.org/)). It has been tested on Node 0.10.24, Chromium 34, and Firefox 28.
 
 
-##### `closer.parse(src, options={})`
+#### `closer.parse(src, options={})`
 
  - __src__ is a String containing the input Clojure code
 
@@ -78,14 +78,14 @@ Closer works on Node.js and all modern browsers (via [browserify](http://browser
    If being used in a browser, this parameter will usually not need to be used.
 
 
-##### `closer.core`
+#### `closer.core`
 
 All implemented clojure.core functions are in this object. A list of what's available can be found [here](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20core%20library).
 
 Ensure it is in scope (with the same name as that passed in the parser's `coreIdentifier` option) if you want to execute JS code generated from your AST using [escodegen](https://github.com/Constellation/escodegen), for instance.
 
 
-##### `closer.assertions`
+#### `closer.assertions`
 
 This is a small module emulating Clojure's arity and type checks. You will never need to use this directly; only ensure it is in scope (with the same name as that passed in the parser's `assertionsIdentifier` option), if you want to execute JS code generated from your AST using [escodegen](https://github.com/Constellation/escodegen), for instance.
 
