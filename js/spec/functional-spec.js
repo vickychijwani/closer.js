@@ -1292,9 +1292,6 @@
     if (!this.locations) {
       return null;
     }
-    if ('length' in loc) {
-      loc = this.locComb(loc[0], loc[1]);
-    }
     return {
       start: {
         line: this.startLine + loc.first_line - 1,
@@ -2294,6 +2291,7 @@ var expressionTypes = ['ThisExpression', 'ArrayExpression', 'ObjectExpression',
 
 // indices for generated identifiers
 var destrucArgIdx, doseqIdx, dotimesIdx;
+resetGeneratedIds();
 function resetGeneratedIds() {
     destrucArgIdx = doseqIdx = dotimesIdx = 0;
 }
