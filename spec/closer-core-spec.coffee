@@ -429,6 +429,8 @@ describe 'Closer core library', ->
       truthy '(coll? #{})'
       falsy '(coll? 3)'
       falsy '(coll? "string")'
+      falsy '(coll? (new Array))'
+      falsy '(coll? (new Object))'
 
   describe '(sequential? coll)', ->
     it 'returns true if coll is a sequential collection', ->
