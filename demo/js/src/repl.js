@@ -1871,8 +1871,8 @@ case 59:
         $$[$0] = getValueIfUndefined($$[$0], []);
         var callee = yy.Node('MemberExpression', $$[$0-1],
             yy.Node('Literal', $$[$0-2], yy.loc(_$[$0-2])),
-            true, yy.loc(_$[$0-3]));
-        var fnCall = yy.Node('CallExpression', callee, $$[$0], yy.loc(_$[$0-3]));
+            true, yy.loc(this._$));
+        var fnCall = yy.Node('CallExpression', callee, $$[$0], yy.loc(this._$));
         if ($$[$0].length > 0) {
             this.$ = fnCall;
         } else {
@@ -1883,15 +1883,15 @@ case 59:
             this.$ = yy.Node('ConditionalExpression',
                 yy.Node('LogicalExpression', '&&',
                     yy.Node('BinaryExpression', '===',
-                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(_$[$0-3])),
-                        yy.Node('Literal', 'function', yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
+                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(this._$)),
+                        yy.Node('Literal', 'function', yy.loc(this._$)), yy.loc(this._$)),
                     yy.Node('BinaryExpression', '===',
                         yy.Node('MemberExpression', callee,
-                            yy.Node('Identifier', 'length', yy.loc(_$[$0-3])),
-                            false, yy.loc(_$[$0-3])),
-                        yy.Node('Literal', 0, yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
-                    yy.loc(_$[$0-3])),
-                fnCall, callee, yy.loc(_$[$0-3]));
+                            yy.Node('Identifier', 'length', yy.loc(this._$)),
+                            false, yy.loc(this._$)),
+                        yy.Node('Literal', 0, yy.loc(this._$)), yy.loc(this._$)),
+                    yy.loc(this._$)),
+                fnCall, callee, yy.loc(this._$));
         }
     
 break;
@@ -2930,8 +2930,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"estraverse":25,"fs":7,"path":9}],6:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"estraverse":25,"fs":7,"path":9}],6:[function(require,module,exports){
 (function (global){
 (function() {
   var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
@@ -3270,8 +3270,8 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8}],10:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8}],10:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -7983,8 +7983,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require("/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"/Users/labuser/Dropbox/Private/Documents/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"path":9}],24:[function(require,module,exports){
+}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"path":9}],24:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",

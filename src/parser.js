@@ -419,8 +419,8 @@ case 59:
         $$[$0] = getValueIfUndefined($$[$0], []);
         var callee = yy.Node('MemberExpression', $$[$0-1],
             yy.Node('Literal', $$[$0-2], yy.loc(_$[$0-2])),
-            true, yy.loc(_$[$0-3]));
-        var fnCall = yy.Node('CallExpression', callee, $$[$0], yy.loc(_$[$0-3]));
+            true, yy.loc(this._$));
+        var fnCall = yy.Node('CallExpression', callee, $$[$0], yy.loc(this._$));
         if ($$[$0].length > 0) {
             this.$ = fnCall;
         } else {
@@ -431,15 +431,15 @@ case 59:
             this.$ = yy.Node('ConditionalExpression',
                 yy.Node('LogicalExpression', '&&',
                     yy.Node('BinaryExpression', '===',
-                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(_$[$0-3])),
-                        yy.Node('Literal', 'function', yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
+                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(this._$)),
+                        yy.Node('Literal', 'function', yy.loc(this._$)), yy.loc(this._$)),
                     yy.Node('BinaryExpression', '===',
                         yy.Node('MemberExpression', callee,
-                            yy.Node('Identifier', 'length', yy.loc(_$[$0-3])),
-                            false, yy.loc(_$[$0-3])),
-                        yy.Node('Literal', 0, yy.loc(_$[$0-3])), yy.loc(_$[$0-3])),
-                    yy.loc(_$[$0-3])),
-                fnCall, callee, yy.loc(_$[$0-3]));
+                            yy.Node('Identifier', 'length', yy.loc(this._$)),
+                            false, yy.loc(this._$)),
+                        yy.Node('Literal', 0, yy.loc(this._$)), yy.loc(this._$)),
+                    yy.loc(this._$)),
+                fnCall, callee, yy.loc(this._$));
         }
     
 break;

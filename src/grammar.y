@@ -387,8 +387,8 @@ DotForm
         $args = getValueIfUndefined($args, []);
         var callee = yy.Node('MemberExpression', $obj,
             yy.Node('Literal', $prop, yy.loc(@prop)),
-            true, yy.loc(@1));
-        var fnCall = yy.Node('CallExpression', callee, $args, yy.loc(@1));
+            true, yy.loc(@$));
+        var fnCall = yy.Node('CallExpression', callee, $args, yy.loc(@$));
         if ($args.length > 0) {
             $$ = fnCall;
         } else {
@@ -399,15 +399,15 @@ DotForm
             $$ = yy.Node('ConditionalExpression',
                 yy.Node('LogicalExpression', '&&',
                     yy.Node('BinaryExpression', '===',
-                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(@1)),
-                        yy.Node('Literal', 'function', yy.loc(@1)), yy.loc(@1)),
+                        yy.Node('UnaryExpression', 'typeof', callee, true, yy.loc(@$)),
+                        yy.Node('Literal', 'function', yy.loc(@$)), yy.loc(@$)),
                     yy.Node('BinaryExpression', '===',
                         yy.Node('MemberExpression', callee,
-                            yy.Node('Identifier', 'length', yy.loc(@1)),
-                            false, yy.loc(@1)),
-                        yy.Node('Literal', 0, yy.loc(@1)), yy.loc(@1)),
-                    yy.loc(@1)),
-                fnCall, callee, yy.loc(@1));
+                            yy.Node('Identifier', 'length', yy.loc(@$)),
+                            false, yy.loc(@$)),
+                        yy.Node('Literal', 0, yy.loc(@$)), yy.loc(@$)),
+                    yy.loc(@$)),
+                fnCall, callee, yy.loc(@$));
         }
     }
   ;
