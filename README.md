@@ -103,7 +103,7 @@ Check out [the demo page](https://vickychijwani.github.io/closer.js). Extensive 
 Contributing
 ------------
 
-Closer's primary dependencies are the [Jison parser generator](http://zaach.github.io/jison/) and [Mori](http://swannodette.github.io/mori/). All new features and functions should have [corresponding tests](spec/). [Issues](https://github.com/vickychijwani/closer.js/issues) and [pull requests](https://github.com/vickychijwani/closer.js/pulls) are welcome.
+Closer's primary dependencies are the [Jison parser generator](http://zaach.github.io/jison/) and [Mori](http://swannodette.github.io/mori/). All new features and functions should have [corresponding tests](spec/). [Issues](https://github.com/vickychijwani/closer.js/issues) and [pull requests](https://github.com/vickychijwani/closer.js/pulls) are welcome. [So are ideas, pointers, and code on how to implement `defmacro` in JavaScript](https://github.com/vickychijwani/closer.js/issues/6).
 
 
 License
