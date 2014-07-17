@@ -629,6 +629,15 @@ describe 'Closer core library', ->
       nil '(get \'(45 89 32) 1)'
       eq '(get "qwerty" 2)', 'e'
 
+  describe '(aget obj key & keys)', ->
+    it 'returns the value corresponding to the given (nested) key in obj', ->
+      obj = { a: 1, b: { c: [2, 3] } }
+      throws '(aget obj)'
+      throws '(aget obj nil nil)'
+      eq '(aget obj "a")', 1
+      eq '(aget obj "b" "c")', [2, 3]
+      eq '(aget obj "b" "c" 1)', 3
+
   describe '(seq coll)', ->
     it 'returns a seq on the collection, or nil if it is empty or nil', ->
       throws '(seq [1 2 3] [4 5 6])'

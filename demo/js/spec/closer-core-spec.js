@@ -743,6 +743,21 @@
         return eq('(get "qwerty" 2)', 'e');
       });
     });
+    describe('(aget obj key & keys)', function() {
+      return it('returns the value corresponding to the given (nested) key in obj', function() {
+        obj = {
+          a: 1,
+          b: {
+            c: [2, 3]
+          }
+        };
+        throws('(aget obj)');
+        throws('(aget obj nil nil)');
+        eq('(aget obj "a")', 1);
+        eq('(aget obj "b" "c")', [2, 3]);
+        return eq('(aget obj "b" "c" 1)', 3);
+      });
+    });
     describe('(seq coll)', function() {
       return it('returns a seq on the collection, or nil if it is empty or nil', function() {
         throws('(seq [1 2 3] [4 5 6])');
@@ -1986,6 +2001,18 @@
       }
       assertions.arity(2, 3, arguments.length);
       return m.get(coll, key, notFound);
+    },
+    'aget': function() {
+      var args, key, keys, obj, rest;
+      obj = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assertions.arity(2, Infinity, arguments.length);
+      key = keys[0];
+      rest = keys.slice(1);
+      if (keys.length === 1) {
+        return obj[key];
+      }
+      args = [obj[key]].concat(rest);
+      return core.aget.apply(null, args);
     },
     'seq': function(coll) {
       assertions.arity(1, arguments.length);
@@ -4355,8 +4382,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
+}).call(this,require("/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"estraverse":26,"fs":8,"path":10}],7:[function(require,module,exports){
 (function (global){
 (function() {
   var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
@@ -4695,8 +4722,8 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9}],11:[function(require,module,exports){
+}).call(this,require("/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9}],11:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -9408,8 +9435,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"path":10}],25:[function(require,module,exports){
+}).call(this,require("/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":9,"path":10}],25:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",

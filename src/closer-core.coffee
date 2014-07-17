@@ -304,6 +304,14 @@ core =
     assertions.arity 2, 3, arguments.length
     m.get coll, key, notFound
 
+  'aget': (obj, keys...) ->
+    assertions.arity 2, Infinity, arguments.length
+    key = keys[0]
+    rest = keys.slice(1)
+    return obj[key] if keys.length is 1
+    args = [obj[key]].concat(rest)
+    core.aget.apply null, args
+
   'seq': (coll) ->
     assertions.arity 1, arguments.length
     assertions.seqable coll

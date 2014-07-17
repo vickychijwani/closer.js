@@ -562,6 +562,18 @@
       assertions.arity(2, 3, arguments.length);
       return m.get(coll, key, notFound);
     },
+    'aget': function() {
+      var args, key, keys, obj, rest;
+      obj = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      assertions.arity(2, Infinity, arguments.length);
+      key = keys[0];
+      rest = keys.slice(1);
+      if (keys.length === 1) {
+        return obj[key];
+      }
+      args = [obj[key]].concat(rest);
+      return core.aget.apply(null, args);
+    },
     'seq': function(coll) {
       assertions.arity(1, arguments.length);
       assertions.seqable(coll);
@@ -2930,8 +2942,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"estraverse":25,"fs":7,"path":9}],6:[function(require,module,exports){
+}).call(this,require("/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"estraverse":25,"fs":7,"path":9}],6:[function(require,module,exports){
 (function (global){
 (function() {
   var closer, closerCore, escodegen, estraverse, repl, wireThisAccess, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
@@ -3270,8 +3282,8 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8}],10:[function(require,module,exports){
+}).call(this,require("/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8}],10:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -7983,8 +7995,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require("/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"/mnt/Windows/Users/chijwani/Downloads/Linux/codecombat-clojure/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"path":9}],24:[function(require,module,exports){
+}).call(this,require("/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),"/../../node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"/home/vicky/Downloads/closer.js/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8,"path":9}],24:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
