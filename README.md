@@ -25,7 +25,6 @@ Key Features
  - [More than 100 functions](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20core%20library) from [clojure.core](http://jafingerhut.github.io/cheatsheet-clj-1.3/cheatsheet-use-title-attribute-cdocs-summary.html)
  - Many of the core functions can work with [lazy sequences](http://clojure.org/sequences), like `range`, `map`, `filter`, `iterate`, `take` and `repeat`
  - In [loose mode](http://vickychijwani.github.io/closer.js/spec_runner.html?spec=Closer%20parser%20Loose%20mode), the parser can handle common syntax errors (missing / excess parentheses at the end, etc.) and will always return a valid AST, even if empty, similar to [Acorn's loose mode](https://github.com/marijnh/acorn#acorn_loosejs)
- - More on the way
 
 `defmacro` is __not__ supported at the moment, as I haven't quite figured it out yet. Ideas and pull requests on how to go about it are always welcome!
 
@@ -117,7 +116,7 @@ Contributors
 
  - [Vicky Chijwani](http://github.com/vickychijwani)
  - Closer exists thanks to the following projects:
-   - [CodeCombat](https://github.com/codecombat/codecombat/) and [Aether](https://github.com/codecombat/aether/) (the _raisons d'être_ for this project)
+   - [CodeCombat](https://github.com/codecombat/codecombat/) and [Aether](https://github.com/codecombat/aether/) (the _raisons d'Ãªtre_ for this project)
    - [Jison](http://zaach.github.io/jison/)
    - [Mori](http://swannodette.github.io/mori/)
    - [Lodash](http://lodash.com/)
