@@ -3,7 +3,7 @@
   "description": "Clojure parser and core library in JavaScript, compatible with the Mozilla Parser API.",
   "homepage": "http://github.com/vickychijwani/closer.js",
   "main": "lib/src/index.js",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "license": "MIT",
   "engines": {
     "node": ">=0.10.24"
