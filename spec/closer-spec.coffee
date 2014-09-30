@@ -225,12 +225,12 @@ describe 'Closer parser', ->
                 ReturnStatement(CallExpression(
                   MemberExpression(Identifier('_$SLASH_'), Identifier('call')),
                   [ThisExpression(),
-                  CallExpression(
-                    MemberExpression(Identifier('apply'), Identifier('call')),
-                    [ThisExpression(), Identifier('_$PLUS_'), Identifier('rest')]),
-                  CallExpression(
-                    MemberExpression(Identifier('count'), Identifier('call')),
-                    [ThisExpression(), Identifier('rest')])])))))))
+                   CallExpression(
+                     MemberExpression(Identifier('apply'), Identifier('call')),
+                     [ThisExpression(), Identifier('_$PLUS_'), Identifier('rest')]),
+                   CallExpression(
+                     MemberExpression(Identifier('count'), Identifier('call')),
+                     [ThisExpression(), Identifier('rest')])])))))))
 
     it 'parses collections and keywords in function position', ->
       eq '([1 2 3 4] 1)', Program(
@@ -305,12 +305,72 @@ describe 'Closer parser', ->
     it 'throws when given if forms with > 3 forms in their body', ->
       throws '(if true 1 2 3)'
 
+    it 'throws when given empty if-not forms', ->
+      throws '(if-not)'
+
+    it 'parses if-not forms without else', ->
+      eq '(if-not (>= x 0) x)\n', Program(
+        ExpressionStatement(ConditionalExpression(
+          CallExpression(Identifier('not'),
+            [CallExpression(
+              MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
+              [ThisExpression(), Identifier('x'), Integer(0)])]),
+          Identifier('x'), Nil())))
+
+    it 'parses if-not forms with else', ->
+      eq '(if-not (>= x 0) x (- x))\n', Program(
+        ExpressionStatement(ConditionalExpression(
+          CallExpression(Identifier('not'),
+            [CallExpression(
+              MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')),
+              [ThisExpression(), Identifier('x'), Integer(0)])]),
+          Identifier('x'),
+          CallExpression(
+            MemberExpression(Identifier('_$_'), Identifier('call')),
+            [ThisExpression(), Identifier('x')]))))
+
+    it 'parses if-not forms in function position', ->
+      eq '(map #(if-not (even? %1) (- %) %) [1 2 3])', Program(
+        ExpressionStatement(CallExpression(
+          MemberExpression(Identifier('map'), Identifier('call')),
+          [ThisExpression(),
+           FunctionExpression(
+             null, [Identifier('__$1')], null,
+             BlockStatement(
+               AssertArity(1),
+               ReturnStatement(ConditionalExpression(
+                 CallExpression(Identifier('not'),
+                   [CallExpression(
+                     MemberExpression(Identifier('even_$QMARK_'), Identifier('call')),
+                     [ThisExpression(), Identifier('__$1')])]),
+                 CallExpression(
+                   MemberExpression(Identifier('_$_'), Identifier('call')),
+                   [ThisExpression(), Identifier('__$1')]),
+                 Identifier('__$1'))))),
+           Vector(Integer(1), Integer(2), Integer(3))])))
+
+    it 'throws when given if-not forms with > 3 forms in their body', ->
+      throws '(if-not true 1 2 3)'
+
     it 'parses when forms', ->
       eq '(when (condition?) (println \"hello\") true)\n', Program(
         IfStatement(
           CallExpression(
             MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')),
             [ThisExpression()]),
+          BlockStatement(
+            ExpressionStatement(CallExpression(
+              MemberExpression(Identifier('println'), Identifier('call')),
+              [ThisExpression(), String('hello')])),
+            ExpressionStatement(Boolean(true)))))
+
+    it 'parses when-not forms', ->
+      eq '(when-not (condition?) (println \"hello\") true)\n', Program(
+        IfStatement(
+          CallExpression(Identifier('not'),
+            [CallExpression(
+              MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')),
+              [ThisExpression()])]),
           BlockStatement(
             ExpressionStatement(CallExpression(
               MemberExpression(Identifier('println'), Identifier('call')),
@@ -576,9 +636,9 @@ describe 'Closer parser', ->
             CallExpression(
               MemberExpression(Identifier('to_$_array'), Identifier('call')),
               [ThisExpression(),
-              CallExpression(
-                MemberExpression(Identifier('range'), Identifier('call')),
-                [ThisExpression(), Integer(5)])]),
+               CallExpression(
+                 MemberExpression(Identifier('range'), Identifier('call')),
+                 [ThisExpression(), Integer(5)])]),
             Identifier('length')),
           Integer(3))))
 
