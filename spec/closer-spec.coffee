@@ -225,12 +225,12 @@ describe 'Closer parser', ->
                 ReturnStatement(CallExpression(
                   MemberExpression(Identifier('_$SLASH_'), Identifier('call')),
                   [ThisExpression(),
-                   CallExpression(
-                     MemberExpression(Identifier('apply'), Identifier('call')),
-                     [ThisExpression(), Identifier('_$PLUS_'), Identifier('rest')]),
-                   CallExpression(
-                     MemberExpression(Identifier('count'), Identifier('call')),
-                     [ThisExpression(), Identifier('rest')])])))))))
+                  CallExpression(
+                    MemberExpression(Identifier('apply'), Identifier('call')),
+                    [ThisExpression(), Identifier('_$PLUS_'), Identifier('rest')]),
+                  CallExpression(
+                    MemberExpression(Identifier('count'), Identifier('call')),
+                    [ThisExpression(), Identifier('rest')])])))))))
 
     it 'parses collections and keywords in function position', ->
       eq '([1 2 3 4] 1)', Program(
@@ -636,9 +636,9 @@ describe 'Closer parser', ->
             CallExpression(
               MemberExpression(Identifier('to_$_array'), Identifier('call')),
               [ThisExpression(),
-               CallExpression(
-                 MemberExpression(Identifier('range'), Identifier('call')),
-                 [ThisExpression(), Integer(5)])]),
+              CallExpression(
+                MemberExpression(Identifier('range'), Identifier('call')),
+                [ThisExpression(), Integer(5)])]),
             Identifier('length')),
           Integer(3))))
 
