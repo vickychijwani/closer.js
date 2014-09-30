@@ -50,7 +50,9 @@ ANON_ARG        \%(\&|[1-9]|1[0-9]|20)?
 'fn'    return 'FN';
 'defn'  return 'DEFN';
 'if'    return 'IF';
+'if-not' return 'IF_NOT';
 'when'  return 'WHEN';
+'when-not' return 'WHEN_NOT';
 'do'    return 'DO';
 'let'   return 'LET';
 'loop'  return 'LOOP';

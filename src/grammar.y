@@ -216,8 +216,30 @@ ConditionalExpr
                 $$.alternate = $$.alternate.expression;
         }
     }
+  | IF_NOT SExpr[test] SExprStmt[consequent] SExprStmt?[alternate] {
+        $$ = yy.Node('IfStatement', $test, $consequent, getValueIfUndefined($alternate, null), yy.loc(@1));
+        // for code like ((if-not true +) 1 2 3)
+        if ($$.consequent.type === 'ExpressionStatement' &&
+            ($$.alternate === null || $$.alternate.type === 'ExpressionStatement')) {
+            $$.type = 'ConditionalExpression';
+            var testLoc = yy.loc(@test);
+            $$.test = yy.Node('CallExpression', yy.Node('Identifier', 'not', testLoc),
+                [$$.test], testLoc);
+            $$.consequent = $$.consequent.expression;
+            if ($$.alternate === null)
+                $$.alternate = yy.Node('Literal', null, yy.loc(@1));
+            else
+                $$.alternate = $$.alternate.expression;
+        }
+    }
   | WHEN SExpr[test] BlockStatement[consequent] {
         $$ = yy.Node('IfStatement', $test, $consequent, null, yy.loc(@1));
+    }
+  | WHEN_NOT SExpr[test] BlockStatement[consequent] {
+        $$ = yy.Node('IfStatement', $test, $consequent, null, yy.loc(@1));
+        var testLoc = yy.loc(@test);
+        $$.test = yy.Node('CallExpression', yy.Node('Identifier', 'not', testLoc),
+            [$$.test], testLoc);
     }
   ;
 
