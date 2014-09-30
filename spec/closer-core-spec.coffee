@@ -564,13 +564,9 @@ describe 'Closer core library', ->
     it 'creates a new hash-map containing the given key-value pairs', ->
       eq '(hash-map)', map()
       throws '(hash-map 1)'   # even number of args required
-      # for equal keys, the first instance of the key and the last value corresponding to it wins
       truthy '(let [kv (first (hash-map \'() 1 [] 2))]
                 (and (list? (first kv)))
-                     (= (last kv) 2))'
-      truthy '(let [kv (first (hash-map [] 1 \'() 2))]
-                (and (vector? (first kv)))
-                     (= (last kv) 2))'
+                     (= (last kv) 1))'
 
   describe '(hash-set keys)', ->
     it 'creates a new hash-set containing the given keys', ->
@@ -880,7 +876,7 @@ describe 'Closer core library', ->
       eq '(flatten [1 \'(2 [3])])', seq [1, 2, 3]
       eq '(flatten #{1 2 #{3}})', emptySeq()    # doesn't work with sets
       eq '(flatten {:a 1, :b 2})', emptySeq()    # doesn't work with maps
-      eq '(flatten (seq {:a 1, :b 2}))', seq [key('a'), 1, key('b'), 2]
+      eq '(flatten (seq {:a 1, :b 2}))', seq [key('b'), 2, key('a'), 1]
 
   describe '(reverse coll)', ->
     it 'reverses the collection', ->
@@ -891,7 +887,7 @@ describe 'Closer core library', ->
       eq '(reverse "string")', seq ['g', 'n', 'i', 'r', 't', 's']
       eq '(reverse [1 2 \'(3 4)])', seq [list(3, 4), 2, 1]
       eq '(reverse #{1 2 3})', seq [3, 2, 1]
-      eq '(reverse {:a 1 :b 2})', seq [vec(key('b'), 2), vec(key('a'), 1)]
+      eq '(reverse {:a 1 :b 2})', seq [vec(key('a'), 1), vec(key('b'), 2)]
 
   describe '(assoc map & kvs)', ->
     it 'adds / updates the given key-value pairs in the given map / vector', ->
@@ -925,7 +921,7 @@ describe 'Closer core library', ->
       throws '(keys \'(1 2 3 4))'
       throws '(keys #{1 2 3 4})'
       throws '(keys "string")'
-      eq '(keys {:a 1, :b 2})', seq [key('a'), key('b')]
+      eq '(keys {:a 1, :b 2})', seq [key('b'), key('a')]
 
   describe '(vals map)', ->
     it 'returns a seq of the map\'s values', ->
@@ -934,7 +930,7 @@ describe 'Closer core library', ->
       throws '(vals \'(1 2 3 4))'
       throws '(vals #{1 2 3 4})'
       throws '(vals "string")'
-      eq '(vals {:a 1, :b 2})', seq [1, 2]
+      eq '(vals {:a 1, :b 2})', seq [2, 1]
 
   describe '(key e)', ->
     it 'returns the key of the given map entry', ->
@@ -1010,7 +1006,7 @@ describe 'Closer core library', ->
       throws '(map +)'
       eq '(map inc [1 2 3])', seq [2, 3, 4]
       eq '(map + [1 2] \'(3 4) #{5 6})', seq [9, 12]
-      eq '(map first {:a 1, :b 2})', seq [key('a'), key('b')]
+      eq '(map first {:a 1, :b 2})', seq [key('b'), key('a')]
       eq '(map #(if (even? %) (- %) %) [1 2 3 4])', vec 1, -2, 3, -4
       eq '(map #{1} [1 2 4 1])', seq [1, null, null, 1]
       eq '(map {1 2, 3 4, 5 6, 7 8} #{3 7})', seq [4, 8]

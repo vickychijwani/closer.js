@@ -46,8 +46,8 @@
     "json-diff": "^0.3.1"
   },
   "dependencies": {
-    "estraverse": "^1.5.0",
+    "estraverse": "^1.5.1",
     "lodash-node": "^2.4.1",
-    "mori": "^0.2.6"
+    "mori": "0.2.9"
   }
 }
