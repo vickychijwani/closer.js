@@ -84,6 +84,22 @@ describe 'Closer parser', ->
       eq 'x\n', Program(
         ExpressionStatement(Identifier('x')))
 
+    it 'parses JavaScript reserved words as identifiers after sanitization', ->
+      eq 'new\nclass\nif\nfunction\n', Program(
+        ExpressionStatement(Identifier('__$new')),
+        ExpressionStatement(Identifier('__$class')),
+        ExpressionStatement(Identifier('__$if')),
+        ExpressionStatement(Identifier('__$function')))
+
+    it 'allows Clojure special form names to be used as identifiers', ->
+      eq 'fn\ndef\nif\nlet\nand\nnew', Program(
+        ExpressionStatement(Identifier('fn')),
+        ExpressionStatement(Identifier('def')),
+        ExpressionStatement(Identifier('__$if')),  # if is also a JS reserved word
+        ExpressionStatement(Identifier('__$let')), # let is also a JS reserved word
+        ExpressionStatement(Identifier('and')),
+        ExpressionStatement(Identifier('__$new'))) # new is also a JS reserved word
+
     it 'parses integer, float, string, boolean, and nil literals', ->
       eq '-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n', Program(
         ExpressionStatement(UnaryExpression('-', Integer(24))),

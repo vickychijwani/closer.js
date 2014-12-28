@@ -45,7 +45,7 @@ __$this = (() ->
 
 describe 'Functional tests', ->
 
-  it 'identifier scope handling (allow shadowing of core functions)', ->
+  it 'identifiers can shadow core functions', ->
     eq '(min 1 2 3)', 1
     throws '(def min 2), (min 1 2 3)'  # min is shadowed, so is not a function
     throws '(defn min [x] x), (min 1 2 3)'  # min is shadowed, so is a function that can accept only 1 param
@@ -56,6 +56,10 @@ describe 'Functional tests', ->
     eq '(defn blah [min] (min 1 2 3)), (blah min)', 1  # still works because core.min is passed into blah's scope
     eq '[(min 1 2 3), (let [min 1 max 9] (range min max)), (min 1 2 3), ((fn [min max] (range min max)) 1 9)]',
       vec 1, seq([1...9]), 1, seq([1...9])
+
+  it 'identifiers must never shadow special forms', ->
+    eq '(let [fn 45] [fn ((fn [] "b"))])', vec 45, 'b'
+    eq '(let [if 45] [if (if false "a" "b")])', vec 45, 'b'
 
   it 'closures', ->
     eq '(defn adder [x] (fn [y] (+ x y))), (def add-3 (adder 3)), (add-3 4)', 7

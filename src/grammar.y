@@ -851,8 +851,21 @@ var charMap = {
     '/': '_$SLASH_',
     '?': '_$QMARK_'
 };
+
+// list of reserved words (current and future) in ES6
+var reservedWords = ['await', 'break', 'case', 'class', 'catch', 'const', 'continue',
+    'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends',
+    'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof',
+    'interface', 'let', 'new', 'package', 'private', 'protected', 'public',
+    'return', 'static', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var',
+    'void', 'while', 'with', 'yield'];
+
 function parseIdentifierName(name) {
     var charsToReplace = new RegExp('[' + Object.keys(charMap).join('') + ']', 'g');
+    if (reservedWords.indexOf(name) !== -1) {
+        // convert identifiers that are reserved words in JS to something safer
+        return '__$' + name;
+    }
     return name.replace(charsToReplace, function (c) { return charMap[c]; });
 }
 

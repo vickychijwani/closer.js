@@ -111,7 +111,7 @@
   })();
 
   describe('Functional tests', function() {
-    it('identifier scope handling (allow shadowing of core functions)', function() {
+    it('identifiers can shadow core functions', function() {
       eq('(min 1 2 3)', 1);
       throws('(def min 2), (min 1 2 3)');
       throws('(defn min [x] x), (min 1 2 3)');
@@ -121,6 +121,10 @@
       throws('(defn blah [min] (min 1 2 3)), (blah 2)');
       eq('(defn blah [min] (min 1 2 3)), (blah min)', 1);
       return eq('[(min 1 2 3), (let [min 1 max 9] (range min max)), (min 1 2 3), ((fn [min max] (range min max)) 1 9)]', vec(1, seq([1, 2, 3, 4, 5, 6, 7, 8]), 1, seq([1, 2, 3, 4, 5, 6, 7, 8])));
+    });
+    it('identifiers must never shadow special forms', function() {
+      eq('(let [fn 45] [fn ((fn [] "b"))])', vec(45, 'b'));
+      return eq('(let [if 45] [if (if false "a" "b")])', vec(45, 'b'));
     });
     it('closures', function() {
       return eq('(defn adder [x] (fn [y] (+ x y))), (def add-3 (adder 3)), (add-3 4)', 7);
@@ -2666,8 +2670,21 @@ var charMap = {
     '/': '_$SLASH_',
     '?': '_$QMARK_'
 };
+
+// list of reserved words (current and future) in ES6
+var reservedWords = ['await', 'break', 'case', 'class', 'catch', 'const', 'continue',
+    'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends',
+    'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof',
+    'interface', 'let', 'new', 'package', 'private', 'protected', 'public',
+    'return', 'static', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var',
+    'void', 'while', 'with', 'yield'];
+
 function parseIdentifierName(name) {
     var charsToReplace = new RegExp('[' + Object.keys(charMap).join('') + ']', 'g');
+    if (reservedWords.indexOf(name) !== -1) {
+        // convert identifiers that are reserved words in JS to something safer
+        return '__$' + name;
+    }
     return name.replace(charsToReplace, function (c) { return charMap[c]; });
 }
 
@@ -3045,96 +3062,101 @@ var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:/* whitespace */;
 break;
-case 1:
+case 1: /* ignore */ 
+break;
+case 2:
+    this.begin('INITIAL');
     return 11;
 
 break;
-case 2:
+case 3:
+    this.begin('INITIAL');
     return 12;
 
 break;
-case 3:
+case 4:
+    this.begin('INITIAL');
     yy_.yytext = yy_.yytext.substr(1, yy_.yyleng-2);
     return 13;
 
 break;
-case 4:
+case 5:
+    this.begin('INITIAL');
     return 9;
 
 break;
-case 5: /* ignore */ 
+case 6: this.begin('INITIAL'); return 35; 
 break;
-case 6:return 35;
+case 7: this.begin('fnpos'); return 22; 
 break;
-case 7:return 22;
+case 8: this.begin('INITIAL'); return 23; 
 break;
-case 8:return 23;
+case 9: this.begin('INITIAL'); return 18; 
 break;
-case 9:return 18;
+case 10: this.begin('INITIAL'); return 20; 
 break;
-case 10:return 20;
+case 11: this.begin('INITIAL'); return 24; 
 break;
-case 11:return 24;
+case 12: this.begin('INITIAL'); return 26; 
 break;
-case 12:return 26;
+case 13: this.begin('INITIAL'); return 27; 
 break;
-case 13:return 27;
+case 14: this.begin('INITIAL'); return 21; 
 break;
-case 14:return 21;
+case 15: this.begin('INITIAL'); return 7; 
 break;
-case 15:return 7;
+case 16: this.begin('INITIAL'); return 71; 
 break;
-case 16:return 71;
+case 17: this.begin('INITIAL'); return 62; 
 break;
-case 17:return 62;
+case 18: this.begin('INITIAL'); return 46; 
 break;
-case 18:return 46;
+case 19: this.begin('INITIAL'); return 47; 
 break;
-case 19:return 47;
+case 20: this.begin('INITIAL'); return 49; 
 break;
-case 20:return 49;
+case 21: this.begin('INITIAL'); return 53; 
 break;
-case 21:return 53;
+case 22: this.begin('INITIAL'); return 54; 
 break;
-case 22:return 54;
+case 23: this.begin('INITIAL'); return 56; 
 break;
-case 23:return 56;
+case 24: this.begin('INITIAL'); return 91; 
 break;
-case 24:return 91;
+case 25: this.begin('INITIAL'); return 67; 
 break;
-case 25:return 67;
+case 26: this.begin('INITIAL'); return 76; 
 break;
-case 26:return 76;
+case 27: this.begin('INITIAL'); return 79; 
 break;
-case 27:return 79;
+case 28: this.begin('INITIAL'); return 58; 
 break;
-case 28:return 58;
+case 29: this.begin('INITIAL'); return 60; 
 break;
-case 29:return 60;
+case 30: this.begin('INITIAL'); return 70; 
 break;
-case 30:return 70;
+case 31: this.begin('INITIAL'); return 82; 
 break;
-case 31:return 82;
+case 32: this.begin('INITIAL'); return 84; 
 break;
-case 32:return 84;
+case 33: this.begin('INITIAL'); return 86; 
 break;
-case 33:return 86;
+case 34: this.begin('INITIAL'); return 89; 
 break;
-case 34:return 89;
+case 35: this.begin('INITIAL'); return 37; 
 break;
-case 35:return 37;
+case 36: this.begin('INITIAL'); return 39; 
 break;
-case 36:return 39;
+case 37: this.begin('INITIAL'); return 40; 
 break;
-case 37:return 40;
+case 38: this.begin('INITIAL'); return 14; 
 break;
-case 38:return 14;
+case 39: this.begin('INITIAL'); return 15; 
 break;
-case 39:return 15;
-break;
-case 40:return 16;
+case 40: this.begin('INITIAL'); return 16; 
 break;
 case 41:
+    this.begin('INITIAL');
     return 4;
 
 break;
@@ -3146,8 +3168,8 @@ case 44:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:([\s,]+))/,/^(?:([-+]?([1-9][0-9]+|[0-9])))/,/^(?:([-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))))/,/^(?:("([^\"\\]|\\[\'\"\\bfnrt])*"))/,/^(?:(%(&|[1-9]|[0-9]|)?))/,/^(?:(;[^\r\n]*))/,/^(?:&)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:#)/,/^(?:')/,/^(?::)/,/^(?:\.)/,/^(?:def)/,/^(?:fn)/,/^(?:defn)/,/^(?:if)/,/^(?:if-not)/,/^(?:when)/,/^(?:when-not)/,/^(?:do)/,/^(?:let)/,/^(?:loop)/,/^(?:recur)/,/^(?:and)/,/^(?:or)/,/^(?:set!)/,/^(?:dotimes)/,/^(?:doseq)/,/^(?:while)/,/^(?:new)/,/^(?::as)/,/^(?::keys)/,/^(?::strs)/,/^(?:true)/,/^(?:false)/,/^(?:nil)/,/^(?:([a-zA-Z*+!\-_=<>?/][0-9a-zA-Z*+!\-_=<>?/]*))/,/^(?:.)/,/^(?:$)/,/^(?:.)/],
-conditions: {"regex":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44],"inclusive":true},"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44],"inclusive":true}}
+rules: [/^(?:([\s,]+))/,/^(?:(;[^\r\n]*))/,/^(?:([-+]?([1-9][0-9]+|[0-9])))/,/^(?:([-+]?[0-9]+((\.[0-9]*[eE][-+]?[0-9]+)|(\.[0-9]*)|([eE][-+]?[0-9]+))))/,/^(?:("([^\"\\]|\\[\'\"\\bfnrt])*"))/,/^(?:(%(&|[1-9]|[0-9]|)?))/,/^(?:&)/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?:\{)/,/^(?:\})/,/^(?:#)/,/^(?:')/,/^(?::)/,/^(?:\.)/,/^(?:def)/,/^(?:fn)/,/^(?:defn)/,/^(?:if)/,/^(?:if-not)/,/^(?:when)/,/^(?:when-not)/,/^(?:do)/,/^(?:let)/,/^(?:loop)/,/^(?:recur)/,/^(?:and)/,/^(?:or)/,/^(?:set!)/,/^(?:dotimes)/,/^(?:doseq)/,/^(?:while)/,/^(?:new)/,/^(?::as)/,/^(?::keys)/,/^(?::strs)/,/^(?:true)/,/^(?:false)/,/^(?:nil)/,/^(?:([a-zA-Z*+!\-_=<>?/][0-9a-zA-Z*+!\-_=<>?/]*))/,/^(?:.)/,/^(?:$)/,/^(?:.)/],
+conditions: {"regex":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,35,36,37,38,39,40,41,42,43,44],"inclusive":true},"fnpos":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44],"inclusive":true},"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,35,36,37,38,39,40,41,42,43,44],"inclusive":true}}
 });
 return lexer;
 })();
