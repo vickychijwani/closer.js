@@ -411,10 +411,7 @@ describe 'Closer parser', ->
                     BlockStatement(ContinueStatement()),
                     BreakStatement())))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
       eq '(loop [x 10] (when (> x 1) (.log console x) (recur (- x 2))))', Program(
         ExpressionStatement(CallExpression(
           MemberExpression(
@@ -445,10 +442,7 @@ describe 'Closer parser', ->
                       ReturnStatement(Nil())),
                     BreakStatement())))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'throws when given loop forms with an odd number of args in their bindings', ->
       throws '(loop [x] (recur 0))'
@@ -667,10 +661,7 @@ describe 'Closer parser', ->
               BlockStatement(
                 ReturnStatement(Nil()))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'parses let forms with non-empty bindings and non-empty body', ->
       eq '(let [x 3 y (- x)] (+ x y))', Program(
@@ -691,10 +682,7 @@ describe 'Closer parser', ->
                   MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
                   [ThisExpression(), Identifier('x'), Identifier('y')])))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'throws when given let forms with an odd number of args in their bindings', ->
       throws '(let [x 1 y])'
@@ -755,10 +743,7 @@ describe 'Closer parser', ->
               null, [], null,
               BlockStatement(ReturnStatement(Nil()))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'parses non-empty do forms', ->
       eq '(do (+ 1 2) (+ 3 4))', Program(
@@ -774,10 +759,7 @@ describe 'Closer parser', ->
                   MemberExpression(Identifier('_$PLUS_'), Identifier('call')),
                   [ThisExpression(), Integer(3), Integer(4)])))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'parses logical expressions (and / or)', ->
       eq '(and) (or)', Program(
@@ -812,10 +794,7 @@ describe 'Closer parser', ->
                   Identifier('x'), Integer(1)))
                 ReturnStatement(Nil()))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'parses forms with excess closing delimiters at the end', ->
       looseEq '(let [x 1])) )\n)', Program(
@@ -828,10 +807,7 @@ describe 'Closer parser', ->
                   Identifier('x'), Integer(1)))
                 ReturnStatement(Nil()))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'parses forms with unmatched closing delimiters at the end', ->
       looseEq '(let [x 1) \n  ]', Program(
@@ -844,10 +820,7 @@ describe 'Closer parser', ->
                   Identifier('x'), Integer(1)))
                 ReturnStatement(Nil()))),
             Identifier('call')),
-          [ConditionalExpression(
-            BinaryExpression('!==',
-              UnaryExpression('typeof', ThisExpression()), String('undefined')),
-            ThisExpression(), Nil())])))
+          [ThisExpression()])))
 
     it 'returns an empty AST for forms with excess closing delimiters in between', ->
       looseEq '(let [x 1)]\nx\n', Program()
