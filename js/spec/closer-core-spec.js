@@ -3801,7 +3801,6 @@ function processRecurFormIfAny(rootNode, actualArgs, yy) {
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, yyloc, yy) {
-    var thisExp = yy.Node('ThisExpression', yyloc);
     return yy.Node('CallExpression',
         yy.Node('MemberExpression',
             yy.Node('FunctionExpression',
@@ -3809,12 +3808,7 @@ function wrapInIIFE(body, yyloc, yy) {
                 createReturnStatementIfPossible(yy.Node('BlockStatement', body, yyloc), yy),
                 false, false, yyloc),
             yy.Node('Identifier', 'call', yyloc), false, yyloc),
-        [yy.Node('ConditionalExpression',
-            yy.Node('BinaryExpression', '!==',
-                yy.Node('UnaryExpression', 'typeof', thisExp, true, yyloc),
-                yy.Node('Literal', 'undefined', yyloc), yyloc),
-            thisExp,
-            yy.Node('Literal', null, yyloc), yyloc)],
+        [yy.Node('ThisExpression', yyloc)],
         yyloc);
 }
 
