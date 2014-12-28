@@ -108,13 +108,14 @@
 
                 var initialInput =
                         ";; type some clojure code here\n" +
-                        "(defn average\n" +
-                        "  [numbers]\n" +
-                        "  (/ (apply + numbers) (count numbers)))\n" +
+                        ";; example: quicksort\n" +
+                        "(defn qsort [[pivot :as coll]]\n" +
+                        "  (if pivot\n" +
+                        "      (concat (qsort (filter #(< % pivot) coll))\n" +
+                        "              (filter #{pivot} coll)\n" +
+                        "              (qsort (filter #(> % pivot) coll)))))\n" +
                         "\n" +
-                        "(let [min 1\n" +
-                        "      max (+ min 9)]\n" +
-                        "  (average (range min max)))   ; => 5\n";
+                        "(qsort [8 3 7 3 2 10 1])\n";
                 inputEditor.getSession().setValue(initialInput);
                 parseInput();
 
