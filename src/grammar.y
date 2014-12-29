@@ -302,6 +302,20 @@ SetForm
 LoopForm
   : LOOP '[' LetBindings ']' BlockStatement {
         var body = [], i, len, letBinding;
+
+        // unwrap IIFEs in loop body, sacrificing strict scoping rules for correct behaviour
+        // I wish there was a cleaner solution
+        // see https://github.com/vickychijwani/closer.js/issues/2
+        estraverse.replace($BlockStatement, {
+            leave: function (node) {
+                var exp = node.argument || node.expression;  // ReturnStatement or ExpressionStatement
+                if (exp && exp.iife === true) {
+                    return unwrapIIFE(exp);
+                }
+                return node;
+            }
+        });
+
         for (i = 0, len = $LetBindings.length; i < len; ++i) {
             letBinding = $LetBindings[i];
             body.push(letBinding.decl);
@@ -529,6 +543,7 @@ Program
         var prog = yy.Node('Program', $NonEmptyDoForm, yy.loc(@NonEmptyDoForm));
         resetGeneratedIds();
         processLocsAndRanges(prog, yy.locs, yy.ranges);
+        deleteExtraProperties(prog);
         return prog;
     }
   | 'END-OF-FILE' {
@@ -710,7 +725,7 @@ function processRecurFormIfAny(rootNode, actualArgs, yy) {
 
 // wrap the given array of statements in an IIFE (Immediately-Invoked Function Expression)
 function wrapInIIFE(body, yyloc, yy) {
-    return yy.Node('CallExpression',
+    var iife = yy.Node('CallExpression',
         yy.Node('MemberExpression',
             yy.Node('FunctionExpression',
                 null, [], null,
@@ -719,6 +734,23 @@ function wrapInIIFE(body, yyloc, yy) {
             yy.Node('Identifier', 'call', yyloc), false, yyloc),
         [yy.Node('ThisExpression', yyloc)],
         yyloc);
+    iife.iife = true;  // must delete this marker property before returning parser output
+    return iife;
+}
+
+// unwrap IIFE and return a BlockStatement
+function unwrapIIFE(node) {
+    return (node.iife === true) ? node.callee.object.body : node;
+}
+
+function deleteExtraProperties(prog) {
+    estraverse.traverse(prog, {
+        enter: function (node) {
+            if (node.iife !== undefined) {
+                delete node.iife;
+            }
+        }
+    });
 }
 
 function wrapInExpressionStatement(expr, yy) {

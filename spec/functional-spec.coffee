@@ -90,6 +90,19 @@ describe 'Functional tests', ->
         (map factorial (range 1 6))',
       seq [1, 2, 6, 24, 120]
 
+  # https://github.com/vickychijwani/closer.js/issues/2
+  it 'let within loop', ->
+    eq '(loop [i 10]
+          (let [i i]
+            (if (zero? i) i
+              (recur (dec i)))))',
+      0
+    eq '(loop [i 10]
+          (let [i i]
+            (if (zero? i) i
+              (recur (dec i)))))',
+      0
+
   it 'destructuring forms', ->
     eq '(defn blah
           [[a b & c :as coll1] d e & [f g & h :as coll2]]
