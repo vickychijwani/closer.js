@@ -48,13 +48,21 @@ body > .container-fluid {
     left: 15px; right: 15px;
 }
 
-.run-code {
+.controls {
     position: absolute;
-    width: 100px;
+    width: 120px;
+}
+
+.control-small {
+    font-size: 14px;
+}
+
+.run-code {
+    margin-top: 10px;
 }
 
 .output-container {
-    margin-left: 120px;
+    margin-left: 140px;
     height: 100%;
 }
 
