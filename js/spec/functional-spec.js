@@ -140,6 +140,10 @@
     it('defn / fn + recur', function() {
       return eq('(defn factorial [n] ((fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n)))) n 1)) (map factorial (range 1 6))', seq([1, 2, 6, 24, 120]));
     });
+    it('lexical scoping in dotimes and doseq forms', function() {
+      eq('(defn x [n] (+ n 1)) (doseq [x (range 7)] (+ x 3)) (x 10034)', 10035);
+      return eq('(defn x [n] (+ n 1)) (dotimes [x 7] (+ x 3)) (x 10034)', 10035);
+    });
     it('let within loop', function() {
       eq('(loop [i 10] (let [i i] (if (zero? i) i (recur (dec i)))))', 0);
       return eq('(loop [i 10] (let [j i] (if (zero? j) j (recur (dec j)))))', 0);
@@ -2084,10 +2088,7 @@ case 58:
         var test = yy.Node('BinaryExpression', '<', $$[$0-3], maxId, yy.loc(_$[$0-3]));
         var update = yy.Node('UpdateExpression', '++', $$[$0-3], true, yy.loc(_$[$0-3]));
         var forLoop = yy.Node('ForStatement', init, test, update, $$[$0], yy.loc(_$[$0-5]));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
-        this.$ = forLoop;
+        this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
     
 break;
 case 59:
@@ -2108,18 +2109,12 @@ case 59:
                 [seqId], idLoc), idLoc);
         var update = yy.Node('SequenceExpression', [seqUpdate, idUpdate], idLoc);
         var forLoop = yy.Node('ForStatement', init, test, update, $$[$0], yy.loc(_$[$0-5]));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
-        this.$ = forLoop;
+        this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
     
 break;
 case 60:
 
         var whileLoop = yy.Node('WhileStatement', $$[$0-1], $$[$0], yy.loc(_$[$0-2]));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([whileLoop], yy.loc(_$[$0-2]), yy);
         this.$ = whileLoop;
     
 break;
