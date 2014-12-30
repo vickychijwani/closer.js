@@ -104,6 +104,14 @@ Contributing
 
 Closer's primary dependencies are the [Jison parser generator](http://zaach.github.io/jison/) and [Mori](http://swannodette.github.io/mori/). All new features and functions should have [corresponding tests](spec/). [Issues](https://github.com/vickychijwani/closer.js/issues) and [pull requests](https://github.com/vickychijwani/closer.js/pulls) are welcome. [So are ideas, pointers, and code on how to implement `defmacro` in JavaScript](https://github.com/vickychijwani/closer.js/issues/6).
 
+**Setup / workflow instructions:**
+
+- Fork and clone this repository
+- Run `npm install` from project root
+- Run `grunt test` to make sure everything's working
+- Make your changes, running `grunt test` to test them
+- You can run `./repl` to get a basic Clojure REPL: it will display the parser output and execute it as JavaScript
+- Once all tests pass, commit and push your changes, and send a pull request! Congratulations!
 
 License
 -------
