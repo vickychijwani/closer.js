@@ -52,7 +52,11 @@
                         <div id="error" class="alert alert-danger"></div>
                     </div>
                     <div class="output-wrapper">
-                        <button class="run-code btn btn-primary">▶&nbsp;&nbsp;&nbsp;Run</button>
+                        <div class="controls">
+                            <span class="control-small"><input id="closer-locations" type="checkbox" /> Node locations</span><br />
+                            <span class="control-small"><input id="closer-loose-mode" type="checkbox" /> Loose mode</span><br />
+                            <button class="run-code btn btn-primary">▶&nbsp;&nbsp;&nbsp;Run</button>
+                        </div>
                         <div class="output-container">
                             <textarea name="output" data-editor="clojure"></textarea>
                             <div class="output editor"></div>
@@ -79,6 +83,8 @@
             $(function () {
                 var inputTabSize = 2, astTabSize = 4, jsTabSize = 4;
                 var $error = $('#error'), runCodeBtn = $('.run-code');
+                var locationsCtrl = $('#closer-locations'), looseModeCtrl = $('#closer-loose-mode');
+                var locations = locationsCtrl.is(":checked"), looseMode = looseModeCtrl.is(":checked");
 
                 var $inputTextArea = $('textarea[name="clojure"]');
                 var inputEditor = setupAceEditor($inputTextArea);
@@ -119,11 +125,21 @@
                 inputEditor.getSession().setValue(initialInput);
                 parseInput();
 
+                locationsCtrl.change(function () {
+                    locations = $(this).is(":checked");
+                    parseInput();
+                });
+
+                looseModeCtrl.change(function () {
+                    looseMode = $(this).is(":checked");
+                    parseInput();
+                });
+
                 runCodeBtn.click(function () {
                     var __$this = {};  // value for "this"
                     var input = inputEditor.getSession().getValue();
                     try {
-                        var ast = repl.parse(input, { loc: false });
+                        var ast = repl.parse(input, { loc: locations, loose: looseMode });
                         var lastStmt = ast.body[ast.body.length-1];
                         if (lastStmt && lastStmt.type === 'ExpressionStatement') {
                             lastStmt.type = 'ReturnStatement';
@@ -147,7 +163,7 @@
                 function parseInput () {
                     var input = inputEditor.getSession().getValue();
                     try {
-                        var ast = repl.parse(input, { loc: true });
+                        var ast = repl.parse(input, { loc: locations, loose: looseMode });
                         var formattedAst = JSON.stringify(ast, null, astTabSize);
                         $error.html('');
                         $error.hide();
