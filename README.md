@@ -73,7 +73,7 @@ Closer works on Node.js and all modern browsers (via [browserify](http://browser
    // execute
    var assertions = closer.assertions; // the name of this variable must match assertionsIdentifier
    var escodegen = require('escodegen');
-   eval(escodegen.generate(ast1)); // === 2
+   eval(escodegen.generate(ast1)); // === 42
    eval(escodegen.generate(ast2)); // ArityError: expected 1..1 args, got 2
    eval(escodegen.generate(ast3)); // ArgTypeError: str is not a number
    ```
