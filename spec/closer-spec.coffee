@@ -481,16 +481,23 @@ describe 'Closer parser', ->
 
     it 'parses dotimes forms', ->
       eq '(dotimes [i expr] (println i))', Program(
-        ForStatement(
-          VariableDeclaration(
-            VariableDeclarator(Identifier('i'), Integer(0)),
-            VariableDeclarator(Identifier('__$max0'), Identifier('expr'))),
-          BinaryExpression('<', Identifier('i'), Identifier('__$max0')),
-          UpdateExpression('++', Identifier('i')),
-          BlockStatement(
-            ExpressionStatement(CallExpression(
-              MemberExpression(Identifier('println'), Identifier('call')),
-              [ThisExpression(), Identifier('i')])))))
+        ExpressionStatement(CallExpression(
+          MemberExpression(
+            FunctionExpression(
+              null, [], null,
+              BlockStatement(
+                ForStatement(
+                  VariableDeclaration(
+                    VariableDeclarator(Identifier('i'), Integer(0)),
+                    VariableDeclarator(Identifier('__$max0'), Identifier('expr'))),
+                  BinaryExpression('<', Identifier('i'), Identifier('__$max0')),
+                  UpdateExpression('++', Identifier('i')),
+                  BlockStatement(
+                    ExpressionStatement(CallExpression(
+                      MemberExpression(Identifier('println'), Identifier('call')),
+                      [ThisExpression(), Identifier('i')])))))),
+            Identifier('call')),
+          [ThisExpression()])))
 
     it 'throws when given dotimes forms with anything more or less than 1 binding', ->
       throws '(dotimes [] (println 2))'
@@ -498,24 +505,31 @@ describe 'Closer parser', ->
 
     it 'parses doseq forms', ->
       eq '(doseq [x (range 5)] (println x))', Program(
-        ForStatement(
-          VariableDeclaration(
-            VariableDeclarator(Identifier('__$doseqSeq0'),
-              CallExpression(
-                MemberExpression(Identifier('range'), Identifier('call')),
-                [ThisExpression(), Integer(5)])),
-            VariableDeclarator(Identifier('x'),
-              CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))),
-          BinaryExpression('!==', Identifier('x'), Nil()),
-          SequenceExpression(
-            AssignmentExpression(Identifier('__$doseqSeq0'),
-              CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])),
-            AssignmentExpression(Identifier('x'),
-              CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))),
-          BlockStatement(
-            ExpressionStatement(CallExpression(
-              MemberExpression(Identifier('println'), Identifier('call')),
-              [ThisExpression(), Identifier('x')])))))
+        ExpressionStatement(CallExpression(
+          MemberExpression(
+            FunctionExpression(
+              null, [], null,
+              BlockStatement(
+                ForStatement(
+                  VariableDeclaration(
+                    VariableDeclarator(Identifier('__$doseqSeq0'),
+                      CallExpression(
+                        MemberExpression(Identifier('range'), Identifier('call')),
+                        [ThisExpression(), Integer(5)])),
+                    VariableDeclarator(Identifier('x'),
+                      CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))),
+                  BinaryExpression('!==', Identifier('x'), Nil()),
+                  SequenceExpression(
+                    AssignmentExpression(Identifier('__$doseqSeq0'),
+                      CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])),
+                    AssignmentExpression(Identifier('x'),
+                      CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))),
+                  BlockStatement(
+                    ExpressionStatement(CallExpression(
+                      MemberExpression(Identifier('println'), Identifier('call')),
+                      [ThisExpression(), Identifier('x')])))))),
+            Identifier('call')),
+          [ThisExpression()])))
 
     it 'throws when given doseq forms with anything more or less than 1 binding', ->
       throws '(doseq [] (println 2))'

@@ -90,6 +90,17 @@ describe 'Functional tests', ->
         (map factorial (range 1 6))',
       seq [1, 2, 6, 24, 120]
 
+  # https://github.com/vickychijwani/closer.js/issues/7
+  it 'lexical scoping in dotimes and doseq forms', ->
+    eq '(defn x [n] (+ n 1))
+        (doseq [x (range 7)] (+ x 3))
+        (x 10034)',
+      10035
+    eq '(defn x [n] (+ n 1))
+        (dotimes [x 7] (+ x 3))
+        (x 10034)',
+      10035
+
   # https://github.com/vickychijwani/closer.js/issues/2
   it 'let within loop', ->
     eq '(loop [i 10]

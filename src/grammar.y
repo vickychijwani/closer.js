@@ -376,10 +376,7 @@ DoTimesForm
         var test = yy.Node('BinaryExpression', '<', $Identifier, maxId, yy.loc(@Identifier));
         var update = yy.Node('UpdateExpression', '++', $Identifier, true, yy.loc(@Identifier));
         var forLoop = yy.Node('ForStatement', init, test, update, $BlockStatement, yy.loc(@1));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // $$ = wrapInIIFE([forLoop], yy.loc(@1), yy);
-        $$ = forLoop;
+        $$ = wrapInIIFE([forLoop], yy.loc(@1), yy);
     }
   ;
 
@@ -401,19 +398,13 @@ DoSeqForm
                 [seqId], idLoc), idLoc);
         var update = yy.Node('SequenceExpression', [seqUpdate, idUpdate], idLoc);
         var forLoop = yy.Node('ForStatement', init, test, update, $BlockStatement, yy.loc(@1));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // $$ = wrapInIIFE([forLoop], yy.loc(@1), yy);
-        $$ = forLoop;
+        $$ = wrapInIIFE([forLoop], yy.loc(@1), yy);
     }
   ;
 
 WhileForm
   : WHILE SExpr BlockStatement {
         var whileLoop = yy.Node('WhileStatement', $SExpr, $BlockStatement, yy.loc(@1));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // $$ = wrapInIIFE([whileLoop], yy.loc(@1), yy);
         $$ = whileLoop;
     }
   ;

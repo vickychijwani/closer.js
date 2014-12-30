@@ -539,14 +539,14 @@
         return eq('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))', Program(ExpressionStatement(FunctionExpression(null, [Identifier('n'), Identifier('acc')], null, BlockStatement(AssertArity(2), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')), [ThisExpression(), Identifier('n')]), ReturnStatement(Identifier('acc')), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('dec'), Identifier('call')), [ThisExpression(), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('__$recur1'), CallExpression(MemberExpression(Identifier('_$STAR_'), Identifier('call')), [ThisExpression(), Identifier('acc'), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('n'), Identifier('__$recur0'))), ExpressionStatement(AssignmentExpression(Identifier('acc'), Identifier('__$recur1'))), ContinueStatement())))))))));
       });
       it('parses dotimes forms', function() {
-        return eq('(dotimes [i expr] (println i))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0)), VariableDeclarator(Identifier('__$max0'), Identifier('expr'))), BinaryExpression('<', Identifier('i'), Identifier('__$max0')), UpdateExpression('++', Identifier('i')), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('i')]))))));
+        return eq('(dotimes [i expr] (println i))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0)), VariableDeclarator(Identifier('__$max0'), Identifier('expr'))), BinaryExpression('<', Identifier('i'), Identifier('__$max0')), UpdateExpression('++', Identifier('i')), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('i')])))))), Identifier('call')), [ThisExpression()]))));
       });
       it('throws when given dotimes forms with anything more or less than 1 binding', function() {
         throws('(dotimes [] (println 2))');
         return throws('(dotimes [i 5 j 10] (println i j))');
       });
       it('parses doseq forms', function() {
-        return eq('(doseq [x (range 5)] (println x))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('__$doseqSeq0'), CallExpression(MemberExpression(Identifier('range'), Identifier('call')), [ThisExpression(), Integer(5)])), VariableDeclarator(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BinaryExpression('!==', Identifier('x'), Nil()), SequenceExpression(AssignmentExpression(Identifier('__$doseqSeq0'), CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])), AssignmentExpression(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('x')]))))));
+        return eq('(doseq [x (range 5)] (println x))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('__$doseqSeq0'), CallExpression(MemberExpression(Identifier('range'), Identifier('call')), [ThisExpression(), Integer(5)])), VariableDeclarator(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BinaryExpression('!==', Identifier('x'), Nil()), SequenceExpression(AssignmentExpression(Identifier('__$doseqSeq0'), CallExpression(Identifier('rest'), [Identifier('__$doseqSeq0')])), AssignmentExpression(Identifier('x'), CallExpression(Identifier('first'), [Identifier('__$doseqSeq0')]))), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [ThisExpression(), Identifier('x')])))))), Identifier('call')), [ThisExpression()]))));
       });
       it('throws when given doseq forms with anything more or less than 1 binding', function() {
         throws('(doseq [] (println 2))');
@@ -1471,10 +1471,7 @@ case 58:
         var test = yy.Node('BinaryExpression', '<', $$[$0-3], maxId, yy.loc(_$[$0-3]));
         var update = yy.Node('UpdateExpression', '++', $$[$0-3], true, yy.loc(_$[$0-3]));
         var forLoop = yy.Node('ForStatement', init, test, update, $$[$0], yy.loc(_$[$0-5]));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
-        this.$ = forLoop;
+        this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
     
 break;
 case 59:
@@ -1495,18 +1492,12 @@ case 59:
                 [seqId], idLoc), idLoc);
         var update = yy.Node('SequenceExpression', [seqUpdate, idUpdate], idLoc);
         var forLoop = yy.Node('ForStatement', init, test, update, $$[$0], yy.loc(_$[$0-5]));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
-        this.$ = forLoop;
+        this.$ = wrapInIIFE([forLoop], yy.loc(_$[$0-5]), yy);
     
 break;
 case 60:
 
         var whileLoop = yy.Node('WhileStatement', $$[$0-1], $$[$0], yy.loc(_$[$0-2]));
-        // wrapping it in an IIFE makes it not work in CodeCombat
-        // see https://github.com/codecombat/aether/issues/49
-        // this.$ = wrapInIIFE([whileLoop], yy.loc(_$[$0-2]), yy);
         this.$ = whileLoop;
     
 break;
