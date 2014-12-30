@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for spec/closer-spec.js</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="../prettify.css">
+
+    <style>
+        body, html {
+            margin:0; padding: 0;
+        }
+        body {
+            font-family: Helvetica Neue, Helvetica,Arial;
+            font-size: 10pt;
+        }
+        div.header, div.footer {
+            background: #eee;
+            padding: 1em;
+        }
+        div.header {
+            z-index: 100;
+            position: fixed;
+            top: 0;
+            border-bottom: 1px solid #666;
+            width: 100%;
+        }
+        div.footer {
+            border-top: 1px solid #666;
+        }
+        div.body {
+            margin-top: 10em;
+        }
+        div.meta {
+            font-size: 90%;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            font-weight: normal;
+        }
+        h1 {
+            font-size: 12pt;
+        }
+        h2 {
+            font-size: 10pt;
+        }
+        pre {
+            font-family: Consolas, Menlo, Monaco, monospace;
+            margin: 0;
+            padding: 0;
+            line-height: 14px;
+            font-size: 14px;
+            -moz-tab-size: 2;
+            -o-tab-size:  2;
+            tab-size: 2;
+        }
+
+        div.path { font-size: 110%; }
+        div.path a:link, div.path a:visited { color: #000; }
+        table.coverage { border-collapse: collapse; margin:0; padding: 0 }
+
+        table.coverage td {
+            margin: 0;
+            padding: 0;
+            color: #111;
+            vertical-align: top;
+        }
+        table.coverage td.line-count {
+            width: 50px;
+            text-align: right;
+            padding-right: 5px;
+        }
+        table.coverage td.line-coverage {
+            color: #777 !important;
+            text-align: right;
+            border-left: 1px solid #666;
+            border-right: 1px solid #666;
+        }
+
+        table.coverage td.text {
+        }
+
+        table.coverage td span.cline-any {
+            display: inline-block;
+            padding: 0 5px;
+            width: 40px;
+        }
+        table.coverage td span.cline-neutral {
+            background: #eee;
+        }
+        table.coverage td span.cline-yes {
+            background: #b5d592;
+            color: #999;
+        }
+        table.coverage td span.cline-no {
+            background: #fc8c84;
+        }
+
+        .cstat-yes { color: #111; }
+        .cstat-no { background: #fc8c84; color: #111; }
+        .fstat-no { background: #ffc520; color: #111 !important; }
+        .cbranch-no { background:  yellow !important; color: #111; }
+        .missing-if-branch {
+            display: inline-block;
+            margin-right: 10px;
+            position: relative;
+            padding: 0 4px;
+            background: black;
+            color: yellow;
+            xtext-decoration: line-through;
+        }
+        .missing-if-branch .typ {
+            color: inherit !important;
+        }
+
+        .entity, .metric { font-weight: bold; }
+        .metric { display: inline-block; border: 1px solid #333; padding: 0.3em; background: white; }
+        .metric small { font-size: 80%; font-weight: normal; color: #666; }
+
+        div.coverage-summary table { border-collapse: collapse; margin: 3em; font-size: 110%; }
+        div.coverage-summary td, div.coverage-summary table  th { margin: 0; padding: 0.25em 1em; border-top: 1px solid #666; border-bottom: 1px solid #666; }
+        div.coverage-summary th { text-align: left; border: 1px solid #666; background: #eee; font-weight: normal; }
+        div.coverage-summary th.file { border-right: none !important; }
+        div.coverage-summary th.pic { border-left: none !important; text-align: right; }
+        div.coverage-summary th.pct { border-right: none !important; }
+        div.coverage-summary th.abs { border-left: none !important; text-align: right; }
+        div.coverage-summary td.pct { text-align: right; border-left: 1px solid #666; }
+        div.coverage-summary td.abs { text-align: right; font-size: 90%; color: #444; border-right: 1px solid #666; }
+        div.coverage-summary td.file { text-align: right; border-left: 1px solid #666; white-space: nowrap;  }
+        div.coverage-summary td.pic { min-width: 120px !important;  }
+        div.coverage-summary a:link { text-decoration: none; color: #000; }
+        div.coverage-summary a:visited { text-decoration: none; color: #333; }
+        div.coverage-summary a:hover { text-decoration: underline; }
+        div.coverage-summary tfoot td { border-top: 1px solid #666; }
+
+        div.coverage-summary .yui3-datatable-sort-indicator, div.coverage-summary .dummy-sort-indicator {
+            height: 10px;
+            width: 7px;
+            display: inline-block;
+            margin-left: 0.5em;
+        }
+        div.coverage-summary .yui3-datatable-sort-indicator {
+            background: url("http://yui.yahooapis.com/3.6.0/build/datatable-sort/assets/skins/sam/sort-arrow-sprite.png") no-repeat scroll 0 0 transparent;
+        }
+        div.coverage-summary .yui3-datatable-sorted .yui3-datatable-sort-indicator {
+            background-position: 0 -20px;
+        }
+        div.coverage-summary .yui3-datatable-sorted-desc .yui3-datatable-sort-indicator {
+            background-position: 0 -10px;
+        }
+
+        .high { background: #b5d592 !important; }
+        .medium { background: #ffe87c !important; }
+        .low { background: #fc8c84 !important; }
+
+        span.cover-fill, span.cover-empty {
+            display:inline-block;
+            border:1px solid #444;
+            background: white;
+            height: 12px;
+        }
+        span.cover-fill {
+            background: #ccc;
+            border-right: 1px solid #444;
+        }
+        span.cover-empty {
+            background: white;
+            border-left: none;
+        }
+        span.cover-full {
+            border-right: none !important;
+        }
+        pre.prettyprint {
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .com { color: #999 !important; }
+    </style>
+</head>
+<body>
+<div class="header high">
+    <h1>Code coverage report for <span class="entity">spec/closer-spec.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">100% <small>(135 / 135)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">55.56% <small>(10 / 18)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">100% <small>(41 / 41)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">100% <small>(135 / 135)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+    </h2>
+    <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">spec/</a> &#187; closer-spec.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">149</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">46</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">(function() {
+  var ArrayExpression, AssertArity, AssignmentExpression, BinaryExpression, BlockStatement, Boolean, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, EmptyStatement, ExpressionStatement, Float, ForStatement, FunctionDeclaration, FunctionExpression, HashMap, HashSet, Identifier, IfStatement, Integer, Keyword, List, LogicalExpression, MemberExpression, Nil, Program, ReturnStatement, String, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, UpdateExpression, VariableDeclaration, VariableDeclarator, Vector, WhileStatement, closer, eq, helpers, json_diff, parseOpts, _ref, _ref1, _ref2;
+&nbsp;
+  closer = (_ref = (_ref1 = (_ref2 = typeof window !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >window !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >window.closer </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref2 </span>: typeof self !== "undefined" &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >self !== null </span>? <span class="branch-0 cbranch-no" title="branch not covered" >self.closer </span>: void 0) != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref1 </span>: typeof global !== "undefined" &amp;&amp; global !== null ? global.closer : <span class="branch-1 cbranch-no" title="branch not covered" >void 0)</span> != null ? <span class="branch-0 cbranch-no" title="branch not covered" >_ref </span>: require('../src/closer');
+&nbsp;
+  json_diff = require('json-diff');
+&nbsp;
+  helpers = require('./closer-helpers');
+&nbsp;
+  Integer = helpers.Literal;
+&nbsp;
+  Float = helpers.Literal;
+&nbsp;
+  String = helpers.Literal;
+&nbsp;
+  Boolean = helpers.Literal;
+&nbsp;
+  Nil = helpers.Literal;
+&nbsp;
+  Keyword = helpers['keyword'];
+&nbsp;
+  Vector = helpers['vector'];
+&nbsp;
+  List = helpers['list'];
+&nbsp;
+  HashSet = helpers['hash_$_set'];
+&nbsp;
+  HashMap = helpers['hash_$_map'];
+&nbsp;
+  AssertArity = helpers.AssertArity;
+&nbsp;
+  Identifier = helpers.Identifier;
+&nbsp;
+  ThisExpression = helpers.ThisExpression;
+&nbsp;
+  UnaryExpression = helpers.UnaryExpression;
+&nbsp;
+  UpdateExpression = helpers.UpdateExpression;
+&nbsp;
+  BinaryExpression = helpers.BinaryExpression;
+&nbsp;
+  LogicalExpression = helpers.LogicalExpression;
+&nbsp;
+  ArrayExpression = helpers.ArrayExpression;
+&nbsp;
+  AssignmentExpression = helpers.AssignmentExpression;
+&nbsp;
+  CallExpression = helpers.CallExpression;
+&nbsp;
+  MemberExpression = helpers.MemberExpression;
+&nbsp;
+  ConditionalExpression = helpers.ConditionalExpression;
+&nbsp;
+  FunctionExpression = helpers.FunctionExpression;
+&nbsp;
+  EmptyStatement = helpers.EmptyStatement;
+&nbsp;
+  ExpressionStatement = helpers.ExpressionStatement;
+&nbsp;
+  ForStatement = helpers.ForStatement;
+&nbsp;
+  WhileStatement = helpers.WhileStatement;
+&nbsp;
+  IfStatement = helpers.IfStatement;
+&nbsp;
+  BreakStatement = helpers.BreakStatement;
+&nbsp;
+  ContinueStatement = helpers.ContinueStatement;
+&nbsp;
+  ReturnStatement = helpers.ReturnStatement;
+&nbsp;
+  TryStatement = helpers.TryStatement;
+&nbsp;
+  CatchClause = helpers.CatchClause;
+&nbsp;
+  ThrowStatement = helpers.ThrowStatement;
+&nbsp;
+  VariableDeclaration = helpers.VariableDeclaration;
+&nbsp;
+  VariableDeclarator = helpers.VariableDeclarator;
+&nbsp;
+  FunctionDeclaration = helpers.FunctionDeclaration;
+&nbsp;
+  BlockStatement = helpers.BlockStatement;
+&nbsp;
+  Program = helpers.Program;
+&nbsp;
+  beforeEach(function() {
+    return this.addMatchers({
+      toDeepEqual: helpers.toDeepEqual
+    });
+  });
+&nbsp;
+  parseOpts = {
+    loc: false,
+    forceNoLoc: true
+  };
+&nbsp;
+  eq = function(src, ast) {
+    return expect(closer.parse(src, parseOpts)).toDeepEqual(ast);
+  };
+&nbsp;
+  describe('Closer parser', function() {
+    it('parses an empty program', function() {
+      return eq('\n', Program());
+    });
+    it('parses an empty s-expression', function() {
+      return eq('()\n', Program(EmptyStatement()));
+    });
+    it('parses comments', function() {
+      return eq('; Heading\n() ; trailing ()\r\n;\r;;;\n\r\r', Program(EmptyStatement()));
+    });
+    it('parses an identifier', function() {
+      return eq('x\n', Program(ExpressionStatement(Identifier('x'))));
+    });
+    it('parses integer, float, string, boolean, and nil literals', function() {
+      return eq('-24\n-23.67\n-22.45E-5\n""\n"string"\ntrue\nfalse\nnil\n', Program(ExpressionStatement(UnaryExpression('-', Integer(24))), ExpressionStatement(UnaryExpression('-', Float(23.67))), ExpressionStatement(UnaryExpression('-', Float(22.45e-5))), ExpressionStatement(String('')), ExpressionStatement(String('string')), ExpressionStatement(Boolean(true)), ExpressionStatement(Boolean(false)), ExpressionStatement(Nil())));
+    });
+    it('parses keywords', function() {
+      return eq(':keyword', Program(ExpressionStatement(Keyword('keyword'))));
+    });
+    it('parses vector and list literals', function() {
+      return eq('[] ["string" true] \'() \'("string" true)', Program(ExpressionStatement(Vector()), ExpressionStatement(Vector(String('string'), Boolean(true))), ExpressionStatement(List()), ExpressionStatement(List(String('string'), Boolean(true)))));
+    });
+    it('parses set and map literals', function() {
+      eq('#{} #{"string" true}', Program(ExpressionStatement(HashSet()), ExpressionStatement(HashSet(String('string'), Boolean(true)))));
+      eq('{} {"string" true}', Program(ExpressionStatement(HashMap()), ExpressionStatement(HashMap(String('string'), Boolean(true)))));
+      return expect(function() {
+        return closer.parse('{1 2 3}');
+      }).toThrow();
+    });
+    it('parses commas as whitespace', function() {
+      return eq(',,, ,,,  ,,\n', Program());
+    });
+    it('parses a function call with 0 arguments', function() {
+      return eq('(fn-name)\n', Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('fn_$_name'), Identifier('call')), [Nil()]))));
+    });
+    it('parses a function call with &gt; 0 arguments', function() {
+      return eq('(fn-name arg1 arg2)\n', Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('fn_$_name'), Identifier('call')), [Nil(), Identifier('arg1'), Identifier('arg2')]))));
+    });
+    it('parses an anonymous function definition', function() {
+      return eq('(fn [x] x)\n', Program(ExpressionStatement(FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x')))))));
+    });
+    it('parses an anonymous function call', function() {
+      return eq('((fn [x] x) 2)\n', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x')))), Identifier('call')), [Nil(), Integer(2)]))));
+    });
+    it('parses anonymous function literals', function() {
+      eq('(#(apply + % %2 %&amp;) 1 2 3 4)', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [Identifier('__$1'), Identifier('__$2')], null, BlockStatement(AssertArity(2, Infinity), VariableDeclaration(VariableDeclarator(Identifier('__$rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('__$1'), Identifier('__$2'), Identifier('__$rest')])))), Identifier('call')), [Nil(), Integer(1), Integer(2), Integer(3), Integer(4)]))));
+      return eq('(map #(if (even? %1) (- %) %) [1 2 3])', Program(ExpressionStatement(CallExpression(MemberExpression(Identifier('map'), Identifier('call')), [Nil(), FunctionExpression(null, [Identifier('__$1')], null, BlockStatement(AssertArity(1), IfStatement(CallExpression(MemberExpression(Identifier('even_$QMARK_'), Identifier('call')), [Nil(), Identifier('__$1')]), ReturnStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('__$1')])), ReturnStatement(Identifier('__$1'))))), Vector(Integer(1), Integer(2), Integer(3))]))));
+    });
+    it('parses a named function definition', function() {
+      return eq('(defn fn-name [x] x)\n', Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('x')], null, BlockStatement(AssertArity(1), ReturnStatement(Identifier('x'))))))));
+    });
+    it('parses rest arguments', function() {
+      return eq('(defn avg [&amp; rest] (/ (apply + rest) (count rest)))\n', Program(VariableDeclaration(VariableDeclarator(Identifier('avg'), FunctionExpression(null, [], null, BlockStatement(AssertArity(0, Infinity), VariableDeclaration(VariableDeclarator(Identifier('rest'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('_$SLASH_'), Identifier('call')), [Nil(), CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('rest')]), CallExpression(MemberExpression(Identifier('count'), Identifier('call')), [Nil(), Identifier('rest')])]))))))));
+    });
+    it('parses destructuring forms', function() {
+      eq('(defn fn-name [[a &amp; b] c &amp; [d &amp; e :as coll]])', Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('__$destruc0'), Identifier('c')], null, BlockStatement(AssertArity(2, Infinity), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('nth'), [Identifier('__$destruc0'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('a'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('drop'), [Integer(1), Identifier('__$destruc0')]))), VariableDeclaration(VariableDeclarator(Identifier('coll'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(2)])]))), TryStatement(BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('d'), CallExpression(Identifier('nth'), [Identifier('coll'), Integer(0)])))), CatchClause(Identifier('__$error'), BlockStatement(IfStatement(BinaryExpression('!==', MemberExpression(Identifier('__$error'), Identifier('name')), String('IndexOutOfBoundsError')), ThrowStatement(Identifier('__$error'))), ExpressionStatement(AssignmentExpression(Identifier('d'), Nil()))))), VariableDeclaration(VariableDeclarator(Identifier('e'), CallExpression(Identifier('drop'), [Integer(1), Identifier('coll')]))), ReturnStatement(Nil())))))));
+      return eq('(defn fn-name [{:as m :keys [b] :strs [c] a :a}])', Program(VariableDeclaration(VariableDeclarator(Identifier('fn_$_name'), FunctionExpression(null, [Identifier('m')], null, BlockStatement(AssertArity(1), VariableDeclaration(VariableDeclarator(Identifier('b'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('b')]))), VariableDeclaration(VariableDeclarator(Identifier('c'), CallExpression(Identifier('get'), [Identifier('m'), String('c')]))), VariableDeclaration(VariableDeclarator(Identifier('a'), CallExpression(Identifier('get'), [Identifier('m'), Keyword('a')]))), ReturnStatement(Nil())))))));
+    });
+    it('parses collections and keywords in function position', function() {
+      eq('([1 2 3 4] 1)', Program(ExpressionStatement(CallExpression(MemberExpression(Vector(Integer(1), Integer(2), Integer(3), Integer(4)), Identifier('call')), [Nil(), Integer(1)]))));
+      eq('({1 2 3 4} 1)', Program(ExpressionStatement(CallExpression(MemberExpression(HashMap(Integer(1), Integer(2), Integer(3), Integer(4)), Identifier('call')), [Nil(), Integer(1)]))));
+      eq('(#{1 2 3 4} 1)', Program(ExpressionStatement(CallExpression(MemberExpression(HashSet(Integer(1), Integer(2), Integer(3), Integer(4)), Identifier('call')), [Nil(), Integer(1)]))));
+      return eq('(:key {:key :val})', Program(ExpressionStatement(CallExpression(MemberExpression(Keyword('key'), Identifier('call')), [Nil(), HashMap(Keyword('key'), Keyword('val'))]))));
+    });
+    it('parses an if statement without else', function() {
+      return eq('(if (&gt;= x 0) x)\n', Program(IfStatement(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), null)));
+    });
+    it('parses an if-else statement', function() {
+      return eq('(if (&gt;= x 0) x (- x))\n', Program(IfStatement(CallExpression(MemberExpression(Identifier('_$GT__$EQ_'), Identifier('call')), [Nil(), Identifier('x'), Integer(0)]), ExpressionStatement(Identifier('x')), ExpressionStatement(CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x')])))));
+    });
+    it('parses a when form', function() {
+      return eq('(when (condition?) (println \"hello\") true)\n', Program(IfStatement(CallExpression(MemberExpression(Identifier('condition_$QMARK_'), Identifier('call')), [Nil()]), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [Nil(), String('hello')])), ExpressionStatement(Boolean(true))))));
+    });
+    it('parses an unbound var definition', function() {
+      return eq('(def var-name)', Program(VariableDeclaration(VariableDeclarator(Identifier('var_$_name'), null))));
+    });
+    it('parses a var bound to a literal', function() {
+      return eq('(def greeting \"Hello\")', Program(VariableDeclaration(VariableDeclarator(Identifier('greeting'), String('Hello')))));
+    });
+    it('parses a var bound to the result of an expression', function() {
+      return eq('(def sum (+ 3 5))', Program(VariableDeclaration(VariableDeclarator(Identifier('sum'), CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(3), Integer(5)])))));
+    });
+    it('parses a var bound to an fn form', function() {
+      return eq('(def add (fn [&amp; numbers] (apply + numbers)))', Program(VariableDeclaration(VariableDeclarator(Identifier('add'), FunctionExpression(null, [], null, BlockStatement(AssertArity(0, Infinity), VariableDeclaration(VariableDeclarator(Identifier('numbers'), CallExpression(Identifier('seq'), [CallExpression(MemberExpression(MemberExpression(MemberExpression(Identifier('Array'), Identifier('prototype')), Identifier('slice')), Identifier('call')), [Identifier('arguments'), Integer(0)])]))), ReturnStatement(CallExpression(MemberExpression(Identifier('apply'), Identifier('call')), [Nil(), Identifier('_$PLUS_'), Identifier('numbers')]))))))));
+    });
+    it('parses var assignment (set! var value) forms', function() {
+      return eq('(set! x 4)', Program(ExpressionStatement(AssignmentExpression(Identifier('x'), Integer(4)))));
+    });
+    it('parses a let form with no bindings and no body', function() {
+      return eq('(let [])', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+    });
+    it('parses a let form with non-empty bindings and a non-empty body', function() {
+      return eq('(let [x 3 y (- x)] (+ x y))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(3))), VariableDeclaration(VariableDeclarator(Identifier('y'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x')]))), ReturnStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Identifier('x'), Identifier('y')])))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+    });
+    it('parses loop + recur forms', function() {
+      eq('(loop [] (recur))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(WhileStatement(Boolean(true), BlockStatement(BlockStatement(ContinueStatement()), BreakStatement())))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+      return eq('(loop [x 10] (when (&gt; x 1) (.log console x) (recur (- x 2))))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(VariableDeclaration(VariableDeclarator(Identifier('x'), Integer(10))), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('_$GT_'), Identifier('call')), [Nil(), Identifier('x'), Integer(1)]), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('console'), String('log'), true), [Identifier('x')])), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('_$_'), Identifier('call')), [Nil(), Identifier('x'), Integer(2)]))), ExpressionStatement(AssignmentExpression(Identifier('x'), Identifier('__$recur0'))), ContinueStatement())), ReturnStatement(Nil())), BreakStatement())))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+    });
+    it('parses fn + recur forms', function() {
+      return eq('(fn [n acc] (if (zero? n) acc (recur (dec n) (* acc n))))', Program(ExpressionStatement(FunctionExpression(null, [Identifier('n'), Identifier('acc')], null, BlockStatement(AssertArity(2), WhileStatement(Boolean(true), BlockStatement(IfStatement(CallExpression(MemberExpression(Identifier('zero_$QMARK_'), Identifier('call')), [Nil(), Identifier('n')]), ReturnStatement(Identifier('acc')), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('__$recur0'), CallExpression(MemberExpression(Identifier('dec'), Identifier('call')), [Nil(), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('__$recur1'), CallExpression(MemberExpression(Identifier('_$STAR_'), Identifier('call')), [Nil(), Identifier('acc'), Identifier('n')]))), ExpressionStatement(AssignmentExpression(Identifier('n'), Identifier('__$recur0'))), ExpressionStatement(AssignmentExpression(Identifier('acc'), Identifier('__$recur1'))), ContinueStatement())))))))));
+    });
+    it('parses dotimes forms', function() {
+      return eq('(dotimes [i expr] (println i))', Program(ForStatement(VariableDeclaration(VariableDeclarator(Identifier('i'), Integer(0)), VariableDeclarator(Identifier('__$max'), Identifier('expr'))), BinaryExpression('&lt;', Identifier('i'), Identifier('__$max')), UpdateExpression('++', Identifier('i')), BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('println'), Identifier('call')), [Nil(), Identifier('i')]))))));
+    });
+    it('parses while forms', function() {
+      return eq('(while (&lt; i 5) (set! i (inc i)))', Program(WhileStatement(CallExpression(MemberExpression(Identifier('_$LT_'), Identifier('call')), [Nil(), Identifier('i'), Integer(5)]), BlockStatement(ExpressionStatement(AssignmentExpression(Identifier('i'), CallExpression(MemberExpression(Identifier('inc'), Identifier('call')), [Nil(), Identifier('i')])))))));
+    });
+    it('parses an empty do form', function() {
+      return eq('(do)', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ReturnStatement(Nil()))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+    });
+    it('parses a non-empty do form', function() {
+      return eq('(do (+ 1 2) (+ 3 4))', Program(ExpressionStatement(CallExpression(MemberExpression(FunctionExpression(null, [], null, BlockStatement(ExpressionStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(1), Integer(2)])), ReturnStatement(CallExpression(MemberExpression(Identifier('_$PLUS_'), Identifier('call')), [Nil(), Integer(3), Integer(4)])))), Identifier('call')), [ConditionalExpression(BinaryExpression('!==', UnaryExpression('typeof', ThisExpression()), String('undefined')), ThisExpression(), Nil())]))));
+    });
+    it('parses dot special forms', function() {
+      eq('(.move-x-y this 10 20)', Program(ExpressionStatement(CallExpression(MemberExpression(ThisExpression(), String('move-x-y'), true), [Integer(10), Integer(20)]))));
+      return eq('(.pos this)', Program(ExpressionStatement(ConditionalExpression(LogicalExpression('&amp;&amp;', BinaryExpression('===', UnaryExpression('typeof', MemberExpression(ThisExpression(), String('pos'), true)), String('function')), BinaryExpression('===', MemberExpression(MemberExpression(ThisExpression(), String('pos'), true), Identifier('length')), Integer(0))), CallExpression(MemberExpression(ThisExpression(), String('pos'), true), []), MemberExpression(ThisExpression(), String('pos'), true)))));
+    });
+    it('parses logical expressions (and / or)', function() {
+      eq('(and) (or)', Program(ExpressionStatement(Boolean(true)), ExpressionStatement(Nil())));
+      eq('(and expr1 expr2 expr3)', Program(ExpressionStatement(LogicalExpression('&amp;&amp;', LogicalExpression('&amp;&amp;', Identifier('expr1'), Identifier('expr2')), Identifier('expr3')))));
+      return eq('(or expr1 expr2 expr3)', Program(ExpressionStatement(LogicalExpression('||', LogicalExpression('||', Identifier('expr1'), Identifier('expr2')), Identifier('expr3')))));
+    });
+    return xit('parses source locations');
+  });
+&nbsp;
+}).call(this);
+&nbsp;</pre></td></tr>
+</table></pre>
+
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu May 15 2014 20:24:31 GMT+0530 (IST)</div>
+</div>
+
+<script src="../prettify.js"></script>
+
+<script src="http://yui.yahooapis.com/3.6.0/build/yui/yui-min.js"></script>
+<script>
+
+    YUI().use('datatable', function (Y) {
+
+        var formatters = {
+          pct: function (o) {
+              o.className += o.record.get('classes')[o.column.key];
+              try {
+                  return o.value.toFixed(2) + '%';
+              } catch (ex) { return o.value + '%'; }
+          },
+          html: function (o) {
+              o.className += o.record.get('classes')[o.column.key];
+              return o.record.get(o.column.key + '_html');
+          }
+        },
+          defaultFormatter = function (o) {
+              o.className += o.record.get('classes')[o.column.key];
+              return o.value;
+          };
+
+        function getColumns(theadNode) {
+            var colNodes = theadNode.all('tr th'),
+                cols = [],
+                col;
+            colNodes.each(function (colNode) {
+                col = {
+                    key: colNode.getAttribute('data-col'),
+                    label: colNode.get('innerHTML') || ' ',
+                    sortable: !colNode.getAttribute('data-nosort'),
+                    className: colNode.getAttribute('class'),
+                    type: colNode.getAttribute('data-type'),
+                    allowHTML: colNode.getAttribute('data-html') === 'true' || colNode.getAttribute('data-fmt') === 'html'
+                };
+                col.formatter = formatters[colNode.getAttribute('data-fmt')] || defaultFormatter;
+                cols.push(col);
+            });
+            return cols;
+        }
+
+        function getRowData(trNode, cols) {
+            var tdNodes = trNode.all('td'),
+                    i,
+                    row = { classes: {} },
+                    node,
+                    name;
+            for (i = 0; i < cols.length; i += 1) {
+                name = cols[i].key;
+                node = tdNodes.item(i);
+                row[name] = node.getAttribute('data-value') || node.get('innerHTML');
+                row[name + '_html'] = node.get('innerHTML');
+                row.classes[name] = node.getAttribute('class');
+                //Y.log('Name: ' + name + '; Value: ' + row[name]);
+                if (cols[i].type === 'number') { row[name] = row[name] * 1; }
+            }
+            //Y.log(row);
+            return row;
+        }
+
+        function getData(tbodyNode, cols) {
+            var data = [];
+            tbodyNode.all('tr').each(function (trNode) {
+                data.push(getRowData(trNode, cols));
+            });
+            return data;
+        }
+
+        function replaceTable(node) {
+            if (!node) { return; }
+            var cols = getColumns(node.one('thead')),
+                data = getData(node.one('tbody'), cols),
+                table,
+                parent = node.get('parentNode');
+
+            table = new Y.DataTable({
+                columns: cols,
+                data: data,
+                sortBy: 'file'
+            });
+            parent.set('innerHTML', '');
+            table.render(parent);
+        }
+
+        Y.on('domready', function () {
+            replaceTable(Y.one('div.coverage-summary table'));
+            if (typeof prettyPrint === 'function') {
+                prettyPrint();
+            }
+        });
+    });
+</script>
+</body>
+</html>
