@@ -19,6 +19,18 @@ body > .container-fluid {
 	margin-top: 20px;
 }
 
+@media (max-width: 767px) {
+    .gh-buttons-mobile {
+        margin-bottom: 20px;
+        display: block;
+    }
+}
+@media (min-width: 768px) {
+    .gh-buttons-mobile {
+        display: none;
+    }
+}
+
 #error {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     font-size: 16px;
