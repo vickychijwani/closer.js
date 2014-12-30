@@ -98,9 +98,9 @@ describe 'Functional tests', ->
               (recur (dec i)))))',
       0
     eq '(loop [i 10]
-          (let [i i]
-            (if (zero? i) i
-              (recur (dec i)))))',
+          (let [j i]
+            (if (zero? j) j
+              (recur (dec j)))))',
       0
 
   it 'destructuring forms', ->
