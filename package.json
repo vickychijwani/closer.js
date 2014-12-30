@@ -38,6 +38,7 @@
     "grunt-coffeelint": "0.0.8",
     "grunt-contrib-coffee": "^0.10.1",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-gh-pages": "^0.9.1",
     "grunt-jasmine-node": "^0.2.1",
     "grunt-jasmine-node-coverage": "^0.1.10",
     "grunt-shell": "^0.6.4",

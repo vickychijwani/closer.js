@@ -11,10 +11,6 @@ module.exports = (grunt) ->
           'mkdir -p lib/src/'
           'cp src/parser.js lib/src/'
         ].join if process.platform.match /^win/ then '&' else '&&'
-      push_ghpages:
-        command: 'git subtree push --prefix demo origin gh-pages'
-        options:
-          stdout: true
 
     jasmine_test:
       all: ['lib/spec/']
@@ -87,12 +83,19 @@ module.exports = (grunt) ->
         options:
           exclude: ['lodash-node']
 
+    'gh-pages':
+      src: ['**']
+      options:
+        base: 'demo/'
+        push: true
+
 
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-browserify'
+  grunt.loadNpmTasks 'grunt-gh-pages'
 
   # grunt-jasmine-node is for tests, grunt-jasmine-node-coverage is for code coverage
   grunt.loadNpmTasks 'grunt-jasmine-node'
@@ -102,4 +105,3 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', ['coffeelint', 'shell:jison', 'coffee']
   grunt.registerTask 'test', ['build', 'jasmine_test']
   grunt.registerTask 'default', ['build', 'browserify', 'jasmine_node']
-  grunt.registerTask 'push_demo', ['shell:push_ghpages']
