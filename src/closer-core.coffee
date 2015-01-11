@@ -677,11 +677,12 @@ core =
     
   'rand_$_nth': (coll) ->
     assertions.arity 1, arguments.length
-    assertions.stack coll
+    assertions.sequential coll
     m.nth coll, _.random m.count(coll) - 1
   
   'get_$_in': (coll,keys,not_found) ->
     assertions.arity 2, 3, arguments.length
+    assertions.seqable keys
     m.get_in(coll,keys,not_found)
     
 
