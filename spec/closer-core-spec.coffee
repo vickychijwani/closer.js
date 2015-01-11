@@ -1274,4 +1274,22 @@ describe 'Closer core library', ->
       nil '(rand-nth nil)'
       eq '(rand-nth \'(1 1 1))', 1   # returns random item of list
       eq '(rand-nth [1 1 1])', 1   # returns random item of vector
+      
+  describe '(get-in coll keys not-found)', ->
+    it 'returns a value from a nested collection', ->
+      throws '(get-in ["foo" "bar"] [1] "not found" [])'  # wrong arity
+      throws '(get-in ["foo" "bar"])'  # wrong arity
+      throws '(get-in ["foo" "bar"] 1)' # keys should be sequable
+      nil '(get-in \'("foo" "bar") \'(1))' # doesn't work with lists
+      nil '(get-in [] [1])' # empty vectors search returns nil
+      eq '(get-in [1 2 4] [1])', 2
+      eq '(get-in [1 2 4] [])', vec(1,2,4) # returns the vector on empty search
+      nil '(get-in [1 2 4] [5])'      # if not found returns nil
+      eq '(get-in [1 2 4] [5] 1)', 1  # if not found and not-found is set returns not-found
+      eq '(get-in [1 2 4] \'(1))', 2  # keys can be lists
+      eq '(get-in [1 [2 3 4] 5] [1 0])', 2
+      nil '(get-in [1 [2 3 4] 5] [1 0 0])' # keys not match
+      eq '(get-in [1 [2 3 4] 5] [1])', vec(2,3,4)
+      
+      
         

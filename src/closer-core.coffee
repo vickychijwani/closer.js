@@ -679,7 +679,11 @@ core =
     assertions.arity 1, arguments.length
     assertions.stack coll
     m.nth coll, _.random m.count(coll) - 1
-
+  
+  'get_$_in': (coll,keys,not_found) ->
+    assertions.arity 2, 3, arguments.length
+    m.get_in(coll,keys,not_found)
+    
 
 bind = (that, args) ->
   for i in [0...args.length]
