@@ -669,10 +669,16 @@ core =
     assertions.arity 1, arguments.length
     m.js_to_clj x
     
+  # newly added functions
   'distinct': (coll) ->
     assertions.arity 1, arguments.length
     assertions.stack coll
     m.distinct coll
+    
+  'rand_$_nth': (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.stack coll
+    m.nth coll, _.random m.count(coll) - 1
 
 
 bind = (that, args) ->

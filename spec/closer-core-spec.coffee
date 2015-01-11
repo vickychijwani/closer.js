@@ -1264,3 +1264,14 @@ describe 'Closer core library', ->
       eq '(distinct \'(1 2 2))', seq([1,2])  # returns the unique items in a list
       eq '(distinct [1 2 2])', seq([1,2])   # returns unique items of vector
         
+  describe '(rand-nth coll)', ->
+    it 'returns a random item from list or vector', ->
+      throws '(rand-nth [1 2] [3 4])'   # wrong arity
+      throws '(rand-nth #{1 2})'   # doesn't work with sets
+      throws '(rand-nth {1 2})'   # doesn't work with maps
+      throws '(rand-nth [])'      #doesn't work with empty vectors
+      throws '(rand-nth \'())'    #doesn't work with empty list
+      nil '(rand-nth nil)'
+      eq '(rand-nth \'(1 1 1))', 1   # returns random item of list
+      eq '(rand-nth [1 1 1])', 1   # returns random item of vector
+        
