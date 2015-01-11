@@ -1257,12 +1257,14 @@ describe 'Closer core library', ->
       throws '(distinct [1 1] [4 4])'   # wrong arity
       throws '(distinct #{1 1})'   # doesn't work with sets
       throws '(distinct {1 1})'   # doesn't work with maps
-      throws '(distinct (seq #{1 1}))'   # doesn't work with seqs
       eq '(distinct nil)', emptySeq()
       eq '(distinct [])', emptySeq()
       eq '(distinct \'())', emptySeq()
       eq '(distinct \'(1 2 2))', seq([1,2])  # returns the unique items in a list
       eq '(distinct [1 2 2])', seq([1,2])   # returns unique items of vector
+      eq '(distinct (seq [1 2 4 1 3]))', seq([1, 2, 4, 3])    # test for seq
+      eq '(distinct "coffee")', seq(["c","o","f","e"])    # test for strings
+      
         
   describe '(rand-nth coll)', ->
     it 'returns a random item from list or vector', ->

@@ -672,7 +672,7 @@ core =
   # newly added functions
   'distinct': (coll) ->
     assertions.arity 1, arguments.length
-    assertions.stack coll
+    assertions.sequential coll
     m.distinct coll
     
   'rand_$_nth': (coll) ->
