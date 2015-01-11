@@ -668,6 +668,11 @@ core =
   'js_$__$GT_clj': (x) ->
     assertions.arity 1, arguments.length
     m.js_to_clj x
+    
+  'distinct': (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.stack coll
+    m.distinct coll
 
 
 bind = (that, args) ->

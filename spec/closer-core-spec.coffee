@@ -1251,3 +1251,16 @@ describe 'Closer core library', ->
     it 'recursively transforms JS objects to maps, and JS arrays to vectors', ->
       throws '(js->clj :key [])'
       eq '(js->clj (clj->js { :a [1 2] :b #{3 4} }))', map 'a', vec(1, 2), 'b', vec(3, 4)
+        
+  describe '(distinct coll)', ->
+    it 'returns the unique items of a list or vector', ->
+      throws '(distinct [1 1] [4 4])'   # wrong arity
+      throws '(distinct #{1 1})'   # doesn't work with sets
+      throws '(distinct {1 1})'   # doesn't work with maps
+      throws '(distinct (seq #{1 1}))'   # doesn't work with seqs
+      eq '(distinct nil)', emptySeq()
+      eq '(distinct [])', emptySeq()
+      eq '(distinct \'())', emptySeq()
+      eq '(distinct \'(1 2 2))', seq([1,2])  # returns the unique items in a list
+      eq '(distinct [1 2 2])', seq([1,2])   # returns unique items of vector
+        
