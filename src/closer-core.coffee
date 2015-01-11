@@ -685,6 +685,12 @@ core =
     assertions.seqable keys
     m.get_in(coll,keys,not_found)
     
+  'assoc_$_in' : (coll,keys,val) ->
+    assertions.arity 3, arguments.length
+    assertions.associative coll
+    assertions.seqable keys
+    m.assoc_in(coll,keys,val)
+    
 
 bind = (that, args) ->
   for i in [0...args.length]

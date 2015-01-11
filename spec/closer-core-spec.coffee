@@ -1291,5 +1291,16 @@ describe 'Closer core library', ->
       nil '(get-in [1 [2 3 4] 5] [1 0 0])' # keys not match
       eq '(get-in [1 [2 3 4] 5] [1])', vec(2,3,4)
       
+  describe '(assoc-in coll keys val)', ->
+    it 'returns associated nested associative structure', ->
+      throws '(assoc-in {"foo" {"bar" 1 }})'  # wrong arity
+      throws '(assoc-in {"foo" {"bar" 1 }} ["foo" "baz"])'  # wrong arity
+      throws '(assoc-in [] [] 1)' #vectors assoc key must be a number
+      throws '(assoc-in [] [1 "bar"] 1)' # index +1 out of bounds
+      throws '(assoc-in [] [-1 "bar"] 1)' # index -1 out of bounds
+      eq '(assoc-in {"foo" {"bar" 1 }} ["foo" "baz"] 2)', map "foo", map "bar",1,"baz",2
+      eq '(assoc-in [{"foo" 1}] [1 "bar"] 1)', vec map("foo",1),map("bar",1)
+      eq '(assoc-in {} [] 1)', map null,1   # adds a null key of keys not present
+      eq '(assoc-in [] [0 "bar"] 1)', vec map "bar",1
       
         
