@@ -28,7 +28,8 @@
     "esprima"
   ],
   "scripts": {
-    "prepublish": "grunt coffeelint && grunt coffee && grunt jasmine_test"
+    "prepublish": "grunt coffeelint && grunt coffee && grunt jasmine_test",
+    "test": "grunt test"
   },
   "devDependencies": {
     "browserify": "^3.38.0",
