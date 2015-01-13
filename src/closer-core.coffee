@@ -691,6 +691,14 @@ core =
     assertions.seqable keys
     m.assoc_in(coll,keys,val)
     
+  'frequencies' : (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.seqable coll
+    core.into(core.hash_$_map(),
+      core.map(
+        ((kv) -> core.vector(core.key(kv), core.count(core.val(kv)))),
+        core.group_$_by(core.identity, coll))
+     )
 
 bind = (that, args) ->
   for i in [0...args.length]

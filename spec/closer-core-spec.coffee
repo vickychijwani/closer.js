@@ -1305,4 +1305,13 @@ describe 'Closer core library', ->
       eq '(assoc-in {} [] 1)', map null,1   # adds a null key of keys not present
       eq '(assoc-in [] [0 "bar"] 1)', vec map "bar",1
       
-        
+  describe '(frequencies coll)', ->
+    it 'returns the map of distinct items in coll to their frequencies', ->
+      throws '(frequencies [1 2 2 1] [1 2 1])' # wrong arity
+      throws '(frequencies)' # wrong arity
+      throws '(frequencies 1)' # collection not seqable
+      eq '(frequencies [])', map()
+      eq '(frequencies [1 2 1 1 1])', map 1,4,2,1  # works with vectors
+      eq '(frequencies \'(1 2 1 1 1))', map 1,4,2,1  # works with lists
+      eq '(frequencies "coffee")', map "c",1,"o",1,"f",2,"e",2  # works with strings
+      
