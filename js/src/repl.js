@@ -92,14 +92,14 @@
         throw new ArgTypeError("" + unexpectedArg + " is not a map");
       }
     },
-    seqable: function() {
+    collection: function() {
       var args, unexpectedArg;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       unexpectedArg = firstFailure(args, function(arg) {
         return mori.is_seqable(arg) || _.isString(arg) || _.isArray(arg);
       });
       if (unexpectedArg) {
-        throw new ArgTypeError("" + unexpectedArg + " is not seqable");
+        throw new ArgTypeError("" + unexpectedArg + " is not a collection");
       }
     },
     sequential: function() {
@@ -109,7 +109,7 @@
         return mori.is_sequential(arg) || _.isString(arg) || _.isArray(arg);
       });
       if (unexpectedArg) {
-        throw new ArgTypeError("" + unexpectedArg + " is not sequential");
+        throw new ArgTypeError("" + unexpectedArg + " is not a sequential collection");
       }
     },
     stack: function() {
@@ -534,7 +534,7 @@
     },
     'count': function(coll) {
       assertions.arity(1, arguments.length);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.count(coll);
     },
     'empty': function(coll) {
@@ -576,7 +576,7 @@
     },
     'seq': function(coll) {
       assertions.arity(1, arguments.length);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.seq(coll);
     },
     'first': function(coll) {
@@ -735,7 +735,7 @@
       var seqs;
       seqs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       assertions.arity(0, Infinity, arguments.length);
-      assertions.seqable.apply(null, seqs);
+      assertions.collection.apply(null, seqs);
       return m.concat.apply(null, seqs);
     },
     'flatten': function(coll) {
@@ -744,7 +744,7 @@
     },
     'reverse': function(coll) {
       assertions.arity(1, arguments.length);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.reverse(coll);
     },
     'assoc': function() {
@@ -808,7 +808,7 @@
     },
     'to_$_array': function(coll) {
       assertions.arity(1, arguments.length);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return core.reduce((function(arr, x) {
         arr.push(x);
         return arr;
@@ -825,7 +825,7 @@
       last = args[args.length - 1];
       rest = args.slice(0, args.length - 1);
       assertions["function"](f);
-      assertions.seqable(last);
+      assertions.collection(last);
       lastSeq = core.seq(last);
       for (i = _i = 0, _ref6 = core.count(lastSeq); 0 <= _ref6 ? _i < _ref6 : _i > _ref6; i = 0 <= _ref6 ? ++_i : --_i) {
         rest.push(core.nth(lastSeq, i));
@@ -875,34 +875,34 @@
     'take': function(n, coll) {
       assertions.arity(2, arguments.length);
       assertions.numbers(n);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.take(n, coll);
     },
     'drop': function(n, coll) {
       assertions.arity(2, arguments.length);
       assertions.numbers(n);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.drop(n, coll);
     },
     'some': function(pred, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](pred);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.some(pred, coll);
     },
     'every_$QMARK_': function(pred, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](pred);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.every(pred, coll);
     },
     'sort': function() {
       assertions.arity(1, 2, arguments.length);
       if (arguments.length === 1) {
-        assertions.seqable(arguments[0]);
+        assertions.collection(arguments[0]);
       } else {
         assertions["function"](arguments[0]);
-        assertions.seqable(arguments[1]);
+        assertions.collection(arguments[1]);
         bind(this, arguments);
       }
       return m.sort.apply(null, arguments);
@@ -911,10 +911,10 @@
       assertions.arity(2, 3, arguments.length);
       if (arguments.length === 2) {
         assertions["function"](arguments[0]);
-        assertions.seqable(arguments[1]);
+        assertions.collection(arguments[1]);
       } else {
         assertions["function"](arguments[0], arguments[1]);
-        assertions.seqable(arguments[2]);
+        assertions.collection(arguments[2]);
       }
       bind(this, arguments);
       return m.sort_by.apply(null, arguments);
@@ -933,29 +933,29 @@
         case 4:
           n = arguments[0], step = arguments[1], pad = arguments[2], coll = arguments[3];
           assertions.numbers(step);
-          assertions.seqable(pad);
+          assertions.collection(pad);
       }
       assertions.numbers(n);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return m.partition.apply(null, arguments);
     },
     'partition_$_by': function(f, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](f);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       bind(this, arguments);
       return m.partition_by(f, coll);
     },
     'group_$_by': function(f, coll) {
       assertions.arity(2, arguments.length);
       assertions["function"](f);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       bind(this, arguments);
       return m.group_by(f, coll);
     },
     'zipmap': function(keys, vals) {
       assertions.arity(2, arguments.length);
-      assertions.seqable(keys, vals);
+      assertions.collection(keys, vals);
       return m.zipmap(keys, vals);
     },
     'iterate': function(f, x) {
@@ -1024,18 +1024,18 @@
     },
     'get_$_in': function(coll, keys, not_found) {
       assertions.arity(2, 3, arguments.length);
-      assertions.seqable(keys);
+      assertions.collection(keys);
       return m.get_in(coll, keys, not_found);
     },
     'assoc_$_in': function(coll, keys, val) {
       assertions.arity(3, arguments.length);
       assertions.associative(coll);
-      assertions.seqable(keys);
+      assertions.collection(keys);
       return m.assoc_in(coll, keys, val);
     },
     'frequencies': function(coll) {
       assertions.arity(1, arguments.length);
-      assertions.seqable(coll);
+      assertions.collection(coll);
       return core.into(core.hash_$_map(), core.map((function(kv) {
         return core.vector(core.key(kv), core.count(core.val(kv)));
       }), core.group_$_by(core.identity, coll)));
