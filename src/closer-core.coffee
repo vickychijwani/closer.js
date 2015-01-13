@@ -287,7 +287,7 @@ core =
 
   'count': (coll) ->
     assertions.arity 1, arguments.length
-    assertions.seqable coll
+    assertions.collection coll
     m.count coll
 
   'empty': (coll) ->
@@ -314,7 +314,7 @@ core =
 
   'seq': (coll) ->
     assertions.arity 1, arguments.length
-    assertions.seqable coll
+    assertions.collection coll
     m.seq coll
 
   'first': (coll) ->
@@ -425,7 +425,7 @@ core =
 
   'concat': (seqs...) ->
     assertions.arity 0, Infinity, arguments.length
-    assertions.seqable.apply null, seqs
+    assertions.collection.apply null, seqs
     m.concat.apply null, seqs
 
   'flatten': (coll) ->
@@ -434,7 +434,7 @@ core =
 
   'reverse': (coll) ->
     assertions.arity 1, arguments.length
-    assertions.seqable coll
+    assertions.collection coll
     m.reverse coll
 
   'assoc': (map, kvs...) ->
@@ -485,7 +485,7 @@ core =
 
   'to_$_array': (coll) ->
     assertions.arity 1, arguments.length
-    assertions.seqable coll
+    assertions.collection coll
     core.reduce ((arr, x) -> arr.push(x); arr), [], coll
 
   'identity': (x) ->
@@ -497,7 +497,7 @@ core =
     last = args[args.length-1]
     rest = args.slice 0, args.length-1
     assertions.function f
-    assertions.seqable last
+    assertions.collection last
     lastSeq = core.seq(last)
     rest.push(core.nth(lastSeq, i)) for i in [0...core.count(lastSeq)]
     f.apply @, rest
@@ -542,35 +542,35 @@ core =
   'take': (n, coll) ->
     assertions.arity 2, arguments.length
     assertions.numbers n
-    assertions.seqable coll
+    assertions.collection coll
     m.take n, coll
 
   'drop': (n, coll) ->
     assertions.arity 2, arguments.length
     assertions.numbers n
-    assertions.seqable coll
+    assertions.collection coll
     m.drop n, coll
 
   'some': (pred, coll) ->
     assertions.arity 2, arguments.length
     assertions.function pred
-    assertions.seqable coll
+    assertions.collection coll
     m.some pred, coll
 
   'every_$QMARK_': (pred, coll) ->
     assertions.arity 2, arguments.length
     assertions.function pred
-    assertions.seqable coll
+    assertions.collection coll
     m.every pred, coll
 
   'sort': () ->
     # arguments: [cmp], coll
     assertions.arity 1, 2, arguments.length
     if arguments.length is 1
-      assertions.seqable arguments[0]
+      assertions.collection arguments[0]
     else
       assertions.function arguments[0]
-      assertions.seqable arguments[1]
+      assertions.collection arguments[1]
       bind @, arguments
     m.sort.apply null, arguments
 
@@ -579,10 +579,10 @@ core =
     assertions.arity 2, 3, arguments.length
     if arguments.length is 2
       assertions.function arguments[0]
-      assertions.seqable arguments[1]
+      assertions.collection arguments[1]
     else
       assertions.function arguments[0], arguments[1]
-      assertions.seqable arguments[2]
+      assertions.collection arguments[2]
     bind @, arguments
     m.sort_by.apply null, arguments
 
@@ -597,28 +597,28 @@ core =
       when 4
         [n, step, pad, coll] = arguments
         assertions.numbers step
-        assertions.seqable pad
+        assertions.collection pad
     assertions.numbers n
-    assertions.seqable coll
+    assertions.collection coll
     m.partition.apply null, arguments
 
   'partition_$_by': (f, coll) ->
     assertions.arity 2, arguments.length
     assertions.function f
-    assertions.seqable coll
+    assertions.collection coll
     bind @, arguments
     m.partition_by f, coll
 
   'group_$_by': (f, coll) ->
     assertions.arity 2, arguments.length
     assertions.function f
-    assertions.seqable coll
+    assertions.collection coll
     bind @, arguments
     m.group_by f, coll
 
   'zipmap': (keys, vals) ->
     assertions.arity 2, arguments.length
-    assertions.seqable keys, vals
+    assertions.collection keys, vals
     m.zipmap keys, vals
 
   'iterate': (f, x) ->
@@ -682,18 +682,18 @@ core =
   
   'get_$_in': (coll,keys,not_found) ->
     assertions.arity 2, 3, arguments.length
-    assertions.seqable keys
+    assertions.collection keys
     m.get_in(coll,keys,not_found)
     
   'assoc_$_in' : (coll,keys,val) ->
     assertions.arity 3, arguments.length
     assertions.associative coll
-    assertions.seqable keys
+    assertions.collection keys
     m.assoc_in(coll,keys,val)
     
   'frequencies' : (coll) ->
     assertions.arity 1, arguments.length
-    assertions.seqable coll
+    assertions.collection coll
     core.into(core.hash_$_map(),
       core.map(
         ((kv) -> core.vector(core.key(kv), core.count(core.val(kv)))),

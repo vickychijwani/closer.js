@@ -42,15 +42,15 @@ assertions =
     if unexpectedArg = firstFailure(args, (arg) -> mori.is_map(arg))
       throw new ArgTypeError "#{unexpectedArg} is not a map"
 
-  seqable: (args...) ->
+  collection: (args...) ->
     unexpectedArg = firstFailure args, (arg) -> mori.is_seqable(arg) or _.isString(arg) or _.isArray(arg)
     if unexpectedArg
-      throw new ArgTypeError "#{unexpectedArg} is not seqable"
+      throw new ArgTypeError "#{unexpectedArg} is not a collection"
 
   sequential: (args...) ->
     unexpectedArg = firstFailure args, (arg) -> mori.is_sequential(arg) or _.isString(arg) or _.isArray(arg)
     if unexpectedArg
-      throw new ArgTypeError "#{unexpectedArg} is not sequential"
+      throw new ArgTypeError "#{unexpectedArg} is not a sequential collection"
 
   stack: (args...) ->
     unexpectedArg = firstFailure args, (arg) -> mori.is_vector(arg) or mori.is_list(arg)
