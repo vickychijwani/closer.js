@@ -1,6 +1,12 @@
 Closer.js
 =========
 
+[![Build Status](https://travis-ci.org/vickychijwani/closer.js.svg?branch=master)](https://travis-ci.org/vickychijwani/closer.js)
+[![NPM version](https://badge.fury.io/js/closer.svg)](http://badge.fury.io/js/closer)
+[![Dependency Status](https://david-dm.org/vickychijwani/closer.js.svg)](https://david-dm.org/vickychijwani/closer.js)
+[![devDependency Status](https://david-dm.org/vickychijwani/closer.js/dev-status.svg)](https://david-dm.org/vickychijwani/closer.js#info=devDependencies)
+
+
 Closer.js is a [parser](src/grammar.y) for the [Clojure programming language](http://clojure.org/) written in JavaScript, compatible with the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API). It also provides much of the [Clojure core](http://clojuredocs.org/quickref/clojure%20core) library as a [separate module](src/closer-core.coffee) (thanks in large part to [swannodette/mori](http://swannodette.github.io/mori/)). All of this is [heavily tested](http://vickychijwani.github.io/closer.js/spec_runner.html), with [> 90% code coverage](http://vickychijwani.github.io/closer.js/coverage/src/index.html) (the untested 10% is mostly [unused code](http://vickychijwani.github.io/closer.js/coverage/src/parser.js.html) from the [Jison parser generator](http://zaach.github.io/jison/)).
 
 It was created to be used on [CodeCombat](http://codecombat.com), a site that teaches users how to code by playing a game (there's [multiplayer](http://blog.codecombat.com/multiplayer-programming-tournament) too!). CodeCombat is [open-source](https://github.com/codecombat/codecombat), backed by [YCombinator](http://blog.codecombat.com/codecombat-in-y-combinator), participating in [Google Summer of Code 2014](https://www.google-melange.com/gsoc/org2/google/gsoc2014/codecombat), and is generally awesome all around. Go [check it out](http://codecombat.com)!
