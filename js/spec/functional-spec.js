@@ -1186,6 +1186,34 @@
     'js_$__$GT_clj': function(x) {
       assertions.arity(1, arguments.length);
       return m.js_to_clj(x);
+    },
+    'distinct': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.sequential(coll);
+      return m.distinct(coll);
+    },
+    'rand_$_nth': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.sequential(coll);
+      return m.nth(coll, _.random(m.count(coll) - 1));
+    },
+    'get_$_in': function(coll, keys, not_found) {
+      assertions.arity(2, 3, arguments.length);
+      assertions.seqable(keys);
+      return m.get_in(coll, keys, not_found);
+    },
+    'assoc_$_in': function(coll, keys, val) {
+      assertions.arity(3, arguments.length);
+      assertions.associative(coll);
+      assertions.seqable(keys);
+      return m.assoc_in(coll, keys, val);
+    },
+    'frequencies': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.seqable(coll);
+      return core.into(core.hash_$_map(), core.map((function(kv) {
+        return core.vector(core.key(kv), core.count(core.val(kv)));
+      }), core.group_$_by(core.identity, coll)));
     }
   };
 

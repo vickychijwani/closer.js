@@ -1426,10 +1426,77 @@
         });
       });
     });
-    return describe('(js->clj x)', function() {
+    describe('(js->clj x)', function() {
       return it('recursively transforms JS objects to maps, and JS arrays to vectors', function() {
         throws('(js->clj :key [])');
         return eq('(js->clj (clj->js { :a [1 2] :b #{3 4} }))', map('a', vec(1, 2), 'b', vec(3, 4)));
+      });
+    });
+    describe('(distinct coll)', function() {
+      return it('returns the unique items of a list or vector', function() {
+        throws('(distinct [1 1] [4 4])');
+        throws('(distinct #{1 1})');
+        throws('(distinct {1 1})');
+        eq('(distinct nil)', emptySeq());
+        eq('(distinct [])', emptySeq());
+        eq('(distinct \'())', emptySeq());
+        eq('(distinct \'(1 2 2))', seq([1, 2]));
+        eq('(distinct [1 2 2])', seq([1, 2]));
+        eq('(distinct (seq [1 2 4 1 3]))', seq([1, 2, 4, 3]));
+        return eq('(distinct "coffee")', seq(["c", "o", "f", "e"]));
+      });
+    });
+    describe('(rand-nth coll)', function() {
+      return it('returns a random item from list or vector', function() {
+        throws('(rand-nth [1 2] [3 4])');
+        throws('(rand-nth #{1 2})');
+        throws('(rand-nth {1 2})');
+        throws('(rand-nth [])');
+        throws('(rand-nth \'())');
+        nil('(rand-nth nil)');
+        eq('(rand-nth \'(1 1 1))', 1);
+        return eq('(rand-nth [1 1 1])', 1);
+      });
+    });
+    describe('(get-in coll keys not-found)', function() {
+      return it('returns a value from a nested collection', function() {
+        throws('(get-in ["foo" "bar"] [1] "not found" [])');
+        throws('(get-in ["foo" "bar"])');
+        throws('(get-in ["foo" "bar"] 1)');
+        nil('(get-in \'("foo" "bar") \'(1))');
+        nil('(get-in [] [1])');
+        eq('(get-in [1 2 4] [1])', 2);
+        eq('(get-in [1 2 4] [])', vec(1, 2, 4));
+        nil('(get-in [1 2 4] [5])');
+        eq('(get-in [1 2 4] [5] 1)', 1);
+        eq('(get-in [1 2 4] \'(1))', 2);
+        eq('(get-in [1 [2 3 4] 5] [1 0])', 2);
+        nil('(get-in [1 [2 3 4] 5] [1 0 0])');
+        return eq('(get-in [1 [2 3 4] 5] [1])', vec(2, 3, 4));
+      });
+    });
+    describe('(assoc-in coll keys val)', function() {
+      return it('returns associated nested associative structure', function() {
+        throws('(assoc-in {"foo" {"bar" 1 }})');
+        throws('(assoc-in {"foo" {"bar" 1 }} ["foo" "baz"])');
+        throws('(assoc-in [] [] 1)');
+        throws('(assoc-in [] [1 "bar"] 1)');
+        throws('(assoc-in [] [-1 "bar"] 1)');
+        eq('(assoc-in {"foo" {"bar" 1 }} ["foo" "baz"] 2)', map("foo", map("bar", 1, "baz", 2)));
+        eq('(assoc-in [{"foo" 1}] [1 "bar"] 1)', vec(map("foo", 1), map("bar", 1)));
+        eq('(assoc-in {} [] 1)', map(null, 1));
+        return eq('(assoc-in [] [0 "bar"] 1)', vec(map("bar", 1)));
+      });
+    });
+    return describe('(frequencies coll)', function() {
+      return it('returns the map of distinct items in coll to their frequencies', function() {
+        throws('(frequencies [1 2 2 1] [1 2 1])');
+        throws('(frequencies)');
+        throws('(frequencies 1)');
+        eq('(frequencies [])', map());
+        eq('(frequencies [1 2 1 1 1])', map(1, 4, 2, 1));
+        eq('(frequencies \'(1 2 1 1 1))', map(1, 4, 2, 1));
+        return eq('(frequencies "coffee")', map("c", 1, "o", 1, "f", 2, "e", 2));
       });
     });
   });
@@ -2450,6 +2517,34 @@
     'js_$__$GT_clj': function(x) {
       assertions.arity(1, arguments.length);
       return m.js_to_clj(x);
+    },
+    'distinct': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.sequential(coll);
+      return m.distinct(coll);
+    },
+    'rand_$_nth': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.sequential(coll);
+      return m.nth(coll, _.random(m.count(coll) - 1));
+    },
+    'get_$_in': function(coll, keys, not_found) {
+      assertions.arity(2, 3, arguments.length);
+      assertions.seqable(keys);
+      return m.get_in(coll, keys, not_found);
+    },
+    'assoc_$_in': function(coll, keys, val) {
+      assertions.arity(3, arguments.length);
+      assertions.associative(coll);
+      assertions.seqable(keys);
+      return m.assoc_in(coll, keys, val);
+    },
+    'frequencies': function(coll) {
+      assertions.arity(1, arguments.length);
+      assertions.seqable(coll);
+      return core.into(core.hash_$_map(), core.map((function(kv) {
+        return core.vector(core.key(kv), core.count(core.val(kv)));
+      }), core.group_$_by(core.identity, coll)));
     }
   };
 
