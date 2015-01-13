@@ -668,7 +668,37 @@ core =
   'js_$__$GT_clj': (x) ->
     assertions.arity 1, arguments.length
     m.js_to_clj x
-
+    
+  # newly added functions
+  'distinct': (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.sequential coll
+    m.distinct coll
+    
+  'rand_$_nth': (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.sequential coll
+    m.nth coll, _.random m.count(coll) - 1
+  
+  'get_$_in': (coll,keys,not_found) ->
+    assertions.arity 2, 3, arguments.length
+    assertions.seqable keys
+    m.get_in(coll,keys,not_found)
+    
+  'assoc_$_in' : (coll,keys,val) ->
+    assertions.arity 3, arguments.length
+    assertions.associative coll
+    assertions.seqable keys
+    m.assoc_in(coll,keys,val)
+    
+  'frequencies' : (coll) ->
+    assertions.arity 1, arguments.length
+    assertions.seqable coll
+    core.into(core.hash_$_map(),
+      core.map(
+        ((kv) -> core.vector(core.key(kv), core.count(core.val(kv)))),
+        core.group_$_by(core.identity, coll))
+     )
 
 bind = (that, args) ->
   for i in [0...args.length]

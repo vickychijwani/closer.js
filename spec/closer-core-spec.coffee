@@ -1251,3 +1251,67 @@ describe 'Closer core library', ->
     it 'recursively transforms JS objects to maps, and JS arrays to vectors', ->
       throws '(js->clj :key [])'
       eq '(js->clj (clj->js { :a [1 2] :b #{3 4} }))', map 'a', vec(1, 2), 'b', vec(3, 4)
+        
+  describe '(distinct coll)', ->
+    it 'returns the unique items of a list or vector', ->
+      throws '(distinct [1 1] [4 4])'   # wrong arity
+      throws '(distinct #{1 1})'   # doesn't work with sets
+      throws '(distinct {1 1})'   # doesn't work with maps
+      eq '(distinct nil)', emptySeq()
+      eq '(distinct [])', emptySeq()
+      eq '(distinct \'())', emptySeq()
+      eq '(distinct \'(1 2 2))', seq([1,2])  # returns the unique items in a list
+      eq '(distinct [1 2 2])', seq([1,2])   # returns unique items of vector
+      eq '(distinct (seq [1 2 4 1 3]))', seq([1, 2, 4, 3])    # test for seq
+      eq '(distinct "coffee")', seq(["c","o","f","e"])    # test for strings
+      
+        
+  describe '(rand-nth coll)', ->
+    it 'returns a random item from list or vector', ->
+      throws '(rand-nth [1 2] [3 4])'   # wrong arity
+      throws '(rand-nth #{1 2})'   # doesn't work with sets
+      throws '(rand-nth {1 2})'   # doesn't work with maps
+      throws '(rand-nth [])'      #doesn't work with empty vectors
+      throws '(rand-nth \'())'    #doesn't work with empty list
+      nil '(rand-nth nil)'
+      eq '(rand-nth \'(1 1 1))', 1   # returns random item of list
+      eq '(rand-nth [1 1 1])', 1   # returns random item of vector
+      
+  describe '(get-in coll keys not-found)', ->
+    it 'returns a value from a nested collection', ->
+      throws '(get-in ["foo" "bar"] [1] "not found" [])'  # wrong arity
+      throws '(get-in ["foo" "bar"])'  # wrong arity
+      throws '(get-in ["foo" "bar"] 1)' # keys should be sequable
+      nil '(get-in \'("foo" "bar") \'(1))' # doesn't work with lists
+      nil '(get-in [] [1])' # empty vectors search returns nil
+      eq '(get-in [1 2 4] [1])', 2
+      eq '(get-in [1 2 4] [])', vec(1,2,4) # returns the vector on empty search
+      nil '(get-in [1 2 4] [5])'      # if not found returns nil
+      eq '(get-in [1 2 4] [5] 1)', 1  # if not found and not-found is set returns not-found
+      eq '(get-in [1 2 4] \'(1))', 2  # keys can be lists
+      eq '(get-in [1 [2 3 4] 5] [1 0])', 2
+      nil '(get-in [1 [2 3 4] 5] [1 0 0])' # keys not match
+      eq '(get-in [1 [2 3 4] 5] [1])', vec(2,3,4)
+      
+  describe '(assoc-in coll keys val)', ->
+    it 'returns associated nested associative structure', ->
+      throws '(assoc-in {"foo" {"bar" 1 }})'  # wrong arity
+      throws '(assoc-in {"foo" {"bar" 1 }} ["foo" "baz"])'  # wrong arity
+      throws '(assoc-in [] [] 1)' #vectors assoc key must be a number
+      throws '(assoc-in [] [1 "bar"] 1)' # index +1 out of bounds
+      throws '(assoc-in [] [-1 "bar"] 1)' # index -1 out of bounds
+      eq '(assoc-in {"foo" {"bar" 1 }} ["foo" "baz"] 2)', map "foo", map "bar",1,"baz",2
+      eq '(assoc-in [{"foo" 1}] [1 "bar"] 1)', vec map("foo",1),map("bar",1)
+      eq '(assoc-in {} [] 1)', map null,1   # adds a null key of keys not present
+      eq '(assoc-in [] [0 "bar"] 1)', vec map "bar",1
+      
+  describe '(frequencies coll)', ->
+    it 'returns the map of distinct items in coll to their frequencies', ->
+      throws '(frequencies [1 2 2 1] [1 2 1])' # wrong arity
+      throws '(frequencies)' # wrong arity
+      throws '(frequencies 1)' # collection not seqable
+      eq '(frequencies [])', map()
+      eq '(frequencies [1 2 1 1 1])', map 1,4,2,1  # works with vectors
+      eq '(frequencies \'(1 2 1 1 1))', map 1,4,2,1  # works with lists
+      eq '(frequencies "coffee")', map "c",1,"o",1,"f",2,"e",2  # works with strings
+      
