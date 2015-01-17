@@ -700,6 +700,13 @@ core =
         core.group_$_by(core.identity, coll))
      )
 
+  'not_$_every_$QMARK_' : (pred,coll) ->
+    assertions.arity 2, arguments.length
+    assertions.function pred
+    assertions.collection coll
+    !m.every? pred,coll
+    
+
 bind = (that, args) ->
   for i in [0...args.length]
     args[i] = _.bind(args[i], that) if _.isFunction(args[i])

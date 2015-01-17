@@ -1315,3 +1315,16 @@ describe 'Closer core library', ->
       eq '(frequencies \'(1 2 1 1 1))', map 1,4,2,1  # works with lists
       eq '(frequencies "coffee")', map "c",1,"o",1,"f",2,"e",2  # works with strings
       
+  describe '(not-every? pred coll)', ->
+    it 'returns false if (pred x) is true for every x in coll, else true', ->
+      throws '(not-every? even?)' # wrong arity
+      throws '(not-every? true [1 2 3])' #not pred
+      throws '(not-every? even? 1)' # not coll
+      falsy '(not-every? even? [2 4 6])'
+      truthy '(not-every? even? [1 3 5])'
+      truthy '(not-every? #{1 2} [1 2 3])'
+      falsy '(not-every? #{1 2} [1 2 2 1])'
+      # weird, but that's how Clojure behaves
+      falsy '(not-every? true? [])'
+      falsy '(not-every? false? [])'
+      
