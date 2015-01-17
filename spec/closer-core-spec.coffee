@@ -1328,3 +1328,14 @@ describe 'Closer core library', ->
       falsy '(not-every? true? [])'
       falsy '(not-every? false? [])'
       
+  describe '(not-any? pred coll)', ->
+    it 'Returns false if (pred x) is logical true for any x in coll, else true.', ->
+      throws '(not-any? even?)'
+      throws '(not-any? true [1 2 3])'
+      throws '(not-any? even? 1)'
+      falsy '(not-any? even? \'(1 2 3 4))'
+      truthy '(not-any? even? \'(1 3 5 7))'
+      falsy '(not-any? {2 "two" 3 "three"} [nil 4 3])'
+      falsy '(not-any? #(if (even? %) %) [1 2 3 4])'
+      truthy '(not-any? #{11} (range 10))'
+      

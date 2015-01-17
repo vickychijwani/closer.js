@@ -706,6 +706,12 @@ core =
     assertions.collection coll
     !m.every? pred,coll
     
+  'not_$_any_$QMARK_' : (pred,coll) ->
+    assertions.arity 2, arguments.length
+    assertions.function pred
+    assertions.collection coll
+    !m.some pred, coll
+    
 
 bind = (that, args) ->
   for i in [0...args.length]
