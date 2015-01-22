@@ -1039,6 +1039,18 @@
       return core.into(core.hash_$_map(), core.map((function(kv) {
         return core.vector(core.key(kv), core.count(core.val(kv)));
       }), core.group_$_by(core.identity, coll)));
+    },
+    'not_$_every_$QMARK_': function(pred, coll) {
+      return !core.every_$QMARK_.apply(this, arguments);
+    },
+    'not_$_any_$QMARK_': function(pred, coll) {
+      return !core.some.apply(this, arguments);
+    },
+    'distinct_$QMARK_': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assertions.arity(1, Infinity, arguments.length);
+      return arguments.length === m.count(m.set(args));
     }
   };
 

@@ -1488,7 +1488,7 @@
         return eq('(assoc-in [] [0 "bar"] 1)', vec(map("bar", 1)));
       });
     });
-    return describe('(frequencies coll)', function() {
+    describe('(frequencies coll)', function() {
       return it('returns the map of distinct items in coll to their frequencies', function() {
         throws('(frequencies [1 2 2 1] [1 2 1])');
         throws('(frequencies)');
@@ -1497,6 +1497,46 @@
         eq('(frequencies [1 2 1 1 1])', map(1, 4, 2, 1));
         eq('(frequencies \'(1 2 1 1 1))', map(1, 4, 2, 1));
         return eq('(frequencies "coffee")', map("c", 1, "o", 1, "f", 2, "e", 2));
+      });
+    });
+    describe('(not-every? pred coll)', function() {
+      return it('returns false if (pred x) is true for every x in coll, else true', function() {
+        throws('(not-every? even?)');
+        throws('(not-every? true [1 2 3])');
+        throws('(not-every? even? 1)');
+        falsy('(not-every? even? [2 4 6])');
+        truthy('(not-every? even? [1 3 5])');
+        truthy('(not-every? #{1 2} [1 2 3])');
+        falsy('(not-every? #{1 2} [1 2 2 1])');
+        falsy('(not-every? true? [])');
+        return falsy('(not-every? false? [])');
+      });
+    });
+    describe('(not-any? pred coll)', function() {
+      return it('Returns false if (pred x) is logical true for any x in coll, else true.', function() {
+        throws('(not-any? even?)');
+        throws('(not-any? true [1 2 3])');
+        throws('(not-any? even? 1)');
+        falsy('(not-any? even? \'(1 2 3 4))');
+        truthy('(not-any? even? \'(1 3 5 7))');
+        falsy('(not-any? {2 "two" 3 "three"} [nil 4 3])');
+        falsy('(not-any? #(if (even? %) %) [1 2 3 4])');
+        return truthy('(not-any? #{11} (range 10))');
+      });
+    });
+    return describe('(distinct? args...)', function() {
+      return it('Returns true if no two of the arguments are =', function() {
+        throws('(distinct? )');
+        truthy('(distinct? 1 2 3)');
+        truthy('(distinct? [])');
+        falsy('(distinct? [] [])');
+        truthy('(distinct? \'(1 2) \'(1 2 3))');
+        falsy('(distinct? 1 2 2)');
+        truthy('(distinct? "A" "B" "C")');
+        falsy('(distinct? "A" "A")');
+        truthy('(distinct? 1 2 [1 2])');
+        falsy('(distinct? 1 1 [1 2])');
+        return falsy('(distinct? #{1 2} #{1 2})');
       });
     });
   });
@@ -2545,6 +2585,18 @@
       return core.into(core.hash_$_map(), core.map((function(kv) {
         return core.vector(core.key(kv), core.count(core.val(kv)));
       }), core.group_$_by(core.identity, coll)));
+    },
+    'not_$_every_$QMARK_': function(pred, coll) {
+      return !core.every_$QMARK_.apply(this, arguments);
+    },
+    'not_$_any_$QMARK_': function(pred, coll) {
+      return !core.some.apply(this, arguments);
+    },
+    'distinct_$QMARK_': function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      assertions.arity(1, Infinity, arguments.length);
+      return arguments.length === m.count(m.set(args));
     }
   };
 
