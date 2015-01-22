@@ -700,6 +700,17 @@ core =
         core.group_$_by(core.identity, coll))
      )
 
+  'not_$_every_$QMARK_' : (pred,coll) ->
+    !core.every_$QMARK_.apply @,arguments
+    
+  'not_$_any_$QMARK_' : (pred,coll) ->
+    !core.some.apply @,arguments
+  
+  'distinct_$QMARK_' : (args...) ->
+    assertions.arity 1, Infinity, arguments.length
+    return arguments.length is m.count(m.set args)
+    
+
 bind = (that, args) ->
   for i in [0...args.length]
     args[i] = _.bind(args[i], that) if _.isFunction(args[i])

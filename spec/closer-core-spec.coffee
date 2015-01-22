@@ -1315,3 +1315,41 @@ describe 'Closer core library', ->
       eq '(frequencies \'(1 2 1 1 1))', map 1,4,2,1  # works with lists
       eq '(frequencies "coffee")', map "c",1,"o",1,"f",2,"e",2  # works with strings
       
+  describe '(not-every? pred coll)', ->
+    it 'returns false if (pred x) is true for every x in coll, else true', ->
+      throws '(not-every? even?)' # wrong arity
+      throws '(not-every? true [1 2 3])' #not pred
+      throws '(not-every? even? 1)' # not coll
+      falsy '(not-every? even? [2 4 6])'
+      truthy '(not-every? even? [1 3 5])'
+      truthy '(not-every? #{1 2} [1 2 3])'
+      falsy '(not-every? #{1 2} [1 2 2 1])'
+      # weird, but that's how Clojure behaves
+      falsy '(not-every? true? [])'
+      falsy '(not-every? false? [])'
+      
+  describe '(not-any? pred coll)', ->
+    it 'Returns false if (pred x) is logical true for any x in coll, else true.', ->
+      throws '(not-any? even?)'
+      throws '(not-any? true [1 2 3])'
+      throws '(not-any? even? 1)'
+      falsy '(not-any? even? \'(1 2 3 4))'
+      truthy '(not-any? even? \'(1 3 5 7))'
+      falsy '(not-any? {2 "two" 3 "three"} [nil 4 3])'
+      falsy '(not-any? #(if (even? %) %) [1 2 3 4])'
+      truthy '(not-any? #{11} (range 10))'
+      
+  describe '(distinct? args...)', ->
+    it 'Returns true if no two of the arguments are =', ->
+      throws '(distinct? )' # wrong arity
+      truthy '(distinct? 1 2 3)'
+      truthy '(distinct? [])'
+      falsy '(distinct? [] [])'
+      truthy '(distinct? \'(1 2) \'(1 2 3))'
+      falsy '(distinct? 1 2 2)'
+      truthy '(distinct? "A" "B" "C")' # works with strings
+      falsy '(distinct? "A" "A")'
+      truthy '(distinct? 1 2 [1 2])' # works with mixed types
+      falsy '(distinct? 1 1 [1 2])'
+      falsy '(distinct? #{1 2} #{1 2})' # works with hash sets
+      
