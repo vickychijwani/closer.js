@@ -711,6 +711,13 @@ core =
     assertions.function pred
     assertions.collection coll
     !m.some pred, coll
+  
+  'distinct_$QMARK_' : (args...) ->
+    assertions.arity 1, Infinity, arguments.length
+    if arguments.length > m.count(m.set args)
+      false
+    else
+      true
     
 
 bind = (that, args) ->

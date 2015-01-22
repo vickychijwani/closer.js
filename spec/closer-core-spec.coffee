@@ -1339,3 +1339,17 @@ describe 'Closer core library', ->
       falsy '(not-any? #(if (even? %) %) [1 2 3 4])'
       truthy '(not-any? #{11} (range 10))'
       
+  describe '(distinct? args...)', ->
+    it 'Returns true if no two of the arguments are =', ->
+      throws '(distinct? )' # wrong arity
+      truthy '(distinct? 1 2 3)'
+      truthy '(distinct? [])'
+      falsy '(distinct? [] [])'
+      truthy '(distinct? \'(1 2) \'(1 2 3))'
+      falsy '(distinct? 1 2 2)'
+      truthy '(distinct? "A" "B" "C")' # works with strings
+      falsy '(distinct? "A" "A")'
+      truthy '(distinct? 1 2 [1 2])' # works with mixed types
+      falsy '(distinct? 1 1 [1 2])'
+      falsy '(distinct? #{1 2} #{1 2})' # works with hash sets
+      
