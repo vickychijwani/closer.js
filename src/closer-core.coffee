@@ -701,23 +701,14 @@ core =
      )
 
   'not_$_every_$QMARK_' : (pred,coll) ->
-    assertions.arity 2, arguments.length
-    assertions.function pred
-    assertions.collection coll
-    !m.every? pred,coll
+    !core.every_$QMARK_.apply @,arguments
     
   'not_$_any_$QMARK_' : (pred,coll) ->
-    assertions.arity 2, arguments.length
-    assertions.function pred
-    assertions.collection coll
-    !m.some pred, coll
+    !core.some.apply @,arguments
   
   'distinct_$QMARK_' : (args...) ->
     assertions.arity 1, Infinity, arguments.length
-    if arguments.length > m.count(m.set args)
-      false
-    else
-      true
+    return arguments.length is m.count(m.set args)
     
 
 bind = (that, args) ->
