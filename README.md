@@ -115,7 +115,9 @@ Closer's primary dependencies are the [Jison parser generator](http://zaach.gith
 **Setup / workflow instructions:**
 
 - Fork and clone this repository
-- Run `npm install` from project root
+- Run these commands from project root:
+  - `npm install`
+  - `sudo npm install -g grunt-cli jison`
 - Run `grunt test` to make sure everything's working
 - Make your changes, running `grunt test` to test them
 - You can run `./repl` to get a basic Clojure REPL: it will display the parser output and execute it as JavaScript
