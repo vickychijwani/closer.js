@@ -259,7 +259,7 @@ core =
 
   'println': (args...) ->
     assertions.arity 0, Infinity, arguments.length
-    console.log.apply null, args
+    console.log.apply console, args
 
 
   # collections
