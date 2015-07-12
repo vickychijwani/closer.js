@@ -140,7 +140,7 @@
                 });
 
                 runCodeBtn.click(function () {
-                    var __$this = {};  // value for "this"
+                    var __$this = window;  // value for "this"
                     var input = inputEditor.getSession().getValue();
                     try {
                         var ast = repl.parse(input, { loc: locations, loose: looseMode });
