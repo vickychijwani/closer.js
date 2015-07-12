@@ -183,16 +183,16 @@
     <h1>Code coverage report for <span class="entity">src/assertions.js</span></h1>
     <h2>
         
-        Statements: <span class="metric">98% <small>(98 / 100)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Statements: <span class="metric">94.44% <small>(102 / 108)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
         Branches: <span class="metric">74.34% <small>(84 / 113)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Functions: <span class="metric">100% <small>(30 / 30)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Functions: <span class="metric">93.94% <small>(31 / 33)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Lines: <span class="metric">97.83% <small>(90 / 92)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Lines: <span class="metric">94% <small>(94 / 100)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
     </h2>
     <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">src/</a> &#187; assertions.js</div>
@@ -365,10 +365,26 @@
 164
 165
 166
-167</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-yes">9</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
@@ -397,6 +413,19 @@
 <span class="cline-any cline-yes">127</span>
 <span class="cline-any cline-yes">127</span>
 <span class="cline-any cline-yes">127</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
@@ -519,6 +548,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -532,7 +564,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">(function() {
-  var ArgTypeError, ArityError, assertions, firstFailure, mori, _, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
+  var ArgTypeError, ArityError, NotImplementedYetError, assertions, firstFailure, mori, _, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { <span class="missing-if-branch" title="else path not taken"" >E</span>if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
@@ -566,6 +598,19 @@
     }
 &nbsp;
     return ArgTypeError;
+&nbsp;
+  })(Error);
+&nbsp;
+  NotImplementedYetError = (function(_super) {
+    __extends(NotImplementedYetError, _super);
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function NotImplementedYetError(namespace, fn) {</span>
+<span class="cstat-no" title="statement not covered" >      this.name = 'NotImplementedYetError';</span>
+<span class="cstat-no" title="statement not covered" >      this.message = "clojure." + namespace + "/" + fn + " is not implemented yet";</span>
+<span class="cstat-no" title="statement not covered" >      this.stack = (new Error()).stack;</span>
+    }
+&nbsp;
+    return NotImplementedYetError;
 &nbsp;
   })(Error);
 &nbsp;
@@ -683,6 +728,9 @@
       if (msg = checkFn(args)) {
         throw new ArityError(msg);
       }
+    },
+    unimplemented: <span class="fstat-no" title="function not covered" >function(namespace, fn) {</span>
+<span class="cstat-no" title="statement not covered" >      throw new NotImplementedYetError(namespace, fn);</span>
     }
   };
 &nbsp;
@@ -702,7 +750,7 @@
 
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Jan 22 2015 22:29:50 GMT+0530 (IST)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Jul 12 2015 22:32:53 GMT+0530 (IST)</div>
 </div>
 
 <script src="../prettify.js"></script>
